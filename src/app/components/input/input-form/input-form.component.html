@@ -1,0 +1,26 @@
+<div class="relative">
+  <input
+    [ngModel]="inputValue"
+    [disabled]="isDisabled"
+    [type]="inputType"
+    [min]="typeNumberMin"
+    [prefix]="maskPrefix"
+    [mask]="maskValue"
+    (input)="sendInputValue($event)"
+    autocomplete="current-password"
+    placeholder="{{ placeholder }}"
+    class="bg-transparent rounded w-full py-2 pl-3 pr-10 border disabled:bg-gray-100 border-gray-500 sm:text-sm sm:leading-5"
+    [ngClass]="inputClass" />
+  @if (showRightIcon) {
+    <div class="absolute inset-y-0 -right-2 flex items-center pr-3">
+      <mat-icon
+        (click)="clearInput()"
+        class="cursor-pointer text-base"
+        [ngClass]="[inputValue.length > 0 ? 'text-white' : 'text-gray-400']"
+        >{{
+          showSearchIcon && inputValue.length == 0 ? 'search' : 'close'
+        }}</mat-icon
+      >
+    </div>
+  }
+</div>

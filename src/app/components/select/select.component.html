@@ -1,0 +1,13 @@
+<select
+  [ngModel]="selectValue"
+  (change)="outputSelectValue($event)"
+  name="select"
+  id="select"
+  class="bg-transparent rounded w-full py-2 pl-3 pr-10 border disabled:bg-gray-100 border-gray-500 sm:text-sm sm:leading-5">
+  <option selected disabled class="hidden">Selecione um item</option>
+  @for (option of optionList; track $index) {
+    <option [value]="option == 'Selecione um item' ? '' : option">
+      {{ option == 'Selecione um item' ? '' : option }}
+    </option>
+  }
+</select>

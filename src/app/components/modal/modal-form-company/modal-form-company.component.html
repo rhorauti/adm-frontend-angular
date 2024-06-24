@@ -1,0 +1,235 @@
+<app-modal-base
+  [showModal]="isModalFormCompanyActive"
+  [showHeader]="true"
+  [isModalForm]="true"
+  [title]="isEditForm ? 'Alterar dados da empresa' : 'Cadastro de nova empresa'"
+  (emitCloseModal)="closeModalForm()">
+  <div class="body-block">
+    @if (companyData.id != 0) {
+      <div class="md:grid md:grid-cols-2 gap-4">
+        <div class="gap-4">
+          <div class="gap-2">
+            <label class="font-semibold text-sm" for="">Id</label>
+            <app-input-form
+              [inputValue]="this.companyData.id.toString()"
+              [isDisabled]="true"
+              [showRightIcon]="false"
+              (emitInputValue)="getInputIdValue($event)"
+              [inputClass]="'text-black h-9'"></app-input-form>
+          </div>
+          <div class="gap-2">
+            <label class="font-semibold text-sm" for="">Nome</label>
+            <app-input-form
+              #inputModal
+              [inputValue]="this.companyData.nome"
+              [showRightIcon]="false"
+              (emitInputValue)="companyData.nome = $event"
+              [inputClass]="'text-black h-9'"></app-input-form>
+          </div>
+          <div class="gap-2">
+            <label class="font-semibold text-sm" for="">E-mail</label>
+            <app-input-form
+              #inputModal
+              [inputValue]="this.companyData.email"
+              [showRightIcon]="false"
+              (emitInputValue)="companyData.email = $event"
+              [inputClass]="'text-black h-9'"></app-input-form>
+          </div>
+          <div class="gap-2">
+            <label class="font-semibold text-sm" for="">Telefone</label>
+            <app-input-form
+              #inputModal
+              [maskType]="'telefone'"
+              [inputValue]="this.companyData.telefone"
+              [showRightIcon]="false"
+              (emitInputValue)="companyData.telefone = $event"
+              [inputClass]="'text-black h-9'"></app-input-form>
+          </div>
+          <div class="gap-2">
+            <label class="font-semibold text-sm" for="">CNPJ/CPF</label>
+            <app-input-form
+              #inputModal
+              [maskType]="'cpf'"
+              [inputValue]="this.companyData.cnpj"
+              [showRightIcon]="false"
+              (emitInputValue)="getInputCnpjValue($event)"
+              [inputClass]="'text-black h-9'"></app-input-form>
+          </div>
+          <div class="gap-2">
+            <label class="font-semibold text-sm" for="">Logradouro</label>
+            <app-input-form
+              #inputModal
+              [inputValue]="this.companyData.logradouro"
+              [showRightIcon]="false"
+              (emitInputValue)="companyData.logradouro = $event"
+              [inputClass]="'text-black h-9'"></app-input-form>
+          </div>
+        </div>
+        <div>
+          <div class="gap-2">
+            <label class="font-semibold text-sm" for="">Número</label>
+            <app-input-form
+              #inputModal
+              [inputValue]="this.companyData.numero.toString()"
+              [showRightIcon]="false"
+              (emitInputValue)="getInputNumeroValue($event)"
+              [inputClass]="'text-black h-9'"></app-input-form>
+          </div>
+          <div class="gap-2">
+            <label class="font-semibold text-sm" for="">Complemento</label>
+            <app-input-form
+              #inputModal
+              [inputValue]="this.companyData.complemento"
+              [showRightIcon]="false"
+              (emitInputValue)="companyData.complemento = $event"
+              [inputClass]="'text-black h-9'"></app-input-form>
+          </div>
+          <div class="gap-2">
+            <label class="font-semibold text-sm" for="">Bairro</label>
+            <app-input-form
+              #inputModal
+              [inputValue]="this.companyData.bairro"
+              [showRightIcon]="false"
+              (emitInputValue)="companyData.bairro = $event"
+              [inputClass]="'text-black h-9'"></app-input-form>
+          </div>
+          <div class="gap-2">
+            <label class="font-semibold text-sm" for="">Cidade</label>
+            <app-input-form
+              #inputModal
+              [inputValue]="this.companyData.cidade"
+              [showRightIcon]="false"
+              (emitInputValue)="companyData.cidade = $event"
+              [inputClass]="'text-black h-9'"></app-input-form>
+          </div>
+          <div class="gap-2">
+            <label class="font-semibold text-sm" for="">Estado</label>
+            <app-select
+              #selectModal
+              [selectType]="'estado'"
+              [selectValue]="this.companyData.estado"
+              (selectValueEmitter)="companyData.estado = $event"></app-select>
+          </div>
+        </div>
+      </div>
+    } @else {
+      <div class="md:grid md:grid-cols-2 gap-4">
+        <div class="gap-4">
+          <div class="gap-2">
+            <label class="font-semibold text-sm" for="">Nome</label>
+            <app-input-form
+              #inputModal
+              [showRightIcon]="false"
+              (emitInputValue)="companyData.nome = $event"
+              [inputClass]="'text-black h-9'"></app-input-form>
+          </div>
+          <div class="gap-2">
+            <label class="font-semibold text-sm" for="">E-mail</label>
+            <app-input-form
+              #inputModal
+              [showRightIcon]="false"
+              (emitInputValue)="companyData.email = $event"
+              [inputClass]="'text-black h-9'"></app-input-form>
+          </div>
+          <div class="gap-2">
+            <label class="font-semibold text-sm" for="">Telefone</label>
+            <app-input-form
+              #inputModal
+              [maskType]="'telefone'"
+              [showRightIcon]="false"
+              (emitInputValue)="companyData.telefone = $event"
+              [inputClass]="'text-black h-9'"></app-input-form>
+          </div>
+          <div class="gap-2">
+            <label class="font-semibold text-sm" for="">CNPJ/CPF</label>
+            <app-input-form
+              #inputModal
+              [maskType]="'cpf'"
+              [showRightIcon]="false"
+              (emitInputValue)="companyData.cnpj = $event"
+              [inputClass]="'text-black h-9'"></app-input-form>
+          </div>
+          <div class="gap-2">
+            <label class="font-semibold text-sm" for="">Logradouro</label>
+            <app-input-form
+              #inputModal
+              [showRightIcon]="false"
+              (emitInputValue)="companyData.logradouro = $event"
+              [inputClass]="'text-black h-9'"></app-input-form>
+          </div>
+        </div>
+        <div>
+          <div class="gap-2">
+            <label class="font-semibold text-sm" for="">Número</label>
+            <app-input-form
+              #inputModal
+              [inputType]="'number'"
+              [showRightIcon]="false"
+              (emitInputValue)="getInputNumeroValue($event)"
+              [inputClass]="'text-black h-9'"></app-input-form>
+          </div>
+          <div class="gap-2">
+            <label class="font-semibold text-sm" for="">Complemento</label>
+            <app-input-form
+              #inputModal
+              [showRightIcon]="false"
+              (emitInputValue)="companyData.complemento = $event"
+              [inputClass]="'text-black h-9'"></app-input-form>
+          </div>
+          <div class="gap-2">
+            <label class="font-semibold text-sm" for="">Bairro</label>
+            <app-input-form
+              #inputModal
+              [showRightIcon]="false"
+              (emitInputValue)="companyData.bairro = $event"
+              [inputClass]="'text-black h-9'"></app-input-form>
+          </div>
+          <div class="gap-2">
+            <label class="font-semibold text-sm" for="">Cidade</label>
+            <app-input-form
+              #inputModal
+              [showRightIcon]="false"
+              (emitInputValue)="companyData.cidade = $event"
+              [inputClass]="'text-black h-9'"></app-input-form>
+          </div>
+          <div class="gap-2">
+            <label class="font-semibold text-sm" for="">Estado</label>
+            <app-select
+              #selectModal
+              [selectType]="'estado'"
+              (selectValueEmitter)="companyData.estado = $event"></app-select>
+          </div>
+        </div>
+      </div>
+    }
+  </div>
+  <div
+    class="footer-block grid gap-3 mt-5"
+    [ngClass]="isEditForm ? 'grid-cols-2' : 'grid-cols-3'">
+    <app-button-standard
+      [btnType]="'cancel'"
+      (click)="closeModalForm()"></app-button-standard>
+    @if (!isEditForm) {
+      <app-button-standard
+        [btnType]="'clear'"
+        (click)="clearForm()"></app-button-standard>
+    }
+    <app-button-standard
+      [btnType]="'forward'"
+      (click)="showModalCheck()"></app-button-standard>
+  </div>
+</app-modal-base>
+<app-modal-check
+  [companyData]="companyData"
+  [isEditForm]="isEditForm"
+  [isModalCheckActive]="isModalCheckActive"
+  [registerType]="registerType"
+  (resetPageEmitter)="resetPage()"
+  (closeModalFormEmitter)="closeModalFormAfterOk($event)"
+  (closeModalCheckEmitter)="isModalCheckActive = $event">
+</app-modal-check>
+<app-modal-info
+  [showModal]="isModalInfoActive"
+  [modalType]="modalInfo.modalType"
+  [modalDescription]="modalInfo.modalDescription"
+  (closeModalEmitter)="isModalInfoActive = $event"></app-modal-info>

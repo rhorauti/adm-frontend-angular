@@ -1,0 +1,14 @@
+<div
+  class="bg-black min-h-screen flex flex-col justify-center sm:mx-auto sm:w-full sm:max-w-sm">
+  <div
+    class="text-white mb-8 text-lg text-center mx-auto flex h-10 w-10 items-center justify-center rounded-full"
+    [ngClass]="iconBackgroundColor">
+    <mat-icon [ngClass]="iconTextColor">{{ icon }}</mat-icon>
+  </div>
+  <p class="text-white mb-8 text-lg text-center">
+    {{ message }}
+  </p>
+  <app-button-standard
+    (click)="redirectToLogin()"
+    [label]="'Ir para login'"></app-button-standard>
+</div>

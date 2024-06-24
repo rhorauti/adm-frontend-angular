@@ -1,0 +1,40 @@
+@if (isSideBarActive) {
+  <nav
+    class="w-full bg-gray-900 adjust-navigation-bar"
+    [ngClass]="isMenuListMobileActive ? '' : 'mb-3'">
+    <div class="flex w-full items-center justify-between px-4 py-3 cursor-pointer adjust-logo">
+      <a routerLink="/login" class="flex items-center">
+        <img class="h-8" src="../../../assets/images/logo.png" alt="Your Company" />
+        <p class="font-semibold text-gray-400 ml-2">Nakano</p>
+      </a>
+      <div class="is-hidden-mobile">
+        <mat-icon
+          (click)="hideSideBar()"
+          class="text-white bg-gray-800 rounded-full cursor-pointer ml-10"
+          >keyboard_arrow_left</mat-icon
+        >
+      </div>
+      <button
+        (click)="isMenuListMobileActive = !isMenuListMobileActive"
+        class="is-hidden-tablet text-gray-300">
+        <mat-icon>menu</mat-icon>
+      </button>
+    </div>
+    <div class="is-hidden-mobile">
+      <app-navbar-list></app-navbar-list>
+    </div>
+  </nav>
+} @else {
+  <nav class="h-screen bg-gray-900 px-2 pt-7">
+    <mat-icon (click)="showSideBar()" class="text-white bg-gray-800 rounded-full cursor-pointer"
+      >keyboard_arrow_right</mat-icon
+    >
+  </nav>
+}
+@if (isMenuListMobileActive) {
+  <div class="bg-white p-3 rounded-md mb-3 mx-3">
+    <app-navbar-list
+      [isMenuListMobileActive]="isMenuListMobileActive"
+      (closeMenuListEmitter)="isMenuListMobileActive = false"></app-navbar-list>
+  </div>
+}

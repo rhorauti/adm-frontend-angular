@@ -1,0 +1,27 @@
+<div class="relative rounded-md shadow-sm">
+  <div
+    class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+    <mat-icon
+      [ngClass]="[inputValue.length > 0 ? 'text-white' : 'text-gray-400']"
+      >{{ iconLeft }}</mat-icon
+    >
+  </div>
+  <input
+    [ngModel]="inputValue"
+    (input)="sendInputValue($event)"
+    [type]="isEmail ? 'text' : showPassword ? 'text' : 'password'"
+    autocomplete="current-password"
+    placeholder="{{ placeholder }}"
+    [ngClass]="borderColor"
+    class="block bg-transparent text-white rounded w-full py-2 pl-12 ring-1 sm:text-sm sm:leading-6" />
+  @if (showIconRight) {
+    <div class="absolute inset-y-0 right-0 flex items-center pr-3">
+      <mat-icon
+        (click)="showPassword = !showPassword"
+        class="cursor-pointer"
+        [ngClass]="[inputValue.length > 0 ? 'text-white' : 'text-gray-400']"
+        >{{ showPassword ? 'visibility' : 'visibility_off' }}</mat-icon
+      >
+    </div>
+  }
+</div>

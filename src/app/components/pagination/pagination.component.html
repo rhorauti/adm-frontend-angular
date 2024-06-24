@@ -1,0 +1,35 @@
+@if (lastPage != 0) {
+  <nav
+    class="text-white text-sm flex justify-between align-middle border border-gray-500 py-1.5 px-3 rounded">
+    <div
+      (click)="goBackPage()"
+      (keypress)="goBackPage()"
+      tabindex="0"
+      class="flex items-center"
+      [ngClass]="
+        currentPage && currentPage <= 1
+          ? 'text-gray-500 cursor-not-allowed'
+          : 'cursor-pointer hover:text-gray-300'
+      ">
+      <mat-icon>arrow_back</mat-icon>
+      <span class="ml-2 max-[400px]:invisible">Anterior</span>
+    </div>
+    <div class="flex items-center gap-2">
+      <span>{{ currentPage }}</span
+      ><span>de</span> <span>{{ lastPage }}</span>
+    </div>
+    <div
+      (click)="goForwardPage()"
+      (keypress)="goForwardPage()"
+      tabindex="0"
+      class="flex items-center cursor-pointer"
+      [ngClass]="
+        currentPage == lastPage
+          ? 'text-gray-500 cursor-not-allowed'
+          : 'cursor-pointer hover:text-gray-300'
+      ">
+      <span class="mr-2 max-[400px]:invisible">Próximo</span>
+      <mat-icon>arrow_forward</mat-icon>
+    </div>
+  </nav>
+}

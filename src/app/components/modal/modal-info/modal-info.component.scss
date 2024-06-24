@@ -1,0 +1,9 @@
+.ajuste-caixa-externa {
+  width: 15rem;
+}
+
+@media screen and (max-width: 310px) {
+  .ajuste-caixa-externa {
+    width: 90%;
+  }
+}

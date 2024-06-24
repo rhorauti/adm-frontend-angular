@@ -1,0 +1,39 @@
+@if (showModal) {
+  <div
+    class="relative z-10"
+    aria-labelledby="modal-title"
+    role="dialog"
+    aria-modal="true">
+    <div class="fixed inset-0 bg-black bg-opacity-75 transition-opacity"></div>
+    <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
+      <div
+        class="flex flex-col min-h-full justify-center mx-auto rounded-lg"
+        [ngClass]="isModalForm ? 'sm:w-3/4' : 'sm:w-96'">
+        @if (showHeader) {
+          <div
+            [ngClass]="headerClass"
+            class="flex w-full font-semibold leading-3 justify-between bg-gray-500 text-white text-lg p-3 rounded-t-lg">
+            <p>{{ title }}</p>
+            @if (showCloseBtn) {
+              <mat-icon
+                (click)="closeModal()"
+                class="bg-red-500 py-0.5 font-semibold hover:bg-red-400 rounded-full text-center text-sm cursor-pointer"
+                >close</mat-icon
+              >
+            }
+          </div>
+        }
+        <div
+          class="bg-white w-full h-full p-5"
+          [ngClass]="showHeader ? 'rounded-b-lg' : 'rounded-lg'">
+          <div [ngClass]="bodyClass">
+            <ng-content select=".body-block"></ng-content>
+          </div>
+          <div [ngClass]="footerClass">
+            <ng-content select=".footer-block"></ng-content>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+}

@@ -1,0 +1,29 @@
+<div [ngClass]="isMenuListMobileActive ? 'text-black' : 'text-gray-400'">
+  @for (link of links; track $index) {
+    <ul role="list" class="mx-2">
+      <div
+        (click)="toogleLink(link)"
+        (keypress)="toogleLink(link)"
+        tabindex="0"
+        class="flex justify-between cursor-pointer">
+        <p class="mb-1 font-bold">{{ link.name }}</p>
+        <div #linkIcon>
+          <mat-icon>keyboard_arrow_down</mat-icon>
+        </div>
+      </div>
+      <div class="is-not-colapsed mx-3" #linkItem>
+        @for (sublink of link.sublinks; track $index) {
+          <li class="my-1 last:mb-1 first:mt-1">
+            <a
+              (click)="selectSubLink(sublink)"
+              [routerLink]="sublink.routerLink"
+              class="hover:text-white hover:bg-gray-800 rounded-md text-sm"
+              [ngClass]="sublink.isSelected ? 'link-is-active' : ''">
+              {{ sublink.name }}
+            </a>
+          </li>
+        }
+      </div>
+    </ul>
+  }
+</div>

@@ -1,0 +1,155 @@
+<div class="overflow-auto h-full border border-gray-500">
+  @if (registerType == 'customers' || registerType == 'suppliers') {
+    <table class="text-white w-full h-full text-sm text-center">
+      <thead class="bg-gray-900 border border-gray-500">
+        <tr>
+          @if (companiesDataFilter.length > 0) {
+            @for (companyTableHeader of companyTableHeaders; track $index) {
+              @if (companyTableHeader.isChecked) {
+                <th class="table-td">
+                  {{
+                    companyTableHeader.name == 'CNPJ'
+                      ? 'CPF/CNPJ'
+                      : companyTableHeader.name == 'Email'
+                        ? 'E-mail'
+                        : companyTableHeader.name
+                  }}
+                </th>
+              }
+            }
+          } @else {
+            @if (registerType == 'customers') {
+              <th class="table-td text-lg">Tabela de clientes</th>
+            } @else if (registerType == 'suppliers') {
+              <th class="table-td text-lg">Tabela de Fornecedores</th>
+            }
+          }
+        </tr>
+      </thead>
+
+      <tbody class="divide-y divide-gray-500 border border-gray-500">
+        @for (company of companiesDataFilter; track $index) {
+          <tr>
+            @if (companyTableHeaders[0].isChecked) {
+              <td class="table-td bg-black">
+                {{ company.id }}
+              </td>
+            }
+            @if (companyTableHeaders[1].isChecked) {
+              <td class="table-td">
+                {{ company.cadastro | date: 'dd/MM/YYYY' }}
+              </td>
+            }
+            @if (companyTableHeaders[2].isChecked) {
+              <td class="table-td">{{ company.nome }}</td>
+            }
+            @if (companyTableHeaders[3].isChecked) {
+              <td class="table-td">{{ company.email }}</td>
+            }
+            @if (companyTableHeaders[4].isChecked) {
+              <td class="table-td">{{ company.telefone }}</td>
+            }
+            @if (companyTableHeaders[5].isChecked) {
+              <td class="table-td">{{ company.cnpj }}</td>
+            }
+            @if (companyTableHeaders[6].isChecked) {
+              <td class="table-td">{{ company.logradouro }}</td>
+            }
+            @if (companyTableHeaders[7].isChecked) {
+              <td class="table-td">
+                {{ company.numero == 0 ? '' : company.numero }}
+              </td>
+            }
+            @if (companyTableHeaders[8].isChecked) {
+              <td class="table-td">{{ company.complemento }}</td>
+            }
+            @if (companyTableHeaders[9].isChecked) {
+              <td class="table-td">{{ company.bairro }}</td>
+            }
+            @if (companyTableHeaders[10].isChecked) {
+              <td class="table-td">{{ company.cidade }}</td>
+            }
+            @if (companyTableHeaders[11].isChecked) {
+              <td class="table-td">{{ company.estado }}</td>
+            }
+            @if (companyTableHeaders[12].isChecked) {
+              <td class="table-td flex justify-center gap-3">
+                <app-button-standard
+                  (click)="showModalFormToEditCompany(company)"
+                  [showLabel]="false"
+                  [showIcon]="true"
+                  [btnType]="'warning'"></app-button-standard>
+                <app-button-standard
+                  (click)="showModalAskToDeleteCompany(company)"
+                  [showLabel]="false"
+                  [showIcon]="true"
+                  [btnType]="'danger'"></app-button-standard>
+              </td>
+            }
+          </tr>
+        } @empty {
+          <p class="p-3 text-base font-semibold">Nenhum registro encontrado!</p>
+        }
+      </tbody>
+    </table>
+  } @else if (registerType == 'products') {
+    <table>
+      <thead class="bg-gray-900 border border-gray-500">
+        <tr>
+          @for (productTableHeader of productTableHeaders; track $index) {
+            <th class="table-td">{{ productTableHeader }}</th>
+          }
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-gray-500 border border-gray-500">
+        @for (
+          product of productsData.data.slice(tableInitialIdx, tableLastIdx);
+          track $index
+        ) {
+          <tr>
+            <td class="table-td">{{ product.id }}</td>
+            <td class="table-td">{{ product.cadastro }}</td>
+            <td class="table-td">{{ product.nome }}</td>
+            <td class="table-td">{{ product.cc }}</td>
+            <td class="table-td">{{ product.ncm }}</td>
+            <td class="table-td">{{ product.unidade }}</td>
+            <td class="table-td">{{ product.preco }}</td>
+            <td class="table-td">{{ product.comentario }}</td>
+            <td class="table-td">
+              <app-button-standard
+                (click)="showModalFormToEditProduct(product)"
+                [showLabel]="false"
+                [btnType]="'warning'"></app-button-standard>
+              <app-button-standard
+                (click)="showModalAskToDeleteProduct(product)"
+                [showLabel]="false"
+                [btnType]="'danger'"></app-button-standard>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  }
+</div>
+<app-modal-form-company
+  [isModalFormCompanyActive]="isModalFormCompanyActive"
+  [companyData]="companyData"
+  [companiesData]="companiesData.data"
+  [isEditForm]="isEditForm"
+  [registerType]="registerType"
+  (resetPageEmitter)="resetPage()"
+  (closeModalFormEmitter)="
+    isModalFormCompanyActive = false
+  "></app-modal-form-company>
+<app-modal-ask
+  [showModal]="isModalAskActive"
+  [modalDescription]="modalAsk.modalDescription"
+  [modalType]="modalAsk.modalType"
+  (cancelEmitter)="isModalAskActive = $event"
+  (actionOkEmitter)="OnModalAskActionOk()"></app-modal-ask>
+<app-modal-info
+  [showModal]="isModalInfoActive"
+  [modalDescription]="modalInfo.modalDescription"
+  [modalType]="modalInfo.modalType"
+  (closeModalEmitter)="isModalInfoActive = $event"></app-modal-info>
+<app-loading [showLoading]="showLoading"></app-loading>
