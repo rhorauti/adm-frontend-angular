@@ -5,7 +5,6 @@ import { NavbarComponent } from './components/menu/navbar/navbar.component';
 import { FilterComponent } from './components/filter/filter.component';
 import { MatIconModule } from '@angular/material/icon';
 import { DataService } from './core/services/data.service';
-// import { WINDOW } from './core/utils/globalWindow';
 
 @Component({
   selector: 'app-root',
@@ -27,9 +26,9 @@ export class AppComponent implements OnInit {
 
   constructor(
     private dataService: DataService,
-    private router: Router,
+    private router: Router
   ) {
-    this.dataService.dataService.subscribe(data => {
+    this.dataService.emitEvent.subscribe(data => {
       this.showNavBar = data;
     });
   }

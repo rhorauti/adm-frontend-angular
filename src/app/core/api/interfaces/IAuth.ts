@@ -11,6 +11,8 @@ export interface IResponseLogin {
   status: boolean;
   message: string;
   data: {
+    id: number;
+    name: string;
     email: string;
     token: string;
   };
@@ -36,6 +38,7 @@ export interface IResponseSignUp {
   message: string;
   data: {
     id: number;
+    name: string;
     email: string;
     avatar: string;
     createdAt: string;
@@ -74,4 +77,10 @@ export interface IRequestNewPasswordHttp {
   token: string;
   password: string;
   confirmPassword: string;
+}
+
+export interface IAuthStore {
+  id: number;
+  name: string;
+  email: string;
 }

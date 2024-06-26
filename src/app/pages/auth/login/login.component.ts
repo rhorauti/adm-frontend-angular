@@ -1,18 +1,20 @@
 import { Component, EventEmitter, Output, ViewChild, inject } from '@angular/core';
-import { AuthApi } from '../../../core/api/http/auth.api';
-import { IRequestlogin } from '../../../core/api/interfaces/IAuth';
 import { MatIconModule } from '@angular/material/icon';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { HttpRequestService } from '../../../core/api/http-request.service';
-import { InputLoginComponent } from '../../../components/input/input-login/input-login.component';
-import { ButtonStandardComponent } from '../../../components/button/button-standard/button-standard.component';
-import { ModalInfoComponent } from '../../../components/modal/modal-info/modal-info.component';
-import { LoadingComponent } from '../../../components/loading/loading.component';
 import { Router } from '@angular/router';
-import { IModal } from '../../../core/api/interfaces/IModal';
-import { NavbarComponent } from '../../../components/menu/navbar/navbar.component';
-import { DataService } from '../../../core/services/data.service';
+import { Store } from '@ngrx/store';
+import { authDataStore } from '@store/auth/auth.action';
+import { InputLoginComponent } from '@components/input/input-login/input-login.component';
+import { ButtonStandardComponent } from '@components/button/button-standard/button-standard.component';
+import { ModalInfoComponent } from '@components/modal/modal-info/modal-info.component';
+import { LoadingComponent } from '@components/loading/loading.component';
+import { AuthApi } from '@core/api/http/auth.api';
+import { HttpRequestService } from '@core/api/http-request.service';
+import { DataService } from '@core/services/data.service';
+import { IAuthStore, IRequestlogin } from '@core/api/interfaces/IAuth';
+import { NavbarComponent } from '@components/menu/navbar/navbar.component';
+import { IModal } from '@core/api/interfaces/IModal';
 
 @Component({
   selector: 'app-login',
@@ -31,7 +33,10 @@ import { DataService } from '../../../core/services/data.service';
   styleUrl: './login.component.scss',
 })
 export class LoginComponent {
-  constructor(private dataService: DataService) {}
+  constructor(
+    private dataService: DataService,
+    private authStore: Store<{ auth: IAuthStore }>
+  ) {}
 
   private authApi = inject(AuthApi);
   private router = inject(Router);
@@ -95,6 +100,12 @@ export class LoginComponent {
   public isLoginSuccess = false;
   @Output() showNavBarEmitter = new EventEmitter<boolean>();
 
+  public authStoreData: IAuthStore = {
+    id: 0,
+    name: '',
+    email: '',
+  };
+
   /**
    * authenticateUser
    * Função que envia os dados do usuário (email e senha) para validação do backend
@@ -109,9 +120,15 @@ export class LoginComponent {
       } else {
         const response = await this.authApi.authenticateUser(this.loginData);
         if (response) {
+          this.authStoreData = {
+            id: response.data.id,
+            name: response.data.name,
+            email: response.data.email,
+          };
           this.handleSuccessModal(response.message);
           this.isLoginSuccess = true;
-          // this.dataService.emitData(true);
+          this.authStore.dispatch(authDataStore({ authData: this.authStoreData }));
+          this.dataService.emitData(true);
         }
       }
       this.isModalActive = true;

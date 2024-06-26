@@ -4,6 +4,7 @@ import { SignupComponent } from './pages/auth/signup/signup.component';
 import { ResetPasswordComponent } from './pages/auth/reset-password/reset-password.component';
 import { NewPasswordComponent } from './pages/auth/new-password/new-password.component';
 import { RedirectComponent } from './pages/auth/redirect/redirect.component';
+import { CompanyComponent } from './pages/register/company/company.component';
 
 export const routes: Routes = [
   {
@@ -25,6 +26,10 @@ export const routes: Routes = [
   {
     path: 'redirect',
     component: RedirectComponent,
+  },
+  {
+    path: 'company',
+    component: CompanyComponent,
   },
   {
     path: '**',

@@ -4,9 +4,9 @@ import { EventEmitter, Injectable } from '@angular/core';
   providedIn: 'root',
 })
 export class DataService {
-  dataService = new EventEmitter<any>();
+  emitEvent = new EventEmitter<any>();
 
   emitData(data: any) {
-    this.dataService.emit(data);
+    this.emitEvent.emit(data);
   }
 }

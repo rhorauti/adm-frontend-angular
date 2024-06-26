@@ -1,0 +1,47 @@
+<div class="flex flex-col align-middle">
+  <section
+    class="text-white text-lg font-semibold mt-2 border leading-4 border-gray-500 p-2 rounded text-center">
+    <h1>
+      {{
+        registerType == 'customers'
+          ? 'Cadastro de Clientes'
+          : registerType == 'suppliers'
+            ? 'Cadastro de Fornecedores'
+            : 'Cadastro de MyCompany'
+      }}
+    </h1>
+  </section>
+  <section class="my-4">
+    <app-filter
+      [tableHeadersData]="tableHeadersData"
+      (tableHeaderDataEmitter)="tableHeadersData = $event"
+      (showModalNewRegisterEmitter)="isModalNewCompanyActive = $event"
+      (inputValueEmitter)="inputValue = $event"
+      (selectValueEmitter)="selectValue = $event"></app-filter>
+  </section>
+  <section>
+    <app-table
+      #tableComponent
+      [registerType]="registerType"
+      [tableUpdated]="tableUpdated"
+      [inputValueFilter]="inputValue"
+      [selectValueFilter]="selectValue"
+      [companyTableHeaders]="tableHeadersData"
+      [currentPage]="currentPage"
+      (lastPageEmitter)="lastPage = $event"
+      (tableUpdatedEmitter)="tableUpdated = $event"
+      (tableHeadersDataEmitter)="tableHeadersData = $event"></app-table>
+  </section>
+  <footer class="my-4">
+    <app-pagination
+      [lastPage]="lastPage"
+      [tableUpdated]="tableUpdated"
+      [inputValueFilter]="inputValue"
+      (currentPageEmitter)="currentPage = $event"></app-pagination>
+  </footer>
+</div>
+<app-modal-form-company
+  [registerType]="registerType"
+  [isModalFormCompanyActive]="isModalNewCompanyActive"
+  (resetPageEmitter)="tableUpdated = $event"
+  (closeModalFormEmitter)="isModalNewCompanyActive = $event"></app-modal-form-company>

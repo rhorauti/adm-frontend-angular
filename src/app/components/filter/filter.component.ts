@@ -1,10 +1,10 @@
 import { CommonModule } from '@angular/common';
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
-import { ButtonStandardComponent } from '../button/button-standard/button-standard.component';
-import { InputFormComponent } from '../input/input-form/input-form.component';
 import { FormsModule } from '@angular/forms';
-import { ICompanyTableHeaders } from '../table/table.component';
-import { InputAddonsComponent } from '../input/input-addons/input-addons.component';
+import { ButtonStandardComponent } from '@components/button/button-standard/button-standard.component';
+import { InputAddonsComponent } from '@components/input/input-addons/input-addons.component';
+import { InputFormComponent } from '@components/input/input-form/input-form.component';
+import { ICompanyTableHeaders } from '@components/table/table.component';
 
 @Component({
   selector: 'app-filter',

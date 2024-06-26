@@ -5,16 +5,12 @@ import { InputLoginComponent } from '../../../components/input/input-login/input
 import { ModalInfoComponent } from '../../../components/modal/modal-info/modal-info.component';
 import { LoadingComponent } from '../../../components/loading/loading.component';
 import { MatIconModule } from '@angular/material/icon';
-import { HttpClientModule } from '@angular/common/http';
 import { AuthApi } from '../../../core/api/http/auth.api';
 import { HttpRequestService } from '../../../core/api/http-request.service';
 import { Router } from '@angular/router';
 import { IModal } from '../../../core/api/interfaces/IModal';
 import { InputValidationComponent } from '../../../components/input/input-validation/input-validation.component';
-import {
-  IFormValidation,
-  IRequestSignUp,
-} from '../../../core/api/interfaces/IAuth';
+import { IFormValidation, IRequestSignUp } from '../../../core/api/interfaces/IAuth';
 
 @Component({
   selector: 'app-signup',
@@ -26,7 +22,6 @@ import {
     ModalInfoComponent,
     LoadingComponent,
     MatIconModule,
-    HttpClientModule,
     InputValidationComponent,
   ],
   providers: [AuthApi, HttpRequestService],
@@ -90,10 +85,7 @@ export class SignupComponent {
    * Função computed que altera a cor da borda do input name para vermelho caso a validação seja atendida.
    */
   changeNameBorderColor: Signal<string> = computed(() => {
-    if (
-      this.signupData.name().length > 0 &&
-      !this.formValidation.nameValidation()
-    ) {
+    if (this.signupData.name().length > 0 && !this.formValidation.nameValidation()) {
       return 'ring-red-400';
     } else {
       return 'ring-logo-blue-hover';
@@ -123,10 +115,7 @@ export class SignupComponent {
    * Função computed que altera a cor da borda do input email para vermelho caso a validação seja atendida.
    */
   changeEmailBorderColor: Signal<string> = computed(() => {
-    if (
-      this.signupData.email().length > 0 &&
-      !this.formValidation.emailValidation()
-    ) {
+    if (this.signupData.email().length > 0 && !this.formValidation.emailValidation()) {
       return 'ring-red-400';
     } else {
       return 'ring-logo-blue-hover';
@@ -186,8 +175,7 @@ export class SignupComponent {
     if (!this.signupData.password()) {
       return 'ring-logo-blue-hover';
     } else if (
-      (this.signupData.password() &&
-        !this.formValidation.passwordLettersValidation()) ||
+      (this.signupData.password() && !this.formValidation.passwordLettersValidation()) ||
       !this.formValidation.passwordUpperCaseValidation() ||
       !this.formValidation.passwordNumberValidation() ||
       !this.formValidation.passwordSymbolValidation()
