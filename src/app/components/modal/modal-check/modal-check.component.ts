@@ -2,12 +2,12 @@ import { CommonModule } from '@angular/common';
 import { Component, EventEmitter, Input, OnChanges, Output } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
 import { ModalBaseComponent } from '../modal-base/modal-base.component';
-import { ButtonStandardComponent } from '../../button/button-standard/button-standard.component';
-import { ICompany } from '../../../core/api/interfaces/IRegister';
-import { RegisterCompanyApi } from '../../../core/api/http/register.api';
-import { LoadingComponent } from '../../loading/loading.component';
-import { IModal } from '../../../core/api/interfaces/IModal';
 import { ModalInfoComponent } from '../modal-info/modal-info.component';
+import { ButtonStandardComponent } from '@components/button/button-standard/button-standard.component';
+import { LoadingComponent } from '@components/loading/loading.component';
+import { RegisterCompanyApi } from '@core/api/http/register.api';
+import { ICompany } from '@core/api/interfaces/IRegister';
+import { IModal } from '@core/api/interfaces/IModal';
 
 interface IFormData {
   title: string;

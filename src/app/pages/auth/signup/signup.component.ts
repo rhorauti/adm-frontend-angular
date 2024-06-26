@@ -1,16 +1,16 @@
 import { CommonModule } from '@angular/common';
 import { Component, Signal, computed, inject, signal } from '@angular/core';
-import { ButtonStandardComponent } from '../../../components/button/button-standard/button-standard.component';
-import { InputLoginComponent } from '../../../components/input/input-login/input-login.component';
-import { ModalInfoComponent } from '../../../components/modal/modal-info/modal-info.component';
-import { LoadingComponent } from '../../../components/loading/loading.component';
 import { MatIconModule } from '@angular/material/icon';
-import { AuthApi } from '../../../core/api/http/auth.api';
-import { HttpRequestService } from '../../../core/api/http-request.service';
 import { Router } from '@angular/router';
-import { IModal } from '../../../core/api/interfaces/IModal';
-import { InputValidationComponent } from '../../../components/input/input-validation/input-validation.component';
-import { IFormValidation, IRequestSignUp } from '../../../core/api/interfaces/IAuth';
+import { ButtonStandardComponent } from '@components/button/button-standard/button-standard.component';
+import { InputLoginComponent } from '@components/input/input-login/input-login.component';
+import { InputValidationComponent } from '@components/input/input-validation/input-validation.component';
+import { LoadingComponent } from '@components/loading/loading.component';
+import { ModalInfoComponent } from '@components/modal/modal-info/modal-info.component';
+import { HttpRequestService } from '@core/api/http-request.service';
+import { AuthApi } from '@core/api/http/auth.api';
+import { IFormValidation, IRequestSignUp } from '@core/api/interfaces/IAuth';
+import { IModal } from '@core/api/interfaces/IModal';
 
 @Component({
   selector: 'app-signup',

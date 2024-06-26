@@ -1,14 +1,14 @@
 import { inject } from '@angular/core';
 import { HttpRequestService } from '../http-request.service';
 import {
+  IRequestlogin,
   IRequestNewPasswordHttp,
   IRequestResetPassword,
   IRequestSignUpHttp,
-  IRequestlogin,
   IResponseLogin,
   IResponseSignUp,
 } from '../interfaces/IAuth';
-import { environment } from '../../../../environments/environment';
+import { environment } from '@environments/environment';
 import { IResponseCommonMessage } from '../interfaces/ICommon';
 
 export class AuthApi {
@@ -62,9 +62,7 @@ export class AuthApi {
    * @param email email informado pelo usuário
    * @returns Promise com a data, status e mensagem
    */
-  async getEmailValidation(
-    email: IRequestResetPassword
-  ): Promise<IResponseCommonMessage> {
+  async getEmailValidation(email: IRequestResetPassword): Promise<IResponseCommonMessage> {
     return await this.httpRequestService.sendHttpRequest(
       `${environment.apiUrl}/reset-password`,
       'POST',
@@ -78,9 +76,7 @@ export class AuthApi {
    * @param newPassword nova senha digitada pelo usuário
    * @returns Promise com a data, status e mensagem
    */
-  async createNewPassword(
-    newPassword: IRequestNewPasswordHttp
-  ): Promise<IResponseCommonMessage> {
+  async createNewPassword(newPassword: IRequestNewPasswordHttp): Promise<IResponseCommonMessage> {
     return await this.httpRequestService.sendHttpRequest(
       `${environment.apiUrl}/new-password?token=${newPassword.token}`,
       'POST',

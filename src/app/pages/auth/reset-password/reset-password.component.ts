@@ -1,17 +1,16 @@
 import { CommonModule } from '@angular/common';
 import { Component, inject } from '@angular/core';
-import { ButtonStandardComponent } from '../../../components/button/button-standard/button-standard.component';
-import { InputLoginComponent } from '../../../components/input/input-login/input-login.component';
 import { MatIconModule } from '@angular/material/icon';
-import { ModalInfoComponent } from '../../../components/modal/modal-info/modal-info.component';
-import { LoadingComponent } from '../../../components/loading/loading.component';
 import { FormsModule } from '@angular/forms';
-import { HttpClientModule } from '@angular/common/http';
-import { AuthApi } from '../../../core/api/http/auth.api';
-import { HttpRequestService } from '../../../core/api/http-request.service';
 import { Router } from '@angular/router';
-import { IModal } from '../../../core/api/interfaces/IModal';
-import { IRequestResetPassword } from '../../../core/api/interfaces/IAuth';
+import { ButtonStandardComponent } from '@components/button/button-standard/button-standard.component';
+import { InputLoginComponent } from '@components/input/input-login/input-login.component';
+import { ModalInfoComponent } from '@components/modal/modal-info/modal-info.component';
+import { LoadingComponent } from '@components/loading/loading.component';
+import { AuthApi } from '@core/api/http/auth.api';
+import { HttpRequestService } from '@core/api/http-request.service';
+import { IRequestResetPassword } from '@core/api/interfaces/IAuth';
+import { IModal } from '@core/api/interfaces/IModal';
 
 @Component({
   selector: 'app-reset-password',
@@ -19,7 +18,6 @@ import { IRequestResetPassword } from '../../../core/api/interfaces/IAuth';
   imports: [
     CommonModule,
     FormsModule,
-    HttpClientModule,
     ButtonStandardComponent,
     InputLoginComponent,
     MatIconModule,
@@ -88,9 +86,7 @@ export class ResetPasswordComponent {
       if (this.resetPasswordData.email.length == 0) {
         this.handleFailureModal('Campo email vazio!');
       } else {
-        const response = await this.authApi.getEmailValidation(
-          this.resetPasswordData
-        );
+        const response = await this.authApi.getEmailValidation(this.resetPasswordData);
         if (response) {
           this.handleSuccessModal(response.message);
           this.isEmailValid = true;

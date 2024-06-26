@@ -1,13 +1,13 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FilterComponent } from '../../../components/filter/filter.component';
-import { PaginationComponent } from '../../../components/pagination/pagination.component';
-import { ModalFormCompanyComponent } from '../../../components/modal/modal-form-company/modal-form-company.component';
-import { RegisterCompanyApi } from '../../../core/api/http/register.api';
-import { HttpRequestService } from '../../../core/api/http-request.service';
 import { MatIconModule } from '@angular/material/icon';
 import { ActivatedRoute } from '@angular/router';
-import { ICompanyTableHeaders, TableComponent } from '../../../components/table/table.component';
+import { ICompanyTableHeaders, TableComponent } from '@components/table/table.component';
+import { FilterComponent } from '@components/filter/filter.component';
+import { PaginationComponent } from '@components/pagination/pagination.component';
+import { ModalFormCompanyComponent } from '@components/modal/modal-form-company/modal-form-company.component';
+import { RegisterCompanyApi } from '@core/api/http/register.api';
+import { HttpRequestService } from '@core/api/http-request.service';
 
 @Component({
   selector: 'app-company',

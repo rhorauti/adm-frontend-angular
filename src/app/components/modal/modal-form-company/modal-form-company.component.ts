@@ -2,13 +2,13 @@ import { CommonModule } from '@angular/common';
 import { Component, EventEmitter, Input, Output, QueryList, ViewChildren } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
 import { ModalBaseComponent } from '../modal-base/modal-base.component';
-import { InputFormComponent } from '../../input/input-form/input-form.component';
-import { ButtonStandardComponent } from '../../button/button-standard/button-standard.component';
-import { ICompany } from '../../../core/api/interfaces/IRegister';
 import { ModalCheckComponent } from '../modal-check/modal-check.component';
 import { ModalInfoComponent } from '../modal-info/modal-info.component';
-import { IModal } from '../../../core/api/interfaces/IModal';
-import { SelectComponent } from '../../select/select.component';
+import { InputFormComponent } from '@components/input/input-form/input-form.component';
+import { ButtonStandardComponent } from '@components/button/button-standard/button-standard.component';
+import { SelectComponent } from '@components/select/select.component';
+import { ICompany } from '@core/api/interfaces/IRegister';
+import { IModal } from '@core/api/interfaces/IModal';
 
 @Component({
   selector: 'app-modal-form-company',

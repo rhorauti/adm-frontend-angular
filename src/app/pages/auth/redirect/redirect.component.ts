@@ -1,21 +1,15 @@
 import { CommonModule } from '@angular/common';
 import { Component, Input, OnInit, inject } from '@angular/core';
-import { ButtonStandardComponent } from '../../../components/button/button-standard/button-standard.component';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
-import { AuthApi } from '../../../core/api/http/auth.api';
-import { HttpRequestService } from '../../../core/api/http-request.service';
-import { HttpClientModule } from '@angular/common/http';
+import { ButtonStandardComponent } from '@components/button/button-standard/button-standard.component';
+import { AuthApi } from '@core/api/http/auth.api';
+import { HttpRequestService } from '@core/api/http-request.service';
 
 @Component({
   selector: 'app-redirect',
   standalone: true,
-  imports: [
-    CommonModule,
-    ButtonStandardComponent,
-    MatIconModule,
-    HttpClientModule,
-  ],
+  imports: [CommonModule, ButtonStandardComponent, MatIconModule],
   providers: [AuthApi, HttpRequestService],
   templateUrl: './redirect.component.html',
   styleUrl: './redirect.component.scss',
@@ -31,8 +25,7 @@ export class RedirectComponent implements OnInit {
   public message = '';
 
   async ngOnInit() {
-    const token: string | null =
-      this.activatedRoute.snapshot.queryParamMap.get('token');
+    const token: string | null = this.activatedRoute.snapshot.queryParamMap.get('token');
     try {
       const response = await this.authApi.checkValidToken(token);
       this.message = response.message;

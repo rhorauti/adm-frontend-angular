@@ -1,13 +1,7 @@
 import { CommonModule } from '@angular/common';
-import {
-  Component,
-  EventEmitter,
-  Input,
-  OnChanges,
-  Output,
-} from '@angular/core';
-import { ButtonStandardComponent } from '../../button/button-standard/button-standard.component';
+import { Component, EventEmitter, Input, OnChanges, Output } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
+import { ButtonStandardComponent } from '@components/button/button-standard/button-standard.component';
 import { ModalBaseComponent } from '../modal-base/modal-base.component';
 import { ModalCheckComponent } from '../modal-check/modal-check.component';
 

@@ -9,22 +9,21 @@ import {
   SimpleChanges,
   inject,
 } from '@angular/core';
-import { RegisterCompanyApi } from '../../core/api/http/register.api';
-import { InputFormComponent } from '../input/input-form/input-form.component';
-import { ButtonStandardComponent } from '../button/button-standard/button-standard.component';
-import { HttpClientModule } from '@angular/common/http';
-import { HttpRequestService } from '../../core/api/http-request.service';
+import { ButtonStandardComponent } from '@components/button/button-standard/button-standard.component';
+import { InputFormComponent } from '@components/input/input-form/input-form.component';
+import { LoadingComponent } from '@components/loading/loading.component';
+import { ModalAskComponent } from '@components/modal/modal-ask/modal-ask.component';
+import { ModalFormCompanyComponent } from '@components/modal/modal-form-company/modal-form-company.component';
+import { ModalInfoComponent } from '@components/modal/modal-info/modal-info.component';
+import { HttpRequestService } from '@core/api/http-request.service';
+import { RegisterCompanyApi } from '@core/api/http/register.api';
+import { IModal } from '@core/api/interfaces/IModal';
 import {
   ICompany,
   IProduct,
   IResponseCompany,
   IResponseProduct,
-} from '../../core/api/interfaces/IRegister';
-import { IModal } from '../../core/api/interfaces/IModal';
-import { LoadingComponent } from '../loading/loading.component';
-import { ModalInfoComponent } from '../modal/modal-info/modal-info.component';
-import { ModalAskComponent } from '../modal/modal-ask/modal-ask.component';
-import { ModalFormCompanyComponent } from '../modal/modal-form-company/modal-form-company.component';
+} from '@core/api/interfaces/IRegister';
 
 export interface ICompanyTableHeaders {
   id: number;
@@ -39,7 +38,6 @@ export interface ICompanyTableHeaders {
     CommonModule,
     InputFormComponent,
     ButtonStandardComponent,
-    HttpClientModule,
     InputFormComponent,
     LoadingComponent,
     ModalInfoComponent,

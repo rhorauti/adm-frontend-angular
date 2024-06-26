@@ -1,10 +1,10 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
-import { NavbarComponent } from './components/menu/navbar/navbar.component';
-import { FilterComponent } from './components/filter/filter.component';
 import { MatIconModule } from '@angular/material/icon';
-import { DataService } from './core/services/data.service';
+import { DataService } from '@core/services/data.service';
+import { NavbarComponent } from '@components/menu/navbar/navbar.component';
+import { FilterComponent } from '@components/filter/filter.component';
 
 @Component({
   selector: 'app-root',
