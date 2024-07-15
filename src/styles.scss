@@ -10,6 +10,16 @@
 
 body {
   background-color: #000000;
+  margin: 0;
+  padding: 0;
+}
+
+.mat-typography p {
+  margin: 0;
+}
+
+.is-active {
+  background-color: #0d7ff1;
 }
 
 .table-td {

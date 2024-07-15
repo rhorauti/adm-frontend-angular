@@ -6,15 +6,15 @@ import { Router } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { authDataStore } from '@store/auth/auth.action';
 import { InputLoginComponent } from '@components/input/input-login/input-login.component';
-import { ButtonStandardComponent } from '@components/button/button-standard/button-standard.component';
+import { ButtonComponent } from '@components/button/button.component';
 import { ModalInfoComponent } from '@components/modal/modal-info/modal-info.component';
 import { LoadingComponent } from '@components/loading/loading.component';
 import { AuthApi } from '@core/api/http/auth.api';
 import { HttpRequestService } from '@core/api/http-request.service';
 import { DataService } from '@core/services/data.service';
-import { IAuthStore, IRequestlogin } from '@core/api/interfaces/IAuth';
+import { IAuthStore, IRequestlogin } from '@core/interfaces/IAuth';
 import { NavbarComponent } from '@components/menu/navbar/navbar.component';
-import { IModal } from '@core/api/interfaces/IModal';
+import { IModal } from '@core/interfaces/IModal';
 
 @Component({
   selector: 'app-login',
@@ -24,7 +24,7 @@ import { IModal } from '@core/api/interfaces/IModal';
     CommonModule,
     FormsModule,
     InputLoginComponent,
-    ButtonStandardComponent,
+    ButtonComponent,
     ModalInfoComponent,
     LoadingComponent,
   ],
@@ -151,7 +151,7 @@ export class LoginComponent {
     } else {
       this.isModalActive = modalStatus;
       this.dataService.emitData(true);
-      this.router.navigate(['/customers']);
+      this.router.navigate(['/company/1']);
     }
   }
 

@@ -3,13 +3,12 @@ import { HttpRequestService } from '../http-request.service';
 import {
   IRequestlogin,
   IRequestNewPasswordHttp,
-  IRequestResetPassword,
-  IRequestSignUpHttp,
+  IRequestSignUp,
   IResponseLogin,
   IResponseSignUp,
-} from '../interfaces/IAuth';
+} from '../../interfaces/IAuth';
 import { environment } from '@environments/environment';
-import { IResponseCommonMessage } from '../interfaces/ICommon';
+import { IResponseCommonMessage } from '../../interfaces/ICommonMessage';
 
 export class AuthApi {
   private httpRequestService = inject(HttpRequestService);
@@ -48,7 +47,7 @@ export class AuthApi {
    * @param newUser nome, email, senha do novo usuário
    * @returns id, email, avatar, data de criação do usuário junto com a mensagem que será exibida no modal.
    */
-  async createNewUser(newUser: IRequestSignUpHttp): Promise<IResponseSignUp> {
+  async createNewUser(newUser: IRequestSignUp): Promise<IResponseSignUp> {
     return await this.httpRequestService.sendHttpRequest(
       `${environment.apiUrl}/signup`,
       'POST',
@@ -62,7 +61,7 @@ export class AuthApi {
    * @param email email informado pelo usuário
    * @returns Promise com a data, status e mensagem
    */
-  async getEmailValidation(email: IRequestResetPassword): Promise<IResponseCommonMessage> {
+  async getEmailValidation(email: string): Promise<IResponseCommonMessage> {
     return await this.httpRequestService.sendHttpRequest(
       `${environment.apiUrl}/reset-password`,
       'POST',

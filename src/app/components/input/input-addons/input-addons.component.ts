@@ -12,6 +12,7 @@ import { MatIconModule } from '@angular/material/icon';
 })
 export class InputAddonsComponent implements OnInit {
   @Input() optionList: string[] = [];
+  @Input() btnLabel = 'Buscar';
 
   public inputValue = '';
   public selectValue = 'Id';
@@ -32,9 +33,9 @@ export class InputAddonsComponent implements OnInit {
     this.selectValueEmitter.emit(this.selectValue);
   }
 
-  @Output() buttonClickEmitter = new EventEmitter();
+  @Output() btnClickEmitter = new EventEmitter();
 
   click(): void {
-    this.buttonClickEmitter.emit();
+    this.btnClickEmitter.emit();
   }
 }

@@ -19,13 +19,6 @@ export interface IResponseLogin {
 }
 
 export interface IRequestSignUp {
-  name: WritableSignal<string>;
-  email: WritableSignal<string>;
-  password: WritableSignal<string>;
-  confirmPassword: WritableSignal<string>;
-}
-
-export interface IRequestSignUpHttp {
   name: string;
   email: string;
   password: string;
@@ -45,32 +38,23 @@ export interface IResponseSignUp {
   };
 }
 
-export interface IFormValidation {
-  nameValidation: WritableSignal<boolean>;
-  emailValidation: WritableSignal<boolean>;
-  passwordLettersValidation: WritableSignal<boolean>;
-  passwordUpperCaseValidation: WritableSignal<boolean>;
-  passwordNumberValidation: WritableSignal<boolean>;
-  passwordSymbolValidation: WritableSignal<boolean>;
-  confirmPasswordValidation: WritableSignal<boolean>;
+export interface IFormValidationNewPassword {
+  passwordLettersValidation: boolean;
+  passwordUpperCaseValidation: boolean;
+  passwordNumberValidation: boolean;
+  passwordSymbolValidation: boolean;
+  confirmPasswordValidation: boolean;
 }
 
-export interface IFormValidationNewPassword {
-  passwordLettersValidation: WritableSignal<boolean>;
-  passwordUpperCaseValidation: WritableSignal<boolean>;
-  passwordNumberValidation: WritableSignal<boolean>;
-  passwordSymbolValidation: WritableSignal<boolean>;
-  confirmPasswordValidation: WritableSignal<boolean>;
+export interface IFormValidationSignUp extends IFormValidationNewPassword {
+  nameValidation: boolean;
+  emailValidation: boolean;
 }
 
 export interface IRequestNewPassword {
   token: string | null;
   password: WritableSignal<string>;
   confirmPassword: WritableSignal<string>;
-}
-
-export interface IRequestResetPassword {
-  email: string;
 }
 
 export interface IRequestNewPasswordHttp {

@@ -7,12 +7,8 @@
     <div>
       @for (data of arrayFormData.slice(firstIdx1, lastIdx1); track $index) {
         @if (data.description != '0' && data.title != 'isCnpj') {
-          <div
-            class="grid grid-cols-3 gap-2 border-t lg:last:border-b border-gray-500 p-2">
-            <p>
-              {{ data.title == 'cnpj' ? 'cpf/cnpj' : data.title
-              }}<span> : </span>
-            </p>
+          <div class="grid grid-cols-3 gap-2 border-t lg:last:border-b border-gray-500 p-2">
+            <p>{{ data.title == 'cnpj' ? 'cpf/cnpj' : data.title }}<span> : </span></p>
             <p class="col-span-2">
               {{
                 data.title == 'cadastro'
@@ -27,8 +23,7 @@
     <div>
       @for (data of arrayFormData.slice(firstIdx2, lastIdx2); track $index) {
         @if (data.description != '0' && data.title != 'isCnpj') {
-          <div
-            class="grid grid-cols-3 gap-2 border-t last:border-b border-gray-500 p-2">
+          <div class="grid grid-cols-3 gap-2 border-t last:border-b border-gray-500 p-2">
             <p>{{ data.title }}<span> : </span></p>
             <p class="col-span-2">{{ data.description }}</p>
           </div>
@@ -37,23 +32,9 @@
     </div>
   </div>
   <div class="footer-block grid grid-cols-2 gap-3 mt-5">
-    <app-button-standard
-      [btnType]="'cancel'"
-      (click)="closeModalCheck()"></app-button-standard>
-    @if (!isEditForm) {
-      <app-button-standard
-        [btnType]="'success-save'"
-        (click)="registerData()"></app-button-standard>
-    } @else {
-      <app-button-standard
-        [btnType]="'success-edit'"
-        (click)="editData()"></app-button-standard>
-    }
+    <app-button [btnType]="'cancel'" (click)="emitCloseEvent()"></app-button>
+    <app-button
+      [btnType]="isEditForm ? 'success-edit' : 'success-save'"
+      (click)="emitSuccessEvent()"></app-button>
   </div>
 </app-modal-base>
-<app-modal-info
-  [showModal]="isModalInfoActive"
-  [modalType]="modalInfo.modalType"
-  [modalDescription]="modalInfo.modalDescription"
-  (closeModalEmitter)="closeModalInfoAfterRegisterOk($event)"></app-modal-info>
-<app-loading [showLoading]="showLoading"></app-loading>

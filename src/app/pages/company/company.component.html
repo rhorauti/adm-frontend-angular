@@ -1,0 +1,83 @@
+<div class="flex flex-col align-middle text-white gap-4">
+  <section class="text-lg font-semibold mt-2 border border-gray-500 p-1 rounded text-center">
+    <p>Cadastro de Empresas</p>
+  </section>
+  <app-tab [arrayTabsTitle]="['Clientes', 'Fornecedores', 'MyCompany']">
+    <div class="flex items-center justify-between mb-4">
+      <app-input-addons [optionList]="['option1', 'option2']"></app-input-addons>
+      <div class="flex gap-2">
+        <app-table-header-box (click)="isHeaderBoxActive()"></app-table-header-box>
+        <app-button [showIcon]="true" [btnIcon]="'add'" [label]="'Cadastrar'"></app-button>
+      </div>
+    </div>
+    <app-table>
+      <tr thead-row>
+        @for (header of companyTableHeaders(); track $index) {
+          @if (header.showHeader) {
+            <th class="table-td">
+              {{ header.name }}
+            </th>
+          }
+        }
+      </tr>
+      @for (company of companiesData(); track $index) {
+        <tr tbody-row>
+          @if (companyTableHeaders()[0].showHeader) {
+            <td class="table-td">
+              {{ company.idCompany }}
+            </td>
+          }
+          @if (companyTableHeaders()[1].showHeader) {
+            <td class="table-td">
+              {{ company.date | date: 'dd/MM/YYYY' }}
+            </td>
+          }
+          @if (companyTableHeaders()[2].showHeader) {
+            <td class="table-td">{{ company.nickname }}</td>
+          }
+          @if (companyTableHeaders()[3].showHeader) {
+            <td class="table-td">{{ company.name }}</td>
+          }
+          @if (companyTableHeaders()[4].showHeader) {
+            <td class="table-td">{{ company.cnpj }}</td>
+          }
+          @if (companyTableHeaders()[5].showHeader) {
+            <td class="table-td flex justify-center gap-3">
+              <app-button
+                (click)="showModalFormToEditCompany(company)"
+                [showLabel]="false"
+                [showIcon]="true"
+                [btnType]="'warning'"></app-button>
+              <app-button
+                (click)="showModalAskToDeleteCompany(company)"
+                [showLabel]="false"
+                [showIcon]="true"
+                [btnType]="'danger'"></app-button>
+            </td>
+          }
+        </tr>
+      }
+    </app-table>
+  </app-tab>
+</div>
+
+<app-modal-form-company
+  [isModalFormCompanyActive]="isModalCompanyActive"
+  (closeModalFormEmitter)="isModalCompanyActive = false"></app-modal-form-company>
+<app-modal-ask
+  [showModal]="isModalAskActive"
+  [modalDescription]="modalData.description"
+  [modalType]="modalData.type"
+  (cancelEmitter)="isModalAskActive = false"
+  (actionOkEmitter)="OnModalAskActionOk()"></app-modal-ask>
+<app-modal-check
+  [companyData]="companyData()"
+  [isEditForm]="isEditForm"
+  [isModalCheckActive]="isModalCheckActive"
+  (closeModalCheckEmitter)="closeModalCheckEvent()"></app-modal-check>
+<app-modal-info
+  [showModal]="isModalInfoActive"
+  [modalDescription]="modalData.description"
+  [modalType]="modalData.type"
+  (closeModalEmitter)="isModalInfoActive = false"></app-modal-info>
+<app-loading [showLoading]="showLoading()"></app-loading>

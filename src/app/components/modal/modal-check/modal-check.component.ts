@@ -3,11 +3,10 @@ import { Component, EventEmitter, Input, OnChanges, Output } from '@angular/core
 import { MatIconModule } from '@angular/material/icon';
 import { ModalBaseComponent } from '../modal-base/modal-base.component';
 import { ModalInfoComponent } from '../modal-info/modal-info.component';
-import { ButtonStandardComponent } from '@components/button/button-standard/button-standard.component';
+import { ButtonComponent } from '@components/button/button.component';
 import { LoadingComponent } from '@components/loading/loading.component';
-import { RegisterCompanyApi } from '@core/api/http/register.api';
-import { ICompany } from '@core/api/interfaces/IRegister';
-import { IModal } from '@core/api/interfaces/IModal';
+import { RegisterCompanyApi } from '@core/api/http/company.api';
+import { ICompany } from '@core/interfaces/ICompany';
 
 interface IFormData {
   title: string;
@@ -22,7 +21,7 @@ interface IFormData {
     MatIconModule,
     ModalBaseComponent,
     ModalInfoComponent,
-    ButtonStandardComponent,
+    ButtonComponent,
     LoadingComponent,
   ],
   providers: [RegisterCompanyApi],
@@ -30,22 +29,15 @@ interface IFormData {
   styleUrl: './modal-check.component.scss',
 })
 export class ModalCheckComponent implements OnChanges {
-  constructor(private registerCompanyApi: RegisterCompanyApi) {}
   @Input() companyData: ICompany = {
-    id: 0,
-    cadastro: new Date(),
-    nome: '',
-    email: '',
-    telefone: '',
-    isCnpj: false,
+    idCompany: 0,
+    type: 0,
+    date: new Date().toISOString(),
+    nickname: '',
+    name: '',
     cnpj: '',
-    logradouro: '',
-    numero: 0,
-    complemento: '',
-    bairro: '',
-    cidade: '',
-    estado: '',
   };
+  @Input() isEditForm = false;
   public firstIdx1 = 0;
   public firstIdx2 = 0;
   public lastIdx1 = 0;
@@ -73,131 +65,15 @@ export class ModalCheckComponent implements OnChanges {
     this.isModalCheckActive = true;
   }
 
-  @Output() closeModalCheckEmitter = new EventEmitter<boolean>();
+  @Output() closeEventEmitter = new EventEmitter();
 
-  closeModalCheck() {
-    this.closeModalCheckEmitter.emit(false);
+  emitCloseEvent(): void {
+    this.closeEventEmitter.emit();
   }
 
-  public isModalInfoActive = false;
-  @Output() changeBtnProsseguirStatusFormEmitter = new EventEmitter<boolean>();
-  @Output() closeModalFormEmitter = new EventEmitter<boolean>();
+  @Output() successEventEmitter = new EventEmitter();
 
-  public isModalResultOk = false;
-
-  /**
-   * closeModalInfo
-   * Fecha o formulário de double-check e registra os dados caso o usuário clique em salvar e caso cancele reseta o botão prosseguir do modal form.
-   * @param isFalse boolean false
-   */
-  closeModalInfoAfterRegisterOk(isFalse: boolean): void {
-    if (!this.isModalResultOk) {
-      this.isModalInfoActive = isFalse;
-      this.closeModalCheck();
-    } else {
-      this.isModalInfoActive = isFalse;
-      this.closeModalCheck();
-      this.closeModalFormEmitter.emit(false);
-      this.isModalResultOk = false;
-    }
-  }
-
-  public modalInfo: IModal = {
-    modalType: '',
-    modalDescription: '',
-  };
-
-  /**
-   * handleSuccessModal
-   * Função que popula os dados do modal no caso de email ou senha validados corretamente.
-   */
-  handleSuccessModal(message: string): void {
-    this.modalInfo = {
-      modalType: 'success',
-      modalDescription: message,
-    };
-  }
-
-  /**
-   * handleFailureModal
-   * Função que popula os dados do modal no caso de email ou senha digitados incorretamente.
-   */
-  handleFailureModal(message: string): void {
-    this.modalInfo = {
-      modalType: 'failure',
-      modalDescription: message,
-    };
-  }
-
-  public showLoading = false;
-  @Input() registerType: string | null = '';
-  @Output() resetPageEmitter = new EventEmitter<boolean>();
-
-  async registerData() {
-    this.showLoading = true;
-    try {
-      switch (this.registerType) {
-        case 'customers': {
-          const newRegisterResponse = await this.registerCompanyApi.addNewCompany(
-            this.companyData,
-            'customers'
-          );
-          this.handleSuccessModal(newRegisterResponse.message);
-          break;
-        }
-        case 'suppliers': {
-          const newRegisterResponse = await this.registerCompanyApi.addNewCompany(
-            this.companyData,
-            'suppliers'
-          );
-          this.handleSuccessModal(newRegisterResponse.message);
-          break;
-        }
-      }
-      this.isModalResultOk = true;
-      this.isModalInfoActive = true;
-      this.resetPageEmitter.emit(true);
-    } catch (e: any) {
-      this.handleFailureModal(e.error.message);
-      this.isModalInfoActive = true;
-    } finally {
-      this.showLoading = false;
-    }
-  }
-
-  @Input() isEditForm = false;
-
-  async editData(): Promise<void> {
-    this.showLoading = true;
-    try {
-      switch (this.registerType) {
-        case 'customers': {
-          const customerData = await this.registerCompanyApi.updateCompany(
-            this.companyData,
-            'customers',
-            this.companyData.id
-          );
-          this.handleSuccessModal(customerData.message);
-          break;
-        }
-        case 'suppliers': {
-          const supplierData = await this.registerCompanyApi.updateCompany(
-            this.companyData,
-            'suppliers',
-            this.companyData.id
-          );
-          this.handleSuccessModal(supplierData.message);
-          break;
-        }
-      }
-      this.isModalResultOk = true;
-      this.isModalInfoActive = true;
-      this.resetPageEmitter.emit();
-    } catch (e: any) {
-      this.handleFailureModal(e.error.message);
-      this.isModalInfoActive = true;
-    } finally {
-      this.showLoading = false;
-    }
+  emitSuccessEvent() {
+    this.successEventEmitter.emit();
   }
 }

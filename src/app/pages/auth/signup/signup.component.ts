@@ -2,22 +2,22 @@ import { CommonModule } from '@angular/common';
 import { Component, Signal, computed, inject, signal } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
 import { Router } from '@angular/router';
-import { ButtonStandardComponent } from '@components/button/button-standard/button-standard.component';
+import { ButtonComponent } from '@components/button/button.component';
 import { InputLoginComponent } from '@components/input/input-login/input-login.component';
 import { InputValidationComponent } from '@components/input/input-validation/input-validation.component';
 import { LoadingComponent } from '@components/loading/loading.component';
 import { ModalInfoComponent } from '@components/modal/modal-info/modal-info.component';
 import { HttpRequestService } from '@core/api/http-request.service';
 import { AuthApi } from '@core/api/http/auth.api';
-import { IFormValidation, IRequestSignUp } from '@core/api/interfaces/IAuth';
-import { IModal } from '@core/api/interfaces/IModal';
+import { IFormValidationSignUp, IRequestSignUp } from '@core/interfaces/IAuth';
+import { IModal } from '@core/interfaces/IModal';
 
 @Component({
   selector: 'app-signup',
   standalone: true,
   imports: [
     CommonModule,
-    ButtonStandardComponent,
+    ButtonComponent,
     InputLoginComponent,
     ModalInfoComponent,
     LoadingComponent,
@@ -32,22 +32,22 @@ export class SignupComponent {
   private authApi = inject(AuthApi);
   private router = inject(Router);
 
-  public signupData: IRequestSignUp = {
-    name: signal(''),
-    email: signal(''),
-    password: signal(''),
-    confirmPassword: signal(''),
-  };
+  public signupData = signal<IRequestSignUp>({
+    name: '',
+    email: '',
+    password: '',
+    confirmPassword: '',
+  });
 
-  public formValidation: IFormValidation = {
-    nameValidation: signal(false),
-    emailValidation: signal(false),
-    passwordLettersValidation: signal(false),
-    passwordUpperCaseValidation: signal(false),
-    passwordNumberValidation: signal(false),
-    passwordSymbolValidation: signal(false),
-    confirmPasswordValidation: signal(false),
-  };
+  public formValidation = signal<IFormValidationSignUp>({
+    nameValidation: false,
+    emailValidation: false,
+    passwordLettersValidation: false,
+    passwordUpperCaseValidation: false,
+    passwordNumberValidation: false,
+    passwordSymbolValidation: false,
+    confirmPasswordValidation: false,
+  });
 
   public modalInfo: IModal = {
     modalType: '',
@@ -68,7 +68,7 @@ export class SignupComponent {
   // }
 
   getNameValue(nameValue: string): void {
-    this.signupData.name.set(nameValue);
+    this.signupData().name = nameValue;
   }
 
   /**
@@ -77,7 +77,7 @@ export class SignupComponent {
    * @param validationStatus
    */
   getNameValidation(validationStatus: boolean) {
-    this.formValidation.nameValidation.set(validationStatus);
+    this.formValidation().nameValidation = validationStatus;
   }
 
   /**
@@ -85,7 +85,7 @@ export class SignupComponent {
    * Função computed que altera a cor da borda do input name para vermelho caso a validação seja atendida.
    */
   changeNameBorderColor: Signal<string> = computed(() => {
-    if (this.signupData.name().length > 0 && !this.formValidation.nameValidation()) {
+    if (this.signupData().name.length > 0 && !this.formValidation().nameValidation) {
       return 'ring-red-400';
     } else {
       return 'ring-logo-blue-hover';
@@ -98,7 +98,7 @@ export class SignupComponent {
    * @param emailValue
    */
   getEmailValue(emailValue: string): void {
-    this.signupData.email.set(emailValue);
+    this.signupData().email = emailValue;
   }
 
   /**
@@ -107,7 +107,7 @@ export class SignupComponent {
    * @param validationStatus
    */
   getEmailValidation(validationStatus: boolean): void {
-    this.formValidation.emailValidation.set(validationStatus);
+    this.formValidation().emailValidation = validationStatus;
   }
 
   /**
@@ -115,7 +115,7 @@ export class SignupComponent {
    * Função computed que altera a cor da borda do input email para vermelho caso a validação seja atendida.
    */
   changeEmailBorderColor: Signal<string> = computed(() => {
-    if (this.signupData.email().length > 0 && !this.formValidation.emailValidation()) {
+    if (this.signupData().email.length > 0 && !this.formValidation().emailValidation) {
       return 'ring-red-400';
     } else {
       return 'ring-logo-blue-hover';
@@ -128,7 +128,7 @@ export class SignupComponent {
    * @param passwordValue
    */
   getPasswordValue(passwordValue: string): void {
-    this.signupData.password.set(passwordValue);
+    this.signupData().password = passwordValue;
   }
 
   /**
@@ -137,7 +137,7 @@ export class SignupComponent {
    * @param validationStatus
    */
   getPasswordLettersValidation(validationStatus: boolean): void {
-    this.formValidation.passwordLettersValidation.set(validationStatus);
+    this.formValidation().passwordLettersValidation = validationStatus;
   }
 
   /**
@@ -146,7 +146,7 @@ export class SignupComponent {
    * @param validationStatus
    */
   getPasswordUpperCaseValidation(validationStatus: boolean): void {
-    this.formValidation.passwordUpperCaseValidation.set(validationStatus);
+    this.formValidation().passwordUpperCaseValidation = validationStatus;
   }
 
   /**
@@ -155,7 +155,7 @@ export class SignupComponent {
    * @param validationStatus
    */
   getPasswordNumberValidation(validationStatus: boolean): void {
-    this.formValidation.passwordNumberValidation.set(validationStatus);
+    this.formValidation().passwordNumberValidation = validationStatus;
   }
 
   /**
@@ -164,7 +164,7 @@ export class SignupComponent {
    * @param validationStatus
    */
   getPasswordSymbolValidation(validationStatus: boolean): void {
-    this.formValidation.passwordSymbolValidation.set(validationStatus);
+    this.formValidation().passwordSymbolValidation = validationStatus;
   }
 
   /**
@@ -172,13 +172,13 @@ export class SignupComponent {
    * Função computed que altera a cor da borda do input senha para vermelho caso as validações sejam atendidas.
    */
   changePasswordBorderColor: Signal<string> = computed(() => {
-    if (!this.signupData.password()) {
+    if (!this.signupData().password) {
       return 'ring-logo-blue-hover';
     } else if (
-      (this.signupData.password() && !this.formValidation.passwordLettersValidation()) ||
-      !this.formValidation.passwordUpperCaseValidation() ||
-      !this.formValidation.passwordNumberValidation() ||
-      !this.formValidation.passwordSymbolValidation()
+      (this.signupData().password && !this.formValidation().passwordLettersValidation) ||
+      !this.formValidation().passwordUpperCaseValidation ||
+      !this.formValidation().passwordNumberValidation ||
+      !this.formValidation().passwordSymbolValidation
     ) {
       return 'ring-red-400';
     } else {
@@ -192,7 +192,7 @@ export class SignupComponent {
    * @param passwordValue
    */
   getConfirmPasswordValue(passwordValue: string): void {
-    this.signupData.confirmPassword.set(passwordValue);
+    this.signupData().confirmPassword = passwordValue;
   }
 
   /**
@@ -201,7 +201,7 @@ export class SignupComponent {
    * @param validationStatus
    */
   getConfirmPasswordValidation(validationStatus: boolean): void {
-    this.formValidation.confirmPasswordValidation.set(validationStatus);
+    this.formValidation().confirmPasswordValidation = validationStatus;
   }
 
   /**
@@ -210,8 +210,8 @@ export class SignupComponent {
    */
   changeConfirmPasswordBorderColor: Signal<string> = computed(() => {
     if (
-      this.signupData.confirmPassword().length > 0 &&
-      !this.formValidation.confirmPasswordValidation()
+      this.signupData().confirmPassword.length > 0 &&
+      !this.formValidation().confirmPasswordValidation
     ) {
       return 'ring-red-400';
     } else {
@@ -225,13 +225,13 @@ export class SignupComponent {
    */
   allValidationsOk: Signal<boolean> = computed(() => {
     if (
-      this.formValidation.nameValidation() &&
-      this.formValidation.emailValidation() &&
-      this.formValidation.passwordLettersValidation() &&
-      this.formValidation.passwordUpperCaseValidation() &&
-      this.formValidation.passwordNumberValidation() &&
-      this.formValidation.passwordSymbolValidation() &&
-      this.formValidation.confirmPasswordValidation()
+      this.formValidation().nameValidation &&
+      this.formValidation().emailValidation &&
+      this.formValidation().passwordLettersValidation &&
+      this.formValidation().passwordUpperCaseValidation &&
+      this.formValidation().passwordNumberValidation &&
+      this.formValidation().passwordSymbolValidation &&
+      this.formValidation().confirmPasswordValidation
     ) {
       return true;
     } else {
@@ -270,12 +270,8 @@ export class SignupComponent {
   async createNewUser(): Promise<void> {
     this.isLoadingActive = true;
     try {
-      const response = await this.authApi.createNewUser({
-        name: this.signupData.name(),
-        email: this.signupData.email(),
-        password: this.signupData.password(),
-        confirmPassword: this.signupData.confirmPassword(),
-      });
+      console.log(this.signupData);
+      const response = await this.authApi.createNewUser(this.signupData());
       if (response) {
         this.handleSuccessModal(response.message);
         this.isModalActive = true;

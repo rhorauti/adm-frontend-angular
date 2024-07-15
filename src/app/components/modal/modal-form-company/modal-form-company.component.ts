@@ -5,10 +5,9 @@ import { ModalBaseComponent } from '../modal-base/modal-base.component';
 import { ModalCheckComponent } from '../modal-check/modal-check.component';
 import { ModalInfoComponent } from '../modal-info/modal-info.component';
 import { InputFormComponent } from '@components/input/input-form/input-form.component';
-import { ButtonStandardComponent } from '@components/button/button-standard/button-standard.component';
+import { ButtonComponent } from '@components/button/button.component';
 import { SelectComponent } from '@components/select/select.component';
-import { ICompany } from '@core/api/interfaces/IRegister';
-import { IModal } from '@core/api/interfaces/IModal';
+import { ICompany } from '@core/interfaces/ICompany';
 
 @Component({
   selector: 'app-modal-form-company',
@@ -20,7 +19,7 @@ import { IModal } from '@core/api/interfaces/IModal';
     ModalCheckComponent,
     ModalInfoComponent,
     InputFormComponent,
-    ButtonStandardComponent,
+    ButtonComponent,
     SelectComponent,
   ],
   templateUrl: './modal-form-company.component.html',
@@ -30,59 +29,18 @@ export class ModalFormCompanyComponent {
   @ViewChildren('inputModal') inputModal?: QueryList<InputFormComponent>;
   @ViewChildren('selectModal') selectModal?: QueryList<SelectComponent>;
 
+  @Input() isModalFormCompanyActive = false;
   @Input() isEditForm = false;
-  public isModalCheckActive = false;
-  public isModalInfoActive = false;
-
   @Input() companyData: ICompany = {
-    id: 0,
-    cadastro: new Date(),
-    nome: '',
-    email: '',
-    telefone: '',
-    isCnpj: false,
+    idCompany: 0,
+    type: 0,
+    date: new Date().toISOString(),
+    nickname: '',
+    name: '',
     cnpj: '',
-    logradouro: '',
-    numero: 0,
-    complemento: '',
-    bairro: '',
-    cidade: '',
-    estado: '',
   };
 
-  @Input() companiesData: ICompany[] = [];
-  @Input() registerType: string | null = '';
-
-  /**
-   * showModalCheck
-   * Abre o modal check caso o usuário tenha preenchido pelo menos o nome do usuário. Caso não, é mostrado uma mensagem para preencher pelo menos o nome.
-   */
-  showModalCheck(): void {
-    if (this.companyData.nome.length < 3) {
-      this.handleFailureModal('Favor preencher o campo nome com no mínimo 3 caracteres!');
-      this.isModalInfoActive = true;
-    } else if (
-      this.companyData.email.length > 0 &&
-      (!/\.com/gi.test(this.companyData.email) || !/@/gi.test(this.companyData.email))
-    ) {
-      this.handleFailureModal('Campo e-mail inválido!');
-      this.isModalInfoActive = true;
-    } else if (this.companyData.telefone.length > 0 && this.companyData.telefone.length < 19) {
-      this.handleFailureModal('Campo telefone inválido!');
-      this.isModalInfoActive = true;
-    } else if (
-      this.companyData.cnpj.length > 0 &&
-      (this.companyData.cnpj.length < 14 ||
-        (this.companyData.cnpj.length > 14 && this.companyData.cnpj.length < 18))
-    ) {
-      this.handleFailureModal('Campo CNPJ/CPF inválido!');
-      this.isModalInfoActive = true;
-    } else {
-      this.isModalCheckActive = true;
-    }
-  }
-
-  @Output() closeModalFormEmitter = new EventEmitter<boolean>();
+  @Output() closeModalFormEmitter = new EventEmitter();
 
   /**
    * closeModalForm
@@ -90,27 +48,13 @@ export class ModalFormCompanyComponent {
    */
   closeModalForm(): void {
     this.clearForm();
-    this.closeModalFormEmitter.emit(false);
+    this.closeModalFormEmitter.emit();
   }
 
-  // Variável do modal info que é acionado quando o registro é feito com sucesso.
-  public isModalInfoRegisterOkActive = false;
-  public modalInfoRegisterOk: IModal = {
-    modalType: '',
-    modalDescription: '',
-  };
-  @Input() isModalFormCompanyActive = false;
+  @Output() followEventEmitter = new EventEmitter();
 
-  closeModalFormAfterOk(isFalse: boolean): void {
-    this.isModalInfoActive = isFalse;
-    this.isModalCheckActive = isFalse;
-    this.closeModalForm();
-  }
-
-  @Output() resetPageEmitter = new EventEmitter<boolean>();
-
-  resetPage(): void {
-    this.resetPageEmitter.emit(true);
+  emitFollowEvent(): void {
+    this.followEventEmitter.emit();
   }
 
   /**
@@ -120,46 +64,11 @@ export class ModalFormCompanyComponent {
   clearForm(): void {
     this.inputModal?.forEach(input => input.clearInput());
     this.selectModal?.forEach(select => select.clearSelect());
-    this.companyData.id = 0;
-    this.companyData.cadastro = new Date();
-    this.companyData.nome = '';
-    this.companyData.email = '';
-    this.companyData.telefone = '';
-    this.companyData.isCnpj = false;
+    this.companyData.idCompany = 0;
+    this.companyData.type = 0;
+    this.companyData.date = new Date().toISOString();
+    this.companyData.name = '';
     this.companyData.cnpj = '';
-    this.companyData.logradouro = '';
-    this.companyData.numero = 0;
-    this.companyData.complemento = '';
-    this.companyData.bairro = '';
-    this.companyData.cidade = '';
-    this.companyData.estado = '';
-  }
-
-  public modalInfo: IModal = {
-    modalType: '',
-    modalDescription: '',
-  };
-
-  /**
-   * handleSuccessModal
-   * Função que popula os dados do modal e mostra para o usuário caso o registro seja validado corretamente.
-   */
-  handleSuccessModal(message: string): void {
-    this.modalInfo = {
-      modalType: 'success',
-      modalDescription: message,
-    };
-  }
-
-  /**
-   * handleFailureModal
-   * Função que popula os dados do modal e mostra para o usuário caso o registro seja validado incorretamente.
-   */
-  handleFailureModal(message: string): void {
-    this.modalInfo = {
-      modalType: 'failure',
-      modalDescription: message,
-    };
   }
 
   /**
@@ -168,7 +77,7 @@ export class ModalFormCompanyComponent {
    * @param id id da empresa
    */
   getInputIdValue(id: string): void {
-    this.companyData.id = Number(id);
+    this.companyData.idCompany = Number(id);
   }
   /**
    * getInputCadastroValue
@@ -176,17 +85,9 @@ export class ModalFormCompanyComponent {
    * @param cadastro cadastro da empresa
    */
   getInputCadastroValue(cadastro: string): void {
-    this.companyData.cadastro = new Date(cadastro);
+    this.companyData.date = new Date(cadastro).toISOString();
   }
 
-  /**
-   * getInputCnpjValue
-   * Função que pega o numero enviado pelo componente input e salva no objeto companyData do modal.
-   * @param numero numero da empresa
-   */
-  getInputNumeroValue(numero: string): void {
-    this.companyData.numero = Number(numero);
-  }
   /**
    * getInputCnpjValue
    * Função que pega o email enviado pelo componente input e salva no objeto companyData do modal.
@@ -194,8 +95,5 @@ export class ModalFormCompanyComponent {
    */
   getInputCnpjValue(cnpj: string): void {
     this.companyData.cnpj = cnpj;
-    if (this.companyData.cnpj.length > 14) {
-      this.companyData.isCnpj = true;
-    }
   }
 }

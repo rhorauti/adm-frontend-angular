@@ -17,7 +17,7 @@
     <div class="mt-2">
       <app-input-validation
         (emitValidationResult)="getNameValidation($event)"
-        [inputValue]="signupData.name()"
+        [inputValue]="signupData().name"
         [validationType]="'letters'"
         [validationLettersQty]="3"
         [validationText]="'Nome deve ter no mínimo 3 caracteres'"></app-input-validation>
@@ -36,7 +36,7 @@
     <div class="mt-2">
       <app-input-validation
         (emitValidationResult)="getEmailValidation($event)"
-        [inputValue]="signupData.email()"
+        [inputValue]="signupData().email"
         [validationType]="'email'"
         [validationText]="'Email valido!'"></app-input-validation>
     </div>
@@ -50,24 +50,24 @@
     <div class="mt-2">
       <app-input-validation
         (emitValidationResult)="getPasswordLettersValidation($event)"
-        [inputValue]="signupData.password()"
+        [inputValue]="signupData().password"
         [validationType]="'letters'"
         [validationLettersQty]="6"
         [validationText]="'A senha deve ter no mínimo 6 caracteres!'"></app-input-validation>
       <app-input-validation
         (emitValidationResult)="getPasswordUpperCaseValidation($event)"
-        [inputValue]="signupData.password()"
+        [inputValue]="signupData().password"
         [validationType]="'passwordUppercase'"
         [validationText]="'A senha deve ter no mínimo 1 letra maiúscula!'"></app-input-validation>
       <app-input-validation
         (emitValidationResult)="getPasswordNumberValidation($event)"
-        [inputValue]="signupData.password()"
+        [inputValue]="signupData().password"
         [validationType]="'passwordNumber'"
         s
         [validationText]="'A senha deve ter no mínimo 1 número!'"></app-input-validation>
       <app-input-validation
         (emitValidationResult)="getPasswordSymbolValidation($event)"
-        [inputValue]="signupData.password()"
+        [inputValue]="signupData().password"
         [validationType]="'passwordSymbol'"
         [validationText]="
           'A senha deve ter no mínimo 1 caractere especial!'
@@ -86,17 +86,17 @@
     <div class="mt-2">
       <app-input-validation
         (emitValidationResult)="getConfirmPasswordValidation($event)"
-        [inputValue]="signupData.confirmPassword()"
+        [inputValue]="signupData().confirmPassword"
         [validationType]="'passwordConfirmation'"
-        [inputValueToCompare]="signupData.password()"
+        [inputValueToCompare]="signupData().password"
         [validationText]="'As 2 senhas devem ser iguais'"></app-input-validation>
     </div>
   </div>
   <div class="mb-4">
-    <app-button-standard
+    <app-button
       (click)="createNewUser()"
       [isDisabled]="!allValidationsOk()"
-      [label]="'Criar'"></app-button-standard>
+      [label]="'Criar'"></app-button>
   </div>
   <p class="text-center text-sm text-gray-400">
     Já possui cadastro?

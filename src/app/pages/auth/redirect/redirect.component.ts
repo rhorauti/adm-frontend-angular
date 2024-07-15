@@ -2,14 +2,14 @@ import { CommonModule } from '@angular/common';
 import { Component, Input, OnInit, inject } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
-import { ButtonStandardComponent } from '@components/button/button-standard/button-standard.component';
+import { ButtonComponent } from '@components/button/button.component';
 import { AuthApi } from '@core/api/http/auth.api';
 import { HttpRequestService } from '@core/api/http-request.service';
 
 @Component({
   selector: 'app-redirect',
   standalone: true,
-  imports: [CommonModule, ButtonStandardComponent, MatIconModule],
+  imports: [CommonModule, ButtonComponent, MatIconModule],
   providers: [AuthApi, HttpRequestService],
   templateUrl: './redirect.component.html',
   styleUrl: './redirect.component.scss',

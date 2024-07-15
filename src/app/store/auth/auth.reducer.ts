@@ -1,6 +1,6 @@
 import { createReducer, on } from '@ngrx/store';
 import * as authActions from './auth.action';
-import { IAuthStore } from '@core/api/interfaces/IAuth';
+import { IAuthStore } from '@core/interfaces/IAuth';
 
 export const initialState: IAuthStore = {
   id: 0,

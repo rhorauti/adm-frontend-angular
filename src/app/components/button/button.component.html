@@ -2,23 +2,17 @@
   [ngClass]="btnClass"
   [disabled]="isDisabled"
   class="
-        {{ textColor }}
-        {{ border }}
+        {{ btnClass }}
         flex
         justify-center
         items-center
-        {{ width }}
         rounded-lg
-        {{ backgroundColor }}
         py-1.5
+        px-4
         text-xs
         md:text-sm
         font-semibold
-        leading-6
-        {{ height }}
-        disabled:bg-gray-500
-        {{ labelColor }}
-        {{ hoverBackgroundColor }}">
+        disabled:bg-gray-500">
   @if (showIcon) {
     <mat-icon class="text-base">{{ btnIcon }}</mat-icon>
   }

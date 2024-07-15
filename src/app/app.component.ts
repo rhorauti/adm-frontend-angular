@@ -4,7 +4,6 @@ import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/rou
 import { MatIconModule } from '@angular/material/icon';
 import { DataService } from '@core/services/data.service';
 import { NavbarComponent } from '@components/menu/navbar/navbar.component';
-import { FilterComponent } from '@components/filter/filter.component';
 
 @Component({
   selector: 'app-root',
@@ -16,7 +15,6 @@ import { FilterComponent } from '@components/filter/filter.component';
     RouterLink,
     RouterLinkActive,
     NavbarComponent,
-    FilterComponent,
   ],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss',

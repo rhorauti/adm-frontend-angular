@@ -2,12 +2,12 @@ import { CommonModule } from '@angular/common';
 import { Component, EventEmitter, Input, OnChanges, Output } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
 import { ModalBaseComponent } from '../modal-base/modal-base.component';
-import { ButtonStandardComponent } from '@components/button/button-standard/button-standard.component';
+import { ButtonComponent } from '@components/button/button.component';
 
 @Component({
   selector: 'app-modal-info',
   standalone: true,
-  imports: [CommonModule, MatIconModule, ButtonStandardComponent, ModalBaseComponent],
+  imports: [CommonModule, MatIconModule, ButtonComponent, ModalBaseComponent],
   templateUrl: './modal-info.component.html',
   styleUrl: './modal-info.component.scss',
 })

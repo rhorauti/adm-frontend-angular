@@ -4,19 +4,11 @@
     (change)="outputSelectValue($event)"
     name="select"
     id="select"
-    class="bg-transparent focus:outline-0 w-[25%] py-2 pl-3 pr-1 rounded-l border disabled:bg-gray-100 border-gray-500 cursor-pointer">
+    class="bg-transparent focus:outline-0 w-[25%] py-1.5 pl-3 pr-1 rounded-l-lg border disabled:bg-gray-100 border-gray-500 cursor-pointer">
     @for (option of optionList; track $index) {
-      @if (option != 'Ação') {
-        <option class="text-black px-3" [value]="option">
-          {{
-            option == 'CNPJ'
-              ? 'CPF/CNPJ'
-              : option == 'Email'
-                ? 'E-mail'
-                : option
-          }}
-        </option>
-      }
+      <option class="text-black px-3" [value]="option">
+        {{ option }}
+      </option>
     }
   </select>
   <input
@@ -25,7 +17,7 @@
     class="bg-transparent focus:outline-0 w-[55%] py-2 px-3 border border-x-0 disabled:bg-gray-100 border-gray-500" />
   <button
     (click)="click()"
-    class="w-[20%] border border-gray-500 hover:bg-gray-800 box-border p-2 rounded-r">
-    Buscar
+    class="w-[20%] border border-gray-500 hover:bg-gray-800 box-border p-2 rounded-r-lg">
+    {{ btnLabel }}
   </button>
 </div>

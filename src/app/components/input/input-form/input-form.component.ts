@@ -7,13 +7,7 @@ import { NgxMaskDirective, NgxMaskPipe, provideNgxMask } from 'ngx-mask';
 @Component({
   selector: 'app-input-form',
   standalone: true,
-  imports: [
-    CommonModule,
-    FormsModule,
-    MatIconModule,
-    NgxMaskDirective,
-    NgxMaskPipe,
-  ],
+  imports: [CommonModule, FormsModule, MatIconModule, NgxMaskDirective, NgxMaskPipe],
   providers: [provideNgxMask()],
   templateUrl: './input-form.component.html',
   styleUrl: './input-form.component.scss',
@@ -41,12 +35,12 @@ export class InputFormComponent implements OnInit {
       this.inputClass = 'pr-3';
     }
     switch (this.maskType) {
-      case 'telefone': {
+      case 'phone': {
         this.maskPrefix = '+55 ';
         this.maskValue = '(00) 00000-0000';
         break;
       }
-      case 'cpf': {
+      case 'cnpj': {
         this.maskValue = '000.000.000-00||00.000.000/0000-00';
         break;
       }

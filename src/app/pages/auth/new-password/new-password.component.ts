@@ -2,22 +2,22 @@ import { CommonModule } from '@angular/common';
 import { Component, Signal, computed, inject, signal } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
 import { ActivatedRoute, Router } from '@angular/router';
-import { ButtonStandardComponent } from '@components/button/button-standard/button-standard.component';
+import { ButtonComponent } from '@components/button/button.component';
 import { InputLoginComponent } from '@components/input/input-login/input-login.component';
 import { InputValidationComponent } from '@components/input/input-validation/input-validation.component';
 import { LoadingComponent } from '@components/loading/loading.component';
 import { ModalInfoComponent } from '@components/modal/modal-info/modal-info.component';
 import { HttpRequestService } from '@core/api/http-request.service';
 import { AuthApi } from '@core/api/http/auth.api';
-import { IFormValidationNewPassword, IRequestNewPassword } from '@core/api/interfaces/IAuth';
-import { IModal } from '@core/api/interfaces/IModal';
+import { IFormValidationNewPassword, IRequestNewPassword } from '@core/interfaces/IAuth';
+import { IModal } from '@core/interfaces/IModal';
 
 @Component({
   selector: 'app-new-password',
   standalone: true,
   imports: [
     CommonModule,
-    ButtonStandardComponent,
+    ButtonComponent,
     InputLoginComponent,
     ModalInfoComponent,
     LoadingComponent,
@@ -39,13 +39,13 @@ export class NewPasswordComponent {
     confirmPassword: signal(''),
   };
 
-  public formValidation: IFormValidationNewPassword = {
-    passwordLettersValidation: signal(false),
-    passwordUpperCaseValidation: signal(false),
-    passwordNumberValidation: signal(false),
-    passwordSymbolValidation: signal(false),
-    confirmPasswordValidation: signal(false),
-  };
+  public formValidation = signal<IFormValidationNewPassword>({
+    passwordLettersValidation: false,
+    passwordUpperCaseValidation: false,
+    passwordNumberValidation: false,
+    passwordSymbolValidation: false,
+    confirmPasswordValidation: false,
+  });
 
   public modalInfo: IModal = {
     modalType: '',
@@ -71,7 +71,7 @@ export class NewPasswordComponent {
    * @param validationStatus
    */
   getPasswordLettersValidation(validationStatus: boolean): void {
-    this.formValidation.passwordLettersValidation.set(validationStatus);
+    this.formValidation().passwordLettersValidation = validationStatus;
   }
 
   /**
@@ -80,7 +80,7 @@ export class NewPasswordComponent {
    * @param validationStatus
    */
   getPasswordUpperCaseValidation(validationStatus: boolean): void {
-    this.formValidation.passwordUpperCaseValidation.set(validationStatus);
+    this.formValidation().passwordUpperCaseValidation = validationStatus;
   }
 
   /**
@@ -89,7 +89,7 @@ export class NewPasswordComponent {
    * @param validationStatus
    */
   getPasswordNumberValidation(validationStatus: boolean): void {
-    this.formValidation.passwordNumberValidation.set(validationStatus);
+    this.formValidation().passwordNumberValidation = validationStatus;
   }
 
   /**
@@ -98,7 +98,7 @@ export class NewPasswordComponent {
    * @param validationStatus
    */
   getPasswordSymbolValidation(validationStatus: boolean): void {
-    this.formValidation.passwordSymbolValidation.set(validationStatus);
+    this.formValidation().passwordSymbolValidation = validationStatus;
   }
 
   /**
@@ -109,10 +109,10 @@ export class NewPasswordComponent {
     if (!this.newPassword.password()) {
       return 'ring-logo-blue-hover';
     } else if (
-      (this.newPassword.password() && !this.formValidation.passwordLettersValidation()) ||
-      !this.formValidation.passwordUpperCaseValidation() ||
-      !this.formValidation.passwordNumberValidation() ||
-      !this.formValidation.passwordSymbolValidation()
+      (this.newPassword.password() && !this.formValidation().passwordLettersValidation) ||
+      !this.formValidation().passwordUpperCaseValidation ||
+      !this.formValidation().passwordNumberValidation ||
+      !this.formValidation().passwordSymbolValidation
     ) {
       return 'ring-red-400';
     } else {
@@ -135,7 +135,7 @@ export class NewPasswordComponent {
    * @param validationStatus
    */
   getConfirmPasswordValidation(validationStatus: boolean): void {
-    this.formValidation.confirmPasswordValidation.set(validationStatus);
+    this.formValidation().confirmPasswordValidation = validationStatus;
   }
 
   /**
@@ -145,7 +145,7 @@ export class NewPasswordComponent {
   changeConfirmPasswordBorderColor: Signal<string> = computed(() => {
     if (
       this.newPassword.confirmPassword().length > 0 &&
-      !this.formValidation.confirmPasswordValidation()
+      !this.formValidation().confirmPasswordValidation
     ) {
       return 'ring-red-400';
     } else {
@@ -159,11 +159,11 @@ export class NewPasswordComponent {
    */
   allValidationsOk: Signal<boolean> = computed(() => {
     if (
-      this.formValidation.passwordLettersValidation() &&
-      this.formValidation.passwordUpperCaseValidation() &&
-      this.formValidation.passwordNumberValidation() &&
-      this.formValidation.passwordSymbolValidation() &&
-      this.formValidation.confirmPasswordValidation()
+      this.formValidation().passwordLettersValidation &&
+      this.formValidation().passwordUpperCaseValidation &&
+      this.formValidation().passwordNumberValidation &&
+      this.formValidation().passwordSymbolValidation &&
+      this.formValidation().confirmPasswordValidation
     ) {
       return true;
     } else {

@@ -1,7 +1,7 @@
-import { IAuthStore } from '@core/api/interfaces/IAuth';
+import { IAuthStore } from '@core/interfaces/IAuth';
 import { createAction, props } from '@ngrx/store';
 
 export const authDataStore = createAction(
-  '[Login Page] User Auth',
+  '[Login Page] Authenticate',
   props<{ authData: IAuthStore }>()
 );
