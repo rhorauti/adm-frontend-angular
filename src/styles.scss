@@ -22,6 +22,10 @@ body {
   background-color: #0d7ff1;
 }
 
+.flex-grow-2 {
+  flex-grow: 2;
+}
+
 .table-td {
   @apply py-1.5 px-3 whitespace-nowrap;
 }

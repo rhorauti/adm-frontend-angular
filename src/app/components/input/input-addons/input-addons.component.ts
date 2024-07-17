@@ -12,7 +12,9 @@ import { MatIconModule } from '@angular/material/icon';
 })
 export class InputAddonsComponent implements OnInit {
   @Input() optionList: string[] = [];
+  @Input() placeholder = '';
   @Input() btnLabel = 'Buscar';
+  @Input() divClass = '';
 
   public inputValue = '';
   public selectValue = 'Id';

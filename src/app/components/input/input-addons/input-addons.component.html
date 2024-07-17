@@ -1,10 +1,10 @@
-<div class="flex text-white text-sm w-full">
+<div class="flex text-white text-sm flex-1" [ngClass]="divClass">
   <select
     [ngModel]="selectValue"
     (change)="outputSelectValue($event)"
     name="select"
     id="select"
-    class="bg-transparent focus:outline-0 w-[25%] py-1.5 pl-3 pr-1 rounded-l-lg border disabled:bg-gray-100 border-gray-500 cursor-pointer">
+    class="bg-transparent flex-1 focus:outline-0 py-1.5 pl-3 pr-1 rounded-l-lg border disabled:bg-gray-100 border-gray-500 cursor-pointer">
     @for (option of optionList; track $index) {
       <option class="text-black px-3" [value]="option">
         {{ option }}
@@ -12,12 +12,13 @@
     }
   </select>
   <input
+    [placeholder]="placeholder"
     [ngModel]="inputValue"
     (input)="sendInputValue($event)"
-    class="bg-transparent focus:outline-0 w-[55%] py-2 px-3 border border-x-0 disabled:bg-gray-100 border-gray-500" />
+    class="bg-transparent focus:outline-0 flex-grow-2 py-2 px-3 border border-x-0 disabled:bg-gray-100 border-gray-500" />
   <button
     (click)="click()"
-    class="w-[20%] border border-gray-500 hover:bg-gray-800 box-border p-2 rounded-r-lg">
+    class="border border-gray-500 hover:bg-gray-800 box-border py-1.5 px-4 rounded-r-lg">
     {{ btnLabel }}
   </button>
 </div>

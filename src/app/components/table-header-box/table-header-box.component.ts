@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
-import { Component, signal } from '@angular/core';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { ButtonComponent } from '@components/button/button.component';
-import { ICompanyTableHeader } from '@core/interfaces/ITableHeader';
+import { ITableHeader } from '@core/interfaces/ITableHeader';
 
 @Component({
   selector: 'app-table-header-box',
@@ -11,26 +11,22 @@ import { ICompanyTableHeader } from '@core/interfaces/ITableHeader';
   styleUrl: './table-header-box.component.scss',
 })
 export class TableHeaderBoxComponent {
-  public isHeaderBoxActive = signal(false);
+  @Input() isHeaderBoxActive = false;
 
   /**
    * showTableHeader
    * Mostra ou esconde a coluna da tabela selecionada e atualiza o select do filtro.
    * @param header ICompanyTableHeaders
    */
-  showTableHeader(header: ICompanyTableHeader): void {
+  showTableHeader(header: ITableHeader): void {
     header.showHeader = !header.showHeader;
   }
 
-  public tableHeaders = signal<ICompanyTableHeader[]>([
-    { id: 0, showHeader: true, name: 'Id' },
-    { id: 1, showHeader: true, name: 'Data' },
-    { id: 2, showHeader: true, name: 'Apelido' },
-    { id: 3, showHeader: true, name: 'Nome' },
-    { id: 4, showHeader: true, name: 'CNPJ' },
-    { id: 5, showHeader: true, name: 'Projetos' },
-    { id: 6, showHeader: true, name: 'Funcionários' },
-    { id: 7, showHeader: true, name: 'Endereços' },
-    { id: 8, showHeader: true, name: 'Ações' },
-  ]);
+  @Input() tableHeaders: ITableHeader[] = [];
+
+  @Output() isTableHeaderActiveEmitter = new EventEmitter();
+
+  sendTableHeaderActiveInfo(): void {
+    this.isTableHeaderActiveEmitter.emit(this.tableHeaders);
+  }
 }

@@ -1,4 +1,4 @@
-export interface ICompanyTableHeader {
+export interface ITableHeader {
   id: number;
   showHeader: boolean;
   name: string;
