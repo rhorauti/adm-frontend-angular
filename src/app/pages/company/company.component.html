@@ -9,9 +9,9 @@
         [optionList]="company().arraySelectFilter"
         [placeholder]="company().placeholderFilter"
         (inputValueEmitter)="company().inputValueFilter = $event"
-        (selectValueEmitter)="company().selectValueFilter = $event"></app-input-addons>
+        (selectValueEmitter)="changeCompanySelectPlaceHolder($event)"></app-input-addons>
       <div class="flex gap-3">
-        <app-table-header-box></app-table-header-box>
+        <app-table-header-box [tableHeaders]="company().tableHeaders"></app-table-header-box>
         <app-button [showIcon]="true" [btnIcon]="'add'" [label]="'Cadastrar'"></app-button>
       </div>
     </div>

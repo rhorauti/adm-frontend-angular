@@ -1,28 +1,26 @@
-<div class="flex flex-1 flex-col lg:flex-row lg:justify-end gap-5">
-  <div class="flex lg:relative">
-    @if (isHeaderBoxActive) {
-      <div
-        class="lg:absolute px-4 py-2 border border-gray-500 bg-white rounded-md text-sm lg:w-40 lg:-left-44 lg:top-0">
-        @for (header of tableHeaders; track $index) {
-          <div>
-            <input
-              (click)="showTableHeader(header)"
-              type="checkbox"
-              [value]="header.name"
-              [checked]="header.showHeader"
-              [disabled]="header.name == 'Id'"
-              [id]="header.id"
-              class="mr-2" />
-            <label [for]="header.id">{{ header.name }}</label>
-          </div>
-        }
-      </div>
-    }
-    <app-button
-      (click)="isHeaderBoxActive = !isHeaderBoxActive"
-      [btnType]="'transparent'"
-      [showIcon]="true"
-      [btnIcon]="'menu'"
-      [label]="'Colunas'"></app-button>
-  </div>
+<div class="flex flex-col lg:flex-row lg:justify-end gap-5 relative">
+  @if (isHeaderBoxActive) {
+    <div
+      class="absolute px-4 py-2 border border-gray-500 bg-white text-black rounded-md text-sm w-40 -left-44 top-0">
+      @for (header of tableHeaders; track $index) {
+        <div>
+          <input
+            (click)="showTableHeader(header)"
+            type="checkbox"
+            [value]="header.name"
+            [checked]="header.showHeader"
+            [disabled]="header.name == 'Id'"
+            [id]="header.id"
+            class="mr-2" />
+          <label [for]="header.id">{{ header.name }}</label>
+        </div>
+      }
+    </div>
+  }
+  <app-button
+    (click)="isHeaderBoxActive = !isHeaderBoxActive"
+    [btnType]="'transparent'"
+    [showIcon]="true"
+    [btnIcon]="'menu'"
+    [label]="'Colunas'"></app-button>
 </div>

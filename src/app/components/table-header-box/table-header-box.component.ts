@@ -11,7 +11,7 @@ import { ITableHeader } from '@core/interfaces/ITableHeader';
   styleUrl: './table-header-box.component.scss',
 })
 export class TableHeaderBoxComponent {
-  @Input() isHeaderBoxActive = false;
+  public isHeaderBoxActive = false;
 
   /**
    * showTableHeader

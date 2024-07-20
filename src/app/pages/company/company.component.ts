@@ -186,18 +186,52 @@ export class CompanyComponent implements AfterViewInit {
     this.showInputPlaceholder(companyItemGroup);
   }
 
+  /**
+   * changeCompanySelectPlaceHolder
+   * Get select value from app-input-addons component and change placeholder
+   * @param value string. Value received from app-input-addons component
+   */
+  changeCompanySelectPlaceHolder(value: string) {
+    this.company().selectValueFilter = value;
+    this.company().placeholderFilter = `Digite um(a) ${value}`;
+  }
+
+  /**
+   * isCompany
+   * Check if received data is equal to ICompany interface
+   * @param data any. Data can change according to tab selection
+   * @returns boolean. If data is equals to ICompany interface, it returns true or else false.
+   */
   isCompany(data: any): data is ICompany {
     return (data as ICompany).idCompany != undefined;
   }
 
+  /**
+   * isAdress
+   * Check if received data is equal to IAddress interface
+   * @param data any. Data can change according to tab selection
+   * @returns boolean. If data is equals to IAddress interface, it returns true or else false.
+   */
   isAdress(data: any): data is IAdress {
     return (data as IAdress).idAdress != undefined;
   }
 
+  /**
+   * isProject
+   * Check if received data is equal to IProject interface
+   * @param data any. Data can change according to tab selection
+   * @returns boolean. If data is equals to IProject interface, it returns true or else false.
+   */
   isProject(data: any): data is IProject {
     return (data as IProject).idProject != undefined;
   }
 
+  /**
+   * isEmployee
+   * Check if received data is equal to IEmployee interface
+   * @param data any. Data can change according to tab selection
+   * @returns boolean. If data is equals to IEmployee interface, it returns true or else false.
+   */
   isEmployee(data: any): data is IEmployee {
     return (data as IEmployee).idEmployee != undefined;
   }
@@ -208,8 +242,8 @@ export class CompanyComponent implements AfterViewInit {
 
   /**
    * showTableHeader
-   * Mostra ou esconde a coluna da tabela selecionada e atualiza o select do filtro.
-   * @param header ICompanyTableHeaders
+   * Show or hide column´s table according to checkbox click in table-header-box component.
+   * @param header ITableHeader
    */
   showTableHeader(header: ITableHeader): void {
     header.showHeader = !header.showHeader;
@@ -233,8 +267,8 @@ export class CompanyComponent implements AfterViewInit {
 
   /**
    * getCustomers
-   * Solicita um lista de clientes registrados no banco de dados.
-   * @returns Promise de sucesso com status, mensagem e array de dados cadastrais do cliente. No caso de erro, retorna somente o status e mensagem.
+   * Get companines list from database
+   * @returns Promise<void>
    */
   async showCompaniesList(companyType: number): Promise<void> {
     try {
