@@ -106,11 +106,19 @@ export class BaseRegister {
 
   isModalCheckActive = signal(false);
 
+  onModalFormBtnOkClick(): void {}
+
   isModalFormActive = signal(false);
   isEditForm = signal(false);
 
-  showModalNewForm(): void {
+  showModalForm(): void {
     this.isModalFormActive.set(true);
+  }
+
+  closeModalForm(): void {
+    if (this.isEditForm()) this.isEditForm.set(false);
+    this.isClearInputForm.set(true);
+    this.isModalFormActive.set(false);
   }
 
   /**
@@ -124,15 +132,41 @@ export class BaseRegister {
     this.isModalFormActive.set(true);
   }
 
-  showModalAskToDeleteCompany(tableItemSelected: TableItemType): void {
-    if (this.isTypeValid(tableItemSelected, 'company')) {
-      this.handleModal('confirmation', `Deseja excluir ${tableItemSelected.name}?`);
-    } else if (this.isTypeValid(tableItemSelected, 'address')) {
-      this.handleModal('confirmation', `Deseja excluir ${tableItemSelected.adress}?`);
-    } else if (this.isTypeValid(tableItemSelected, 'employee')) {
-      this.handleModal('confirmation', `Deseja excluir ${tableItemSelected.name}?`);
-    } else if (this.isTypeValid(tableItemSelected, 'project')) {
-      this.handleModal('confirmation', `Deseja excluir ${tableItemSelected.code}?`);
+  isClearInputForm = signal(false);
+
+  showModalAskToDeleteCompany(
+    tableItemSelected: TableItemType,
+    tableItemNameSelected: TableDataTypeString
+  ): void {
+    switch (tableItemNameSelected) {
+      case 'company': {
+        if (this.isTypeValid(tableItemSelected, 'company')) {
+          this.handleModal('confirmation', `Deseja excluir ${tableItemSelected.name}?`);
+          this.isModalAskActive.set(true);
+        }
+        break;
+      }
+      case 'address': {
+        if (this.isTypeValid(tableItemSelected, 'address')) {
+          this.handleModal('confirmation', `Deseja excluir ${tableItemSelected.adress}?`);
+          this.isModalAskActive.set(true);
+        }
+        break;
+      }
+      case 'employee': {
+        if (this.isTypeValid(tableItemSelected, 'employee')) {
+          this.handleModal('confirmation', `Deseja excluir ${tableItemSelected.name}?`);
+          this.isModalAskActive.set(true);
+        }
+        break;
+      }
+      case 'project': {
+        if (this.isTypeValid(tableItemSelected, 'project')) {
+          this.handleModal('confirmation', `Deseja excluir ${tableItemSelected.code}?`);
+          this.isModalAskActive.set(true);
+        }
+        break;
+      }
     }
   }
 
@@ -203,8 +237,6 @@ export class BaseRegister {
         'GET'
       );
       baseGroupSignal().tableDataSelected = response.data;
-      console.log(response);
-      console.log(baseGroupSignal().tableDataSelected);
     } catch (e) {
       this.handleModal('failure', (e as Error).message);
     } finally {

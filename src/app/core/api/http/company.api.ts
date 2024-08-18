@@ -2,7 +2,8 @@ import { inject } from '@angular/core';
 import { HttpRequestService } from '../http-request.service';
 import { environment } from '@environments/environment';
 import { IResponseCommonMessage } from '@core/interfaces/ICommonMessage';
-import { ICompany, IBaseResponse } from '@core/interfaces/ICompany';
+import { ICompany } from '@core/interfaces/ICompany';
+import { IBaseResponse } from '@core/interfaces/IBase';
 
 export class RegisterCompanyApi {
   private httpRequestService = inject(HttpRequestService);

@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, Input, OnChanges, OnInit, Output } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
 import { NgxMaskDirective, NgxMaskPipe, provideNgxMask } from 'ngx-mask';
@@ -12,7 +12,7 @@ import { NgxMaskDirective, NgxMaskPipe, provideNgxMask } from 'ngx-mask';
   templateUrl: './input-form.component.html',
   styleUrl: './input-form.component.scss',
 })
-export class InputFormComponent implements OnInit {
+export class InputFormComponent implements OnInit, OnChanges {
   @Input() showSearchIcon = true;
   @Input() showRightIcon = true;
   @Input() placeholder = '';
@@ -22,12 +22,14 @@ export class InputFormComponent implements OnInit {
   @Input() isEmail = false;
   @Input() isDisabled = false;
   @Input() maskType = '';
-  @Output() emitInputValue = new EventEmitter<string>();
+  @Input() isClearInputForm = false;
 
   inputValue = '';
   maskValue = '';
   maskPrefix = '';
   showPassword = false;
+
+  @Output() emitInputValue = new EventEmitter<string>();
   @Output() clearInputEmitter = new EventEmitter<boolean>();
 
   ngOnInit(): void {
@@ -47,9 +49,18 @@ export class InputFormComponent implements OnInit {
     }
   }
 
+  ngOnChanges(): void {
+    if (this.isClearInputForm) {
+      this.inputValue = '';
+      this.clearInputEmitter.emit(false);
+    }
+  }
+
   clearInput(): void {
     this.inputValue = '';
-    this.clearInputEmitter.emit(true);
+    this.clearInputEmitter.emit(false);
+    this.isClearInputForm = false;
+    console.log('isClearInput', this.isClearInputForm);
   }
 
   sendInputValue(inputData: Event): void {

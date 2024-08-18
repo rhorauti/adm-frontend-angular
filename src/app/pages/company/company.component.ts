@@ -2,7 +2,6 @@ import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
 import { PaginationComponent } from '@components/pagination/pagination.component';
-import { ModalFormCompanyComponent } from '@components/modal/modal-form-company/modal-form-company.component';
 import { RegisterCompanyApi } from '@core/api/http/company.api';
 import { HttpRequestService } from '@core/api/http-request.service';
 import { ButtonComponent } from '@components/button/button.component';
@@ -19,6 +18,7 @@ import { TableHeaderBoxComponent } from '@components/table-header-box/table-head
 import { BaseRegister } from '@core/generic/baseRegister';
 import { ModalBaseComponent } from '@components/modal/modal-base/modal-base.component';
 import { InputFormComponent } from '@components/input/input-form/input-form.component';
+import { TableItemType } from '@core/interfaces/IBase';
 
 @Component({
   selector: 'app-company',
@@ -29,7 +29,6 @@ import { InputFormComponent } from '@components/input/input-form/input-form.comp
     ButtonComponent,
     CommonModule,
     PaginationComponent,
-    ModalFormCompanyComponent,
     ModalAskComponent,
     ModalInfoComponent,
     ModalCheckComponent,
@@ -177,6 +176,34 @@ export class CompanyComponent extends BaseRegister implements OnInit {
     tableIdx: 0,
     qtyPerPage: 12,
   });
+
+  setCompanyProperty(
+    tableItemSelected: TableItemType,
+    propertyName: string,
+    valueSet: string
+  ): void {
+    if (this.isTypeValid(tableItemSelected, 'company')) {
+      switch (propertyName) {
+        case 'idCompany': {
+          tableItemSelected.idCompany = Number(valueSet);
+          break;
+        }
+        case 'nickname': {
+          tableItemSelected.nickname = valueSet;
+          break;
+        }
+        case 'name': {
+          tableItemSelected.name = valueSet;
+          break;
+        }
+        case 'cnpj': {
+          tableItemSelected.cnpj = valueSet;
+          break;
+        }
+      }
+    }
+    this.isClearInputForm.set(false);
+  }
 
   /**
    * getCustomers

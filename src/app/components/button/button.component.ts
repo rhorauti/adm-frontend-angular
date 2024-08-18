@@ -17,7 +17,6 @@ export class ButtonComponent implements OnInit {
   @Input() showIcon = false;
   @Input() showLabel = true;
   @Input() isDisabled = false;
-  public labelColor = 'text-white';
   public hoverBackgroundColor = '';
 
   ngOnInit(): void {
@@ -27,26 +26,26 @@ export class ButtonComponent implements OnInit {
         break;
       }
       case 'close': {
-        this.btnClass = 'bg-black hover:bg-gray-800';
+        this.btnClass = 'bg-black hover:bg-gray-800 md:w-36';
         this.label = 'Fechar';
         break;
       }
       case 'cancel': {
-        this.btnClass = 'bg-black text-white hover:bg-gray-700';
+        this.btnClass = 'bg-black text-white hover:bg-gray-700 md:w-36';
         this.showIcon = true;
         this.btnIcon = 'close';
         this.label = 'Fechar';
         break;
       }
       case 'clear': {
-        this.btnClass = 'bg-black text-white hover:bg-gray-700';
+        this.btnClass = 'bg-black text-white hover:bg-gray-700 md:w-36';
         this.showIcon = true;
         this.btnIcon = 'update';
         this.label = 'Limpar';
         break;
       }
       case 'forward': {
-        this.btnClass = 'bg-green-600 hover:bg-green-500';
+        this.btnClass = 'bg-green-500 hover:bg-green-400 md:w-36';
         this.showIcon = true;
         this.btnIcon = 'arrow_forward';
         this.label = 'Prosseguir';
@@ -67,7 +66,7 @@ export class ButtonComponent implements OnInit {
         break;
       }
       case 'success-delete': {
-        this.btnClass = 'bg-red-600 hover:bg-red-500';
+        this.btnClass = 'bg-red-400 hover:bg-red-300 text-white';
         this.showIcon = true;
         this.btnIcon = 'save';
         this.label = 'Excluir';
@@ -84,7 +83,7 @@ export class ButtonComponent implements OnInit {
         break;
       }
       case 'danger': {
-        this.btnClass = 'text-black bg-red-500 border border-gray-500 hover:bg-red-400 h-6';
+        this.btnClass = 'text-black bg-red-400 border border-gray-500 hover:bg-red-300 h-6';
         this.hoverBackgroundColor = 'hover:bg-red-400';
         this.btnIcon = 'delete_outline';
         this.label = '';

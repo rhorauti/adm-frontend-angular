@@ -16,7 +16,7 @@
           [showIcon]="true"
           [btnIcon]="'add'"
           [label]="'Cadastrar'"
-          (click)="showModalNewForm()"></app-button>
+          (click)="showModalForm()"></app-button>
       </div>
     </div>
     <app-table>
@@ -30,7 +30,7 @@
         }
       </tr>
       @for (dataSelected of company().tableDataSelected; track $index) {
-        <tr tbody-row>
+        <tr tbody-row class="hover:bg-gray-700">
           @if (isTypeValid(dataSelected, 'company')) {
             @if (company().companyTableHeaders[0].showHeader) {
               <td class="table-td">
@@ -59,7 +59,7 @@
                   [showIcon]="true"
                   [btnType]="'warning'"></app-button>
                 <app-button
-                  (click)="showModalAskToDeleteCompany(dataSelected)"
+                  (click)="showModalAskToDeleteCompany(dataSelected, 'company')"
                   [showLabel]="false"
                   [showIcon]="true"
                   [btnType]="'danger'"></app-button>
@@ -96,7 +96,7 @@
           }
         </tr>
         @for (dataSelected of companyItem().tableDataSelected; track $index) {
-          <tr tbody-row>
+          <tr tbody-row class="hover:bg-gray-700">
             @if (isTypeValid(dataSelected, 'address')) {
               @if (companyItem().tableHeaderSelected[0].showHeader) {
                 <td class="table-td">
@@ -134,7 +134,7 @@
                     [showIcon]="true"
                     [btnType]="'warning'"></app-button>
                   <app-button
-                    (click)="showModalAskToDeleteCompany(dataSelected)"
+                    (click)="showModalAskToDeleteCompany(dataSelected, 'address')"
                     [showLabel]="false"
                     [showIcon]="true"
                     [btnType]="'danger'"></app-button>
@@ -152,58 +152,56 @@
   [showModal]="isModalFormActive()"
   [isModalForm]="true"
   [title]="isEditForm() ? 'Alterar dados da empresa' : 'Cadastro de nova empresa'"
-  (emitCloseModal)="isModalFormActive.set(false)">
+  (emitCloseModal)="closeModalForm()">
   <div class="body-block">
-    <div class="md:grid md:grid-cols-2 gap-4">
-      <div class="gap-4">
-        <!-- @if (isTypeValid(company().tableItemSelected, 'company')) { -->
-        @if (isCompanySelected && companyId != null) {
-          <div class="gap-2">
-            <label class="font-semibold text-sm" for="">Id</label>
-            <app-input-form
-              [isDisabled]="true"
-              [showRightIcon]="false"
-              (emitInputValue)="company().tableItemSelected.idCompany = $event"
-              [inputClass]="'text-black h-9'"></app-input-form>
-          </div>
-        }
-        <div class="gap-2">
-          <label class="font-semibold text-sm" for="">Nickname</label>
+    <div class="flex flex-col gap-2">
+      @if (isEditForm()) {
+        <div class="flex flex-col gap-1">
+          <label class="font-semibold text-sm" for="">Id</label>
           <app-input-form
-            #inputModal
+            [isClearInputForm]="isClearInputForm()"
+            [isDisabled]="true"
             [showRightIcon]="false"
-            (emitInputValue)="company().tableItemSelected.nickname = $event"
+            (emitInputValue)="setCompanyProperty(company().tableItemSelected, 'idCompany', $event)"
             [inputClass]="'text-black h-9'"></app-input-form>
         </div>
-        <div class="gap-2">
-          <label class="font-semibold text-sm" for="">Nome</label>
-          <app-input-form
-            #inputModal
-            [showRightIcon]="false"
-            (emitInputValue)="company().tableItemSelected.name = $event"
-            [inputClass]="'text-black h-9'"></app-input-form>
-        </div>
-        <div class="gap-2">
-          <label class="font-semibold text-sm" for="">CNPJ/CPF</label>
-          <app-input-form
-            #inputModal
-            [maskType]="'cnpj'"
-            [showRightIcon]="false"
-            (emitInputValue)="company().tableItemSelected.cnpj = $event"
-            [inputClass]="'text-black h-9'"></app-input-form>
-        </div>
-        <!-- } -->
+      }
+      <div class="flex flex-col gap-1">
+        <label class="font-semibold text-sm" for="">Nickname</label>
+        <app-input-form
+          [isClearInputForm]="isClearInputForm()"
+          #inputModal
+          [showRightIcon]="false"
+          (emitInputValue)="setCompanyProperty(company().tableItemSelected, 'nickname', $event)"
+          [inputClass]="'text-black h-9'"></app-input-form>
+      </div>
+      <div class="flex flex-col gap-1">
+        <label class="font-semibold text-sm" for="">Nome</label>
+        <app-input-form
+          [isClearInputForm]="isClearInputForm()"
+          #inputModal
+          [showRightIcon]="false"
+          (emitInputValue)="setCompanyProperty(company().tableItemSelected, 'name', $event)"
+          [inputClass]="'text-black h-9'"></app-input-form>
+      </div>
+      <div class="flex flex-col gap-1">
+        <label class="font-semibold text-sm" for="">CNPJ</label>
+        <app-input-form
+          [isClearInputForm]="isClearInputForm()"
+          #inputModal
+          [maskType]="'cnpj'"
+          [showRightIcon]="false"
+          (emitInputValue)="setCompanyProperty(company().tableItemSelected, 'cnpj', $event)"
+          [inputClass]="'text-black h-9'"></app-input-form>
       </div>
     </div>
   </div>
-  <div
-    class="footer-block grid gap-3 mt-5"
-    [ngClass]="isEditForm() ? 'grid-cols-2' : 'grid-cols-3'">
-    <app-button [btnType]="'cancel'" (click)="isModalFormActive.set(false)"></app-button>
+  <div class="grid footer-block md:flex md:justify-center gap-5 mt-6 w-full">
+    <app-button [btnType]="'cancel'" (click)="closeModalForm()"></app-button>
     @if (!isEditForm()) {
-      <app-button [btnType]="'clear'" (click)="clearForm()"></app-button>
+      <app-button [btnType]="'clear'" (click)="isClearInputForm.set(true)"></app-button>
     }
-    <app-button [btnType]="'forward'" (click)="onModalFormBtnOk()"></app-button>
+    <app-button [btnType]="'forward'" (click)="onModalFormBtnOkClick()"></app-button>
   </div>
 </app-modal-base>
 

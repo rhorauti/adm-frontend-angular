@@ -1,4 +1,4 @@
-<app-modal-base [showModal]="showModal">
+<app-modal-base [showModal]="showModal" [showHeader]="false">
   <div class="body-block">
     <div
       class="mx-auto flex h-10 w-10 items-center justify-center rounded-full"
@@ -6,9 +6,9 @@
       <mat-icon [ngClass]="iconModalTextColor">{{ icon }}</mat-icon>
     </div>
     <div class="bg-white my-5 text-center">
-      <h3 class="text-base font-semibold leading-6 text-gray-900 w-full" id="modal-title">
+      <h5 class="text-base font-semibold leading-6 text-gray-900 w-full" id="modal-title">
         {{ title }}
-      </h3>
+      </h5>
       <div class="mt-2">
         <p class="text-sm text-gray-500 w-full">
           {{ description }}

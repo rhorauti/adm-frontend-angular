@@ -14,10 +14,11 @@ export class ModalBaseComponent {
   @Input() title = '';
   @Input() showHeader = true;
   @Input() showCloseBtn = true;
+  @Input() divClass = '';
   @Input() headerClass = '';
   @Input() isModalForm = false;
   @Input() bodyClass = '';
-  @Input() showFooter = false;
+  @Input() showFooter = true;
   @Input() footerClass = '';
   @Output() emitCloseModal = new EventEmitter<boolean>();
 
