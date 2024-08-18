@@ -5,7 +5,8 @@
         <button
           [id]="tabTitle"
           (click)="selectTab($index)"
-          class="border border-gray-500 px-3 py-2 first:rounded-tl-lg last:rounded-tr-lg">
+          class="border border-gray-500 px-3 py-2 first:rounded-tl-lg last:rounded-tr-lg"
+          [ngClass]="selectedTabIdx == $index ? 'is-active' : ''">
           {{ tabTitle }}
         </button>
       }

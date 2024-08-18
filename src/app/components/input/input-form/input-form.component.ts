@@ -21,13 +21,13 @@ export class InputFormComponent implements OnInit {
   @Input() inputClass = '';
   @Input() isEmail = false;
   @Input() isDisabled = false;
+  @Input() maskType = '';
   @Output() emitInputValue = new EventEmitter<string>();
 
-  @Input() inputValue = '';
-  @Input() maskType = '';
-  public maskValue = '';
-  public maskPrefix = '';
-  public showPassword = false;
+  inputValue = '';
+  maskValue = '';
+  maskPrefix = '';
+  showPassword = false;
   @Output() clearInputEmitter = new EventEmitter<boolean>();
 
   ngOnInit(): void {

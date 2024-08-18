@@ -48,8 +48,8 @@ export class NewPasswordComponent {
   });
 
   public modalInfo: IModal = {
-    modalType: '',
-    modalDescription: '',
+    type: '',
+    description: '',
   };
 
   public showPassword = false;
@@ -177,8 +177,8 @@ export class NewPasswordComponent {
    */
   handleSuccessModal(message: string): void {
     this.modalInfo = {
-      modalType: 'success',
-      modalDescription: message,
+      type: 'success',
+      description: message,
     };
   }
 
@@ -188,8 +188,8 @@ export class NewPasswordComponent {
    */
   handleFailureModal(message: string): void {
     this.modalInfo = {
-      modalType: 'failure',
-      modalDescription: message,
+      type: 'failure',
+      description: message,
     };
   }
 

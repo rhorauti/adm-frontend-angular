@@ -2,7 +2,7 @@ import { inject } from '@angular/core';
 import { HttpRequestService } from '../http-request.service';
 import { environment } from '@environments/environment';
 import { IResponseCommonMessage } from '@core/interfaces/ICommonMessage';
-import { ICompany, IResponseCompany } from '@core/interfaces/ICompany';
+import { ICompany, IBaseResponse } from '@core/interfaces/ICompany';
 
 export class RegisterCompanyApi {
   private httpRequestService = inject(HttpRequestService);
@@ -12,7 +12,7 @@ export class RegisterCompanyApi {
    * Solicita uma lista de empresas para o backend
    * @returns Promise com o status, mensagem, e os dados de id, nome, email, cadastro, telefone, cnpj, e dados cadastrais.
    */
-  async getCompaniesList(type: number): Promise<IResponseCompany> {
+  async getCompaniesList(type: number): Promise<IBaseResponse> {
     return await this.httpRequestService.sendHttpRequest(
       `${environment.apiUrl}/company/${type}`,
       'GET'

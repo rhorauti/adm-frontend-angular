@@ -1,5 +1,5 @@
 export interface IProject {
-  idProject: number;
+  idProject: number | null;
   date: string;
   code: string;
   product: string;

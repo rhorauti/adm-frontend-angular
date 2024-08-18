@@ -50,8 +50,8 @@ export class SignupComponent {
   });
 
   public modalInfo: IModal = {
-    modalType: '',
-    modalDescription: '',
+    type: '',
+    description: '',
   };
 
   public showPassword = false;
@@ -245,8 +245,8 @@ export class SignupComponent {
    */
   handleSuccessModal(message: string): void {
     this.modalInfo = {
-      modalType: 'success',
-      modalDescription: message,
+      type: 'success',
+      description: message,
     };
   }
 
@@ -256,8 +256,8 @@ export class SignupComponent {
    */
   handleFailureModal(message: string): void {
     this.modalInfo = {
-      modalType: 'failure',
-      modalDescription: message,
+      type: 'failure',
+      description: message,
     };
   }
 

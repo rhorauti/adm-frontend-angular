@@ -2,27 +2,23 @@
   <div class="body-block">
     <div
       class="mx-auto flex h-10 w-10 items-center justify-center rounded-full"
-      [ngClass]="iconModalBackgroundColor">
-      <mat-icon [ngClass]="iconModalTextColor">{{ modalIcon }}</mat-icon>
+      [ngClass]="iconBackgroundColor">
+      <mat-icon [ngClass]="iconTextColor">{{ icon }}</mat-icon>
     </div>
     <div class="bg-white my-5 text-center">
-      <h3
-        class="text-base font-semibold leading-6 text-gray-900 w-full"
-        id="modal-title">
-        {{ modalTitle }}
+      <h3 class="text-base font-semibold leading-6 text-gray-900 w-full" id="modal-title">
+        {{ title }}
       </h3>
       <div class="mt-2">
         <p class="text-sm text-gray-500 w-full">
-          {{ modalDescription }}
+          {{ description }}
         </p>
       </div>
     </div>
   </div>
   <div class="footer-block">
     <div class="mt-6">
-      <app-button
-        [btnType]="'close'"
-        (click)="closeModalInfo()"></app-button>
+      <app-button [btnType]="'close'" (click)="closeModalInfo()"></app-button>
     </div>
   </div>
 </app-modal-base>

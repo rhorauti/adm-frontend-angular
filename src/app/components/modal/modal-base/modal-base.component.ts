@@ -12,8 +12,8 @@ import { MatIconModule } from '@angular/material/icon';
 export class ModalBaseComponent {
   @Input() showModal = false;
   @Input() title = '';
-  @Input() showHeader = false;
-  @Input() showCloseBtn = false;
+  @Input() showHeader = true;
+  @Input() showCloseBtn = true;
   @Input() headerClass = '';
   @Input() isModalForm = false;
   @Input() bodyClass = '';

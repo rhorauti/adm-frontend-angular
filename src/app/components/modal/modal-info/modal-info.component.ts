@@ -12,30 +12,30 @@ import { ButtonComponent } from '@components/button/button.component';
   styleUrl: './modal-info.component.scss',
 })
 export class ModalInfoComponent implements OnChanges {
-  @Input() modalType = '';
+  @Input() type = '';
   @Input() showModal = false;
-  @Input() modalIcon = 'check';
-  @Input() iconModalBackgroundColor = 'bg-green-600';
-  @Input() iconModalTextColor = 'text-green-100';
-  @Input() modalTitle = 'Sucesso!';
-  @Input() modalDescription = 'Dados registrados com sucesso!';
-  @Output() emitCancelModal = new EventEmitter<boolean>();
-  @Output() emitOkModal = new EventEmitter<boolean>();
+  @Input() icon = 'check';
+  @Input() iconBackgroundColor = 'bg-green-600';
+  @Input() iconTextColor = 'text-green-100';
+  @Input() title = 'Sucesso!';
+  @Input() description = 'Dados registrados com sucesso!';
+  @Output() closeEmitter = new EventEmitter<boolean>();
+  @Output() actionOkEmitter = new EventEmitter<boolean>();
 
   ngOnChanges() {
-    switch (this.modalType) {
+    switch (this.type) {
       case 'success': {
-        this.modalIcon = 'check';
-        this.modalTitle = 'Sucesso!';
-        this.iconModalBackgroundColor = 'bg-green-600';
-        this.iconModalTextColor = 'text-green-100';
+        this.icon = 'check';
+        this.title = 'Sucesso!';
+        this.iconBackgroundColor = 'bg-green-600';
+        this.iconTextColor = 'text-green-100';
         break;
       }
       case 'failure': {
-        this.modalIcon = 'close';
-        this.modalTitle = 'Erro!';
-        this.iconModalBackgroundColor = 'bg-red-500';
-        this.iconModalTextColor = 'text-white';
+        this.icon = 'close';
+        this.title = 'Erro!';
+        this.iconBackgroundColor = 'bg-red-500';
+        this.iconTextColor = 'text-white';
         break;
       }
     }
@@ -49,5 +49,9 @@ export class ModalInfoComponent implements OnChanges {
    */
   closeModalInfo(): void {
     this.closeModalEmitter.emit(false);
+  }
+
+  onActionOk(): void {
+    this.actionOkEmitter.emit();
   }
 }

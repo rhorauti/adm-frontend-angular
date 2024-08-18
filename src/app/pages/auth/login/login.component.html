@@ -7,7 +7,7 @@
   <div class="mb-3">
     <label for="email" class="block mb-2 text-sm font-medium leading-6 text-white">E-mail</label>
     <app-input-login
-      (emitInputValue)="getEmailValue($event)"
+      (emitInputValue)="loginData.email = $event"
       [isEmail]="true"
       [showIconRight]="false"
       [iconLeft]="'email'"
@@ -15,7 +15,7 @@
   </div>
   <div class="mb-4">
     <label for="password" class="block mb-2 text-sm font-medium leading-6 text-white">Senha</label>
-    <app-input-login (emitInputValue)="getPasswordValue($event)"></app-input-login>
+    <app-input-login (emitInputValue)="loginData.password = $event"></app-input-login>
   </div>
   <div class="flex items-center max-[420px]:flex-col justify-between pb-6">
     <div class="flex items-center">
@@ -54,6 +54,6 @@
 <app-loading [showLoading]="isLoadingActive"></app-loading>
 <app-modal-info
   [showModal]="isModalActive"
-  [modalType]="modalInfo.modalType"
-  [modalDescription]="modalInfo.modalDescription"
+  [type]="modalInfo.type"
+  [description]="modalInfo.description"
   (closeModalEmitter)="closeModal($event)"></app-modal-info>

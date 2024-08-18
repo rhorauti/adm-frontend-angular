@@ -53,27 +53,9 @@ export class LoginComponent {
   public isModalActive = false;
   public isLoadingActive = false;
   public modalInfo: IModal = {
-    modalType: '',
-    modalDescription: '',
+    type: '',
+    description: '',
   };
-
-  /**
-   * getEmailValue
-   * Função que pega o valor do componente input e-mail
-   * @param emailValue
-   */
-  getEmailValue(emailValue: string): void {
-    this.loginData.email = emailValue;
-  }
-
-  /**
-   * getPasswordValue
-   * Função que pega o valor do componente input password
-   * @param passwordValue
-   */
-  getPasswordValue(passwordValue: string): void {
-    this.loginData.password = passwordValue;
-  }
 
   /**
    * handleSuccessModal
@@ -81,8 +63,8 @@ export class LoginComponent {
    */
   handleSuccessModal(message: string): void {
     this.modalInfo = {
-      modalType: 'success',
-      modalDescription: message,
+      type: 'success',
+      description: message,
     };
   }
 
@@ -92,8 +74,8 @@ export class LoginComponent {
    */
   handleFailureModal(message: string): void {
     this.modalInfo = {
-      modalType: 'failure',
-      modalDescription: message,
+      type: 'failure',
+      description: message,
     };
   }
 

@@ -1,10 +1,11 @@
-import { IAdress } from './IAdress';
+import { IAddress } from './IAddress';
 import { IProject } from './IProject';
 import { ITableHeader } from './ITableHeader';
 import { IEmployee } from './IEmployee';
+import { IBaseGroup } from './IBase';
 
 export interface ICompany {
-  idCompany: number;
+  idCompany: number | null;
   type: number;
   date: string;
   nickname: string;
@@ -12,49 +13,18 @@ export interface ICompany {
   cnpj: string;
 }
 
-export interface IResponseCompany {
-  date: string;
-  status: boolean;
-  message: string;
-  data: ICompany[];
-}
-
-export interface ICompanyGroup {
+export interface ICompanyGroup extends IBaseGroup {
   companyType: number | null;
-  arrayTab: string[];
-  arraySelectFilter: string[];
-  inputValueFilter: string;
-  selectValueFilter: string;
-  placeholderFilter: string;
-  tabIndex: number;
-  isHeaderBoxActive: boolean;
-  tableHeaders: ITableHeader[];
-  initialTableData: ICompany[];
+  companyTableHeaders: ITableHeader[];
   companiesData: ICompany[];
   companyData: ICompany;
-  tableIdx: number;
-  qtyPerPage: number;
 }
 
-export interface ICompanyItemGroup {
-  arrayTab: string[];
-  arraySelectFilter: string[];
-  inputValueFilter: string;
-  selectValueFilter: string;
-  placeholderFilter: string;
-  tabIndex: number;
-  isHeaderBoxActive: boolean;
-  tableHeaderSelected: ITableHeader[];
+export interface ICompanyItemGroup extends IBaseGroup {
   adressTableHeaders: ITableHeader[];
   projectTableHeaders: ITableHeader[];
   employeeTableHeaders: ITableHeader[];
-  initialTableData: ICompany[] | IAdress[] | IProject[] | IEmployee[];
-  tableDataSelected: ICompany[] | IAdress[] | IProject[] | IEmployee[];
-  adressData: IAdress;
+  addressData: IAddress;
   projectData: IProject;
   employeeData: IEmployee;
-  tableIdx: number;
-  qtyPerPage: number;
 }
-
-export type ICompanyPageGroup = ICompany | IAdress | IProject | IEmployee;

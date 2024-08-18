@@ -6,7 +6,7 @@ import { ModalInfoComponent } from '../modal-info/modal-info.component';
 import { ButtonComponent } from '@components/button/button.component';
 import { LoadingComponent } from '@components/loading/loading.component';
 import { RegisterCompanyApi } from '@core/api/http/company.api';
-import { ICompany } from '@core/interfaces/ICompany';
+import { TableItemType } from '@core/interfaces/IBase';
 
 interface IFormData {
   title: string;
@@ -29,7 +29,7 @@ interface IFormData {
   styleUrl: './modal-check.component.scss',
 })
 export class ModalCheckComponent implements OnChanges {
-  @Input() companyData: ICompany = {
+  @Input() tableDataSelected: TableItemType = {
     idCompany: 0,
     type: 0,
     date: new Date().toISOString(),
@@ -46,8 +46,8 @@ export class ModalCheckComponent implements OnChanges {
   public arrayFormData: IFormData[] = [{ title: '', description: '' }];
 
   ngOnChanges() {
-    const arrayKeys = Object.keys(this.companyData);
-    const arrayValues = Object.values(this.companyData);
+    const arrayKeys = Object.keys(this.tableDataSelected);
+    const arrayValues = Object.values(this.tableDataSelected);
     this.arrayFormData = arrayKeys.map((key, idx) => ({
       title: key,
       description: arrayValues[idx],

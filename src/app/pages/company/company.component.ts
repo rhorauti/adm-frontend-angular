@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, Signal, signal } from '@angular/core';
+import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
 import { PaginationComponent } from '@components/pagination/pagination.component';
@@ -10,28 +10,22 @@ import { ModalAskComponent } from '@components/modal/modal-ask/modal-ask.compone
 import { ModalInfoComponent } from '@components/modal/modal-info/modal-info.component';
 import { LoadingComponent } from '@components/loading/loading.component';
 import { FormsModule } from '@angular/forms';
-import {
-  ICompanyItemGroup,
-  ICompanyGroup,
-  ICompanyPageGroup,
-  ICompany,
-} from '@core/interfaces/ICompany';
-import { ITableHeader } from '@core/interfaces/ITableHeader';
+import { ICompanyItemGroup, ICompanyGroup } from '@core/interfaces/ICompany';
 import { ModalCheckComponent } from '@components/modal/modal-check/modal-check.component';
 import { TabComponent } from '@components/tab/tab.component';
 import { InputAddonsComponent } from '../../components/input/input-addons/input-addons.component';
 import { TableComponent } from '../../components/table/table.component';
 import { TableHeaderBoxComponent } from '@components/table-header-box/table-header-box.component';
-import { ActivatedRoute } from '@angular/router';
-import { IAdress } from '@core/interfaces/IAdress';
-import { IProject } from '@core/interfaces/IProject';
-import { IEmployee } from '@core/interfaces/IEmployee';
+import { BaseRegister } from '@core/generic/baseRegister';
+import { ModalBaseComponent } from '@components/modal/modal-base/modal-base.component';
+import { InputFormComponent } from '@components/input/input-form/input-form.component';
 
 @Component({
   selector: 'app-company',
   standalone: true,
   imports: [
     FormsModule,
+    InputFormComponent,
     ButtonComponent,
     CommonModule,
     PaginationComponent,
@@ -39,6 +33,7 @@ import { IEmployee } from '@core/interfaces/IEmployee';
     ModalAskComponent,
     ModalInfoComponent,
     ModalCheckComponent,
+    ModalBaseComponent,
     LoadingComponent,
     TabComponent,
     InputAddonsComponent,
@@ -49,34 +44,32 @@ import { IEmployee } from '@core/interfaces/IEmployee';
   templateUrl: './company.component.html',
   styleUrl: './company.component.scss',
 })
-export class CompanyComponent implements AfterViewInit {
-  constructor(
-    private activatedRoute: ActivatedRoute,
-    private registerCompanyApi: RegisterCompanyApi
-  ) {}
-
-  ngAfterViewInit(): void {
-    this.activatedRoute.paramMap.subscribe(params => {
-      this.company().companyType = Number(params.get('company-type'));
-      this.showInputPlaceholder(this.company);
-      this.showInputPlaceholder(this.companyItem);
-      this.showCompaniesList(Number(this.company().companyType));
-      this.checkOptionListCompany(this.company);
-      this.checkOptionListCompanyItem(this.companyItem);
-    });
+export class CompanyComponent extends BaseRegister implements OnInit {
+  constructor(httpRequestService: HttpRequestService) {
+    super(httpRequestService);
   }
 
-  public showLoading = signal(false);
+  ngOnInit(): void {
+    this.showTableDataList(this.company, 'company', 1);
+    this.company().tableHeaderSelected = this.company().companyTableHeaders;
+    this.showOptionList(this.company);
+    this.showInputPlaceholder(this.company);
+    this.companyItem().tableHeaderSelected = this.companyItem().adressTableHeaders;
+    this.showOptionList(this.companyItem);
+    this.showInputPlaceholder(this.companyItem);
+  }
+
   public company = signal<ICompanyGroup>({
-    companyType: 0,
+    companyType: 1,
     arrayTab: ['Clientes', 'Fornecedores', 'MyCompany'],
     arraySelectFilter: [],
     inputValueFilter: '',
-    selectValueFilter: '',
+    selectValueFilter: 'Id',
     placeholderFilter: '',
     tabIndex: 0,
     isHeaderBoxActive: false,
-    tableHeaders: [
+    tableHeaderSelected: [],
+    companyTableHeaders: [
       { id: 0, showHeader: true, name: 'Id' },
       { id: 1, showHeader: true, name: 'Data' },
       { id: 2, showHeader: true, name: 'Apelido' },
@@ -84,10 +77,12 @@ export class CompanyComponent implements AfterViewInit {
       { id: 4, showHeader: true, name: 'CNPJ' },
       { id: 5, showHeader: true, name: 'Ações' },
     ],
+    tableDataSelected: [],
+    tableItemSelected: { idCompany: null, type: 0, date: '', nickname: '', name: '', cnpj: '' },
     initialTableData: [],
     companiesData: [],
     companyData: {
-      idCompany: 0,
+      idCompany: null,
       type: 0,
       date: new Date().toISOString(),
       nickname: '',
@@ -101,11 +96,17 @@ export class CompanyComponent implements AfterViewInit {
     arrayTab: ['Endereços', 'Projetos', 'Funcionarios'],
     arraySelectFilter: [],
     inputValueFilter: '',
-    selectValueFilter: '',
+    selectValueFilter: 'Id',
     placeholderFilter: '',
     tabIndex: 0,
     isHeaderBoxActive: false,
-    tableHeaderSelected: [],
+    tableHeaderSelected: [
+      {
+        id: 0,
+        showHeader: false,
+        name: '',
+      },
+    ],
     adressTableHeaders: [
       { id: 0, showHeader: true, name: 'Id' },
       { id: 1, showHeader: true, name: 'Tipo' },
@@ -137,8 +138,18 @@ export class CompanyComponent implements AfterViewInit {
     ],
     initialTableData: [],
     tableDataSelected: [],
-    adressData: {
-      idAdress: 0,
+    tableItemSelected: {
+      idAddress: 0,
+      type: '',
+      adress: '',
+      number: 0,
+      complement: '',
+      district: '',
+      city: '',
+      state: '',
+    },
+    addressData: {
+      idAddress: 0,
       type: '',
       adress: '',
       number: 0,
@@ -167,223 +178,122 @@ export class CompanyComponent implements AfterViewInit {
     qtyPerPage: 12,
   });
 
-  checkOptionListCompany(companyGroup: Signal<ICompanyGroup>): void {
-    companyGroup().arraySelectFilter = [];
-    companyGroup().tableHeaders.forEach(header => {
-      if (header.showHeader) {
-        companyGroup().arraySelectFilter.push(header.name);
-      }
-    });
-  }
-
-  checkOptionListCompanyItem(companyItemGroup: Signal<ICompanyItemGroup>): void {
-    companyItemGroup().arraySelectFilter = [];
-    companyItemGroup().tableHeaderSelected.forEach(header => {
-      if (header.showHeader) {
-        companyItemGroup().arraySelectFilter.push(header.name);
-      }
-    });
-    this.showInputPlaceholder(companyItemGroup);
-  }
-
-  /**
-   * changeCompanySelectPlaceHolder
-   * Get select value from app-input-addons component and change placeholder
-   * @param value string. Value received from app-input-addons component
-   */
-  changeCompanySelectPlaceHolder(value: string) {
-    this.company().selectValueFilter = value;
-    this.company().placeholderFilter = `Digite um(a) ${value}`;
-  }
-
-  /**
-   * isCompany
-   * Check if received data is equal to ICompany interface
-   * @param data any. Data can change according to tab selection
-   * @returns boolean. If data is equals to ICompany interface, it returns true or else false.
-   */
-  isCompany(data: any): data is ICompany {
-    return (data as ICompany).idCompany != undefined;
-  }
-
-  /**
-   * isAdress
-   * Check if received data is equal to IAddress interface
-   * @param data any. Data can change according to tab selection
-   * @returns boolean. If data is equals to IAddress interface, it returns true or else false.
-   */
-  isAdress(data: any): data is IAdress {
-    return (data as IAdress).idAdress != undefined;
-  }
-
-  /**
-   * isProject
-   * Check if received data is equal to IProject interface
-   * @param data any. Data can change according to tab selection
-   * @returns boolean. If data is equals to IProject interface, it returns true or else false.
-   */
-  isProject(data: any): data is IProject {
-    return (data as IProject).idProject != undefined;
-  }
-
-  /**
-   * isEmployee
-   * Check if received data is equal to IEmployee interface
-   * @param data any. Data can change according to tab selection
-   * @returns boolean. If data is equals to IEmployee interface, it returns true or else false.
-   */
-  isEmployee(data: any): data is IEmployee {
-    return (data as IEmployee).idEmployee != undefined;
-  }
-
-  showInputPlaceholder(companyData: Signal<ICompanyGroup> | Signal<ICompanyItemGroup>): void {
-    companyData().placeholderFilter = `Digite um(a) ${companyData().selectValueFilter}`;
-  }
-
-  /**
-   * showTableHeader
-   * Show or hide column´s table according to checkbox click in table-header-box component.
-   * @param header ITableHeader
-   */
-  showTableHeader(header: ITableHeader): void {
-    header.showHeader = !header.showHeader;
-  }
-
-  // filterCompanyTable(inputValue: string): void {
-  //   if (!inputValue) {
-  //     this.companiesData.set(
-  //       this.companyInitialTableData().slice(this.tableIdx(), this.tableIdx() + this.QtyPerPage)
-  //     );
-  //   } else {
-  //     this.companiesData.set(
-  //       this.companyInitialTableData().filter(company =>
-  //         String(company[this.company().selectValueFilter.toLowerCase() as keyof ICompany])
-  //           .toLowerCase()
-  //           .includes(String(this.company().inputValueFilter).toLowerCase().trim())
-  //       )
-  //     );
-  //   }
-  // }
-
   /**
    * getCustomers
    * Get companines list from database
    * @returns Promise<void>
    */
-  async showCompaniesList(companyType: number): Promise<void> {
-    try {
-      this.showLoading.set(true);
-      const companies = await this.registerCompanyApi.getCompaniesList(companyType);
-      console.log(companies);
-      this.company().companiesData = companies.data;
-    } catch (e: any) {
-      this.handleModal('failure', e.message);
-    } finally {
-      this.showLoading.set(false);
-    }
-  }
+  // async showCompaniesList(companyType: number): Promise<void> {
+  //   try {
+  //     this.showLoading.set(true);
+  //     const companies = await this.registerCompanyApi.getCompaniesList(companyType);
+  //     console.log(companies);
+  //     this.company().companiesData = companies.data;
+  //   } catch (e) {
+  //     this.handleModal('failure', (e as Error).message);
+  //   } finally {
+  //     this.showLoading.set(false);
+  //   }
+  // }
 
-  async addNewCompany() {
-    try {
-      this.showLoading.set(true);
-      const companyData = await this.registerCompanyApi.addNewCompany(this.company().companyData);
-      this.handleModal('success', companyData.message);
-    } catch (e: any) {
-      this.handleModal('failure', e.message);
-    } finally {
-      this.showLoading.set(false);
-    }
-  }
+  // async addNewCompany() {
+  //   try {
+  //     this.showLoading.set(true);
+  //     const companyData = await this.registerCompanyApi.addNewCompany(this.company().companyData);
+  //     this.handleModal('success', companyData.message);
+  //   } catch (e) {
+  //     this.handleModal('failure', (e as Error).message);
+  //   } finally {
+  //     this.showLoading.set(false);
+  //   }
+  // }
 
-  async updateCompany() {
-    try {
-      this.showLoading.set(true);
-      const companyData = await this.registerCompanyApi.updateCompany(
-        this.company().companyData,
-        this.company().companyData.idCompany
-      );
-      this.handleModal('success', companyData.message);
-    } catch (e: any) {
-      this.handleModal('failure', e.message);
-    } finally {
-      this.showLoading.set(false);
-    }
-  }
+  // async updateCompany() {
+  //   try {
+  //     this.showLoading.set(true);
+  //     const companyData = await this.registerCompanyApi.updateCompany(
+  //       this.company().companyData,
+  //       this.company().companyData.idCompany
+  //     );
+  //     this.handleModal('success', companyData.message);
+  //   } catch (e) {
+  //     this.handleModal('failure', (e as Error).message);
+  //   } finally {
+  //     this.showLoading.set(false);
+  //   }
+  // }
 
-  async deleteCompany(): Promise<void> {
-    try {
-      this.showLoading.set(true);
-      const companyData = await this.registerCompanyApi.deleteRegister(
-        this.company().companyData.idCompany
-      );
-      this.handleModal('success', companyData.message);
-      this.isModalInfoActive = true;
-    } catch (e: any) {
-      this.handleModal('failure', e.message);
-      this.isModalInfoActive = true;
-    } finally {
-      this.showLoading.set(false);
-    }
-  }
+  // async deleteCompany(): Promise<void> {
+  //   try {
+  //     this.showLoading.set(true);
+  //     const companyData = await this.registerCompanyApi.deleteRegister(
+  //       this.company().companyData.idCompany
+  //     );
+  //     this.handleModal('success', companyData.message);
+  //     this.isModalInfoActive = true;
+  //   } catch (e) {
+  //     this.handleModal('failure', (e as Error).message);
+  //     this.isModalInfoActive = true;
+  //   } finally {
+  //     this.showLoading.set(false);
+  //   }
+  // }
 
-  public isModalCompanyActive = false;
+  // public isModalCompanyActive = false;
 
-  showModalNewCompany(): void {
-    this.isModalCompanyActive = true;
-  }
+  // showModalNewCompany(): void {
+  //   this.isModalCompanyActive = true;
+  // }
 
-  public isModalInfoActive = false;
-  public isModalAskActive = false;
-  public modalData = {
-    type: '',
-    description: '',
-  };
+  // public isModalAskActive = false;
 
-  handleModal(type: string, description: string): void {
-    this.modalData.type = type;
-    this.modalData.description = description;
-  }
+  // handleModal(type: string, description: string): void {
+  //   this.modalData.type = type;
+  //   this.modalData.description = description;
+  // }
 
-  showModalAskToDeleteCompany(data: ICompanyPageGroup): void {
-    if (this.isCompany(data)) {
-      this.company().companyData = data;
-      this.handleModal('confirmation', `Deseja excluir ${this.company().companyData.name}?`);
-    } else if (this.isAdress(data)) {
-      this.companyItem().adressData = data;
-      this.handleModal('confirmation', `Deseja excluir ${this.companyItem().adressData.adress}?`);
-    } else if (this.isProject(data)) {
-      this.companyItem().projectData = data;
-      this.handleModal('confirmation', `Deseja excluir ${this.companyItem().projectData.code}?`);
-    } else if (this.isEmployee(data)) {
-      this.companyItem().employeeData = data;
-      this.handleModal('confirmation', `Deseja excluir ${this.companyItem().employeeData.name}?`);
-    }
+  // showModalAskToDeleteCompany(data: IPageGroup): void {
+  //   if (this.isTypeValid(data, 'company')) {
+  //     this.company().companyData = data;
+  //     this.handleModal('confirmation', `Deseja excluir ${this.company().companyData.name}?`);
+  //   } else if (this.isTypeValid(data, 'address')) {
+  //     this.companyItem().addressData = data;
+  //     this.handleModal('confirmation', `Deseja excluir ${this.companyItem().addressData.adress}?`);
+  //   } else if (this.isTypeValid(data, 'project')) {
+  //     this.companyItem().projectData = data;
+  //     this.handleModal('confirmation', `Deseja excluir ${this.companyItem().projectData.code}?`);
+  //   } else if (this.isTypeValid(data, 'employee')) {
+  //     this.companyItem().employeeData = data;
+  //     this.handleModal('confirmation', `Deseja excluir ${this.companyItem().employeeData.name}?`);
+  //   }
 
-    this.isModalAskActive = true;
-  }
+  //   this.isModalAskActive = true;
+  // }
 
-  public isModalFormCompanyActive = false;
-  public isEditForm = false;
+  // public isModalFormCompanyActive = false;
+  // public isEditForm = false;
 
-  showModalFormToEditCompany(data: ICompanyPageGroup): void {
-    if (this.isCompany(data)) {
-      this.company().companyData = { ...data };
-    } else if (this.isAdress(data)) {
-      this.companyItem().adressData = { ...data };
-    } else if (this.isProject(data)) {
-      this.companyItem().projectData = { ...data };
-    } else if (this.isEmployee(data)) {
-      this.companyItem().employeeData = { ...data };
-    }
-    this.isEditForm = true;
-    this.isModalFormCompanyActive = true;
-  }
+  // showModalFormToEditCompany(data: IPageGroup): void {
+  //   if (this.isTypeValid(data, 'company')) {
+  //     this.company().companyData = { ...data };
+  //   } else if (this.isTypeValid(data, 'address')) {
+  //     this.companyItem().addressData = { ...data };
+  //   } else if (this.isTypeValid(data, 'project')) {
+  //     this.companyItem().projectData = { ...data };
+  //   } else if (this.isTypeValid(data, 'employee')) {
+  //     this.companyItem().employeeData = { ...data };
+  //   }
+  //   this.isEditForm = true;
+  //   this.isModalFormCompanyActive = true;
+  // }
 
-  public isModalCheckActive = false;
+  // public isModalCheckActive = false;
 
-  closeModalCheckEvent() {}
+  // closeModalCheckEvent() {
+  //   return;
+  // }
 
-  OnModalAskActionOk(): void {
-    this.isModalAskActive = false;
-  }
+  // OnModalAskActionOk(): void {
+  //   this.isModalAskActive = false;
+  // }
 }

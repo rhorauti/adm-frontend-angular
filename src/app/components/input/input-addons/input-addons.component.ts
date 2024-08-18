@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
 
@@ -10,7 +10,7 @@ import { MatIconModule } from '@angular/material/icon';
   templateUrl: './input-addons.component.html',
   styleUrl: './input-addons.component.scss',
 })
-export class InputAddonsComponent implements OnInit {
+export class InputAddonsComponent {
   @Input() optionList: string[] = [];
   @Input() placeholder = '';
   @Input() btnLabel = 'Buscar';
@@ -21,10 +21,6 @@ export class InputAddonsComponent implements OnInit {
   @Output() inputValueEmitter = new EventEmitter<string>();
   @Output() selectValueEmitter = new EventEmitter<string>();
 
-  ngOnInit(): void {
-    this.selectValueEmitter.emit(this.selectValue);
-  }
-
   sendInputValue(inputData: Event): void {
     this.inputValue = (inputData.target as HTMLInputElement).value.trim();
     this.inputValueEmitter.emit(this.inputValue);
@@ -33,6 +29,7 @@ export class InputAddonsComponent implements OnInit {
   outputSelectValue(event: Event): void {
     this.selectValue = (event.target as HTMLSelectElement).value;
     this.selectValueEmitter.emit(this.selectValue);
+    console.log(this.selectValue);
   }
 
   @Output() btnClickEmitter = new EventEmitter();

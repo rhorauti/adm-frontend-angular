@@ -1,5 +1,5 @@
-export interface IAdress {
-  idAdress: number;
+export interface IAddress {
+  idAddress: number | null;
   type: string;
   adress: string;
   number: number;

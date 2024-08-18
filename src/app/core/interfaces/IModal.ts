@@ -1,4 +1,4 @@
 export interface IModal {
-  modalType: string;
-  modalDescription: string;
+  type: string;
+  description: string;
 }
