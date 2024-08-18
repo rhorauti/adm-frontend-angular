@@ -1,7 +1,13 @@
 <div class="flex flex-col lg:flex-row lg:justify-end gap-5 relative">
+  <app-button
+    (click)="isHeaderBoxActive = !isHeaderBoxActive"
+    [btnType]="'transparent'"
+    [showIcon]="true"
+    [btnIcon]="'menu'"
+    [label]="'Colunas'"></app-button>
   @if (isHeaderBoxActive) {
     <div
-      class="absolute px-4 py-2 border border-gray-500 bg-white text-black rounded-md text-sm w-40 -left-44 top-0">
+      class="grid md:gap-1 gap-2 md:absolute px-4 py-2 border border-gray-500 bg-white text-black rounded-md text-sm w-full md:w-40 md:-left-44 md:top-0">
       @for (header of tableHeaders; track $index) {
         <div>
           <input
@@ -17,10 +23,4 @@
       }
     </div>
   }
-  <app-button
-    (click)="isHeaderBoxActive = !isHeaderBoxActive"
-    [btnType]="'transparent'"
-    [showIcon]="true"
-    [btnIcon]="'menu'"
-    [label]="'Colunas'"></app-button>
 </div>
