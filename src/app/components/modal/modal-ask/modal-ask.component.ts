@@ -22,8 +22,7 @@ export class ModalAskComponent implements OnChanges {
   @Input() iconModalTextColor = '';
   @Input() title = '';
   @Input() tableItemSelected: TableItemType = {
-    idCompany: null,
-    type: 0,
+    idCompany: 0,
     date: '',
     nickname: '',
     name: '',

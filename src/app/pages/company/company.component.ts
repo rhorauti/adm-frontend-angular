@@ -15,10 +15,10 @@ import { TabComponent } from '@components/tab/tab.component';
 import { InputAddonsComponent } from '../../components/input/input-addons/input-addons.component';
 import { TableComponent } from '../../components/table/table.component';
 import { TableHeaderBoxComponent } from '@components/table-header-box/table-header-box.component';
-import { BaseRegister } from '@core/generic/baseRegister';
 import { ModalBaseComponent } from '@components/modal/modal-base/modal-base.component';
 import { InputFormComponent } from '@components/input/input-form/input-form.component';
 import { TableItemType } from '@core/interfaces/IBase';
+import { BaseRegister } from '@core/generic/baseRegister';
 
 @Component({
   selector: 'app-company',
@@ -77,12 +77,17 @@ export class CompanyComponent extends BaseRegister implements OnInit {
       { id: 5, showHeader: true, name: 'Ações' },
     ],
     tableDataSelected: [],
-    tableItemSelected: { idCompany: null, type: 0, date: '', nickname: '', name: '', cnpj: '' },
+    tableItemSelected: {
+      idCompany: 0,
+      date: new Date().toISOString(),
+      nickname: '',
+      name: '',
+      cnpj: '',
+    },
     initialTableData: [],
     companiesData: [],
     companyData: {
-      idCompany: null,
-      type: 0,
+      idCompany: 0,
       date: new Date().toISOString(),
       nickname: '',
       name: '',
@@ -90,6 +95,7 @@ export class CompanyComponent extends BaseRegister implements OnInit {
     },
     tableIdx: 0,
     qtyPerPage: 12,
+    isTableExpanded: false,
   });
   public companyItem = signal<ICompanyItemGroup>({
     arrayTab: ['Endereços', 'Projetos', 'Funcionarios'],
@@ -175,7 +181,12 @@ export class CompanyComponent extends BaseRegister implements OnInit {
     },
     tableIdx: 0,
     qtyPerPage: 12,
+    isTableExpanded: false,
   });
+
+  setCompanyIdx(idx: number): void {
+    this.company().tabIndex = idx;
+  }
 
   setCompanyProperty(
     tableItemSelected: TableItemType,
@@ -201,8 +212,33 @@ export class CompanyComponent extends BaseRegister implements OnInit {
           break;
         }
       }
+      this.isClearInputForm.set(false);
     }
-    this.isClearInputForm.set(false);
+  }
+
+  modalCheckCompany = signal({
+    idCompany: 0,
+    nickname: '',
+    name: '',
+    cnpj: '',
+  });
+
+  isModalCheckActive = signal(false);
+
+  showModalCheck(tableItemSelected: TableItemType): void {
+    this.isModalCheckActive.set(true);
+    if (this.isTypeValid(tableItemSelected, 'company')) {
+      this.modalCheckCompany().idCompany = tableItemSelected.idCompany;
+      this.modalCheckCompany().nickname = tableItemSelected.nickname;
+      this.modalCheckCompany().name = tableItemSelected.name;
+      this.modalCheckCompany().cnpj = tableItemSelected.cnpj;
+    }
+  }
+
+  addNewCompany(tableItemSelected: TableItemType): void {
+    if (this.isTypeValid(tableItemSelected, 'company')) {
+      this.addRegister(tableItemSelected, 'company', this.company().companyType);
+    }
   }
 
   /**

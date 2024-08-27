@@ -25,6 +25,7 @@ export interface IBaseGroup {
   tableDataSelected: TableDataTypeArray;
   tableItemSelected: TableItemType;
   initialTableData: TableDataTypeArray;
+  isTableExpanded: boolean;
 }
 
 export interface ITableHeaderGroup {
@@ -32,6 +33,13 @@ export interface ITableHeaderGroup {
   adressTableHeaders: ITableHeader[];
   projectTableHeaders: ITableHeader[];
   employeeTableHeaders: ITableHeader[];
+}
+
+export interface TableTypeObject {
+  company: ICompany;
+  address: IAddress;
+  project: IProject;
+  employee: IEmployee;
 }
 
 export type TableDataTypeString = 'company' | 'address' | 'project' | 'employee';

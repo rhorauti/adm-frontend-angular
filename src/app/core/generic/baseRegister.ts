@@ -6,6 +6,7 @@ import {
   TableItemType,
   TableTypeNumber,
   IBaseGroup,
+  TableTypeObject,
 } from '@core/interfaces/IBase';
 import { ICompany } from '@core/interfaces/ICompany';
 import { IEmployee } from '@core/interfaces/IEmployee';
@@ -14,15 +15,10 @@ import { IProject } from '@core/interfaces/IProject';
 import { ITableHeader } from '@core/interfaces/ITableHeader';
 import { environment } from '@environments/environment';
 
-interface TableTypeObject {
-  company: ICompany;
-  address: IAddress;
-  project: IProject;
-  employee: IEmployee;
-}
-
 export class BaseRegister {
   constructor(public httpRequestService: HttpRequestService) {}
+
+  version = 'v1';
 
   /**
    * showOptionList
@@ -79,6 +75,10 @@ export class BaseRegister {
     }
   }
 
+  toggleBtn(baseGroup: Signal<IBaseGroup>): void {
+    baseGroup().isTableExpanded = !baseGroup().isTableExpanded;
+  }
+
   /**
    * isTypeValid
    * Type guard that check if received data is equal to interface provided.
@@ -104,21 +104,19 @@ export class BaseRegister {
     }
   }
 
-  isModalCheckActive = signal(false);
-
   onModalFormBtnOkClick(): void {}
 
-  isModalFormActive = signal(false);
+  isBaseModalFormActive = signal(false);
   isEditForm = signal(false);
 
   showModalForm(): void {
-    this.isModalFormActive.set(true);
+    this.isBaseModalFormActive.set(true);
   }
 
   closeModalForm(): void {
     if (this.isEditForm()) this.isEditForm.set(false);
     this.isClearInputForm.set(true);
-    this.isModalFormActive.set(false);
+    this.isBaseModalFormActive.set(false);
   }
 
   /**
@@ -129,7 +127,7 @@ export class BaseRegister {
   showModalEditForm(tableItemSelected: TableItemType, data: TableItemType): void {
     tableItemSelected = { ...data };
     this.isEditForm.set(true);
-    this.isModalFormActive.set(true);
+    this.isBaseModalFormActive.set(true);
   }
 
   isClearInputForm = signal(false);
@@ -142,39 +140,39 @@ export class BaseRegister {
       case 'company': {
         if (this.isTypeValid(tableItemSelected, 'company')) {
           this.handleModal('confirmation', `Deseja excluir ${tableItemSelected.name}?`);
-          this.isModalAskActive.set(true);
+          this.isBaseModalAskActive.set(true);
         }
         break;
       }
       case 'address': {
         if (this.isTypeValid(tableItemSelected, 'address')) {
           this.handleModal('confirmation', `Deseja excluir ${tableItemSelected.adress}?`);
-          this.isModalAskActive.set(true);
+          this.isBaseModalAskActive.set(true);
         }
         break;
       }
       case 'employee': {
         if (this.isTypeValid(tableItemSelected, 'employee')) {
           this.handleModal('confirmation', `Deseja excluir ${tableItemSelected.name}?`);
-          this.isModalAskActive.set(true);
+          this.isBaseModalAskActive.set(true);
         }
         break;
       }
       case 'project': {
         if (this.isTypeValid(tableItemSelected, 'project')) {
           this.handleModal('confirmation', `Deseja excluir ${tableItemSelected.code}?`);
-          this.isModalAskActive.set(true);
+          this.isBaseModalAskActive.set(true);
         }
         break;
       }
     }
   }
 
-  isModalAskActive = signal(false);
+  isBaseModalAskActive = signal(false);
   isModalAskClickedBtnYes = false;
 
   onModalAskBtnNoClick(): void {
-    this.isModalAskActive.set(false);
+    this.isBaseModalAskActive.set(false);
   }
 
   /**
@@ -183,36 +181,36 @@ export class BaseRegister {
    * Handle action of modalAsk button click. If click is yes, register will be added or updated. If click is no, modal will be closed.
    * @param tableItemSelected GroupType - Data provided by the loop in HTML file
    */
-  onModalAskBtnYesClick(tableItemSelected: TableItemType): void {
-    if (this.isTypeValid(tableItemSelected, 'company')) {
-      if (tableItemSelected.idCompany != null) {
-        this.updateRegister(tableItemSelected, 'company', tableItemSelected.idCompany);
-        this.isEditForm.set(false);
-      } else {
-        this.addRegister(tableItemSelected, 'company');
-      }
-    } else if (this.isTypeValid(tableItemSelected, 'address')) {
-      if (tableItemSelected.idAddress != null) {
-        this.updateRegister(tableItemSelected, 'address', tableItemSelected.idAddress);
-        this.isEditForm.set(false);
-      } else {
-        this.addRegister(tableItemSelected, 'address');
-      }
-    } else if (this.isTypeValid(tableItemSelected, 'employee')) {
-      if (tableItemSelected.idEmployee != null) {
-        this.updateRegister(tableItemSelected, 'employee', tableItemSelected.idEmployee);
-        this.isEditForm.set(false);
-      } else {
-        this.addRegister(tableItemSelected, 'employee');
-      }
-    } else if (this.isTypeValid(tableItemSelected, 'project')) {
-      if (tableItemSelected.idProject != null) {
-        this.updateRegister(tableItemSelected, 'project', tableItemSelected.idProject);
-        this.isEditForm.set(false);
-      } else {
-        this.addRegister(tableItemSelected, 'project');
-      }
-    }
+  onModalAskBtnYesClick(): void {
+    // if (this.isTypeValid(tableItemSelected, 'company')) {
+    //   if (tableItemSelected.idCompany != null) {
+    //     this.updateRegister(tableItemSelected, 'company', tableItemSelected.idCompany);
+    //     this.isEditForm.set(false);
+    //   } else {
+    //     this.addRegister(tableItemSelected, 'company');
+    //   }
+    // } else if (this.isTypeValid(tableItemSelected, 'address')) {
+    //   if (tableItemSelected.idAddress != null) {
+    //     this.updateRegister(tableItemSelected, 'address', tableItemSelected.idAddress);
+    //     this.isEditForm.set(false);
+    //   } else {
+    //     this.addRegister(tableItemSelected, 'address');
+    //   }
+    // } else if (this.isTypeValid(tableItemSelected, 'employee')) {
+    //   if (tableItemSelected.idEmployee != null) {
+    //     this.updateRegister(tableItemSelected, 'employee', tableItemSelected.idEmployee);
+    //     this.isEditForm.set(false);
+    //   } else {
+    //     this.addRegister(tableItemSelected, 'employee');
+    //   }
+    // } else if (this.isTypeValid(tableItemSelected, 'project')) {
+    //   if (tableItemSelected.idProject != null) {
+    //     this.updateRegister(tableItemSelected, 'project', tableItemSelected.idProject);
+    //     this.isEditForm.set(false);
+    //   } else {
+    //     this.addRegister(tableItemSelected, 'project');
+    //   }
+    // }
   }
 
   baseShowLoading: WritableSignal<boolean> = signal(false);
@@ -233,7 +231,7 @@ export class BaseRegister {
     try {
       this.baseShowLoading.set(true);
       const response = await this.httpRequestService.sendHttpRequest(
-        `${environment.apiUrl}/${baseGroupName}/${groupType}`,
+        `${environment.apiUrl}/${this.version}/${baseGroupName}/${groupType}`,
         'GET'
       );
       baseGroupSignal().tableDataSelected = response.data;
@@ -244,28 +242,33 @@ export class BaseRegister {
     }
   }
 
-  baseIsModalInfoActive: WritableSignal<boolean> = signal(false);
+  isBaseModalInfoActive: WritableSignal<boolean> = signal(false);
 
   async addRegister(
     tableItemSelected: TableItemType,
-    baseGroupName: TableDataTypeString
+    baseGroupName: TableDataTypeString,
+    groupType: TableTypeNumber
   ): Promise<void> {
     try {
       this.baseShowLoading.set(true);
       const response = await this.httpRequestService.sendHttpRequest(
-        `${environment.apiUrl}/${baseGroupName}`,
+        `${environment.apiUrl}/${this.version}/${baseGroupName}/${groupType}`,
         'POST',
         tableItemSelected
       );
+      console.log(response);
       this.handleModal('success', response.message);
-      this.baseIsModalInfoActive.set(true);
-    } catch (e) {
-      this.handleModal('failure', (e as Error).message);
-      this.baseIsModalInfoActive.set(true);
+      this.isBaseModalInfoActive.set(true);
+    } catch (e: any) {
+      console.log(e);
+      this.handleModal('failure', e.error.message);
+      this.isBaseModalInfoActive.set(true);
     } finally {
       this.baseShowLoading.set(false);
     }
   }
+
+  isNewEditRegister = false;
 
   async updateRegister(
     tableItemSelected: TableItemType,
@@ -275,15 +278,16 @@ export class BaseRegister {
     try {
       this.baseShowLoading.set(true);
       const response = await this.httpRequestService.sendHttpRequest(
-        `${environment.apiUrl}/${baseGroupName}/${id.toString()}`,
+        `${environment.apiUrl}/${this.version}/${baseGroupName}/${id.toString()}`,
         'PUT',
         tableItemSelected
       );
       this.handleModal('success', response.message);
-      this.baseIsModalInfoActive.set(true);
+      this.isBaseModalInfoActive.set(true);
+      this.isNewEditRegister = true;
     } catch (e) {
       this.handleModal('failure', (e as Error).message);
-      this.baseIsModalInfoActive.set(true);
+      this.isBaseModalInfoActive.set(true);
     } finally {
       this.baseShowLoading.set(false);
     }
@@ -293,14 +297,14 @@ export class BaseRegister {
     try {
       this.baseShowLoading.set(true);
       const response = await this.httpRequestService.sendHttpRequest(
-        `${environment.apiUrl}/${baseGroupName}/${id.toString()}`,
+        `${environment.apiUrl}/${this.version}/${baseGroupName}/${id.toString()}`,
         'DELETE'
       );
       this.handleModal('success', response.message);
-      this.baseIsModalInfoActive.set(true);
+      this.isBaseModalInfoActive.set(true);
     } catch (e) {
       this.handleModal('failure', (e as Error).message);
-      this.baseIsModalInfoActive.set(true);
+      this.isBaseModalInfoActive.set(true);
     } finally {
       this.baseShowLoading.set(false);
     }

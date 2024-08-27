@@ -31,7 +31,6 @@ interface IFormData {
 export class ModalCheckComponent implements OnChanges {
   @Input() tableDataSelected: TableItemType = {
     idCompany: 0,
-    type: 0,
     date: new Date().toISOString(),
     nickname: '',
     name: '',

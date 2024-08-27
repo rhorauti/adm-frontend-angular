@@ -52,21 +52,21 @@ export class ButtonComponent implements OnInit {
         break;
       }
       case 'success-save': {
-        this.btnClass = 'bg-green-600 hover:bg-green-500';
+        this.btnClass = 'bg-green-600 hover:bg-green-500 text-white md:w-36';
         this.showIcon = true;
         this.btnIcon = 'save';
         this.label = 'Adicionar';
         break;
       }
       case 'success-edit': {
-        this.btnClass = 'bg-green-600 hover:bg-green-500';
+        this.btnClass = 'bg-green-600 hover:bg-green-500 text-white md:w-36';
         this.showIcon = true;
         this.btnIcon = 'save';
         this.label = 'Alterar';
         break;
       }
       case 'success-delete': {
-        this.btnClass = 'bg-red-400 hover:bg-red-300 text-white';
+        this.btnClass = 'bg-red-400 hover:bg-red-300 text-white md:w-36';
         this.showIcon = true;
         this.btnIcon = 'save';
         this.label = 'Excluir';
@@ -76,17 +76,27 @@ export class ButtonComponent implements OnInit {
         this.btnClass = 'text-white bg-transparent border border-gray-500 hover:bg-gray-800';
         break;
       }
-      case 'warning': {
+      case 'icon-edit': {
         this.btnClass = 'bg-yellow-400 hover:bg-yellow-300 h-6';
         this.btnIcon = 'edit';
         this.label = '';
         break;
       }
-      case 'danger': {
+      case 'icon-delete': {
         this.btnClass = 'text-black bg-red-400 border border-gray-500 hover:bg-red-300 h-6';
         this.hoverBackgroundColor = 'hover:bg-red-400';
         this.btnIcon = 'delete_outline';
         this.label = '';
+        break;
+      }
+      case 'icon-arrow-down': {
+        this.btnClass = 'text-white bg-transparent border border-gray-500 hover:bg-gray-800';
+        this.btnIcon = 'arrow_downward';
+        break;
+      }
+      case 'icon-arrow-up': {
+        this.btnClass = 'text-white bg-transparent border border-gray-500 hover:bg-gray-800';
+        this.btnIcon = 'arrow_upward';
         break;
       }
       default:

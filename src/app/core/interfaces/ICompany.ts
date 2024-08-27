@@ -2,11 +2,10 @@ import { IAddress } from './IAddress';
 import { IProject } from './IProject';
 import { ITableHeader } from './ITableHeader';
 import { IEmployee } from './IEmployee';
-import { IBaseGroup } from './IBase';
+import { IBaseGroup, TableTypeNumber } from './IBase';
 
 export interface ICompany {
-  idCompany: number | null;
-  type: number;
+  idCompany: number;
   date: string;
   nickname: string;
   name: string;
@@ -14,7 +13,7 @@ export interface ICompany {
 }
 
 export interface ICompanyGroup extends IBaseGroup {
-  companyType: number | null;
+  companyType: TableTypeNumber;
   companyTableHeaders: ITableHeader[];
   companiesData: ICompany[];
   companyData: ICompany;

@@ -2,7 +2,8 @@
   <section class="text-lg font-semibold mt-2 border border-gray-500 p-1 rounded text-center">
     <p>Cadastro de Empresas</p>
   </section>
-  <app-tab [arrayTabsTitle]="company().arrayTab" (selectedTabEmitter)="company().tabIndex = $event">
+
+  <app-tab [arrayTabsTitle]="company().arrayTab" (selectedTabEmitter)="setCompanyIdx($event)">
     <div class="grid gap-5 md:flex md:items-center md:justify-between md:gap-10 mb-5">
       <app-input-addons
         [optionList]="company().arraySelectFilter"
@@ -16,8 +17,24 @@
           [btnIcon]="'add'"
           [label]="'Cadastrar'"
           (click)="showModalForm()"></app-button>
+        @if (company().isTableExpanded) {
+          <app-button
+            (click)="toggleBtn(company)"
+            [isDisabled]="company().tableDataSelected.length == 0"
+            [showLabel]="false"
+            [showIcon]="true"
+            [btnType]="'icon-arrow-up'"></app-button>
+        } @else {
+          <app-button
+            (click)="toggleBtn(company)"
+            [isDisabled]="company().tableDataSelected.length == 0"
+            [showLabel]="false"
+            [showIcon]="true"
+            [btnType]="'icon-arrow-down'"></app-button>
+        }
       </div>
     </div>
+
     <app-table>
       <tr thead-row>
         @for (header of company().tableHeaderSelected; track $index) {
@@ -56,18 +73,19 @@
                   (click)="showModalEditForm(company().tableDataSelected[$index], dataSelected)"
                   [showLabel]="false"
                   [showIcon]="true"
-                  [btnType]="'warning'"></app-button>
+                  [btnType]="'icon-edit'"></app-button>
                 <app-button
                   (click)="showModalAskToDeleteCompany(dataSelected, 'company')"
                   [showLabel]="false"
                   [showIcon]="true"
-                  [btnType]="'danger'"></app-button>
+                  [btnType]="'icon-delete'"></app-button>
               </td>
             }
           }
         </tr>
       }
     </app-table>
+
     <app-tab
       [arrayTabsTitle]="companyItem().arrayTab"
       [divClass]="'mt-5'"
@@ -83,6 +101,7 @@
           <app-button [showIcon]="true" [btnIcon]="'add'" [label]="'Cadastrar'"></app-button>
         </div>
       </div>
+
       <app-table>
         <tr thead-row>
           @for (header of companyItem().tableHeaderSelected; track $index) {
@@ -130,12 +149,12 @@
                     (click)="showModalEditForm(company().tableDataSelected[$index], dataSelected)"
                     [showLabel]="false"
                     [showIcon]="true"
-                    [btnType]="'warning'"></app-button>
+                    [btnType]="'icon-edit'"></app-button>
                   <app-button
                     (click)="showModalAskToDeleteCompany(dataSelected, 'address')"
                     [showLabel]="false"
                     [showIcon]="true"
-                    [btnType]="'danger'"></app-button>
+                    [btnType]="'icon-delete'"></app-button>
                 </td>
               }
             }
@@ -147,7 +166,7 @@
 </div>
 
 <app-modal-base
-  [showModal]="isModalFormActive()"
+  [showModal]="isBaseModalFormActive()"
   [isModalForm]="true"
   [title]="isEditForm() ? 'Alterar dados da empresa' : 'Cadastro de nova empresa'"
   (emitCloseModal)="closeModalForm()">
@@ -199,24 +218,63 @@
     @if (!isEditForm()) {
       <app-button [btnType]="'clear'" (click)="isClearInputForm.set(true)"></app-button>
     }
-    <app-button [btnType]="'forward'" (click)="onModalFormBtnOkClick()"></app-button>
+    <app-button
+      [btnType]="'forward'"
+      (click)="showModalCheck(company().tableItemSelected)"></app-button>
+  </div>
+</app-modal-base>
+
+<app-modal-base
+  [showModal]="isModalCheckActive()"
+  [showHeader]="true"
+  [title]="'Confirmação dos dados'"
+  [isModalForm]="true"
+  (emitCloseModal)="isModalCheckActive.set(false)">
+  <div class="body-block text-sm text-center">
+    @if (isEditForm()) {
+      <div class="grid grid-cols-[1fr_3fr] border-t border-gray-500">
+        <p class="border-r border-l p-2">Id:</p>
+        <p class="border-r p-2 font-bold">{{ modalCheckCompany().idCompany }}</p>
+      </div>
+    }
+    <div class="grid grid-cols-[1fr_3fr] border-t border-gray-500">
+      <p class="border-r border-l p-2">Apelido:</p>
+      <p class="border-r p-2 font-bold">{{ modalCheckCompany().nickname }}</p>
+    </div>
+    <div class="grid grid-cols-[1fr_3fr] border-t border-gray-500">
+      <p class="border-r border-l p-2">Nome:</p>
+      <p class="border-r p-2 font-bold">{{ modalCheckCompany().name }}</p>
+    </div>
+    <div class="grid grid-cols-[1fr_3fr] border-t last:border-b border-gray-500">
+      <p class="border-r border-l p-2">CNPJ:</p>
+      <p class="border-r p-2 font-bold">{{ modalCheckCompany().cnpj }}</p>
+    </div>
+  </div>
+  <div class="footer-block flex justify-center items-center gap-5 mt-5">
+    <app-button [btnType]="'cancel'" (click)="isModalCheckActive.set(false)"></app-button>
+    @if (isEditForm()) {
+      <app-button
+        [btnType]="'success-edit'"
+        (click)="
+          updateRegister(company().tableItemSelected, 'company', modalCheckCompany().idCompany)
+        "></app-button>
+    } @else {
+      <app-button
+        [btnType]="'success-save'"
+        (click)="addNewCompany(company().tableItemSelected)"></app-button>
+    }
   </div>
 </app-modal-base>
 
 <app-modal-ask
-  [showModal]="isModalAskActive()"
+  [showModal]="isBaseModalAskActive()"
   [description]="baseModalData().description"
   [type]="baseModalData().type"
   (closeEmitter)="onModalAskBtnNoClick()"
-  (actionOkEmitter)="onModalAskBtnYesClick($event)"></app-modal-ask>
-<app-modal-check
-  [isModalCheckActive]="isModalCheckActive()"
-  [tableDataSelected]="company().tableItemSelected"
-  [isEditForm]="isEditForm()"
-  (closeEventEmitter)="isModalCheckActive.set(false)"></app-modal-check>
+  (actionOkEmitter)="onModalAskBtnYesClick()"></app-modal-ask>
 <app-modal-info
-  [showModal]="baseIsModalInfoActive()"
+  [showModal]="isBaseModalInfoActive()"
   [description]="baseModalData().description"
   [type]="baseModalData().type"
-  (closeModalEmitter)="baseIsModalInfoActive.set(false)"></app-modal-info>
+  (closeModalEmitter)="isBaseModalInfoActive.set(false)"></app-modal-info>
 <app-loading [showLoading]="baseShowLoading()"></app-loading>
