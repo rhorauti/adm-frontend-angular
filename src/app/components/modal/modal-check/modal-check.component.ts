@@ -32,9 +32,12 @@ export class ModalCheckComponent implements OnChanges {
   @Input() tableDataSelected: TableItemType = {
     idCompany: 0,
     date: new Date().toISOString(),
+    type: 1,
     nickname: '',
     name: '',
     cnpj: '',
+    ie: '',
+    im: '',
   };
   @Input() isEditForm = false;
   public firstIdx1 = 0;

@@ -23,8 +23,9 @@ export class InputFormComponent implements OnInit, OnChanges {
   @Input() isDisabled = false;
   @Input() maskType = '';
   @Input() isClearInputForm = false;
+  @Input() propsInput: number | string = '';
 
-  inputValue = '';
+  inputValue: number | string = this.propsInput;
   maskValue = '';
   maskPrefix = '';
   showPassword = false;
@@ -49,18 +50,22 @@ export class InputFormComponent implements OnInit, OnChanges {
     }
   }
 
+  isInputLengthNotZero(inputValue: unknown): boolean {
+    return (inputValue as string).length > 0;
+  }
+
   ngOnChanges(): void {
     if (this.isClearInputForm) {
       this.inputValue = '';
       this.clearInputEmitter.emit(false);
     }
+    this.inputValue = this.propsInput;
   }
 
   clearInput(): void {
     this.inputValue = '';
     this.clearInputEmitter.emit(false);
     this.isClearInputForm = false;
-    console.log('isClearInput', this.isClearInputForm);
   }
 
   sendInputValue(inputData: Event): void {

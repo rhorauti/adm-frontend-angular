@@ -16,10 +16,8 @@
       <mat-icon
         (click)="clearInput()"
         class="cursor-pointer text-base"
-        [ngClass]="[inputValue.length > 0 ? 'text-white' : 'text-gray-400']"
-        >{{
-          showSearchIcon && inputValue.length == 0 ? 'search' : 'close'
-        }}</mat-icon
+        [ngClass]="[isInputLengthNotZero(inputValue) ? 'text-white' : 'text-gray-400']"
+        >{{ showSearchIcon && !isInputLengthNotZero(inputValue) ? 'search' : 'close' }}</mat-icon
       >
     </div>
   }

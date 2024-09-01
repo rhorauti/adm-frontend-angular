@@ -24,9 +24,12 @@ export class ModalAskComponent implements OnChanges {
   @Input() tableItemSelected: TableItemType = {
     idCompany: 0,
     date: '',
+    type: 1,
     nickname: '',
     name: '',
     cnpj: '',
+    ie: '',
+    im: '',
   };
 
   ngOnChanges() {

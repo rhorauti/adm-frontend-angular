@@ -16,17 +16,15 @@
           [showIcon]="true"
           [btnIcon]="'add'"
           [label]="'Cadastrar'"
-          (click)="showModalForm()"></app-button>
+          (click)="onShowBaseModalForm()"></app-button>
         @if (company().isTableExpanded) {
           <app-button
-            (click)="toggleBtn(company)"
             [isDisabled]="company().tableDataSelected.length == 0"
             [showLabel]="false"
             [showIcon]="true"
             [btnType]="'icon-arrow-up'"></app-button>
         } @else {
           <app-button
-            (click)="toggleBtn(company)"
             [isDisabled]="company().tableDataSelected.length == 0"
             [showLabel]="false"
             [showIcon]="true"
@@ -47,7 +45,7 @@
       </tr>
       @for (dataSelected of company().tableDataSelected; track $index) {
         <tr tbody-row class="hover:bg-gray-700">
-          @if (isTypeValid(dataSelected, 'company')) {
+          @if (isBaseTypeValid(dataSelected, 'company')) {
             @if (company().companyTableHeaders[0].showHeader) {
               <td class="table-td">
                 {{ dataSelected.idCompany }}
@@ -68,14 +66,20 @@
               <td class="table-td">{{ dataSelected.cnpj }}</td>
             }
             @if (company().companyTableHeaders[5].showHeader) {
+              <td class="table-td">{{ dataSelected.ie }}</td>
+            }
+            @if (company().companyTableHeaders[6].showHeader) {
+              <td class="table-td">{{ dataSelected.im }}</td>
+            }
+            @if (company().companyTableHeaders[7].showHeader) {
               <td class="table-td flex justify-center gap-3">
                 <app-button
-                  (click)="showModalEditForm(company().tableDataSelected[$index], dataSelected)"
+                  (click)="onShowModalEditFormCompany(dataSelected)"
                   [showLabel]="false"
                   [showIcon]="true"
                   [btnType]="'icon-edit'"></app-button>
                 <app-button
-                  (click)="showModalAskToDeleteCompany(dataSelected, 'company')"
+                  (click)="showBaseModalAskToDeleteCompany(dataSelected)"
                   [showLabel]="false"
                   [showIcon]="true"
                   [btnType]="'icon-delete'"></app-button>
@@ -114,7 +118,7 @@
         </tr>
         @for (dataSelected of companyItem().tableDataSelected; track $index) {
           <tr tbody-row class="hover:bg-gray-700">
-            @if (isTypeValid(dataSelected, 'address')) {
+            @if (isBaseTypeValid(dataSelected, 'address')) {
               @if (companyItem().tableHeaderSelected[0].showHeader) {
                 <td class="table-td">
                   {{ dataSelected.idAddress }}
@@ -146,12 +150,12 @@
               @if (companyItem().tableHeaderSelected[5].showHeader) {
                 <td class="table-td flex justify-center gap-3">
                   <app-button
-                    (click)="showModalEditForm(company().tableDataSelected[$index], dataSelected)"
+                    (click)="onShowModalEditFormCompany(dataSelected)"
                     [showLabel]="false"
                     [showIcon]="true"
                     [btnType]="'icon-edit'"></app-button>
                   <app-button
-                    (click)="showModalAskToDeleteCompany(dataSelected, 'address')"
+                    (click)="showModalAskToDeleteCompanyItem()"
                     [showLabel]="false"
                     [showIcon]="true"
                     [btnType]="'icon-delete'"></app-button>
@@ -166,17 +170,18 @@
 </div>
 
 <app-modal-base
-  [showModal]="isBaseModalFormActive()"
+  [showModal]="isModalFormActive()"
   [isModalForm]="true"
   [title]="isEditForm() ? 'Alterar dados da empresa' : 'Cadastro de nova empresa'"
-  (emitCloseModal)="closeModalForm()">
+  (emitCloseModal)="onCloseModalForm()">
   <div class="body-block">
     <div class="flex flex-col gap-2">
       @if (isEditForm()) {
         <div class="flex flex-col gap-1">
           <label class="font-semibold text-sm" for="">Id</label>
           <app-input-form
-            [isClearInputForm]="isClearInputForm()"
+            [propsInput]="modalCompanyInfo().idCompany"
+            [isClearInputForm]="isInputFormClear()"
             [isDisabled]="true"
             [showRightIcon]="false"
             (emitInputValue)="setCompanyProperty(company().tableItemSelected, 'idCompany', $event)"
@@ -186,7 +191,8 @@
       <div class="flex flex-col gap-1">
         <label class="font-semibold text-sm" for="">Nickname</label>
         <app-input-form
-          [isClearInputForm]="isClearInputForm()"
+          [propsInput]="modalCompanyInfo().nickname"
+          [isClearInputForm]="isInputFormClear()"
           #inputModal
           [showRightIcon]="false"
           (emitInputValue)="setCompanyProperty(company().tableItemSelected, 'nickname', $event)"
@@ -195,7 +201,8 @@
       <div class="flex flex-col gap-1">
         <label class="font-semibold text-sm" for="">Nome</label>
         <app-input-form
-          [isClearInputForm]="isClearInputForm()"
+          [propsInput]="modalCompanyInfo().name"
+          [isClearInputForm]="isInputFormClear()"
           #inputModal
           [showRightIcon]="false"
           (emitInputValue)="setCompanyProperty(company().tableItemSelected, 'name', $event)"
@@ -204,23 +211,44 @@
       <div class="flex flex-col gap-1">
         <label class="font-semibold text-sm" for="">CNPJ</label>
         <app-input-form
-          [isClearInputForm]="isClearInputForm()"
+          [propsInput]="modalCompanyInfo().cnpj"
+          [isClearInputForm]="isInputFormClear()"
           #inputModal
           [maskType]="'cnpj'"
           [showRightIcon]="false"
           (emitInputValue)="setCompanyProperty(company().tableItemSelected, 'cnpj', $event)"
           [inputClass]="'text-black h-9'"></app-input-form>
       </div>
+      <div class="flex flex-col gap-1">
+        <label class="font-semibold text-sm" for="">Inscrição Estadual</label>
+        <app-input-form
+          [propsInput]="modalCompanyInfo().ie"
+          [isClearInputForm]="isInputFormClear()"
+          #inputModal
+          [showRightIcon]="false"
+          (emitInputValue)="setCompanyProperty(company().tableItemSelected, 'ie', $event)"
+          [inputClass]="'text-black h-9'"></app-input-form>
+      </div>
+      <div class="flex flex-col gap-1">
+        <label class="font-semibold text-sm" for="">Inscrição Municipal</label>
+        <app-input-form
+          [propsInput]="modalCompanyInfo().im"
+          [isClearInputForm]="isInputFormClear()"
+          #inputModal
+          [showRightIcon]="false"
+          (emitInputValue)="setCompanyProperty(company().tableItemSelected, 'im', $event)"
+          [inputClass]="'text-black h-9'"></app-input-form>
+      </div>
     </div>
   </div>
   <div class="grid footer-block md:flex md:justify-center gap-5 mt-6 w-full">
-    <app-button [btnType]="'cancel'" (click)="closeModalForm()"></app-button>
+    <app-button [btnType]="'cancel'" (click)="onCloseModalForm()"></app-button>
     @if (!isEditForm()) {
-      <app-button [btnType]="'clear'" (click)="isClearInputForm.set(true)"></app-button>
+      <app-button [btnType]="'clear'" (click)="isInputFormClear.set(true)"></app-button>
     }
     <app-button
       [btnType]="'forward'"
-      (click)="showModalCheck(company().tableItemSelected)"></app-button>
+      (click)="onShowModalCheckCompany(company().tableItemSelected)"></app-button>
   </div>
 </app-modal-base>
 
@@ -234,47 +262,49 @@
     @if (isEditForm()) {
       <div class="grid grid-cols-[1fr_3fr] border-t border-gray-500">
         <p class="border-r border-l p-2">Id:</p>
-        <p class="border-r p-2 font-bold">{{ modalCheckCompany().idCompany }}</p>
+        <p class="border-r p-2 font-bold">{{ modalCompanyInfo().idCompany }}</p>
       </div>
     }
     <div class="grid grid-cols-[1fr_3fr] border-t border-gray-500">
       <p class="border-r border-l p-2">Apelido:</p>
-      <p class="border-r p-2 font-bold">{{ modalCheckCompany().nickname }}</p>
+      <p class="border-r p-2 font-bold">{{ modalCompanyInfo().nickname }}</p>
     </div>
     <div class="grid grid-cols-[1fr_3fr] border-t border-gray-500">
       <p class="border-r border-l p-2">Nome:</p>
-      <p class="border-r p-2 font-bold">{{ modalCheckCompany().name }}</p>
+      <p class="border-r p-2 font-bold">{{ modalCompanyInfo().name }}</p>
     </div>
     <div class="grid grid-cols-[1fr_3fr] border-t last:border-b border-gray-500">
       <p class="border-r border-l p-2">CNPJ:</p>
-      <p class="border-r p-2 font-bold">{{ modalCheckCompany().cnpj }}</p>
+      <p class="border-r p-2 font-bold">{{ modalCompanyInfo().cnpj }}</p>
+    </div>
+    <div class="grid grid-cols-[1fr_3fr] border-t last:border-b border-gray-500">
+      <p class="border-r border-l p-2">Inscrição Estadual:</p>
+      <p class="border-r p-2 font-bold">{{ modalCompanyInfo().ie }}</p>
+    </div>
+    <div class="grid grid-cols-[1fr_3fr] border-t last:border-b border-gray-500">
+      <p class="border-r border-l p-2">Inscrição Municipal:</p>
+      <p class="border-r p-2 font-bold">{{ modalCompanyInfo().im }}</p>
     </div>
   </div>
   <div class="footer-block flex justify-center items-center gap-5 mt-5">
     <app-button [btnType]="'cancel'" (click)="isModalCheckActive.set(false)"></app-button>
     @if (isEditForm()) {
-      <app-button
-        [btnType]="'success-edit'"
-        (click)="
-          updateRegister(company().tableItemSelected, 'company', modalCheckCompany().idCompany)
-        "></app-button>
+      <app-button [btnType]="'success-edit'" (click)="updateCompany()"></app-button>
     } @else {
-      <app-button
-        [btnType]="'success-save'"
-        (click)="addNewCompany(company().tableItemSelected)"></app-button>
+      <app-button [btnType]="'success-save'" (click)="addNewCompany()"></app-button>
     }
   </div>
 </app-modal-base>
 
 <app-modal-ask
-  [showModal]="isBaseModalAskActive()"
-  [description]="baseModalData().description"
-  [type]="baseModalData().type"
-  (closeEmitter)="onModalAskBtnNoClick()"
-  (actionOkEmitter)="onModalAskBtnYesClick()"></app-modal-ask>
+  [showModal]="isModalAskActive()"
+  [description]="modalData().description"
+  [type]="modalData().type"
+  (closeEmitter)="isModalAskActive.set(false)"
+  (actionOkEmitter)="deleteCompany()"></app-modal-ask>
 <app-modal-info
-  [showModal]="isBaseModalInfoActive()"
-  [description]="baseModalData().description"
-  [type]="baseModalData().type"
-  (closeModalEmitter)="isBaseModalInfoActive.set(false)"></app-modal-info>
-<app-loading [showLoading]="baseShowLoading()"></app-loading>
+  [showModal]="isModalInfoActive()"
+  [description]="modalData().description"
+  [type]="modalData().type"
+  (closeModalEmitter)="onCloseModalInfoCompany()"></app-modal-info>
+<app-loading [showLoading]="showLoading()"></app-loading>
