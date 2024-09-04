@@ -7,19 +7,21 @@
     [label]="'Colunas'"></app-button>
   @if (isHeaderBoxActive) {
     <div
-      class="grid md:gap-1 gap-2 md:absolute px-4 py-2 border border-gray-500 bg-white text-black rounded-md text-sm w-full md:w-40 md:-left-44 md:top-0">
+      class="grid md:gap-1 gap-2 md:absolute px-4 py-2 border border-gray-500 bg-white text-black rounded-md text-sm w-full md:w-fit md:-left-52 md:-top-16">
       @for (header of tableHeaders; track $index) {
-        <div>
-          <input
-            (click)="showTableHeader(header)"
-            type="checkbox"
-            [value]="header.name"
-            [checked]="header.showHeader"
-            [disabled]="header.name == 'Id'"
-            [id]="header.id"
-            class="mr-2" />
-          <label [for]="header.id">{{ header.name }}</label>
-        </div>
+        @if (header.name != 'Ações') {
+          <div>
+            <input
+              (click)="showTableHeader(header)"
+              type="checkbox"
+              [value]="header.name"
+              [checked]="header.showHeader"
+              [disabled]="header.name == 'Id'"
+              [id]="header.id"
+              class="mr-2" />
+            <label [for]="header.id">{{ header.name }}</label>
+          </div>
+        }
       }
     </div>
   }

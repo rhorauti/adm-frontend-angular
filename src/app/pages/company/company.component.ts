@@ -1,5 +1,5 @@
-import { Component, OnInit, Signal, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, Inject, OnInit, Signal, signal } from '@angular/core';
+import { CommonModule, DOCUMENT } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
 import { PaginationComponent } from '@components/pagination/pagination.component';
 import { RegisterCompanyApi } from '@core/api/http/company.api';
@@ -16,7 +16,7 @@ import { InputAddonsComponent } from '../../components/input/input-addons/input-
 import { TableComponent } from '../../components/table/table.component';
 import { TableHeaderBoxComponent } from '@components/table-header-box/table-header-box.component';
 import { ModalBaseComponent } from '@components/modal/modal-base/modal-base.component';
-import { InputFormComponent } from '@components/input/input-form/input-form.component';
+import { InputStandardComponent } from '@components/input/input-standard/input-standard.component';
 import { IBaseGroup, TableItemType, TableTypeObject } from '@core/interfaces/IBase';
 import { environment } from '@environments/environment';
 import { IAddress } from '@core/interfaces/IAddress';
@@ -27,7 +27,7 @@ import { IEmployee } from '@core/interfaces/IEmployee';
   standalone: true,
   imports: [
     FormsModule,
-    InputFormComponent,
+    InputStandardComponent,
     ButtonComponent,
     CommonModule,
     PaginationComponent,
@@ -46,19 +46,12 @@ import { IEmployee } from '@core/interfaces/IEmployee';
   styleUrl: './company.component.scss',
 })
 export class CompanyComponent implements OnInit {
-  constructor(private httpRequestService: HttpRequestService) {}
+  constructor(
+    @Inject(DOCUMENT) private document: Document,
+    private httpRequestService: HttpRequestService
+  ) {}
 
   version = 'v1';
-
-  ngOnInit(): void {
-    this.showCompanyList();
-    this.company().tableHeaderSelected = this.company().companyTableHeaders;
-    this.showOptionList(this.company);
-    this.showInputPlaceholder(this.company);
-    this.companyItem().tableHeaderSelected = this.companyItem().adressTableHeaders;
-    this.showOptionList(this.companyItem);
-    this.showInputPlaceholder(this.companyItem);
-  }
 
   public company = signal<ICompanyGroup>({
     companyType: 1,
@@ -136,38 +129,42 @@ export class CompanyComponent implements OnInit {
     employeeTableHeaders: [
       { id: 0, showHeader: true, name: 'Id' },
       { id: 1, showHeader: true, name: 'Nome' },
-      { id: 2, showHeader: true, name: 'Departamento' },
-      { id: 3, showHeader: true, name: 'Cargo' },
-      { id: 4, showHeader: true, name: 'E-mail' },
-      { id: 5, showHeader: true, name: 'Telefone fixo' },
-      { id: 6, showHeader: true, name: 'Celular' },
-      { id: 7, showHeader: true, name: 'Ações' },
+      { id: 2, showHeader: true, name: 'cpf' },
+      { id: 3, showHeader: true, name: 'Departamento' },
+      { id: 4, showHeader: true, name: 'Cargo' },
+      { id: 5, showHeader: true, name: 'E-mail' },
+      { id: 6, showHeader: true, name: 'Tel. fixo' },
+      { id: 7, showHeader: true, name: 'Celular' },
+      { id: 8, showHeader: true, name: 'Ações' },
     ],
     initialTableData: [],
     tableDataSelected: [],
     tableItemSelected: {
       idAddress: 0,
       type: '',
-      adress: '',
+      address: '',
       number: 0,
       complement: '',
       district: '',
       city: '',
       state: '',
     },
+    addressesData: [],
     addressData: {
       idAddress: 0,
       type: '',
-      adress: '',
+      address: '',
       number: 0,
       complement: '',
       district: '',
       city: '',
       state: '',
     },
+    employeesData: [],
     employeeData: {
       idEmployee: 0,
       name: '',
+      cpf: '',
       department: '',
       position: '',
       email: '',
@@ -179,8 +176,44 @@ export class CompanyComponent implements OnInit {
     isTableExpanded: false,
   });
 
-  setCompanyIdx(idx: number): void {
-    this.company().tabIndex = idx;
+  ngOnInit(): void {
+    this.onShowCompanyList();
+    this.onShowAddressList();
+    this.onShowEmployeeList();
+    this.company().tableHeaderSelected = this.company().companyTableHeaders;
+    this.companyItem().tableHeaderSelected = this.companyItem().adressTableHeaders;
+    this.showOptionList(this.company);
+    this.showInputPlaceholder(this.company);
+    this.showOptionList(this.companyItem);
+    this.showInputPlaceholder(this.companyItem);
+  }
+
+  setCompanyIdx(group: Signal<IBaseGroup>, idx: number): void {
+    group().tabIndex = idx;
+    if (idx == 0) {
+      group().tableDataSelected.filter(data => {
+        if (this.isBaseTypeValid(data, 'company')) return data.type == 1;
+        else return;
+      });
+    } else if (idx == 1) {
+      group().tableDataSelected.filter(data => {
+        if (this.isBaseTypeValid(data, 'company')) return data.type == 2;
+        else return;
+      });
+    }
+  }
+
+  setCompanyItemIdx(idx: number): void {
+    this.companyItem().tabIndex = idx;
+    if (idx == 0) {
+      this.companyItem().tableDataSelected = this.companyItem().addressesData;
+      this.companyItem().tableItemSelected = this.modalAddressInfo();
+      this.companyItem().tableHeaderSelected = this.companyItem().adressTableHeaders;
+    } else if (idx == 1) {
+      this.companyItem().tableDataSelected = this.companyItem().employeesData;
+      this.companyItem().tableItemSelected = this.modalEmployeeInfo();
+      this.companyItem().tableHeaderSelected = this.companyItem().employeeTableHeaders;
+    }
   }
 
   /**
@@ -219,8 +252,35 @@ export class CompanyComponent implements OnInit {
     baseGroup().selectValueFilter = value;
   }
 
-  isInputFormClear = signal(false);
-  isModalAskActive = signal(false);
+  setCompanyItemVisible(): void {
+    const tableCompanyItem = this.document.getElementById('table-company-item-address');
+    if (tableCompanyItem) {
+      const tableClassList = tableCompanyItem.classList;
+      if (tableClassList.contains('h-0')) tableClassList.remove('h-0');
+      if (!tableClassList.contains('opacity-100')) tableClassList.add('opacity-100');
+      if (!tableClassList.contains('h-full')) tableClassList.add('h-full');
+      if (!tableClassList.contains('mt-5')) tableClassList.add('mt-5');
+    }
+  }
+
+  selectedTableRow(index: number): void {
+    const rows = this.document.getElementsByClassName('company-table-row');
+    Array.from(rows).forEach(row => {
+      if (row.classList.contains('is-active')) row.classList.remove('is-active');
+    });
+    rows[index].classList.add('is-active');
+    this.setCompanyItemVisible();
+  }
+
+  modalFormInfo = signal({
+    isActive: false,
+    isInputClear: false,
+    isEditForm: false,
+  });
+
+  modalAskInfo = signal({
+    isActive: false,
+  });
 
   /**
    * isTypeValid
@@ -279,7 +339,7 @@ export class CompanyComponent implements OnInit {
           break;
         }
       }
-      this.isInputFormClear.set(false);
+      this.modalFormInfo().isInputClear = false;
     }
   }
 
@@ -292,6 +352,28 @@ export class CompanyComponent implements OnInit {
     im: '',
   });
 
+  modalAddressInfo = signal({
+    idAddress: 0,
+    type: '',
+    address: '',
+    number: 0,
+    complement: '',
+    district: '',
+    city: '',
+    state: '',
+  });
+
+  modalEmployeeInfo = signal({
+    idEmployee: 0,
+    name: '',
+    cpf: '',
+    department: '',
+    position: '',
+    email: '',
+    deskphone: '',
+    cellphone: '',
+  });
+
   clearModalCompany(): void {
     this.modalCompanyInfo().idCompany = 0;
     this.modalCompanyInfo().nickname = '';
@@ -301,83 +383,78 @@ export class CompanyComponent implements OnInit {
     this.modalCompanyInfo().im = '';
   }
 
-  isModalFormActive = signal(false);
-  isEditForm = signal(false);
-
-  onShowBaseModalForm(): void {
-    this.isModalFormActive.set(true);
+  onShowModalForm(): void {
+    this.modalFormInfo().isActive = true;
   }
 
   onCloseModalForm(): void {
-    if (this.isEditForm()) this.isEditForm.set(false);
+    if (this.modalFormInfo().isEditForm) this.modalFormInfo().isEditForm = false;
     this.clearModalCompany();
-    this.isInputFormClear.set(true);
-    this.isModalFormActive.set(false);
+    this.modalFormInfo().isInputClear = true;
+    this.modalFormInfo().isActive = false;
   }
 
-  onShowModalEditFormCompany(dataSelected: TableItemType): void {
+  onShowModalEditForm(dataSelected: TableItemType): void {
     if (this.isBaseTypeValid(dataSelected, 'company')) {
       this.modalCompanyInfo.set({ ...dataSelected });
-      this.company().tableItemSelected = dataSelected;
-      this.isEditForm.set(true);
+      this.company().tableItemSelected = { ...dataSelected };
     }
-    this.isModalFormActive.set(true);
+    this.modalFormInfo().isEditForm = true;
+    this.modalFormInfo().isActive = true;
   }
 
-  isModalCheckActive = signal(false);
+  modalCheckInfo = signal({
+    isActive: false,
+    isActionOk: false,
+  });
 
-  onShowModalCheckCompany(tableItemSelected: TableItemType): void {
+  onShowModalCheck(tableItemSelected: TableItemType): void {
     if (this.isBaseTypeValid(tableItemSelected, 'company')) {
       this.modalCompanyInfo.set(tableItemSelected);
     }
-    this.isModalCheckActive.set(true);
+    this.modalCheckInfo().isActive = true;
   }
 
-  onCloseModalCheckCompany(): void {
-    this.clearModalCompany();
-    this.isModalCheckActive.set(false);
+  modalInfo = signal({
+    isActive: false,
+    type: '',
+    description: '',
+    isActionOk: false,
+  });
+
+  onHandleModalInfo(type: string, description: string): void {
+    this.modalInfo().type = type;
+    this.modalInfo().description = description;
   }
 
-  modalData = signal({ type: '', description: '' });
-
-  handleModal(type: string, description: string): void {
-    this.modalData().type = type;
-    this.modalData().description = description;
-  }
-
-  isModalInfoActive = signal(false);
-  isModalInfoFormActionOk = false;
-  isModalInfoDeleteActionOk = false;
-
-  onCloseModalInfoCompany(): void {
-    if (this.isModalInfoFormActionOk) {
-      this.showCompanyList();
+  onCloseModalInfo(): void {
+    if (this.modalCheckInfo().isActionOk) {
+      this.onShowCompanyList();
       this.onCloseModalForm();
-      this.onCloseModalCheckCompany();
-      this.isModalInfoActive.set(false);
-      this.isModalInfoFormActionOk = false;
-    } else if (this.isModalInfoDeleteActionOk) {
-      console.log('entrando else if');
-      this.showCompanyList();
-      this.isModalAskActive.set(false);
-      this.isModalInfoActive.set(false);
-      this.isModalInfoDeleteActionOk = false;
+      this.modalCheckInfo().isActive = false;
+      this.modalInfo().isActive = false;
+      this.modalCheckInfo().isActionOk = false;
+    } else if (this.modalInfo().isActionOk) {
+      this.onShowCompanyList();
+      this.modalAskInfo().isActive = false;
+      this.modalInfo().isActive = false;
+      this.modalInfo().isActionOk = false;
     } else {
-      this.onCloseModalCheckCompany();
-      this.isModalInfoActive.set(false);
+      this.modalCheckInfo().isActive = false;
+      this.modalInfo().isActive = false;
     }
   }
 
-  showBaseModalAskToDeleteCompany(dataSelected: TableItemType): void {
+  onShowBaseModalAskToDelete(dataSelected: TableItemType): void {
     this.company().tableItemSelected = dataSelected;
-    this.handleModal(
+    this.onHandleModalInfo(
       'confirmation',
       `Deseja excluir ${(this.company().tableItemSelected as ICompany).name}?`
     );
-    this.isModalAskActive.set(true);
+    this.modalAskInfo().isActive = true;
   }
 
-  showModalAskToDeleteCompanyItem(): void {}
+  onShowModalAskToDeleteCompanyItem(): void {}
 
   showLoading = signal(false);
 
@@ -389,7 +466,7 @@ export class CompanyComponent implements OnInit {
    * @param baseGroupSignal WritableSignal - Data of the group informed.
    * @param baseGroupName string - Name of the group informed (ex. company, product, etc)
    */
-  async showCompanyList(): Promise<void> {
+  async onShowCompanyList(): Promise<void> {
     try {
       this.showLoading.set(true);
       const response = await this.httpRequestService.sendHttpRequest(
@@ -398,7 +475,39 @@ export class CompanyComponent implements OnInit {
       );
       this.company().tableDataSelected = response.data;
     } catch (e: any) {
-      this.handleModal('failure', 'Erro ao carregar a lista');
+      this.onHandleModalInfo('failure', 'Erro ao carregar a lista');
+    } finally {
+      this.showLoading.set(false);
+    }
+  }
+
+  async onShowAddressList(): Promise<void> {
+    try {
+      this.showLoading.set(true);
+      const response = await this.httpRequestService.sendHttpRequest(
+        `${environment.apiUrl}/${this.version}/address`,
+        'GET'
+      );
+      this.companyItem().addressesData = response.data;
+      this.companyItem().tableDataSelected = this.companyItem().addressesData;
+    } catch (e: any) {
+      this.onHandleModalInfo('failure', 'Erro ao carregar a lista');
+    } finally {
+      this.showLoading.set(false);
+    }
+  }
+
+  async onShowEmployeeList(): Promise<void> {
+    try {
+      this.showLoading.set(true);
+      const response = await this.httpRequestService.sendHttpRequest(
+        `${environment.apiUrl}/${this.version}/employee`,
+        'GET'
+      );
+      this.companyItem().employeesData = response.data;
+      console.log(this.companyItem().employeesData);
+    } catch (e: any) {
+      this.onHandleModalInfo('failure', 'Erro ao carregar a lista');
     } finally {
       this.showLoading.set(false);
     }
@@ -412,18 +521,16 @@ export class CompanyComponent implements OnInit {
         'POST',
         this.company().tableItemSelected
       );
-      this.isModalInfoFormActionOk = true;
-      this.handleModal('success', response.message);
-      this.isModalInfoActive.set(true);
+      this.modalCheckInfo().isActionOk = true;
+      this.onHandleModalInfo('success', response.message);
+      this.modalInfo().isActive = true;
     } catch (e: any) {
-      this.handleModal('failure', e.error.message);
-      this.isModalInfoActive.set(true);
+      this.onHandleModalInfo('failure', e.error.message);
+      this.modalInfo().isActive = true;
     } finally {
       this.showLoading.set(false);
     }
   }
-
-  isNewEditRegister = false;
 
   async updateCompany() {
     try {
@@ -433,12 +540,12 @@ export class CompanyComponent implements OnInit {
         'PUT',
         this.company().tableItemSelected
       );
-      this.handleModal('success', response.message);
-      this.isModalInfoActive.set(true);
-      this.isNewEditRegister = true;
+      this.onHandleModalInfo('success', response.message);
+      this.modalCheckInfo().isActionOk = true;
+      this.modalInfo().isActive = true;
     } catch (e: any) {
-      this.handleModal('failure', e.error.message);
-      this.isModalInfoActive.set(true);
+      this.onHandleModalInfo('failure', e.error.message);
+      this.modalInfo().isActive = true;
     } finally {
       this.showLoading.set(false);
     }
@@ -451,12 +558,12 @@ export class CompanyComponent implements OnInit {
         `${environment.apiUrl}/${this.version}/company/${(this.company().tableItemSelected as ICompany).idCompany}`,
         'DELETE'
       );
-      this.isModalInfoDeleteActionOk = true;
-      this.handleModal('success', response.message);
-      this.isModalInfoActive.set(true);
+      this.modalInfo().isActionOk = true;
+      this.onHandleModalInfo('success', response.message);
+      this.modalInfo().isActive = true;
     } catch (e: any) {
-      this.handleModal('failure', 'Erro ao excluir o item');
-      this.isModalInfoActive.set(true);
+      this.onHandleModalInfo('failure', 'Erro ao excluir o item');
+      this.modalInfo().isActive = true;
     } finally {
       this.showLoading.set(false);
     }

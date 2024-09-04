@@ -3,7 +3,7 @@ module.exports = {
   content: ['./src/**/*.{html,ts}'],
   theme: {
     colors: {
-      'logo-blue': '#0d7ff1',
+      'logo-blue': '#0353a3',
       'logo-blue-hover': '#2c8dee',
       'logo-red': '#ca391e',
       'logo-red-hover': '#f05032',
@@ -36,8 +36,8 @@ module.exports = {
       'red-700': '#b91c1c',
       'red-800': '#991b1b',
       'red-900': '#7f1d1d',
-      'white': '#fff',
-      'black': '#000000',
+      white: '#fff',
+      black: '#000000',
       'yellow-100': '#fef9c3',
       'yellow-200': '#fef08a',
       'yellow-300': '#fde047',
@@ -47,7 +47,7 @@ module.exports = {
       'yellow-700': '#a16207',
       'yellow-800': '#854d0e',
       'yellow-900': '#713f12',
-      'transparent': 'transparent',
+      transparent: 'transparent',
     },
     extend: {},
   },

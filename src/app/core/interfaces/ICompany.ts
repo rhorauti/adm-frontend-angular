@@ -1,5 +1,4 @@
 import { IAddress } from './IAddress';
-import { IProject } from './IProject';
 import { ITableHeader } from './ITableHeader';
 import { IEmployee } from './IEmployee';
 import { IBaseGroup, TableTypeNumber } from './IBase';
@@ -25,6 +24,8 @@ export interface ICompanyGroup extends IBaseGroup {
 export interface ICompanyItemGroup extends IBaseGroup {
   adressTableHeaders: ITableHeader[];
   employeeTableHeaders: ITableHeader[];
+  addressesData: IAddress[];
   addressData: IAddress;
+  employeesData: IEmployee[];
   employeeData: IEmployee;
 }

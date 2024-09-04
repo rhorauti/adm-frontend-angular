@@ -8,7 +8,7 @@ export interface IBaseResponse {
   date: string;
   status: boolean;
   message: string;
-  data: TableDataTypeArray;
+  data: TableItemType[];
 }
 
 export interface IBaseGroup {
@@ -22,9 +22,9 @@ export interface IBaseGroup {
   tableIdx: number;
   qtyPerPage: number;
   tableHeaderSelected: ITableHeader[];
-  tableDataSelected: TableDataTypeArray;
+  tableDataSelected: TableItemType[];
   tableItemSelected: TableItemType;
-  initialTableData: TableDataTypeArray;
+  initialTableData: TableItemType[];
   isTableExpanded: boolean;
 }
 
@@ -45,4 +45,3 @@ export interface TableTypeObject {
 export type TableDataTypeString = 'company' | 'address' | 'project' | 'employee';
 export type TableTypeNumber = 1 | 2 | 3;
 export type TableItemType = ICompany | IAddress | IProject | IEmployee;
-export type TableDataTypeArray = ICompany[] | IAddress[] | IProject[] | IEmployee[];

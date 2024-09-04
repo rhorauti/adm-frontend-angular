@@ -5,14 +5,14 @@ import { MatIconModule } from '@angular/material/icon';
 import { NgxMaskDirective, NgxMaskPipe, provideNgxMask } from 'ngx-mask';
 
 @Component({
-  selector: 'app-input-form',
+  selector: 'app-input-standard',
   standalone: true,
   imports: [CommonModule, FormsModule, MatIconModule, NgxMaskDirective, NgxMaskPipe],
   providers: [provideNgxMask()],
-  templateUrl: './input-form.component.html',
-  styleUrl: './input-form.component.scss',
+  templateUrl: './input-standard.component.html',
+  styleUrl: './input-standard.component.scss',
 })
-export class InputFormComponent implements OnInit, OnChanges {
+export class InputStandardComponent implements OnInit, OnChanges {
   @Input() showSearchIcon = true;
   @Input() showRightIcon = true;
   @Input() placeholder = '';

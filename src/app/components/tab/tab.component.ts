@@ -15,7 +15,7 @@ export class TabComponent {
 
   @Input() arrayTabsTitle = ['Tab1', 'Tab2', 'Tab3'];
   @Input() divClass = '';
-  public selectedTabIdx = 0;
+  selectedTabIdx = 0;
 
   @Output() selectedTabEmitter = new EventEmitter<number>();
 
