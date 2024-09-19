@@ -188,22 +188,30 @@ export class CompanyComponent implements OnInit {
     this.showInputPlaceholder(this.companyItem);
   }
 
-  setCompanyIdx(group: Signal<IBaseGroup>, idx: number): void {
-    group().tabIndex = idx;
+  onChangeCompanyIdx(idx: number): void {
+    this.setCompanyType(idx);
+    this.filterCompanyData();
+  }
+
+  setCompanyType(idx: number): void {
     if (idx == 0) {
-      group().tableDataSelected.filter(data => {
-        if (this.isBaseTypeValid(data, 'company')) return data.type == 1;
-        else return;
-      });
+      (this.company().tableItemSelected as ICompany).type = 1;
     } else if (idx == 1) {
-      group().tableDataSelected.filter(data => {
-        if (this.isBaseTypeValid(data, 'company')) return data.type == 2;
-        else return;
-      });
+      (this.company().tableItemSelected as ICompany).type = 2;
+    } else {
+      (this.company().tableItemSelected as ICompany).type = 3;
     }
   }
 
-  setCompanyItemIdx(idx: number): void {
+  filterCompanyData(): void {
+    this.company().tableDataSelected = this.company().initialTableData.filter(data => {
+      if (this.isTypeValid(data, 'company'))
+        return data.type == (this.company().tableItemSelected as ICompany).type;
+      else return;
+    });
+  }
+
+  onChangeCompanyItemIdx(idx: number, classElement: string): void {
     this.companyItem().tabIndex = idx;
     if (idx == 0) {
       this.companyItem().tableDataSelected = this.companyItem().addressesData;
@@ -214,6 +222,8 @@ export class CompanyComponent implements OnInit {
       this.companyItem().tableItemSelected = this.modalEmployeeInfo();
       this.companyItem().tableHeaderSelected = this.companyItem().employeeTableHeaders;
     }
+    const rows = this.document.getElementsByClassName(classElement);
+    this.clearSelectionTableRow(rows);
   }
 
   /**
@@ -263,16 +273,31 @@ export class CompanyComponent implements OnInit {
     }
   }
 
-  selectedTableRow(index: number): void {
-    const rows = this.document.getElementsByClassName('company-table-row');
+  clearSelectionTableRow(rows: HTMLCollection): void {
     Array.from(rows).forEach(row => {
       if (row.classList.contains('is-active')) row.classList.remove('is-active');
     });
+  }
+
+  selectedTableRow(index: number, classElements: string): void {
+    const rows = this.document.getElementsByClassName(classElements);
+    this.clearSelectionTableRow(rows);
     rows[index].classList.add('is-active');
     this.setCompanyItemVisible();
   }
 
-  modalFormInfo = signal({
+  modalFormCompanyInfo = signal({
+    isActive: false,
+    isInputClear: false,
+    isEditForm: false,
+  });
+  modalFormAddressInfo = signal({
+    isActive: false,
+    isInputClear: false,
+    isEditForm: false,
+  });
+
+  modalFormEmployeeInfo = signal({
     isActive: false,
     isInputClear: false,
     isEditForm: false,
@@ -288,10 +313,7 @@ export class CompanyComponent implements OnInit {
    * @param data unknown. Data can change according to tab selection.
    * @returns boolean. If data is equals to interface provided, it returns true or else false.
    */
-  isBaseTypeValid<T extends keyof TableTypeObject>(
-    data: unknown,
-    type: T
-  ): data is TableTypeObject[T] {
+  isTypeValid<T extends keyof TableTypeObject>(data: unknown, type: T): data is TableTypeObject[T] {
     switch (type) {
       case 'company': {
         return (data as ICompany).idCompany != undefined;
@@ -307,39 +329,75 @@ export class CompanyComponent implements OnInit {
     }
   }
 
-  setCompanyProperty(
-    tableItemSelected: TableItemType,
-    propertyName: string,
-    valueSet: string
-  ): void {
-    if (this.isBaseTypeValid(tableItemSelected, 'company')) {
+  setCompanyProperty<T>(tableItemSelected: TableItemType, propertyName: string, value: T): void {
+    if (this.isTypeValid(tableItemSelected, 'company')) {
       switch (propertyName) {
         case 'idCompany': {
-          tableItemSelected.idCompany = Number(valueSet);
+          tableItemSelected.idCompany = Number(value);
           break;
         }
         case 'nickname': {
-          tableItemSelected.nickname = valueSet;
+          tableItemSelected.nickname = value as string;
           break;
         }
         case 'name': {
-          tableItemSelected.name = valueSet;
+          tableItemSelected.name = value as string;
           break;
         }
         case 'cnpj': {
-          tableItemSelected.cnpj = valueSet;
+          tableItemSelected.cnpj = value as string;
           break;
         }
         case 'ie': {
-          tableItemSelected.ie = valueSet;
+          tableItemSelected.ie = value as string;
           break;
         }
         case 'im': {
-          tableItemSelected.im = valueSet;
+          tableItemSelected.im = value as string;
           break;
         }
       }
-      this.modalFormInfo().isInputClear = false;
+      this.modalFormCompanyInfo().isInputClear = false;
+    }
+  }
+
+  setAddressProperty<T>(tableItemSelected: TableItemType, propertyName: string, value: T): void {
+    if (this.isTypeValid(tableItemSelected, 'address')) {
+      switch (propertyName) {
+        case 'idAddress': {
+          tableItemSelected.idAddress = Number(value);
+          break;
+        }
+        case 'type': {
+          tableItemSelected.type = value as string;
+          break;
+        }
+        case 'address': {
+          tableItemSelected.address = value as string;
+          break;
+        }
+        case 'number': {
+          tableItemSelected.number = value as number;
+          break;
+        }
+        case 'complement': {
+          tableItemSelected.complement = value as string;
+          break;
+        }
+        case 'district': {
+          tableItemSelected.district = value as string;
+          break;
+        }
+        case 'city': {
+          tableItemSelected.city = value as string;
+          break;
+        }
+        case 'state': {
+          tableItemSelected.state = value as string;
+          break;
+        }
+      }
+      this.modalFormAddressInfo().isInputClear = false;
     }
   }
 
@@ -383,24 +441,32 @@ export class CompanyComponent implements OnInit {
     this.modalCompanyInfo().im = '';
   }
 
-  onShowModalForm(): void {
-    this.modalFormInfo().isActive = true;
+  onShowModalCompanyForm(): void {
+    this.modalFormCompanyInfo().isActive = true;
+  }
+
+  onShowModalAddressForm(): void {
+    this.modalFormAddressInfo().isActive = true;
   }
 
   onCloseModalForm(): void {
-    if (this.modalFormInfo().isEditForm) this.modalFormInfo().isEditForm = false;
+    if (this.modalFormCompanyInfo().isEditForm) this.modalFormCompanyInfo().isEditForm = false;
     this.clearModalCompany();
-    this.modalFormInfo().isInputClear = true;
-    this.modalFormInfo().isActive = false;
+    this.modalFormCompanyInfo().isInputClear = true;
+    this.modalFormCompanyInfo().isActive = false;
   }
 
   onShowModalEditForm(dataSelected: TableItemType): void {
-    if (this.isBaseTypeValid(dataSelected, 'company')) {
+    if (this.isTypeValid(dataSelected, 'company')) {
       this.modalCompanyInfo.set({ ...dataSelected });
       this.company().tableItemSelected = { ...dataSelected };
+      this.modalFormCompanyInfo().isActive = true;
+    } else if (this.isTypeValid(dataSelected, 'address')) {
+      this.modalAddressInfo.set({ ...dataSelected });
+      this.companyItem().tableItemSelected = { ...dataSelected };
+      this.modalFormAddressInfo().isActive = true;
     }
-    this.modalFormInfo().isEditForm = true;
-    this.modalFormInfo().isActive = true;
+    this.modalFormCompanyInfo().isEditForm = true;
   }
 
   modalCheckInfo = signal({
@@ -409,7 +475,7 @@ export class CompanyComponent implements OnInit {
   });
 
   onShowModalCheck(tableItemSelected: TableItemType): void {
-    if (this.isBaseTypeValid(tableItemSelected, 'company')) {
+    if (this.isTypeValid(tableItemSelected, 'company')) {
       this.modalCompanyInfo.set(tableItemSelected);
     }
     this.modalCheckInfo().isActive = true;
@@ -470,10 +536,12 @@ export class CompanyComponent implements OnInit {
     try {
       this.showLoading.set(true);
       const response = await this.httpRequestService.sendHttpRequest(
-        `${environment.apiUrl}/${this.version}/company/${this.company().companyType}`,
+        `${environment.apiUrl}/${this.version}/company`,
         'GET'
       );
-      this.company().tableDataSelected = response.data;
+      this.company().initialTableData = response.data;
+      (this.company().tableItemSelected as ICompany).type = 1;
+      this.filterCompanyData();
     } catch (e: any) {
       this.onHandleModalInfo('failure', 'Erro ao carregar a lista');
     } finally {
@@ -505,7 +573,6 @@ export class CompanyComponent implements OnInit {
         'GET'
       );
       this.companyItem().employeesData = response.data;
-      console.log(this.companyItem().employeesData);
     } catch (e: any) {
       this.onHandleModalInfo('failure', 'Erro ao carregar a lista');
     } finally {
@@ -517,15 +584,36 @@ export class CompanyComponent implements OnInit {
     try {
       this.showLoading.set(true);
       const response = await this.httpRequestService.sendHttpRequest(
-        `${environment.apiUrl}/${this.version}/company/${this.company().companyType}`,
+        `${environment.apiUrl}/${this.version}/company`,
         'POST',
         this.company().tableItemSelected
       );
       this.modalCheckInfo().isActionOk = true;
-      this.onHandleModalInfo('success', response.message);
+      this.onHandleModalInfo('success', response.msg);
       this.modalInfo().isActive = true;
     } catch (e: any) {
-      this.onHandleModalInfo('failure', e.error.message);
+      console.log('response addNewCompany', e);
+      this.onHandleModalInfo('failure', e.error.msg);
+      this.modalInfo().isActive = true;
+    } finally {
+      this.showLoading.set(false);
+    }
+  }
+
+  async addNewAddress(): Promise<void> {
+    try {
+      this.showLoading.set(true);
+      const response = await this.httpRequestService.sendHttpRequest(
+        `${environment.apiUrl}/${this.version}/address`,
+        'POST',
+        this.company().tableItemSelected,
+        this.companyItem().tableDataSelected
+      );
+      this.modalCheckInfo().isActionOk = true;
+      this.onHandleModalInfo('success', response.msg);
+      this.modalInfo().isActive = true;
+    } catch (e: any) {
+      this.onHandleModalInfo('failure', e.error.msg);
       this.modalInfo().isActive = true;
     } finally {
       this.showLoading.set(false);
@@ -540,11 +628,11 @@ export class CompanyComponent implements OnInit {
         'PUT',
         this.company().tableItemSelected
       );
-      this.onHandleModalInfo('success', response.message);
+      this.onHandleModalInfo('success', response.msg);
       this.modalCheckInfo().isActionOk = true;
       this.modalInfo().isActive = true;
     } catch (e: any) {
-      this.onHandleModalInfo('failure', e.error.message);
+      this.onHandleModalInfo('failure', e.error.msg);
       this.modalInfo().isActive = true;
     } finally {
       this.showLoading.set(false);
@@ -559,7 +647,7 @@ export class CompanyComponent implements OnInit {
         'DELETE'
       );
       this.modalInfo().isActionOk = true;
-      this.onHandleModalInfo('success', response.message);
+      this.onHandleModalInfo('success', response.msg);
       this.modalInfo().isActive = true;
     } catch (e: any) {
       this.onHandleModalInfo('failure', 'Erro ao excluir o item');
