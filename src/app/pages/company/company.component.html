@@ -84,7 +84,7 @@
       </div>
     </app-table>
 
-    <div class="h-0 opacity-0 transition-all duration-300" id="table-company-item-address">
+    <div class="h-0 opacity-0 transition-all duration-300" id="table-company-item">
       <app-tab
         [arrayTabsTitle]="companyItem().arrayTab"
         (selectedTabEmitter)="onChangeCompanyItemIdx($event, 'company-item-table-row')">
@@ -122,7 +122,7 @@
             <tr
               tbody-row
               class="hover:bg-gray-700 company-item-table-row"
-              (click)="selectedTableRow($index, 'company-item-table-row')">
+              >
               @if (isTypeValid(dataSelected, 'address')) {
                 @if (companyItem().tableHeaderSelected[0].showHeader) {
                   <td class="table-td">
@@ -218,20 +218,20 @@
 </div>
 
 <app-modal-base
-  [showModal]="modalFormCompanyInfo().isActive"
+  [showModal]="modalFormCompany().isActive"
   [isModalForm]="true"
   [title]="
-    modalFormCompanyInfo().isEditForm ? 'Alterar dados da empresa' : 'Cadastro de nova empresa'
+    modalFormCompany().isEditForm ? 'Alterar dados da empresa' : 'Cadastro de nova empresa'
   "
   (emitCloseModal)="onCloseModalForm()">
   <div class="body-block">
     <div class="flex flex-col gap-2">
-      @if (modalFormCompanyInfo().isEditForm) {
+      @if (modalFormCompany().isEditForm) {
         <div class="flex flex-col gap-1">
           <label class="font-semibold text-sm" for="">Id</label>
           <app-input-standard
             [propsInput]="modalCompanyInfo().idCompany"
-            [isClearInputForm]="modalFormCompanyInfo().isInputClear"
+            [isClearInputForm]="modalFormCompany().isInputClear"
             [isDisabled]="true"
             [showRightIcon]="false"
             (emitInputValue)="setCompanyProperty(company().tableItemSelected, 'idCompany', $event)"
@@ -242,7 +242,7 @@
         <label class="font-semibold text-sm" for="">Nickname</label>
         <app-input-standard
           [propsInput]="modalCompanyInfo().nickname"
-          [isClearInputForm]="modalFormCompanyInfo().isInputClear"
+          [isClearInputForm]="modalFormCompany().isInputClear"
           #inputModal
           [showRightIcon]="false"
           (emitInputValue)="setCompanyProperty(company().tableItemSelected, 'nickname', $event)"
@@ -252,7 +252,7 @@
         <label class="font-semibold text-sm" for="">Nome</label>
         <app-input-standard
           [propsInput]="modalCompanyInfo().name"
-          [isClearInputForm]="modalFormCompanyInfo().isInputClear"
+          [isClearInputForm]="modalFormCompany().isInputClear"
           #inputModal
           [showRightIcon]="false"
           (emitInputValue)="setCompanyProperty(company().tableItemSelected, 'name', $event)"
@@ -262,7 +262,7 @@
         <label class="font-semibold text-sm" for="">CNPJ</label>
         <app-input-standard
           [propsInput]="modalCompanyInfo().cnpj"
-          [isClearInputForm]="modalFormCompanyInfo().isInputClear"
+          [isClearInputForm]="modalFormCompany().isInputClear"
           #inputModal
           [maskType]="'cnpj'"
           [showRightIcon]="false"
@@ -273,7 +273,7 @@
         <label class="font-semibold text-sm" for="">Inscrição Estadual</label>
         <app-input-standard
           [propsInput]="modalCompanyInfo().ie"
-          [isClearInputForm]="modalFormCompanyInfo().isInputClear"
+          [isClearInputForm]="modalFormCompany().isInputClear"
           #inputModal
           [showRightIcon]="false"
           (emitInputValue)="setCompanyProperty(company().tableItemSelected, 'ie', $event)"
@@ -283,7 +283,7 @@
         <label class="font-semibold text-sm" for="">Inscrição Municipal</label>
         <app-input-standard
           [propsInput]="modalCompanyInfo().im"
-          [isClearInputForm]="modalFormCompanyInfo().isInputClear"
+          [isClearInputForm]="modalFormCompany().isInputClear"
           #inputModal
           [showRightIcon]="false"
           (emitInputValue)="setCompanyProperty(company().tableItemSelected, 'im', $event)"
@@ -293,10 +293,10 @@
   </div>
   <div class="grid footer-block md:flex md:justify-center gap-5 mt-6 w-full">
     <app-button [btnType]="'cancel'" (click)="onCloseModalForm()"></app-button>
-    @if (!modalFormCompanyInfo().isEditForm) {
+    @if (!modalFormCompany().isEditForm) {
       <app-button
         [btnType]="'clear'"
-        (click)="modalFormCompanyInfo().isInputClear = true"></app-button>
+        (click)="modalFormCompany().isInputClear = true"></app-button>
     }
     <app-button
       [btnType]="'forward'"
@@ -305,20 +305,20 @@
 </app-modal-base>
 
 <app-modal-base
-  [showModal]="modalFormAddressInfo().isActive"
+  [showModal]="modalFormAddress().isActive"
   [isModalForm]="true"
   [title]="
-    modalFormCompanyInfo().isEditForm ? 'Alterar dados de endereço' : 'Cadastro de novo endereço'
+    modalFormCompany().isEditForm ? 'Alterar dados de endereço' : 'Cadastro de novo endereço'
   "
   (emitCloseModal)="onCloseModalForm()">
   <div class="body-block">
     <div class="flex flex-col gap-2">
-      @if (modalFormAddressInfo().isEditForm) {
+      @if (modalFormAddress().isEditForm) {
         <div class="flex flex-col gap-1">
           <label class="font-semibold text-sm" for="">Id</label>
           <app-input-standard
             [propsInput]="modalAddressInfo().idAddress"
-            [isClearInputForm]="modalFormAddressInfo().isInputClear"
+            [isClearInputForm]="modalFormAddress().isInputClear"
             [isDisabled]="true"
             [showRightIcon]="false"
             (emitInputValue)="setCompanyProperty(company().tableItemSelected, 'nickname', $event)"
@@ -329,7 +329,7 @@
         <label class="font-semibold text-sm" for="">Tipo</label>
         <app-input-standard
           [propsInput]="modalAddressInfo().type"
-          [isClearInputForm]="modalFormAddressInfo().isInputClear"
+          [isClearInputForm]="modalFormAddress().isInputClear"
           #inputModal
           [showRightIcon]="false"
           (emitInputValue)="setCompanyProperty(company().tableItemSelected, 'type', $event)"
@@ -339,7 +339,7 @@
         <label class="font-semibold text-sm" for="">Endereço</label>
         <app-input-standard
           [propsInput]="modalAddressInfo().address"
-          [isClearInputForm]="modalFormAddressInfo().isInputClear"
+          [isClearInputForm]="modalFormAddress().isInputClear"
           #inputModal
           [showRightIcon]="false"
           (emitInputValue)="setCompanyProperty(company().tableItemSelected, 'address', $event)"
@@ -349,7 +349,7 @@
         <label class="font-semibold text-sm" for="">Número</label>
         <app-input-standard
           [propsInput]="modalAddressInfo().number"
-          [isClearInputForm]="modalFormAddressInfo().isInputClear"
+          [isClearInputForm]="modalFormAddress().isInputClear"
           #inputModal
           [showRightIcon]="false"
           (emitInputValue)="setCompanyProperty(company().tableItemSelected, 'number', $event)"
@@ -359,7 +359,7 @@
         <label class="font-semibold text-sm" for="">Complemento</label>
         <app-input-standard
           [propsInput]="modalAddressInfo().complement"
-          [isClearInputForm]="modalFormAddressInfo().isInputClear"
+          [isClearInputForm]="modalFormAddress().isInputClear"
           #inputModal
           [showRightIcon]="false"
           (emitInputValue)="setCompanyProperty(company().tableItemSelected, 'complement', $event)"
@@ -369,7 +369,7 @@
         <label class="font-semibold text-sm" for="">Bairro</label>
         <app-input-standard
           [propsInput]="modalAddressInfo().district"
-          [isClearInputForm]="modalFormAddressInfo().isInputClear"
+          [isClearInputForm]="modalFormAddress().isInputClear"
           #inputModal
           [showRightIcon]="false"
           (emitInputValue)="setCompanyProperty(company().tableItemSelected, 'district', $event)"
@@ -380,7 +380,7 @@
           <label class="font-semibold text-sm" for="">Cidade</label>
           <app-input-standard
             [propsInput]="modalAddressInfo().city"
-            [isClearInputForm]="modalFormAddressInfo().isInputClear"
+            [isClearInputForm]="modalFormAddress().isInputClear"
             #inputModal
             [showRightIcon]="false"
             (emitInputValue)="setCompanyProperty(company().tableItemSelected, 'city', $event)"
@@ -390,7 +390,7 @@
       <label class="font-semibold text-sm" for="">UF</label>
       <app-input-standard
         [propsInput]="modalAddressInfo().state"
-        [isClearInputForm]="modalFormAddressInfo().isInputClear"
+        [isClearInputForm]="modalFormAddress().isInputClear"
         #inputModal
         [showRightIcon]="false"
         (emitInputValue)="setCompanyProperty(company().tableItemSelected, 'state', $event)"
@@ -399,10 +399,10 @@
   </div>
   <div class="grid footer-block md:flex md:justify-center gap-5 mt-6 w-full">
     <app-button [btnType]="'cancel'" (click)="onCloseModalForm()"></app-button>
-    @if (!modalFormCompanyInfo().isEditForm) {
+    @if (!modalFormAddress().isEditForm) {
       <app-button
         [btnType]="'clear'"
-        (click)="modalFormAddressInfo().isInputClear = true"></app-button>
+        (click)="modalFormAddress().isInputClear = true"></app-button>
     }
     <app-button
       [btnType]="'forward'"
@@ -417,7 +417,7 @@
   [isModalForm]="true"
   (emitCloseModal)="modalCheckInfo().isActive = false">
   <div class="body-block text-sm text-center">
-    @if (modalFormCompanyInfo().isEditForm) {
+    @if (modalFormCompany().isEditForm) {
       <div class="grid grid-cols-[1fr_3fr] border-t border-gray-500">
         <p class="border-r border-l p-2">Id:</p>
         <p class="border-r p-2 font-bold">{{ modalCompanyInfo().idCompany }}</p>
@@ -446,7 +446,7 @@
   </div>
   <div class="footer-block flex justify-center items-center gap-5 mt-5">
     <app-button [btnType]="'cancel'" (click)="modalCheckInfo().isActive = false"></app-button>
-    @if (modalFormCompanyInfo().isEditForm) {
+    @if (modalFormCompany().isEditForm) {
       <app-button [btnType]="'success-edit'" (click)="updateCompany()"></app-button>
     } @else {
       <app-button [btnType]="'success-save'" (click)="addNewCompany()"></app-button>
@@ -461,7 +461,7 @@
   [isModalForm]="true"
   (emitCloseModal)="modalCheckInfo().isActive = false">
   <div class="body-block text-sm text-center">
-    @if (modalFormCompanyInfo().isEditForm) {
+    @if (modalFormCompany().isEditForm) {
       <div class="grid grid-cols-[1fr_3fr] border-t border-gray-500">
         <p class="border-r border-l p-2">Id:</p>
         <p class="border-r p-2 font-bold">{{ modalCompanyInfo().idCompany }}</p>
@@ -490,7 +490,7 @@
   </div>
   <div class="footer-block flex justify-center items-center gap-5 mt-5">
     <app-button [btnType]="'cancel'" (click)="modalCheckInfo().isActive = false"></app-button>
-    @if (modalFormCompanyInfo().isEditForm) {
+    @if (modalFormCompany().isEditForm) {
       <app-button [btnType]="'success-edit'" (click)="updateCompany()"></app-button>
     } @else {
       <app-button [btnType]="'success-save'" (click)="addNewCompany()"></app-button>

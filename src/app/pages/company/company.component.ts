@@ -191,6 +191,8 @@ export class CompanyComponent implements OnInit {
   onChangeCompanyIdx(idx: number): void {
     this.setCompanyType(idx);
     this.filterCompanyData();
+    this.clearSelectionTableRow('company-table-row');
+    this.setCompanyItemVisibility(false);
   }
 
   setCompanyType(idx: number): void {
@@ -211,7 +213,7 @@ export class CompanyComponent implements OnInit {
     });
   }
 
-  onChangeCompanyItemIdx(idx: number, classElement: string): void {
+  onChangeCompanyItemIdx(idx: number, className: string): void {
     this.companyItem().tabIndex = idx;
     if (idx == 0) {
       this.companyItem().tableDataSelected = this.companyItem().addressesData;
@@ -222,8 +224,7 @@ export class CompanyComponent implements OnInit {
       this.companyItem().tableItemSelected = this.modalEmployeeInfo();
       this.companyItem().tableHeaderSelected = this.companyItem().employeeTableHeaders;
     }
-    const rows = this.document.getElementsByClassName(classElement);
-    this.clearSelectionTableRow(rows);
+    this.clearSelectionTableRow(className);
   }
 
   /**
@@ -262,42 +263,54 @@ export class CompanyComponent implements OnInit {
     baseGroup().selectValueFilter = value;
   }
 
-  setCompanyItemVisible(): void {
-    const tableCompanyItem = this.document.getElementById('table-company-item-address');
+  setCompanyItemVisibility(isVisible: boolean): void {
+    const tableCompanyItem = this.document.getElementById('table-company-item');
     if (tableCompanyItem) {
       const tableClassList = tableCompanyItem.classList;
-      if (tableClassList.contains('h-0')) tableClassList.remove('h-0');
-      if (!tableClassList.contains('opacity-100')) tableClassList.add('opacity-100');
-      if (!tableClassList.contains('h-full')) tableClassList.add('h-full');
-      if (!tableClassList.contains('mt-5')) tableClassList.add('mt-5');
+      if (isVisible) {
+        if (!tableClassList.contains('transition-all')) tableClassList.add('transition-all');
+        if (!tableClassList.contains('duration-300')) tableClassList.add('duration-300');
+        if (tableClassList.contains('h-0')) tableClassList.remove('h-0');
+        if (!tableClassList.contains('opacity-100')) tableClassList.add('opacity-100');
+        if (!tableClassList.contains('h-full')) tableClassList.add('h-full');
+        if (!tableClassList.contains('mt-5')) tableClassList.add('mt-5');
+      } else {
+        if (tableClassList.contains('transition-all')) tableClassList.remove('transition-all');
+        if (tableClassList.contains('duration-300')) tableClassList.remove('duration-300');
+        if (!tableClassList.contains('h-0')) tableClassList.add('h-0');
+        if (tableClassList.contains('opacity-100')) tableClassList.remove('opacity-100');
+        if (tableClassList.contains('h-full')) tableClassList.remove('h-full');
+        if (tableClassList.contains('mt-5')) tableClassList.remove('mt-5');
+      }
     }
   }
 
-  clearSelectionTableRow(rows: HTMLCollection): void {
+  clearSelectionTableRow(className: string): void {
+    const rows = this.document.getElementsByClassName(className);
     Array.from(rows).forEach(row => {
       if (row.classList.contains('is-active')) row.classList.remove('is-active');
     });
   }
 
-  selectedTableRow(index: number, classElements: string): void {
-    const rows = this.document.getElementsByClassName(classElements);
-    this.clearSelectionTableRow(rows);
+  selectedTableRow(index: number, className: string): void {
+    const rows = this.document.getElementsByClassName(className);
+    this.clearSelectionTableRow(className);
     rows[index].classList.add('is-active');
-    this.setCompanyItemVisible();
+    if (className == 'company-table-row') this.setCompanyItemVisibility(true);
   }
 
-  modalFormCompanyInfo = signal({
+  modalFormCompany = signal({
     isActive: false,
     isInputClear: false,
     isEditForm: false,
   });
-  modalFormAddressInfo = signal({
+  modalFormAddress = signal({
     isActive: false,
     isInputClear: false,
     isEditForm: false,
   });
 
-  modalFormEmployeeInfo = signal({
+  modalFormEmployee = signal({
     isActive: false,
     isInputClear: false,
     isEditForm: false,
@@ -357,7 +370,7 @@ export class CompanyComponent implements OnInit {
           break;
         }
       }
-      this.modalFormCompanyInfo().isInputClear = false;
+      this.modalFormCompany().isInputClear = false;
     }
   }
 
@@ -397,7 +410,7 @@ export class CompanyComponent implements OnInit {
           break;
         }
       }
-      this.modalFormAddressInfo().isInputClear = false;
+      this.modalFormAddress().isInputClear = false;
     }
   }
 
@@ -432,7 +445,7 @@ export class CompanyComponent implements OnInit {
     cellphone: '',
   });
 
-  clearModalCompany(): void {
+  clearModalCompanyInfo(): void {
     this.modalCompanyInfo().idCompany = 0;
     this.modalCompanyInfo().nickname = '';
     this.modalCompanyInfo().name = '';
@@ -442,31 +455,69 @@ export class CompanyComponent implements OnInit {
   }
 
   onShowModalCompanyForm(): void {
-    this.modalFormCompanyInfo().isActive = true;
+    this.modalFormCompany().isActive = true;
   }
 
   onShowModalAddressForm(): void {
-    this.modalFormAddressInfo().isActive = true;
+    this.modalFormAddress().isActive = true;
+  }
+
+  clearModalAddressInfo(): void {
+    this.modalAddressInfo().idAddress = 0;
+    this.modalAddressInfo().type = '';
+    this.modalAddressInfo().address = '';
+    this.modalAddressInfo().number = 0;
+    this.modalAddressInfo().complement = '';
+    this.modalAddressInfo().district = '';
+    this.modalAddressInfo().city = '';
+    this.modalAddressInfo().state = '';
+  }
+
+  clearModalEmployeeInfo(): void {
+    this.modalEmployeeInfo().idEmployee = 0;
+    this.modalEmployeeInfo().name = '';
+    this.modalEmployeeInfo().cpf = '';
+    this.modalEmployeeInfo().department = '';
+    this.modalEmployeeInfo().position = '';
+    this.modalEmployeeInfo().email = '';
+    this.modalEmployeeInfo().deskphone = '';
+    this.modalEmployeeInfo().cellphone = '';
   }
 
   onCloseModalForm(): void {
-    if (this.modalFormCompanyInfo().isEditForm) this.modalFormCompanyInfo().isEditForm = false;
-    this.clearModalCompany();
-    this.modalFormCompanyInfo().isInputClear = true;
-    this.modalFormCompanyInfo().isActive = false;
+    if (this.modalFormCompany().isActive) {
+      if (this.modalFormCompany().isEditForm) this.modalFormCompany().isEditForm = false;
+      this.clearModalCompanyInfo();
+      this.modalFormCompany().isInputClear = true;
+      this.modalFormCompany().isActive = false;
+    } else if (this.modalFormAddress().isActive) {
+      if (this.modalFormAddress().isEditForm) this.modalFormAddress().isEditForm = false;
+      this.clearModalAddressInfo();
+      this.modalFormAddress().isInputClear = true;
+      this.modalFormAddress().isActive = false;
+    } else if (this.modalFormEmployee().isActive) {
+      if (this.modalFormEmployee().isEditForm) this.modalFormEmployee().isEditForm = false;
+      this.clearModalEmployeeInfo();
+      this.modalFormEmployee().isInputClear = true;
+      this.modalFormEmployee().isActive = false;
+    }
   }
 
   onShowModalEditForm(dataSelected: TableItemType): void {
     if (this.isTypeValid(dataSelected, 'company')) {
       this.modalCompanyInfo.set({ ...dataSelected });
       this.company().tableItemSelected = { ...dataSelected };
-      this.modalFormCompanyInfo().isActive = true;
+      this.modalFormCompany().isActive = true;
     } else if (this.isTypeValid(dataSelected, 'address')) {
       this.modalAddressInfo.set({ ...dataSelected });
       this.companyItem().tableItemSelected = { ...dataSelected };
-      this.modalFormAddressInfo().isActive = true;
+      this.modalFormAddress().isActive = true;
+    } else if (this.isTypeValid(dataSelected, 'employee')) {
+      this.modalEmployeeInfo.set({ ...dataSelected });
+      this.companyItem().tableItemSelected = { ...dataSelected };
+      this.modalFormEmployee().isActive = true;
     }
-    this.modalFormCompanyInfo().isEditForm = true;
+    this.modalFormCompany().isEditForm = true;
   }
 
   modalCheckInfo = signal({
@@ -477,6 +528,10 @@ export class CompanyComponent implements OnInit {
   onShowModalCheck(tableItemSelected: TableItemType): void {
     if (this.isTypeValid(tableItemSelected, 'company')) {
       this.modalCompanyInfo.set(tableItemSelected);
+    } else if (this.isTypeValid(tableItemSelected, 'address')) {
+      this.modalAddressInfo.set(tableItemSelected);
+    } else if (this.isTypeValid(tableItemSelected, 'employee')) {
+      this.modalEmployeeInfo.set(tableItemSelected);
     }
     this.modalCheckInfo().isActive = true;
   }
