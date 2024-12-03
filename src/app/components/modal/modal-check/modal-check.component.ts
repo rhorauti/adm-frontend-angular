@@ -2,9 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, EventEmitter, Input, OnChanges, Output } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
 import { ModalBaseComponent } from '../modal-base/modal-base.component';
-import { ModalInfoComponent } from '../modal-info/modal-info.component';
 import { ButtonComponent } from '@components/button/button.component';
-import { LoadingComponent } from '@components/loading/loading.component';
 import { RegisterCompanyApi } from '@core/api/http/company.api';
 import { TableItemType } from '@core/interfaces/IBase';
 
@@ -20,9 +18,7 @@ interface IFormData {
     CommonModule,
     MatIconModule,
     ModalBaseComponent,
-    ModalInfoComponent,
     ButtonComponent,
-    LoadingComponent,
   ],
   providers: [RegisterCompanyApi],
   templateUrl: './modal-check.component.html',

@@ -12,7 +12,7 @@ export interface IBaseResponse {
 }
 
 export interface IBaseGroup {
-  arrayTab: string[];
+  tabList: string[];
   arraySelectFilter: string[];
   inputValueFilter: string;
   selectValueFilter: string;
@@ -24,7 +24,6 @@ export interface IBaseGroup {
   tableHeaderSelected: ITableHeader[];
   tableDataSelected: TableItemType[];
   tableItemSelected: TableItemType;
-  initialTableData: TableItemType[];
   isTableExpanded: boolean;
 }
 

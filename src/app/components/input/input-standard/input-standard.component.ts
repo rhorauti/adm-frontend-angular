@@ -58,8 +58,10 @@ export class InputStandardComponent implements OnInit, OnChanges {
     if (this.isClearInputForm) {
       this.inputValue = '';
       this.clearInputEmitter.emit(false);
+      console.log('inputValue', this.inputValue);
+    } else {
+      this.inputValue = this.propsInput;
     }
-    this.inputValue = this.propsInput;
   }
 
   clearInput(): void {

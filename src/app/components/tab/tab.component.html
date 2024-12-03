@@ -1,12 +1,12 @@
 <div [ngClass]="divClass">
   <div class="text-sm overflow-x-auto text-nowrap">
-    @for (tabTitle of arrayTabsTitle; track $index) {
+    @for (tabLabel of tabList; track $index) {
       <button
-        [id]="tabTitle"
+        [id]="tabLabel"
         (click)="selectTab($index)"
         class="border border-gray-500 px-3 py-2 first:rounded-tl-lg last:rounded-tr-lg"
         [ngClass]="selectedTabIdx == $index ? 'is-active' : ''">
-        {{ tabTitle }}
+        {{ tabLabel }}
       </button>
     }
   </div>

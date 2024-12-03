@@ -7,7 +7,7 @@
     [label]="'Colunas'"></app-button>
   @if (isHeaderBoxActive) {
     <div
-      class="grid md:gap-1 gap-2 md:absolute px-4 py-2 border border-gray-500 bg-white text-black rounded-md text-sm w-full md:w-fit md:-left-52 md:-top-16">
+      class="grid md:gap-1 gap-2 md:absolute px-4 py-2 border border-gray-500 bg-white text-black rounded-md text-sm w-full md:w-fit md:-left-52 md:-top-16 z-50">
       @for (header of tableHeaders; track $index) {
         @if (header.name != 'Ações') {
           <div>

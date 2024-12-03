@@ -13,7 +13,7 @@ import { ButtonComponent } from '@components/button/button.component';
 export class TabComponent {
   constructor(@Inject(DOCUMENT) private document: Document) {}
 
-  @Input() arrayTabsTitle = ['Tab1', 'Tab2', 'Tab3'];
+  @Input() tabList = ['Tab1', 'Tab2', 'Tab3'];
   @Input() divClass = '';
   selectedTabIdx = 0;
 
