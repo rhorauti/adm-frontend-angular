@@ -10,7 +10,8 @@
         [optionList]="company().arraySelectFilter"
         [placeholder]="company().placeholderFilter"
         (inputValueEmitter)="company().inputValueFilter = $event"
-        (selectValueEmitter)="changeSelectPlaceHolder(company, $event)"></app-input-addons>
+        (selectValueEmitter)="changeSelectPlaceHolder(company, $event)"
+        (btnClickEmitter)="filterTable()"></app-input-addons>
       <div class="grid md:flex gap-5">
         <app-table-header-box [tableHeaders]="company().tableHeaderSelected"></app-table-header-box>
         <app-button
@@ -32,59 +33,59 @@
           }
         }
       </tr>
-      @if (company().companiesData.length == 0) {
-        <tr tbody-row class="text-center italic text-white">
-          <td [attr.colspan]="companyItem().tableHeaderSelected.length" class="p-2">
-            Não existem empresas a serem exibidas!
-          </td>
-        </tr>
-      }
-      @for (companyData of company().companiesData; track $index) {
-        <tr
-          tbody-row
-          class="hover:bg-gray-700 company-table-row"
-          (click)="selectedTableRow($index, 'company-table-row')">
-          @if (company().companyTableHeaders[0].showHeader) {
-            <td class="table-td">
-              {{ companyData.idCompany }}
+      <tbody tbody-row class="divide-y divide-gray-500 border border-gray-500">
+        @for (companyData of company().companiesData; track $index) {
+          <tr
+            class="hover:bg-gray-700 company-table-row"
+            (click)="selectedTableRow($index, 'company-table-row')">
+            @if (company().companyTableHeaders[0].showHeader) {
+              <td class="table-td">
+                {{ companyData.idCompany }}
+              </td>
+            }
+            @if (company().companyTableHeaders[1].showHeader) {
+              <td class="table-td">
+                {{ companyData.date | date: 'dd/MM/YYYY' }}
+              </td>
+            }
+            @if (company().companyTableHeaders[2].showHeader) {
+              <td class="table-td">{{ companyData.nickname }}</td>
+            }
+            @if (company().companyTableHeaders[3].showHeader) {
+              <td class="table-td">{{ companyData.name }}</td>
+            }
+            @if (company().companyTableHeaders[4].showHeader) {
+              <td class="table-td">{{ companyData.cnpj }}</td>
+            }
+            @if (company().companyTableHeaders[5].showHeader) {
+              <td class="table-td">{{ companyData.ie }}</td>
+            }
+            @if (company().companyTableHeaders[6].showHeader) {
+              <td class="table-td">{{ companyData.im }}</td>
+            }
+            @if (company().companyTableHeaders[7].showHeader) {
+              <td class="table-td flex justify-center gap-3">
+                <app-button
+                  (click)="onShowModalEditForm(companyData)"
+                  [showLabel]="false"
+                  [showIcon]="true"
+                  [btnType]="'icon-edit'"></app-button>
+                <app-button
+                  (click)="onShowModalAskToDelete(companyData)"
+                  [showLabel]="false"
+                  [showIcon]="true"
+                  [btnType]="'icon-delete'"></app-button>
+              </td>
+            }
+          </tr>
+        } @empty {
+          <tr class="text-center italic text-white">
+            <td [attr.colspan]="companyItem().tableHeaderSelected.length" class="p-2">
+              Não existem empresas a serem exibidas!
             </td>
-          }
-          @if (company().companyTableHeaders[1].showHeader) {
-            <td class="table-td">
-              {{ companyData.date | date: 'dd/MM/YYYY' }}
-            </td>
-          }
-          @if (company().companyTableHeaders[2].showHeader) {
-            <td class="table-td">{{ companyData.nickname }}</td>
-          }
-          @if (company().companyTableHeaders[3].showHeader) {
-            <td class="table-td">{{ companyData.name }}</td>
-          }
-          @if (company().companyTableHeaders[4].showHeader) {
-            <td class="table-td">{{ companyData.cnpj }}</td>
-          }
-          @if (company().companyTableHeaders[5].showHeader) {
-            <td class="table-td">{{ companyData.ie }}</td>
-          }
-          @if (company().companyTableHeaders[6].showHeader) {
-            <td class="table-td">{{ companyData.im }}</td>
-          }
-          @if (company().companyTableHeaders[7].showHeader) {
-            <td class="table-td flex justify-center gap-3">
-              <app-button
-                (click)="onShowModalEditForm(companyData)"
-                [showLabel]="false"
-                [showIcon]="true"
-                [btnType]="'icon-edit'"></app-button>
-              <app-button
-                (click)="onShowModalAskToDelete(companyData)"
-                [showLabel]="false"
-                [showIcon]="true"
-                [btnType]="'icon-delete'"></app-button>
-            </td>
-          }
-        </tr>
-      }
+          </tr>
+        }
+      </tbody>
       <div class="flex justify-end">
         <app-button [showLabel]="false" [showIcon]="true" [btnType]="'icon-arrow-up'"></app-button>
       </div>
@@ -104,7 +105,11 @@
           <div class="grid md:flex gap-5">
             <app-table-header-box
               [tableHeaders]="companyItem().tableHeaderSelected"></app-table-header-box>
-            <app-button [showIcon]="true" [btnIcon]="'add'" [label]="'Cadastrar'"></app-button>
+            <app-button
+              (click)="showModalCompanyItem(companyItem().tabIdx)"
+              [showIcon]="true"
+              [btnIcon]="'add'"
+              [label]="'Cadastrar'"></app-button>
           </div>
         </div>
 
@@ -118,71 +123,63 @@
               }
             }
           </tr>
-          @if (companyItem().tabIndex == 0) {
-            @if (companyItem().addressesData.length == 0) {
-              <tr tbody-row class="text-center italic text-white">
-                <td [attr.colspan]="companyItem().tableHeaderSelected.length" class="p-2">
-                  Não existem endereços a serem exibidos!
-                </td>
-              </tr>
-            }
-            @for (addressData of companyItem().addressesData; track $index) {
-              <tr tbody-row class="hover:bg-gray-700 company-item-table-row">
-                @if (companyItem().tableHeaderSelected[0].showHeader) {
-                  <td class="table-td">
-                    {{ addressData.idAddress }}
+          <tbody tbody-row class="divide-y divide-gray-500 border border-gray-500">
+            @if (companyItem().tabIdx == 0) {
+              @for (addressData of companyItem().addressesData; track addressData.idAddress) {
+                <tr class="hover:bg-gray-700 company-item-table-row">
+                  @if (companyItem().tableHeaderSelected[0].showHeader) {
+                    <td class="table-td">
+                      {{ addressData.idAddress }}
+                    </td>
+                  }
+                  @if (companyItem().tableHeaderSelected[1].showHeader) {
+                    <td class="table-td">
+                      {{ addressData.type }}
+                    </td>
+                  }
+                  @if (companyItem().tableHeaderSelected[2].showHeader) {
+                    <td class="table-td">{{ addressData.address }}</td>
+                  }
+                  @if (companyItem().tableHeaderSelected[3].showHeader) {
+                    <td class="table-td">{{ addressData.number }}</td>
+                  }
+                  @if (companyItem().tableHeaderSelected[4].showHeader) {
+                    <td class="table-td">{{ addressData.complement }}</td>
+                  }
+                  @if (companyItem().tableHeaderSelected[5].showHeader) {
+                    <td class="table-td">{{ addressData.district }}</td>
+                  }
+                  @if (companyItem().tableHeaderSelected[6].showHeader) {
+                    <td class="table-td">{{ addressData.city }}</td>
+                  }
+                  @if (companyItem().tableHeaderSelected[7].showHeader) {
+                    <td class="table-td">{{ addressData.state }}</td>
+                  }
+                  @if (companyItem().tableHeaderSelected[5].showHeader) {
+                    <td class="table-td flex justify-center gap-3">
+                      <app-button
+                        (click)="onShowModalEditForm(addressData)"
+                        [showLabel]="false"
+                        [showIcon]="true"
+                        [btnType]="'icon-edit'"></app-button>
+                      <app-button
+                        (click)="onShowModalAskToDeleteCompanyItem()"
+                        [showLabel]="false"
+                        [showIcon]="true"
+                        [btnType]="'icon-delete'"></app-button>
+                    </td>
+                  }
+                </tr>
+              } @empty {
+                <tr class="text-center italic text-white">
+                  <td [attr.colspan]="companyItem().tableHeaderSelected.length" class="p-2">
+                    Não existem endereços a serem exibidos!
                   </td>
-                }
-                @if (companyItem().tableHeaderSelected[1].showHeader) {
-                  <td class="table-td">
-                    {{ addressData.type }}
-                  </td>
-                }
-                @if (companyItem().tableHeaderSelected[2].showHeader) {
-                  <td class="table-td">{{ addressData.address }}</td>
-                }
-                @if (companyItem().tableHeaderSelected[3].showHeader) {
-                  <td class="table-td">{{ addressData.number }}</td>
-                }
-                @if (companyItem().tableHeaderSelected[4].showHeader) {
-                  <td class="table-td">{{ addressData.complement }}</td>
-                }
-                @if (companyItem().tableHeaderSelected[5].showHeader) {
-                  <td class="table-td">{{ addressData.district }}</td>
-                }
-                @if (companyItem().tableHeaderSelected[6].showHeader) {
-                  <td class="table-td">{{ addressData.city }}</td>
-                }
-                @if (companyItem().tableHeaderSelected[7].showHeader) {
-                  <td class="table-td">{{ addressData.state }}</td>
-                }
-                @if (companyItem().tableHeaderSelected[5].showHeader) {
-                  <td class="table-td flex justify-center gap-3">
-                    <app-button
-                      (click)="onShowModalEditForm(addressData)"
-                      [showLabel]="false"
-                      [showIcon]="true"
-                      [btnType]="'icon-edit'"></app-button>
-                    <app-button
-                      (click)="onShowModalAskToDeleteCompanyItem()"
-                      [showLabel]="false"
-                      [showIcon]="true"
-                      [btnType]="'icon-delete'"></app-button>
-                  </td>
-                }
-              </tr>
-            }
-          }
-          <!-- } @else if (companyItem().tabIndex == 1) {
-            @if (companyItem().employeesData.length == 0) {
-              <tr tbody-row class="text-center italic text-white">
-                <td [attr.colspan]="companyItem().tableHeaderSelected.length" class="p-2">
-                  Não existem funcionários a serem exibidos!
-                </td>
-              </tr>
+                </tr>
+              }
             } @else {
-              @for (employeeData of companyItem().employeesData; track $index) {
-                <tr tbody-row class="hover:bg-gray-700 company-item-table-row">
+              @for (employeeData of companyItem().employeesData; track employeeData.idEmployee) {
+                <tr class="hover:bg-gray-700 company-item-table-row">
                   @if (companyItem().tableHeaderSelected[0].showHeader) {
                     <td class="table-td">
                       {{ employeeData.idEmployee }}
@@ -224,9 +221,15 @@
                     </td>
                   }
                 </tr>
+              } @empty {
+                <tr class="text-center italic text-white">
+                  <td [attr.colspan]="companyItem().tableHeaderSelected.length" class="p-2">
+                    Não existem funcionários a serem exibidos!
+                  </td>
+                </tr>
               }
             }
-          } -->
+          </tbody>
         </app-table>
       </app-tab>
     </div>
@@ -270,7 +273,7 @@
           [inputClass]="'text-black h-9'"></app-input-standard>
       </div>
       <div class="flex flex-col gap-1">
-        <label class="font-semibold text-sm" for="">CNPJ</label>
+        <label class="font-semibold text-sm" for="">CNPJ/CPF</label>
         <app-input-standard
           [propsInput]="company().companyData.cnpj"
           [maskType]="'cnpj'"
@@ -350,7 +353,7 @@
         <app-input-standard
           [propsInput]="companyItem().addressData.number"
           [showRightIcon]="false"
-          (emitInputValue)="getAddressNumber($event)"
+          (emitInputValue)="companyItem().addressData.number = $event"
           [inputClass]="'text-black h-9'"></app-input-standard>
       </div>
       <div class="flex flex-col gap-1">
@@ -395,6 +398,97 @@
     <app-button
       [btnType]="'forward'"
       (click)="companyItem().modalCheckAddress.isActive = true"></app-button>
+  </div>
+</app-modal-base>
+
+<app-modal-base
+  [showModal]="companyItem().modalFormEmployee.isActive"
+  [isModalForm]="true"
+  [title]="
+    companyItem().modalFormEmployee.isEditForm
+      ? 'Alterar dados do funcionário'
+      : 'Cadastro de novo funcionário'
+  "
+  (emitCloseModal)="onCloseModalForm()">
+  <div class="body-block">
+    <div class="flex flex-col gap-2">
+      @if (companyItem().modalFormEmployee.isEditForm) {
+        <div class="flex flex-col gap-1">
+          <label class="font-semibold text-sm" for="">Id</label>
+          <app-input-standard
+            [propsInput]="companyItem().employeeData.idEmployee"
+            [isDisabled]="true"
+            [showRightIcon]="false"
+            (emitInputValue)="getEmployeeId($event)"
+            [inputClass]="'text-black h-9'"></app-input-standard>
+        </div>
+      }
+      <div class="flex flex-col gap-1">
+        <label class="font-semibold text-sm" for="">Nome</label>
+        <app-input-standard
+          [propsInput]="companyItem().employeeData.name"
+          [showRightIcon]="false"
+          (emitInputValue)="companyItem().employeeData.name = $event"
+          [inputClass]="'text-black h-9'"></app-input-standard>
+      </div>
+      <div class="flex flex-col gap-1">
+        <label class="font-semibold text-sm" for="">CPF</label>
+        <app-input-standard
+          [propsInput]="companyItem().employeeData.cpf"
+          [showRightIcon]="false"
+          (emitInputValue)="companyItem().employeeData.cpf = $event"
+          [inputClass]="'text-black h-9'"></app-input-standard>
+      </div>
+      <div class="flex flex-col gap-1">
+        <label class="font-semibold text-sm" for="">Departamento</label>
+        <app-input-standard
+          [propsInput]="companyItem().employeeData.department"
+          [showRightIcon]="false"
+          (emitInputValue)="companyItem().employeeData.department = $event"
+          [inputClass]="'text-black h-9'"></app-input-standard>
+      </div>
+      <div class="flex flex-col gap-1">
+        <label class="font-semibold text-sm" for="">Cargo</label>
+        <app-input-standard
+          [propsInput]="companyItem().employeeData.position"
+          [showRightIcon]="false"
+          (emitInputValue)="companyItem().employeeData.position = $event"
+          [inputClass]="'text-black h-9'"></app-input-standard>
+      </div>
+      <div class="flex flex-col gap-1">
+        <label class="font-semibold text-sm" for="">E-mail</label>
+        <app-input-standard
+          [propsInput]="companyItem().employeeData.email"
+          [showRightIcon]="false"
+          (emitInputValue)="companyItem().employeeData.email = $event"
+          [inputClass]="'text-black h-9'"></app-input-standard>
+      </div>
+      <div class="flex flex-col gap-1">
+        <label class="font-semibold text-sm" for="">Telefone fixo</label>
+        <app-input-standard
+          [propsInput]="companyItem().employeeData.deskphone"
+          [showRightIcon]="false"
+          (emitInputValue)="companyItem().employeeData.deskphone = $event"
+          [inputClass]="'text-black h-9'"></app-input-standard>
+      </div>
+      <div class="flex flex-col gap-1">
+        <label class="font-semibold text-sm" for="">Celular</label>
+        <app-input-standard
+          [propsInput]="companyItem().employeeData.cellphone"
+          [showRightIcon]="false"
+          (emitInputValue)="companyItem().employeeData.cellphone = $event"
+          [inputClass]="'text-black h-9'"></app-input-standard>
+      </div>
+    </div>
+  </div>
+  <div class="grid footer-block md:flex md:justify-center gap-5 mt-6 w-full">
+    <app-button [btnType]="'cancel'" (click)="onCloseModalForm()"></app-button>
+    @if (!companyItem().modalFormEmployee.isEditForm) {
+      <app-button [btnType]="'clear'" (click)="clearModalEmployeeInfo()"></app-button>
+    }
+    <app-button
+      [btnType]="'forward'"
+      (click)="companyItem().modalCheckEmployee.isActive = true"></app-button>
   </div>
 </app-modal-base>
 
@@ -447,7 +541,7 @@
 <app-modal-base
   [showModal]="companyItem().modalCheckAddress.isActive"
   [showHeader]="true"
-  [title]="'Confirmação dos dados'"
+  [title]="'Confirmação dos dados de endereço'"
   [isModalForm]="true"
   (emitCloseModal)="companyItem().modalCheckAddress.isActive = false">
   <div class="body-block text-sm text-center">
@@ -490,6 +584,60 @@
     <app-button
       [btnType]="'cancel'"
       (click)="companyItem().modalCheckAddress.isActive = false"></app-button>
+    @if (companyItem().modalFormAddress.isEditForm) {
+      <app-button [btnType]="'success-edit'" (click)="updateCompany()"></app-button>
+    } @else {
+      <app-button [btnType]="'success-save'" (click)="addNewCompany()"></app-button>
+    }
+  </div>
+</app-modal-base>
+
+<app-modal-base
+  [showModal]="companyItem().modalCheckEmployee.isActive"
+  [showHeader]="true"
+  [title]="'Confirmação dos dados do Funcionário'"
+  [isModalForm]="true"
+  (emitCloseModal)="companyItem().modalCheckEmployee.isActive = false">
+  <div class="body-block text-sm text-center">
+    @if (companyItem().modalFormEmployee.isEditForm) {
+      <div class="grid grid-cols-[1fr_3fr] border-t border-gray-500">
+        <p class="border-r border-l p-2">Id:</p>
+        <p class="border-r p-2 font-bold">{{ companyItem().employeeData.idEmployee }}</p>
+      </div>
+    }
+    <div class="grid grid-cols-[1fr_3fr] border-t border-gray-500">
+      <p class="border-r border-l p-2">Nome:</p>
+      <p class="border-r p-2 font-bold">{{ companyItem().employeeData.name }}</p>
+    </div>
+    <div class="grid grid-cols-[1fr_3fr] border-t border-gray-500">
+      <p class="border-r border-l p-2">CPF:</p>
+      <p class="border-r p-2 font-bold">{{ companyItem().employeeData.cpf }}</p>
+    </div>
+    <div class="grid grid-cols-[1fr_3fr] border-t last:border-b border-gray-500">
+      <p class="border-r border-l p-2">Departamento:</p>
+      <p class="border-r p-2 font-bold">{{ companyItem().employeeData.department }}</p>
+    </div>
+    <div class="grid grid-cols-[1fr_3fr] border-t last:border-b border-gray-500">
+      <p class="border-r border-l p-2">Cargo:</p>
+      <p class="border-r p-2 font-bold">{{ companyItem().employeeData.position }}</p>
+    </div>
+    <div class="grid grid-cols-[1fr_3fr] border-t last:border-b border-gray-500">
+      <p class="border-r border-l p-2">E-mail:</p>
+      <p class="border-r p-2 font-bold">{{ companyItem().employeeData.email }}</p>
+    </div>
+    <div class="grid grid-cols-[1fr_3fr] border-t last:border-b border-gray-500">
+      <p class="border-r border-l p-2">Telefone fixo:</p>
+      <p class="border-r p-2 font-bold">{{ companyItem().employeeData.deskphone }}</p>
+    </div>
+    <div class="grid grid-cols-[1fr_3fr] border-t last:border-b border-gray-500">
+      <p class="border-r border-l p-2">Celular:</p>
+      <p class="border-r p-2 font-bold">{{ companyItem().employeeData.cellphone }}</p>
+    </div>
+  </div>
+  <div class="footer-block flex justify-center items-center gap-5 mt-5">
+    <app-button
+      [btnType]="'cancel'"
+      (click)="companyItem().modalCheckEmployee.isActive = false"></app-button>
     @if (companyItem().modalFormAddress.isEditForm) {
       <app-button [btnType]="'success-edit'" (click)="updateCompany()"></app-button>
     } @else {

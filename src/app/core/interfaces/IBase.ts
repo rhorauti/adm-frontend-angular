@@ -17,7 +17,7 @@ export interface IBaseGroup {
   inputValueFilter: string;
   selectValueFilter: string;
   placeholderFilter: string;
-  tabIndex: number;
+  tabIdx: number;
   isHeaderBoxActive: boolean;
   tableIdx: number;
   qtyPerPage: number;
@@ -42,5 +42,5 @@ export interface TableTypeObject {
 }
 
 export type TableDataTypeString = 'company' | 'address' | 'project' | 'employee';
-export type TableTypeNumber = 1 | 2 | 3;
+export type TableTypeNumber = 0 | 1 | 2;
 export type TableItemType = ICompany | IAddress | IProject | IEmployee;

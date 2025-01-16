@@ -3,8 +3,9 @@
     <thead class="bg-gray-900 border border-gray-500">
       <ng-content select="[thead-row]"></ng-content>
     </thead>
-    <tbody class="divide-y divide-gray-500 border border-gray-500">
+    <!-- <tbody class="divide-y divide-gray-500 border border-gray-500">
       <ng-content select="[tbody-row]"></ng-content>
-    </tbody>
+    </tbody> -->
+    <ng-content select="[tbody-row]"></ng-content>
   </table>
 </div>

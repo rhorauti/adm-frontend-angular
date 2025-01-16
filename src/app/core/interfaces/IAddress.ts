@@ -2,7 +2,7 @@ export interface IAddress {
   idAddress: number;
   type: string;
   address: string;
-  number: number;
+  number: string;
   complement: string;
   district: string;
   city: string;

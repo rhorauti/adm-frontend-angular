@@ -1,12 +1,11 @@
 import { CommonModule, DOCUMENT } from '@angular/common';
 import { Component, EventEmitter, Inject, Input, Output } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
-import { ButtonComponent } from '@components/button/button.component';
 
 @Component({
   selector: 'app-tab',
   standalone: true,
-  imports: [CommonModule, ButtonComponent, MatIconModule],
+  imports: [CommonModule, MatIconModule],
   templateUrl: './tab.component.html',
   styleUrl: './tab.component.scss',
 })
