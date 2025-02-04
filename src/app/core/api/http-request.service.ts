@@ -19,7 +19,7 @@ export class HttpRequestService {
    * @param authToken token de autenticação
    * @returns Retorna uma promise genérica
    */
-  async sendHttpRequest(path: string, method = 'GET', ...data: any): Promise<any> {
+  async sendHttpRequest(path: string, method = 'GET', data: any = null): Promise<any> {
     const headers = new HttpHeaders({
       Authorization: `Bearer ${localStorage.getItem('@authToken')}`,
       'Content-Type': 'application/json',

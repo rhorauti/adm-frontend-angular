@@ -19,7 +19,11 @@
           [btnIcon]="'add'"
           [label]="'Cadastrar'"
           (click)="company().modalFormCompany.isActive = true"></app-button>
-        <app-button [showLabel]="false" [showIcon]="true" [btnType]="'icon-arrow-up'"></app-button>
+        <app-button
+          [showLabel]="false"
+          [showIcon]="true"
+          [btnIcon]="'plus'"
+          [btnType]="'transparent'"></app-button>
       </div>
     </div>
 
@@ -36,7 +40,7 @@
       <tbody tbody-row class="divide-y divide-gray-500 border border-gray-500">
         @for (companyData of company().companiesData; track $index) {
           <tr
-            class="hover:bg-gray-700 company-table-row"
+            class="hover:bg-gray-700 h-full py-2 cursor-pointer company-table-row"
             (click)="selectedTableRow($index, 'company-table-row')">
             @if (company().companyTableHeaders[0].showHeader) {
               <td class="table-td">
@@ -55,7 +59,7 @@
               <td class="table-td">{{ companyData.name }}</td>
             }
             @if (company().companyTableHeaders[4].showHeader) {
-              <td class="table-td">{{ companyData.cnpj }}</td>
+              <td class="table-td">{{ companyData.cnpj | mask: setCnpjMask($index) }}</td>
             }
             @if (company().companyTableHeaders[5].showHeader) {
               <td class="table-td">{{ companyData.ie }}</td>
@@ -66,12 +70,21 @@
             @if (company().companyTableHeaders[7].showHeader) {
               <td class="table-td flex justify-center gap-3">
                 <app-button
+                  (click)="onShowCompanyDetails($index)"
+                  [isDisabled]="arrayIsBtnDisabled()[$index]"
+                  [showLabel]="false"
+                  [showIcon]="true"
+                  [isToggled]="arrayIsArrowUp()[$index]"
+                  [btnType]="'icon-arrow-down'"></app-button>
+                <app-button
                   (click)="onShowModalEditForm(companyData)"
+                  [isDisabled]="arrayIsBtnDisabled()[$index]"
                   [showLabel]="false"
                   [showIcon]="true"
                   [btnType]="'icon-edit'"></app-button>
                 <app-button
                   (click)="onShowModalAskToDelete(companyData)"
+                  [isDisabled]="arrayIsBtnDisabled()[$index]"
                   [showLabel]="false"
                   [showIcon]="true"
                   [btnType]="'icon-delete'"></app-button>
@@ -126,7 +139,7 @@
           <tbody tbody-row class="divide-y divide-gray-500 border border-gray-500">
             @if (companyItem().tabIdx == 0) {
               @for (addressData of companyItem().addressesData; track addressData.idAddress) {
-                <tr class="hover:bg-gray-700 company-item-table-row">
+                <tr class="hover:bg-gray-700">
                   @if (companyItem().tableHeaderSelected[0].showHeader) {
                     <td class="table-td">
                       {{ addressData.idAddress }}
@@ -134,7 +147,7 @@
                   }
                   @if (companyItem().tableHeaderSelected[1].showHeader) {
                     <td class="table-td">
-                      {{ addressData.type }}
+                      {{ addressData.postalCode }}
                     </td>
                   }
                   @if (companyItem().tableHeaderSelected[2].showHeader) {
@@ -179,7 +192,7 @@
               }
             } @else {
               @for (employeeData of companyItem().employeesData; track employeeData.idEmployee) {
-                <tr class="hover:bg-gray-700 company-item-table-row">
+                <tr class="hover:bg-gray-700">
                   @if (companyItem().tableHeaderSelected[0].showHeader) {
                     <td class="table-td">
                       {{ employeeData.idEmployee }}
@@ -333,11 +346,12 @@
         </div>
       }
       <div class="flex flex-col gap-1">
-        <label class="font-semibold text-sm" for="">Tipo</label>
+        <label class="font-semibold text-sm" for="">CEP</label>
         <app-input-standard
-          [propsInput]="companyItem().addressData.type"
+          [propsInput]="companyItem().addressData.postalCode"
           [showRightIcon]="false"
-          (emitInputValue)="companyItem().addressData.type = $event"
+          (emitInputValue)="companyItem().addressData.postalCode = $event"
+          (changeTriggerEmitter)="setCep()"
           [inputClass]="'text-black h-9'"></app-input-standard>
       </div>
       <div class="flex flex-col gap-1">
@@ -383,11 +397,10 @@
         </div>
       </div>
       <label class="font-semibold text-sm" for="">UF</label>
-      <app-input-standard
-        [propsInput]="companyItem().addressData.state"
-        [showRightIcon]="false"
-        (emitInputValue)="companyItem().addressData.state = $event"
-        [inputClass]="'text-black h-9'"></app-input-standard>
+      <app-select
+        [selectValue]="companyItem().addressData.state"
+        [selectType]="'state'"
+        (selectValueEmitter)="companyItem().addressData.state = $event"></app-select>
     </div>
   </div>
   <div class="grid footer-block md:flex md:justify-center gap-5 mt-6 w-full">
@@ -552,8 +565,8 @@
       </div>
     }
     <div class="grid grid-cols-[1fr_3fr] border-t border-gray-500">
-      <p class="border-r border-l p-2">Tipo:</p>
-      <p class="border-r p-2 font-bold">{{ companyItem().addressData.type }}</p>
+      <p class="border-r border-l p-2">CEP:</p>
+      <p class="border-r p-2 font-bold">{{ companyItem().addressData.postalCode }}</p>
     </div>
     <div class="grid grid-cols-[1fr_3fr] border-t border-gray-500">
       <p class="border-r border-l p-2">Logradouro:</p>

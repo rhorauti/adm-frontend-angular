@@ -18,7 +18,7 @@ export class SelectComponent implements OnInit {
 
   ngOnInit(): void {
     switch (this.selectType) {
-      case 'estado': {
+      case 'state': {
         this.optionList = [
           'AC',
           'AL',
@@ -48,6 +48,26 @@ export class SelectComponent implements OnInit {
           'SE',
           'TO',
         ];
+        break;
+      }
+      case 'tipoLogradouro': {
+        this.optionList = [
+          'Rua',
+          'Avenida',
+          'Alameda',
+          'Travessa',
+          'Praça',
+          'Rodovia',
+          'Estrada',
+          'Vila',
+          'Ladeira',
+          'Beco',
+          'Viaduto',
+          'Largo',
+          'Passarela',
+          'Servidão',
+        ];
+        break;
       }
     }
   }

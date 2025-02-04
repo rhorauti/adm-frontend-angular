@@ -6,6 +6,7 @@
     [min]="typeNumberMin"
     [prefix]="maskPrefix"
     [mask]="maskValue"
+    (change)="sendChangeTrigger($event)"
     (input)="sendInputValue($event)"
     autocomplete="current-password"
     placeholder="{{ placeholder }}"

@@ -2,12 +2,12 @@ import { CommonModule } from '@angular/common';
 import { Component, EventEmitter, Input, OnChanges, OnInit, Output } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
-import { NgxMaskDirective, NgxMaskPipe, provideNgxMask } from 'ngx-mask';
+import { NgxMaskDirective, provideNgxMask } from 'ngx-mask';
 
 @Component({
   selector: 'app-input-standard',
   standalone: true,
-  imports: [CommonModule, FormsModule, MatIconModule, NgxMaskDirective, NgxMaskPipe],
+  imports: [CommonModule, FormsModule, MatIconModule, NgxMaskDirective],
   providers: [provideNgxMask()],
   templateUrl: './input-standard.component.html',
   styleUrl: './input-standard.component.scss',
@@ -32,6 +32,7 @@ export class InputStandardComponent implements OnInit, OnChanges {
 
   @Output() emitInputValue = new EventEmitter<string>();
   @Output() clearInputEmitter = new EventEmitter<boolean>();
+  @Output() changeTriggerEmitter = new EventEmitter<string>();
 
   ngOnInit(): void {
     if (!this.showRightIcon) {
@@ -73,5 +74,10 @@ export class InputStandardComponent implements OnInit, OnChanges {
   sendInputValue(inputData: Event): void {
     this.inputValue = (inputData.target as HTMLInputElement).value.trim();
     this.emitInputValue.emit(this.inputValue);
+  }
+
+  sendChangeTrigger(change: Event): void {
+    this.inputValue = (change.target as HTMLInputElement).value.trim();
+    this.changeTriggerEmitter.emit(this.inputValue);
   }
 }
