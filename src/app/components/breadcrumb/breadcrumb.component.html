@@ -1,0 +1,12 @@
+<nav class="text-white bg-gray-700 rounded-md p-1.5">
+  <ul class="flex gap-4">
+    @for (item of items; track $index) {
+      <li [ngClass]="items.length - 1 == $index ? 'font-bold' : ''">
+        <a [routerLink]="item.href">{{ item.label }}</a>
+      </li>
+      @if (items.length - 1 != $index) {
+        <span>\</span>
+      }
+    }
+  </ul>
+</nav>

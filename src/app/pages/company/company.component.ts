@@ -23,6 +23,8 @@ import { IEmployee } from '@core/interfaces/IEmployee';
 import { NgxMaskPipe, provideNgxMask } from 'ngx-mask';
 import { SelectComponent } from '../../components/select/select.component';
 import { ThirdPartApi } from '@core/api/http/third.part.api';
+import { REGISTER_TYPE } from 'src/app/enum/register.enum';
+import { ModalCompanyComponent } from '@components/modal/modal-company/modal-company.component';
 
 @Component({
   selector: 'app-company',
@@ -42,6 +44,7 @@ import { ThirdPartApi } from '@core/api/http/third.part.api';
     TableHeaderBoxComponent,
     NgxMaskPipe,
     SelectComponent,
+    ModalCompanyComponent,
   ],
   providers: [
     RegisterCompanyApi,
@@ -64,7 +67,6 @@ export class CompanyComponent implements OnInit {
   version = 'v1';
 
   public company = signal<ICompanyGroup>({
-    companyType: 0,
     tabList: ['Clientes', 'Fornecedores', 'MyCompany'],
     arraySelectFilter: [],
     inputValueFilter: '',
@@ -75,13 +77,12 @@ export class CompanyComponent implements OnInit {
     tableHeaderSelected: [],
     companyTableHeaders: [
       { id: 0, showHeader: true, name: 'Id' },
-      { id: 1, showHeader: true, name: 'Data' },
-      { id: 2, showHeader: true, name: 'Apelido' },
-      { id: 3, showHeader: true, name: 'Razão Social' },
-      { id: 4, showHeader: true, name: 'CNPJ/CPF' },
-      { id: 5, showHeader: true, name: 'Inscr. Estadual' },
-      { id: 6, showHeader: true, name: 'Inscr. Municipal' },
-      { id: 7, showHeader: true, name: 'Ações' },
+      { id: 1, showHeader: true, name: 'Apelido' },
+      { id: 2, showHeader: true, name: 'Razão Social' },
+      { id: 3, showHeader: true, name: 'CNPJ/CPF' },
+      { id: 4, showHeader: false, name: 'Inscr. Estadual' },
+      { id: 5, showHeader: false, name: 'Inscr. Municipal' },
+      { id: 6, showHeader: true, name: 'Ações' },
     ],
     tableDataSelected: [],
     tableItemSelected: {
@@ -98,7 +99,6 @@ export class CompanyComponent implements OnInit {
     companiesData: [],
     companyData: {
       idCompany: 0,
-      date: new Date().toISOString(),
       type: 0,
       nickname: '',
       name: '',
@@ -136,14 +136,15 @@ export class CompanyComponent implements OnInit {
     ],
     adressTableHeaders: [
       { id: 0, showHeader: true, name: 'Id' },
-      { id: 1, showHeader: true, name: 'CEP' },
-      { id: 2, showHeader: true, name: 'Endereço' },
-      { id: 3, showHeader: true, name: 'Número' },
-      { id: 4, showHeader: true, name: 'Complemento' },
-      { id: 5, showHeader: true, name: 'Bairro' },
-      { id: 6, showHeader: true, name: 'Cidade' },
-      { id: 7, showHeader: true, name: 'UF' },
-      { id: 8, showHeader: true, name: 'Ações' },
+      { id: 1, showHeader: true, name: 'Apelido' },
+      { id: 2, showHeader: true, name: 'CEP' },
+      { id: 3, showHeader: true, name: 'Endereço' },
+      { id: 4, showHeader: true, name: 'Número' },
+      { id: 5, showHeader: true, name: 'Complemento' },
+      { id: 6, showHeader: true, name: 'Bairro' },
+      { id: 7, showHeader: true, name: 'Cidade' },
+      { id: 8, showHeader: true, name: 'UF' },
+      { id: 9, showHeader: true, name: 'Ações' },
     ],
     employeeTableHeaders: [
       { id: 0, showHeader: true, name: 'Id' },
@@ -159,6 +160,9 @@ export class CompanyComponent implements OnInit {
     tableDataSelected: [],
     tableItemSelected: {
       idAddress: 0,
+      nickname: '',
+      isDelivery: 0,
+      isBilling: 0,
       postalCode: '',
       address: '',
       number: '',
@@ -166,11 +170,15 @@ export class CompanyComponent implements OnInit {
       district: '',
       city: '',
       state: '',
+      id_Company: 0,
     },
     initialAddressTableData: [],
     addressesData: [],
     addressData: {
       idAddress: 0,
+      nickname: '',
+      isDelivery: 0,
+      isBilling: 0,
       postalCode: '',
       address: '',
       number: '',
@@ -178,6 +186,7 @@ export class CompanyComponent implements OnInit {
       district: '',
       city: '',
       state: '',
+      id_Company: 0,
     },
     modalFormAddress: {
       isActive: false,
@@ -199,6 +208,7 @@ export class CompanyComponent implements OnInit {
       email: '',
       deskphone: '',
       cellphone: '',
+      id_Company: 0,
     },
     modalFormEmployee: {
       isActive: false,
@@ -215,12 +225,30 @@ export class CompanyComponent implements OnInit {
   });
 
   arrayIsBtnDisabled = signal<boolean[]>([]);
+  isDelivery = false;
+  isBilling = false;
 
-  setCnpjMask(idx: number): string {
-    if (this.company()?.companiesData?.[idx]?.cnpj?.length > 11) {
-      return '00.000.000/0000-00';
-    } else {
-      return '000.000.000-00';
+  setMask(type: string, idx?: number): string {
+    switch (type) {
+      case 'cnpj': {
+        if ((this.company()?.companiesData?.[idx || 0]?.cnpj || '')?.length > 11) {
+          return '00.000.000/0000-00';
+        } else {
+          return '000.000.000-00';
+        }
+      }
+      case 'postalCode': {
+        return '00000-000';
+      }
+      case 'phone': {
+        if ((this.companyItem()?.employeesData?.[idx || 0]?.deskphone || '')?.length > 11) {
+          return '+55 (00) 0000-0000';
+        } else {
+          return '+55 (00) 00000-0000';
+        }
+      }
+      default:
+        return '';
     }
   }
 
@@ -274,7 +302,7 @@ export class CompanyComponent implements OnInit {
 
   filterCompanyType(): void {
     this.company().companiesData = this.company().initialTableData.filter(company => {
-      return company.type == this.company().companyData.type;
+      return company.type == this.company().tabIdx;
     });
   }
 
@@ -315,7 +343,7 @@ export class CompanyComponent implements OnInit {
     this.clearSelectionTableRow('company-table-row');
     this.company().companiesData = this.company().initialTableData.filter(company => {
       if (this.company().inputValueFilter == '') {
-        return company.type == this.company().companyData.type;
+        return company.type == this.company().tabIdx;
       } else {
         const key = this.setCompanyKeyValueFilter() as keyof ICompany;
         return (
@@ -324,7 +352,7 @@ export class CompanyComponent implements OnInit {
             .toLowerCase()
             .trim()
             .includes(this.company().inputValueFilter.toLowerCase().trim()) &&
-          company.type == this.company().companyData.type
+          company.type == this.company().tabIdx
         );
       }
     });
@@ -445,6 +473,7 @@ export class CompanyComponent implements OnInit {
     this.setBtnRowAble(index);
     this.clearSelectionTableRow(className);
     this.highlightRow(index, className);
+    this.company().companyData.idCompany = this.company().companiesData[index].idCompany;
   }
 
   isCompanyDetailActive = false;
@@ -456,7 +485,6 @@ export class CompanyComponent implements OnInit {
       this.setCompanyItemVisibility(false);
     }
     this.isCompanyDetailActive = !this.isCompanyDetailActive;
-    this.company().companyData.idCompany = this.company().companiesData[index].idCompany;
     this.arrayIsArrowUp.update(currentArray =>
       currentArray.map((value, idx) => (idx == index ? (value = !value) : value))
     );
@@ -474,13 +502,13 @@ export class CompanyComponent implements OnInit {
    */
   isTypeValid<T extends keyof TableTypeObject>(data: unknown, type: T): data is TableTypeObject[T] {
     switch (type) {
-      case 'company': {
+      case REGISTER_TYPE.COMPANY: {
         return (data as ICompany).idCompany != undefined;
       }
-      case 'address': {
+      case REGISTER_TYPE.ADDRESS: {
         return (data as IAddress).idAddress != undefined;
       }
-      case 'employee': {
+      case REGISTER_TYPE.EMPLOYEE: {
         return (data as IEmployee).idEmployee != undefined;
       }
       default:
@@ -488,7 +516,7 @@ export class CompanyComponent implements OnInit {
     }
   }
 
-  clearModalCompanyInfo(): void {
+  clearCompanyInfo(): void {
     this.company().companyData.idCompany = 0;
     this.company().companyData.nickname = '';
     this.company().companyData.name = '';
@@ -497,8 +525,13 @@ export class CompanyComponent implements OnInit {
     this.company().companyData.im = '';
   }
 
-  clearModalAddressInfo(): void {
+  clearAddressInfo(): void {
     this.companyItem().addressData.idAddress = 0;
+    this.companyItem().addressData.nickname = '';
+    this.companyItem().addressData.isBilling = 0;
+    this.companyItem().addressData.isDelivery = 0;
+    this.isBilling = false;
+    this.isDelivery = false;
     this.companyItem().addressData.postalCode = '';
     this.companyItem().addressData.address = '';
     this.companyItem().addressData.number = '';
@@ -508,7 +541,7 @@ export class CompanyComponent implements OnInit {
     this.companyItem().addressData.state = '';
   }
 
-  clearModalEmployeeInfo(): void {
+  clearEmployeeInfo(): void {
     this.companyItem().employeeData.idEmployee = 0;
     this.companyItem().employeeData.name = '';
     this.companyItem().employeeData.cpf = '';
@@ -523,13 +556,13 @@ export class CompanyComponent implements OnInit {
     if (this.company().modalFormCompany.isActive) {
       if (this.company().modalFormCompany.isEditForm)
         this.company().modalFormCompany.isEditForm = false;
-      this.clearModalCompanyInfo();
+      this.clearCompanyInfo();
       this.company().modalFormCompany.isInputClear = true;
       this.company().modalFormCompany.isActive = false;
     } else if (this.companyItem().modalFormAddress.isActive) {
       if (this.companyItem().modalFormAddress.isEditForm)
         this.companyItem().modalFormAddress.isEditForm = false;
-      this.clearModalAddressInfo();
+      this.clearAddressInfo();
       this.companyItem().modalFormAddress.isInputClear = true;
       this.companyItem().modalFormAddress.isActive = false;
       if (this.companyItem().modalCheckAddress.isActive) {
@@ -538,7 +571,7 @@ export class CompanyComponent implements OnInit {
     } else if (this.companyItem().modalFormEmployee.isActive) {
       if (this.companyItem().modalFormEmployee.isEditForm)
         this.companyItem().modalFormEmployee.isEditForm = false;
-      this.clearModalEmployeeInfo();
+      this.clearEmployeeInfo();
       this.companyItem().modalFormEmployee.isInputClear = true;
       this.companyItem().modalFormEmployee.isActive = false;
       if (this.companyItem().modalCheckEmployee.isActive) {
@@ -553,20 +586,27 @@ export class CompanyComponent implements OnInit {
     });
   }
 
+  convertNumberValueToBoolean(value: number): boolean {
+    if (value == 1) return true;
+    else return false;
+  }
+
   onShowModalEditForm(dataSelected: TableItemType): void {
-    if (this.isTypeValid(dataSelected, 'company')) {
+    if (this.isTypeValid(dataSelected, REGISTER_TYPE.COMPANY)) {
       this.company.update(state => ({
         ...state,
         companyData: { ...dataSelected },
         modalFormCompany: { ...state.modalFormCompany, isActive: true, isEditForm: true },
       }));
-    } else if (this.isTypeValid(dataSelected, 'address')) {
+    } else if (this.isTypeValid(dataSelected, REGISTER_TYPE.ADDRESS)) {
       this.companyItem.update(state => ({
         ...state,
         addressData: { ...dataSelected },
         modalFormAddress: { ...state.modalFormAddress, isActive: true, isEditForm: true },
       }));
-    } else if (this.isTypeValid(dataSelected, 'employee')) {
+      this.isDelivery = this.convertNumberValueToBoolean(this.companyItem().addressData.isDelivery);
+      this.isBilling = this.convertNumberValueToBoolean(this.companyItem().addressData.isBilling);
+    } else if (this.isTypeValid(dataSelected, REGISTER_TYPE.EMPLOYEE)) {
       this.companyItem.update(state => ({
         ...state,
         employeeData: { ...dataSelected },
@@ -595,34 +635,193 @@ export class CompanyComponent implements OnInit {
       this.company().modalCheckCompany.isActionOk = false;
       this.clearSelectionTableRow('company-table-row');
     } else if (this.companyItem().modalCheckAddress.isActionOk) {
-      this.onShowCompanyList();
+      this.onShowAddressList();
       this.onCloseModalForm();
       this.companyItem().modalCheckAddress.isActive = false;
       this.companyItem().modalCheckAddress.isActionOk = false;
     } else if (this.companyItem().modalCheckEmployee.isActionOk) {
-      this.onShowCompanyList();
+      this.onShowEmployeeList();
       this.onCloseModalForm();
       this.companyItem().modalCheckEmployee.isActive = false;
       this.companyItem().modalCheckEmployee.isActionOk = false;
-    } else if (this.modalInfo().isActionOk) {
-      this.onShowCompanyList();
-      this.modalAskInfo().isActive = false;
-      this.modalInfo().isActionOk = false;
     }
     this.modalInfo().isActive = false;
   }
 
-  onShowModalAskToDelete(dataSelected: ICompany): void {
-    this.company().companyData = dataSelected;
-    this.onHandleModalInfo(
-      'confirmation',
-      `Deseja excluir ${(this.company().companyData as ICompany).name}?`
-    );
+  registerItem = '';
+
+  onShowModalAskToDelete(registerItem: string, dataSelected: TableItemType): void {
+    this.registerItem = registerItem;
+    switch (registerItem) {
+      case REGISTER_TYPE.COMPANY: {
+        this.company().companyData = dataSelected as ICompany;
+        this.onHandleModalInfo(
+          'confirmation',
+          `Deseja excluir ${(dataSelected as ICompany).name}?`
+        );
+        break;
+      }
+      case REGISTER_TYPE.ADDRESS: {
+        this.companyItem().addressData = dataSelected as IAddress;
+        this.onHandleModalInfo(
+          'confirmation',
+          `Deseja excluir ${(dataSelected as IAddress).nickname}?`
+        );
+        break;
+      }
+      case REGISTER_TYPE.EMPLOYEE: {
+        this.companyItem().employeeData = dataSelected as IEmployee;
+        this.onHandleModalInfo(
+          'confirmation',
+          `Deseja excluir ${(dataSelected as IEmployee).name}?`
+        );
+        break;
+      }
+    }
     this.modalAskInfo().isActive = true;
   }
 
-  onShowModalAskToDeleteCompanyItem(): void {
-    console.log('teste...');
+  onActionOk(): void {
+    switch (this.registerItem) {
+      case REGISTER_TYPE.COMPANY: {
+        this.deleteCompany();
+        this.clearCompanyInfo();
+        break;
+      }
+      case REGISTER_TYPE.ADDRESS: {
+        this.deleteAddress();
+        this.clearAddressInfo();
+        break;
+      }
+      case REGISTER_TYPE.EMPLOYEE: {
+        this.deleteEmployee();
+        this.clearEmployeeInfo();
+        break;
+      }
+    }
+    this.registerItem = '';
+  }
+
+  showLoading = signal(false);
+
+  /**
+   * showTableDataList
+   *
+   * Request datas to backend to fill table information.
+   * @param groupType number - type of the group (1 - Customer, 2 - Supplier, 3 - MyCompany)
+   * @param baseGroupSignal WritableSignal - Data of the group informed.
+   * @param baseGroupName string - Name of the group informed (ex. company, product, etc)
+   */
+  async onShowCompanyList(): Promise<void> {
+    try {
+      this.showLoading.set(true);
+      const response = await this.httpRequestService.sendHttpRequest(
+        `${environment.apiUrl}/${this.version}/company`,
+        'GET'
+      );
+      this.company.update(state => ({
+        ...state,
+        initialTableData: response.data,
+        companiesData: response.data,
+      }));
+      this.fillCompanyBtnDisableBooleanArray(
+        this.company().companiesData.filter(company => company.type == this.company().tabIdx).length
+      );
+      this.fillCompanyBtnDetailBooleanArray(
+        this.company().companiesData.filter(company => company.type == this.company().tabIdx).length
+      );
+
+      this.filterCompanyType();
+    } catch (e: any) {
+      this.onHandleModalInfo('failure', e?.error?.msg);
+    } finally {
+      this.showLoading.set(false);
+    }
+  }
+
+  companyData = {
+    idCompany: 0,
+    date: '',
+    type: 0,
+    nickname: '',
+    name: '',
+    cnpj: '',
+    ie: '',
+    im: '',
+  } as ICompany;
+
+  removeMask(data: string): string {
+    return (data ?? '').replace(/[\D]/g, '');
+  }
+
+  setCompanyData(): void {
+    this.companyData.idCompany = this.company().companyData.idCompany;
+    this.companyData.type = this.company().companyData.type;
+    this.companyData.nickname = this.company().companyData.nickname;
+    this.companyData.name = this.company().companyData.name;
+    this.companyData.cnpj = this.removeMask(this.company().companyData?.cnpj || '');
+    this.companyData.ie = this.removeMask(this.company().companyData.ie || '');
+    this.companyData.im = this.removeMask(this.company().companyData.im || '');
+  }
+
+  async addNewCompany(): Promise<void> {
+    try {
+      this.showLoading.set(true);
+      this.setCompanyData();
+      console.log(this.companyData);
+      const response = await this.httpRequestService.sendHttpRequest(
+        `${environment.apiUrl}/${this.version}/company`,
+        'POST',
+        this.companyData
+      );
+      this.company().modalCheckCompany.isActionOk = true;
+      this.onHandleModalInfo('success', response.msg);
+      this.modalInfo().isActive = true;
+    } catch (e: any) {
+      this.onHandleModalInfo('failure', e?.error?.msg);
+      this.modalInfo().isActive = true;
+    } finally {
+      this.showLoading.set(false);
+    }
+  }
+
+  async updateCompany(): Promise<void> {
+    try {
+      this.showLoading.set(true);
+      this.setCompanyData();
+      const response = await this.httpRequestService.sendHttpRequest(
+        `${environment.apiUrl}/${this.version}/company/${(this.company().companyData as ICompany).idCompany}`,
+        'PUT',
+        this.companyData
+      );
+      this.onHandleModalInfo('success', response.msg);
+      this.company().modalCheckCompany.isActionOk = true;
+      this.modalInfo().isActive = true;
+    } catch (e: any) {
+      this.onHandleModalInfo('failure', e?.error?.msg);
+      this.modalInfo().isActive = true;
+    } finally {
+      this.showLoading.set(false);
+    }
+  }
+
+  async deleteCompany(): Promise<void> {
+    try {
+      this.showLoading.set(true);
+      const response = await this.httpRequestService.sendHttpRequest(
+        `${environment.apiUrl}/${this.version}/company/${(this.company().companyData as ICompany).idCompany}`,
+        'DELETE'
+      );
+      this.modalAskInfo.update(state => ({ ...state, isActive: false }));
+      this.onHandleModalInfo('success', response.msg);
+      this.company().modalCheckCompany.isActionOk = true;
+      this.modalInfo().isActive = true;
+    } catch (e: any) {
+      this.onHandleModalInfo('failure', e?.error?.msg);
+      this.modalInfo().isActive = true;
+    } finally {
+      this.showLoading.set(false);
+    }
   }
 
   async setCep(): Promise<void> {
@@ -651,43 +850,6 @@ export class CompanyComponent implements OnInit {
     }
   }
 
-  showLoading = signal(false);
-
-  /**
-   * showTableDataList
-   *
-   * Request datas to backend to fill table information.
-   * @param groupType number - type of the group (1 - Customer, 2 - Supplier, 3 - MyCompany)
-   * @param baseGroupSignal WritableSignal - Data of the group informed.
-   * @param baseGroupName string - Name of the group informed (ex. company, product, etc)
-   */
-  async onShowCompanyList(): Promise<void> {
-    try {
-      this.showLoading.set(true);
-      const response = await this.httpRequestService.sendHttpRequest(
-        `${environment.apiUrl}/${this.version}/company`,
-        'GET'
-      );
-      this.company.update(state => ({
-        ...state,
-        initialTableData: response.data,
-        companiesData: response.data,
-      }));
-      this.fillCompanyBtnDisableBooleanArray(
-        this.company().companiesData.filter(company => company.type == 0).length
-      );
-      this.fillCompanyBtnDetailBooleanArray(
-        this.company().companiesData.filter(company => company.type == 0).length
-      );
-
-      this.filterCompanyType();
-    } catch (e: any) {
-      this.onHandleModalInfo('failure', e?.error?.msg);
-    } finally {
-      this.showLoading.set(false);
-    }
-  }
-
   async onShowAddressList(): Promise<void> {
     try {
       this.showLoading.set(true);
@@ -702,6 +864,75 @@ export class CompanyComponent implements OnInit {
       }));
     } catch (e: any) {
       this.onHandleModalInfo('failure', e?.error?.msg);
+    } finally {
+      this.showLoading.set(false);
+    }
+  }
+
+  addressData = {
+    idAddress: 0,
+    nickname: '',
+    isDelivery: 0,
+    isBilling: 0,
+    postalCode: '',
+    address: '',
+    number: '',
+    complement: '',
+    district: '',
+    city: '',
+    state: '',
+    id_Company: 0,
+  } as IAddress;
+
+  setAddressData(): void {
+    this.addressData.idAddress = this.companyItem().addressData.idAddress;
+    this.addressData.nickname = this.companyItem().addressData.nickname;
+    this.addressData.isDelivery = this.isDelivery ? 1 : 0;
+    this.addressData.isBilling = this.isBilling ? 1 : 0;
+    this.addressData.postalCode = this.removeMask(this.companyItem().addressData.postalCode);
+    this.addressData.address = this.companyItem().addressData.address;
+    this.addressData.number = this.companyItem().addressData.number || '';
+    this.addressData.complement = this.companyItem().addressData.complement || '';
+    this.addressData.district = this.companyItem().addressData.district || '';
+    this.addressData.city = this.companyItem().addressData.city || '';
+    this.addressData.state = this.companyItem().addressData.state || '';
+    this.addressData.id_Company = this.company().companyData.idCompany;
+  }
+
+  async saveAddress(): Promise<void> {
+    try {
+      this.setAddressData();
+      this.showLoading.set(true);
+      const response = await this.httpRequestService.sendHttpRequest(
+        `${environment.apiUrl}/${this.version}/address`,
+        'POST',
+        this.addressData
+      );
+      this.companyItem().modalCheckAddress.isActionOk = true;
+      this.onHandleModalInfo('success', response.msg);
+      this.modalInfo().isActive = true;
+    } catch (e: any) {
+      this.onHandleModalInfo('failure', e?.error?.msg);
+      this.modalInfo().isActive = true;
+    } finally {
+      this.showLoading.set(false);
+    }
+  }
+
+  async deleteAddress(): Promise<void> {
+    try {
+      this.showLoading.set(true);
+      const response = await this.httpRequestService.sendHttpRequest(
+        `${environment.apiUrl}/${this.version}/address/${(this.companyItem().addressData as IAddress).idAddress}`,
+        'DELETE'
+      );
+      this.modalAskInfo.update(state => ({ ...state, isActive: false }));
+      this.onHandleModalInfo('success', response.msg);
+      this.companyItem().modalCheckAddress.isActionOk = true;
+      this.modalInfo().isActive = true;
+    } catch (e: any) {
+      this.onHandleModalInfo('failure', e?.error?.msg);
+      this.modalInfo().isActive = true;
     } finally {
       this.showLoading.set(false);
     }
@@ -726,87 +957,43 @@ export class CompanyComponent implements OnInit {
     }
   }
 
-  companyDataWithouMask = {
-    idCompany: 0,
-    date: '',
-    type: 0,
-    nickname: '',
+  employeeData = {
+    idEmployee: 0,
     name: '',
-    cnpj: '',
-    ie: '',
-    im: '',
-  };
+    cpf: '',
+    department: '',
+    position: '',
+    email: '',
+    deskphone: '',
+    cellphone: '',
+    id_Company: 0,
+  } as IEmployee;
 
-  removeMask(data: string): string {
-    return (data ?? '').replace(/[./-]/g, '');
+  setEmployeeData(): void {
+    this.employeeData.idEmployee = this.companyItem().employeeData.idEmployee;
+    this.employeeData.name = this.companyItem().employeeData.name;
+    this.employeeData.cpf = this.removeMask(this.companyItem().employeeData.cpf || '');
+    this.employeeData.department = this.companyItem().employeeData.department || '';
+    this.employeeData.position = this.companyItem().employeeData.position || '';
+    this.employeeData.email = this.companyItem().employeeData.email || '';
+    this.employeeData.deskphone = this.removeMask(
+      this.removeMask(this.companyItem().employeeData.deskphone || '')
+    );
+    this.employeeData.cellphone = this.removeMask(this.companyItem().employeeData.cellphone || '');
+    this.employeeData.id_Company = this.company().companyData.idCompany;
   }
 
-  removeCompanyItemsMask(): void {
-    this.companyDataWithouMask.idCompany = this.company().companyData.idCompany;
-    this.companyDataWithouMask.date = new Date().toISOString();
-    this.companyDataWithouMask.type = this.company().companyData.type;
-    this.companyDataWithouMask.nickname = this.company().companyData.nickname;
-    this.companyDataWithouMask.name = this.company().companyData.name;
-    this.companyDataWithouMask.cnpj = this.removeMask(this.company().companyData.cnpj);
-    this.companyDataWithouMask.ie = this.removeMask(this.company().companyData.ie);
-    this.companyDataWithouMask.im = this.removeMask(this.company().companyData.im);
-  }
-
-  async addNewCompany(): Promise<void> {
+  async saveEmployee(): Promise<void> {
     try {
+      this.setEmployeeData();
       this.showLoading.set(true);
-      this.removeCompanyItemsMask();
+      console.log('employeeData', this.employeeData);
       const response = await this.httpRequestService.sendHttpRequest(
-        `${environment.apiUrl}/${this.version}/company`,
+        `${environment.apiUrl}/${this.version}/employee`,
         'POST',
-        this.companyDataWithouMask
+        this.employeeData
       );
-      this.company().modalCheckCompany.isActionOk = true;
-      this.onHandleModalInfo('success', response.msg);
-      this.modalInfo().isActive = true;
-    } catch (e: any) {
-      console.log('response addNewCompany', e);
-      this.onHandleModalInfo('failure', e?.error?.msg);
-      this.modalInfo().isActive = true;
-    } finally {
-      this.showLoading.set(false);
-    }
-  }
-
-  addressData = {
-    idAddress: 0,
-    postalCode: '',
-    address: '',
-    number: '',
-    complement: '',
-    district: '',
-    city: '',
-    state: '',
-    idCompany: 0,
-  };
-
-  setAddressData(): void {
-    this.addressData.idAddress = this.companyItem().addressData.idAddress;
-    this.addressData.postalCode = this.companyItem().addressData.postalCode;
-    this.addressData.address = this.companyItem().addressData.address;
-    this.addressData.number = this.companyItem().addressData.number;
-    this.addressData.complement = this.companyItem().addressData.complement;
-    this.addressData.district = this.companyItem().addressData.district;
-    this.addressData.city = this.companyItem().addressData.city;
-    this.addressData.state = this.companyItem().addressData.state;
-    this.addressData.idCompany = this.company().companyData.idCompany;
-  }
-
-  async addNewAddress(): Promise<void> {
-    try {
-      this.setAddressData();
-      this.showLoading.set(true);
-      const response = await this.httpRequestService.sendHttpRequest(
-        `${environment.apiUrl}/${this.version}/address`,
-        'POST',
-        this.addressData
-      );
-      this.companyItem().modalCheckAddress.isActionOk = true;
+      this.companyItem().modalCheckEmployee.isActionOk = true;
       this.onHandleModalInfo('success', response.msg);
       this.modalInfo().isActive = true;
     } catch (e: any) {
@@ -817,36 +1004,16 @@ export class CompanyComponent implements OnInit {
     }
   }
 
-  async updateCompany() {
-    try {
-      this.showLoading.set(true);
-      this.removeCompanyItemsMask();
-      const response = await this.httpRequestService.sendHttpRequest(
-        `${environment.apiUrl}/${this.version}/company/${(this.company().companyData as ICompany).idCompany}`,
-        'PUT',
-        this.companyDataWithouMask
-      );
-      this.onHandleModalInfo('success', response.msg);
-      this.company().modalCheckCompany.isActionOk = true;
-      this.modalInfo().isActive = true;
-    } catch (e: any) {
-      this.onHandleModalInfo('failure', e?.error?.msg);
-      this.modalInfo().isActive = true;
-    } finally {
-      this.showLoading.set(false);
-    }
-  }
-
-  async deleteCompany(): Promise<void> {
+  async deleteEmployee(): Promise<void> {
     try {
       this.showLoading.set(true);
       const response = await this.httpRequestService.sendHttpRequest(
-        `${environment.apiUrl}/${this.version}/company/${(this.company().companyData as ICompany).idCompany}`,
+        `${environment.apiUrl}/${this.version}/employee/${(this.companyItem().employeeData as IEmployee).idEmployee}`,
         'DELETE'
       );
       this.modalAskInfo.update(state => ({ ...state, isActive: false }));
       this.onHandleModalInfo('success', response.msg);
-      this.company().modalCheckCompany.isActionOk = true;
+      this.companyItem().modalCheckEmployee.isActionOk = true;
       this.modalInfo().isActive = true;
     } catch (e: any) {
       this.onHandleModalInfo('failure', e?.error?.msg);

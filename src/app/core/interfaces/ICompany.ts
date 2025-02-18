@@ -1,17 +1,16 @@
 import { IAddress } from './IAddress';
 import { ITableHeader } from './ITableHeader';
 import { IEmployee } from './IEmployee';
-import { IBaseGroup, TableTypeNumber } from './IBase';
+import { IBaseGroup } from './IBase';
 
 export interface ICompany {
   idCompany: number;
-  date: string;
   type: number;
   nickname: string;
   name: string;
-  cnpj: string;
-  ie: string;
-  im: string;
+  cnpj?: string;
+  ie?: string;
+  im?: string;
 }
 
 export interface IModalForm {
@@ -26,7 +25,6 @@ export interface IModalCheck {
 }
 
 export interface ICompanyGroup extends IBaseGroup {
-  companyType: TableTypeNumber;
   companyTableHeaders: ITableHeader[];
   companiesData: ICompany[];
   companyData: ICompany;

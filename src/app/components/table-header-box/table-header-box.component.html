@@ -1,7 +1,7 @@
 <div class="flex flex-col lg:flex-row lg:justify-end gap-5 relative">
   <app-button
     (click)="isHeaderBoxActive = !isHeaderBoxActive"
-    [btnType]="'transparent'"
+    [btnType]="isTextBlack ? 'transparent-black' : 'transparent'"
     [showIcon]="true"
     [btnIcon]="'menu'"
     [label]="'Colunas'"></app-button>

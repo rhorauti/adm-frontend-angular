@@ -1,10 +1,11 @@
 export interface IEmployee {
   idEmployee: number;
   name: string;
-  cpf: string;
-  department: string;
-  position: string;
-  email: string;
-  deskphone: string;
-  cellphone: string;
+  cpf?: string;
+  department?: string;
+  position?: string;
+  email?: string;
+  deskphone?: string;
+  cellphone?: string;
+  id_Company: number;
 }

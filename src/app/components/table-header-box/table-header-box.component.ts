@@ -12,6 +12,7 @@ import { ITableHeader } from '@core/interfaces/ITableHeader';
 })
 export class TableHeaderBoxComponent {
   public isHeaderBoxActive = false;
+  @Input() isTextBlack = false;
 
   /**
    * showTableHeader

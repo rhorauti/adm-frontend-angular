@@ -1,0 +1,11 @@
+<app-modal-base
+  [isModalForm]="true"
+  [title]="'Selecione a empresa'"
+  [showModal]="showModalCompany"
+  (emitCloseModal)="showModalCompany = false">
+  <div class="body-block">
+    <app-modal-company [isModalCompany]="true"></app-modal-company>
+  </div>
+</app-modal-base>
+
+<button class="text-white" (click)="showModalCompany = true">Mostrar Modal</button>

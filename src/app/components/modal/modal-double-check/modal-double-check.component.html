@@ -1,0 +1,149 @@
+<!-- <app-modal-base
+  [showModal]="company().modalCheckCompany.isActive"
+  [showHeader]="true"
+  [title]="'Confirmação dos dados'"
+  [isModalForm]="true"
+  (emitCloseModal)="company().modalCheckCompany.isActive = false">
+  <div class="body-block text-sm text-center">
+    @if (company().modalFormCompany.isEditForm) {
+      <div class="grid grid-cols-[1fr_3fr] border-t border-gray-500">
+        <p class="border-r border-l p-2">Id:</p>
+        <p class="border-r p-2 font-bold">{{ company().companyData.idCompany }}</p>
+      </div>
+    }
+    <div class="grid grid-cols-[1fr_3fr] border-t border-gray-500">
+      <p class="border-r border-l p-2">Apelido:</p>
+      <p class="border-r p-2 font-bold">{{ company().companyData.nickname }}</p>
+    </div>
+    <div class="grid grid-cols-[1fr_3fr] border-t border-gray-500">
+      <p class="border-r border-l p-2">Nome:</p>
+      <p class="border-r p-2 font-bold">{{ company().companyData.name }}</p>
+    </div>
+    <div class="grid grid-cols-[1fr_3fr] border-t last:border-b border-gray-500">
+      <p class="border-r border-l p-2">CNPJ:</p>
+      <p class="border-r p-2 font-bold">{{ company().companyData.cnpj }}</p>
+    </div>
+    <div class="grid grid-cols-[1fr_3fr] border-t last:border-b border-gray-500">
+      <p class="border-r border-l p-2">Inscrição Estadual:</p>
+      <p class="border-r p-2 font-bold">{{ company().companyData.ie }}</p>
+    </div>
+    <div class="grid grid-cols-[1fr_3fr] border-t last:border-b border-gray-500">
+      <p class="border-r border-l p-2">Inscrição Municipal:</p>
+      <p class="border-r p-2 font-bold">{{ company().companyData.im }}</p>
+    </div>
+  </div>
+  <div class="footer-block flex justify-center items-center gap-5 mt-5">
+    <app-button
+      [btnType]="'cancel'"
+      (click)="company().modalCheckCompany.isActive = false"></app-button>
+    @if (company().modalFormCompany.isEditForm) {
+      <app-button [btnType]="'success-edit'" (click)="updateCompany()"></app-button>
+    } @else {
+      <app-button [btnType]="'success-save'" (click)="addNewCompany()"></app-button>
+    }
+  </div>
+</app-modal-base>
+
+<app-modal-base
+  [showModal]="companyItem().modalCheckAddress.isActive"
+  [showHeader]="true"
+  [title]="'Confirmação dos dados de endereço'"
+  [isModalForm]="true"
+  (emitCloseModal)="companyItem().modalCheckAddress.isActive = false">
+  <div class="body-block text-sm text-center">
+    @if (companyItem().modalFormAddress.isEditForm) {
+      <div class="grid grid-cols-[1fr_3fr] border-t border-gray-500">
+        <p class="border-r border-l p-2">Id:</p>
+        <p class="border-r p-2 font-bold">{{ companyItem().addressData.idAddress }}</p>
+      </div>
+    }
+    <div class="grid grid-cols-[1fr_3fr] border-t border-gray-500">
+      <p class="border-r border-l p-2">CEP:</p>
+      <p class="border-r p-2 font-bold">{{ companyItem().addressData.postalCode }}</p>
+    </div>
+    <div class="grid grid-cols-[1fr_3fr] border-t border-gray-500">
+      <p class="border-r border-l p-2">Logradouro:</p>
+      <p class="border-r p-2 font-bold">{{ companyItem().addressData.address }}</p>
+    </div>
+    <div class="grid grid-cols-[1fr_3fr] border-t last:border-b border-gray-500">
+      <p class="border-r border-l p-2">Número:</p>
+      <p class="border-r p-2 font-bold">{{ companyItem().addressData.number }}</p>
+    </div>
+    <div class="grid grid-cols-[1fr_3fr] border-t last:border-b border-gray-500">
+      <p class="border-r border-l p-2">Complemento:</p>
+      <p class="border-r p-2 font-bold">{{ companyItem().addressData.complement }}</p>
+    </div>
+    <div class="grid grid-cols-[1fr_3fr] border-t last:border-b border-gray-500">
+      <p class="border-r border-l p-2">Bairro:</p>
+      <p class="border-r p-2 font-bold">{{ companyItem().addressData.district }}</p>
+    </div>
+    <div class="grid grid-cols-[1fr_3fr] border-t last:border-b border-gray-500">
+      <p class="border-r border-l p-2">Cidade:</p>
+      <p class="border-r p-2 font-bold">{{ companyItem().addressData.city }}</p>
+    </div>
+    <div class="grid grid-cols-[1fr_3fr] border-t last:border-b border-gray-500">
+      <p class="border-r border-l p-2">UF:</p>
+      <p class="border-r p-2 font-bold">{{ companyItem().addressData.state }}</p>
+    </div>
+  </div>
+  <div class="footer-block flex justify-center items-center gap-5 mt-5">
+    <app-button
+      [btnType]="'cancel'"
+      (click)="companyItem().modalCheckAddress.isActive = false"></app-button>
+      <app-button [btnType]="'success-save'" (click)="saveAddress()"></app-button>
+  </div>
+</app-modal-base>
+
+<app-modal-base
+  [showModal]="companyItem().modalCheckEmployee.isActive"
+  [showHeader]="true"
+  [title]="'Confirmação dos dados do Funcionário'"
+  [isModalForm]="true"
+  (emitCloseModal)="companyItem().modalCheckEmployee.isActive = false">
+  <div class="body-block text-sm text-center">
+    @if (companyItem().modalFormEmployee.isEditForm) {
+      <div class="grid grid-cols-[1fr_3fr] border-t border-gray-500">
+        <p class="border-r border-l p-2">Id:</p>
+        <p class="border-r p-2 font-bold">{{ companyItem().employeeData.idEmployee }}</p>
+      </div>
+    }
+    <div class="grid grid-cols-[1fr_3fr] border-t border-gray-500">
+      <p class="border-r border-l p-2">Nome:</p>
+      <p class="border-r p-2 font-bold">{{ companyItem().employeeData.name }}</p>
+    </div>
+    <div class="grid grid-cols-[1fr_3fr] border-t border-gray-500">
+      <p class="border-r border-l p-2">CPF:</p>
+      <p class="border-r p-2 font-bold">{{ companyItem().employeeData.cpf }}</p>
+    </div>
+    <div class="grid grid-cols-[1fr_3fr] border-t last:border-b border-gray-500">
+      <p class="border-r border-l p-2">Departamento:</p>
+      <p class="border-r p-2 font-bold">{{ companyItem().employeeData.department }}</p>
+    </div>
+    <div class="grid grid-cols-[1fr_3fr] border-t last:border-b border-gray-500">
+      <p class="border-r border-l p-2">Cargo:</p>
+      <p class="border-r p-2 font-bold">{{ companyItem().employeeData.position }}</p>
+    </div>
+    <div class="grid grid-cols-[1fr_3fr] border-t last:border-b border-gray-500">
+      <p class="border-r border-l p-2">E-mail:</p>
+      <p class="border-r p-2 font-bold">{{ companyItem().employeeData.email }}</p>
+    </div>
+    <div class="grid grid-cols-[1fr_3fr] border-t last:border-b border-gray-500">
+      <p class="border-r border-l p-2">Telefone fixo:</p>
+      <p class="border-r p-2 font-bold">{{ companyItem().employeeData.deskphone }}</p>
+    </div>
+    <div class="grid grid-cols-[1fr_3fr] border-t last:border-b border-gray-500">
+      <p class="border-r border-l p-2">Celular:</p>
+      <p class="border-r p-2 font-bold">{{ companyItem().employeeData.cellphone }}</p>
+    </div>
+  </div>
+  <div class="footer-block flex justify-center items-center gap-5 mt-5">
+    <app-button
+      [btnType]="'cancel'"
+      (click)="companyItem().modalCheckEmployee.isActive = false"></app-button>
+    @if (companyItem().modalFormAddress.isEditForm) {
+      <app-button [btnType]="'success-edit'" (click)="updateCompany()"></app-button>
+    } @else {
+      <app-button [btnType]="'success-save'" (click)="addNewCompany()"></app-button>
+    }
+  </div>
+</app-modal-base> -->

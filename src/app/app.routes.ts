@@ -5,6 +5,8 @@ import { ResetPasswordComponent } from './pages/auth/reset-password/reset-passwo
 import { NewPasswordComponent } from './pages/auth/new-password/new-password.component';
 import { RedirectComponent } from './pages/auth/redirect/redirect.component';
 import { CompanyComponent } from '@pages/company/company.component';
+import { CompanyDetailComponent } from '@pages/company-detail/company-detail.component';
+import { PurchasingOrderComponent } from '@pages/purchasing-order/purchasing-order.component';
 
 export const routes: Routes = [
   {
@@ -28,8 +30,12 @@ export const routes: Routes = [
     component: RedirectComponent,
   },
   {
-    path: 'company/:company-type',
+    path: 'company',
     component: CompanyComponent,
+  },
+  {
+    path: 'purchasing-order',
+    component: PurchasingOrderComponent,
   },
   {
     path: '**',

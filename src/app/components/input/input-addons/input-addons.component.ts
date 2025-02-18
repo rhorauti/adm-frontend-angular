@@ -16,6 +16,7 @@ export class InputAddonsComponent implements OnChanges {
   @Input() selectValueFilter = 'Id';
   @Input() btnLabel = 'Buscar';
   @Input() divClass = '';
+  @Input() isTextBlack = false;
 
   public inputValue = '';
   public selectValue = this.selectValueFilter;

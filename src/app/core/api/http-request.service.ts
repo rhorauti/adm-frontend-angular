@@ -19,21 +19,21 @@ export class HttpRequestService {
    * @param authToken token de autenticação
    * @returns Retorna uma promise genérica
    */
-  async sendHttpRequest(path: string, method = 'GET', data: any = null): Promise<any> {
+  async sendHttpRequest(path: string, method = 'GET', data?: any): Promise<any> {
     const headers = new HttpHeaders({
       Authorization: `Bearer ${localStorage.getItem('@authToken')}`,
       'Content-Type': 'application/json',
     });
-    const body = data.length > 0 ? data : undefined;
+    // const body = data && data.length > 0 ? data : undefined;
     switch (method) {
       case 'GET': {
         return await lastValueFrom(this.httpClient.get(path, { headers }));
       }
       case 'POST': {
-        return await lastValueFrom(this.httpClient.post(path, body, { headers }));
+        return await lastValueFrom(this.httpClient.post(path, data, { headers }));
       }
       case 'PUT': {
-        return await lastValueFrom(this.httpClient.put(path, body, { headers }));
+        return await lastValueFrom(this.httpClient.put(path, data, { headers }));
       }
       case 'DELETE': {
         return await lastValueFrom(this.httpClient.delete(path, { headers }));

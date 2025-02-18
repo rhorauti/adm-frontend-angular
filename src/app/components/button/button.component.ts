@@ -26,6 +26,10 @@ export class ButtonComponent implements OnInit, OnChanges {
         this.btnClass = 'bg-logo-blue hover:bg-logo-blue-hover px-4 py-1.5';
         break;
       }
+      case 'submit-white': {
+        this.btnClass = 'bg-logo-blue hover:bg-logo-blue-hover px-4 py-1.5 text-white';
+        break;
+      }
       case 'close': {
         this.btnClass = 'bg-black hover:bg-gray-800 md:w-36 px-4 py-1.5';
         this.label = 'Fechar';
@@ -56,14 +60,7 @@ export class ButtonComponent implements OnInit, OnChanges {
         this.btnClass = 'bg-green-600 hover:bg-green-500 text-white md:w-36 px-4 py-1.5';
         this.showIcon = true;
         this.btnIcon = 'save';
-        this.label = 'Adicionar';
-        break;
-      }
-      case 'success-edit': {
-        this.btnClass = 'bg-green-600 hover:bg-green-500 text-white md:w-36 px-4 py-1.5';
-        this.showIcon = true;
-        this.btnIcon = 'save';
-        this.label = 'Alterar';
+        this.label = 'Salvar';
         break;
       }
       case 'success-delete': {
@@ -76,6 +73,11 @@ export class ButtonComponent implements OnInit, OnChanges {
       case 'transparent': {
         this.btnClass =
           'text-white bg-transparent border border-gray-500 hover:bg-gray-800 px-4 py-1.5';
+        break;
+      }
+      case 'transparent-black': {
+        this.btnClass =
+          'text-black bg-transparent border border-gray-500 hover:bg-gray-800 px-4 py-1.5';
         break;
       }
       case 'icon-edit': {

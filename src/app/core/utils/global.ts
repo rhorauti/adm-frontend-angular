@@ -1,4 +1,5 @@
-import { InjectionToken } from '@angular/core';
+import { InjectionToken, Signal } from '@angular/core';
+import { IBaseGroup } from '@core/interfaces/IBase';
 
 export const WINDOW = new InjectionToken<Window>('Global window object', {
   factory: () => window,
@@ -10,4 +11,14 @@ export const formatarData = (dataInformada: string) => {
   } else {
     return '-';
   }
+};
+
+/**
+ * changeSelectPlaceHolder
+ * Get select value from app-input-addons component and change placeholder
+ * @param value string. Value received from app-input-addons component
+ */
+export const changeSelectPlaceHolder = (baseGroup: Signal<IBaseGroup>, value: string) => {
+  baseGroup().placeholderFilter = `Digite um(a) ${value}`;
+  baseGroup().selectValueFilter = value;
 };

@@ -41,6 +41,11 @@ export interface TableTypeObject {
   employee: IEmployee;
 }
 
+export interface IBreadcrumb {
+  label: string;
+  href: string;
+}
+
 export type TableDataTypeString = 'company' | 'address' | 'project' | 'employee';
 export type TableTypeNumber = 0 | 1 | 2;
 export type TableItemType = ICompany | IAddress | IProject | IEmployee;
