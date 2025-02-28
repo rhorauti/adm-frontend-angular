@@ -67,7 +67,7 @@
         </div>
       </div>
 
-      <app-table>
+      <app-table-base>
         <tr thead-row>
           @for (header of companyItem().tableHeaderSelected; track $index) {
             @if (header.showHeader) {
@@ -191,7 +191,7 @@
             }
           }
         </tbody>
-      </app-table>
+      </app-table-base>
     </app-tab>
   </div>
 </div>

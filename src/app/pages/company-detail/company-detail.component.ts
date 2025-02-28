@@ -7,8 +7,8 @@ import { TabComponent } from '@components/tab/tab.component';
 import { ButtonComponent } from '@components/button/button.component';
 import { NgxMaskPipe, provideNgxMask } from 'ngx-mask';
 import { InputAddonsComponent } from '@components/input/input-addons/input-addons.component';
-import { TableHeaderBoxComponent } from '@components/table-header-box/table-header-box.component';
-import { TableComponent } from '@components/table/table.component';
+import { TableHeaderBoxComponent } from '@components/table/table-header-box/table-header-box.component';
+import { TableBaseComponent } from '@components/table/table-base/table-base.component';
 import { REGISTER_TYPE } from 'src/app/enum/register.enum';
 import { IAddress } from '@core/interfaces/IAddress';
 import { IEmployee } from '@core/interfaces/IEmployee';
@@ -31,7 +31,7 @@ import { FormsModule } from '@angular/forms';
     ButtonComponent,
     InputAddonsComponent,
     TableHeaderBoxComponent,
-    TableComponent,
+    TableBaseComponent,
     ModalAskComponent,
     ModalInfoComponent,
     LoadingComponent,

@@ -41,6 +41,18 @@ export interface TableTypeObject {
   employee: IEmployee;
 }
 
+export interface IFilter {
+  selectValues: string[];
+  selectValue: string;
+  input: string;
+  placeholder: string;
+}
+
+export interface IPagination {
+  firstIdx: number;
+  qtyPerPage: number;
+}
+
 export interface IBreadcrumb {
   label: string;
   href: string;

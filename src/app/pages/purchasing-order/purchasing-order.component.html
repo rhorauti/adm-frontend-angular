@@ -4,8 +4,8 @@
   [showModal]="showModalCompany"
   (emitCloseModal)="showModalCompany = false">
   <div class="body-block">
-    <app-modal-company [isModalCompany]="true"></app-modal-company>
+    <app-table-company [isModalCompany]="true"></app-table-company>
   </div>
 </app-modal-base>
 
-<button class="text-white" (click)="showModalCompany = true">Mostrar Modal</button>
+<button (click)="showModalCompany = true">Mostrar Modal</button>

@@ -2,12 +2,12 @@ import { CommonModule } from '@angular/common';
 import { Component, Input } from '@angular/core';
 
 @Component({
-  selector: 'app-table',
+  selector: 'app-table-base',
   standalone: true,
   imports: [CommonModule],
-  templateUrl: './table.component.html',
-  styleUrl: './table.component.scss',
+  templateUrl: './table-base.component.html',
+  styleUrl: './table-base.component.scss',
 })
-export class TableComponent {
+export class TableBaseComponent {
   @Input() divClass = '';
 }

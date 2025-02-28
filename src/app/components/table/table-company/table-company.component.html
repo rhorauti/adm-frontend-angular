@@ -1,0 +1,183 @@
+<div class="flex flex-col gap-10">
+  <div class="flex flex-col gap-5">
+    <div
+      class="flex flex-col-reverse md:flex-row gap-4 h-full md:items-stretch md:justify-between md:gap-10">
+      <app-input-addons
+        [isTextBlack]="isModalCompany ? true : false"
+        [selectValueFilter]="filter().selectValue"
+        [optionList]="filter().selectValues"
+        [placeholder]="filter().placeholder"
+        (inputValueEmitter)="filter().input = $event"
+        (selectValueEmitter)="changeSelectPlaceHolder($event)"
+        (btnClickEmitter)="filterTable()"></app-input-addons>
+      <div class="flex justify-center gap-4">
+        <div class="is-hidden-mobile">
+          <app-table-header-box [tableHeaders]="tableHeaders()"></app-table-header-box>
+        </div>
+        <app-button
+          [showIcon]="true"
+          [btnType]="'icon-add'"
+          (click)="showNewCompanyForm()"></app-button>
+        <app-button
+          [showIcon]="true"
+          [isDisabled]="isEditBtnDisabled()"
+          [btnType]="'icon-edit'"
+          (click)="onShowModalEditForm()"></app-button>
+        <app-button
+          [showIcon]="true"
+          [isDisabled]="isDelBtnDisabled()"
+          [btnType]="'icon-delete'"
+          (click)="onShowModalAskToDelete()"></app-button>
+        @if (isModalCompany) {
+          <app-button
+            [showIcon]="true"
+            [isDisabled]="isEditBtnDisabled()"
+            [btnType]="'icon-send'"></app-button>
+        }
+      </div>
+    </div>
+    <div class="is-hidden-tablet">
+      <app-table-header-box [tableHeaders]="tableHeaders()"></app-table-header-box>
+    </div>
+
+    <app-table-base>
+      <tr thead-row>
+        @for (header of tableHeaders(); track $index) {
+          @if (header.showHeader) {
+            @if ($index == 0) {
+              <th class="table-td flex items-center justify-center">
+                <input type="checkbox" [(ngModel)]="checkboxHeaderValue" />
+              </th>
+            } @else {
+              <th class="table-td">
+                {{ header.name }}
+              </th>
+            }
+          }
+        }
+      </tr>
+      <tbody tbody-row class="divide-y divide-gray-500 border border-gray-500">
+        @for (companyData of companiesData(); track $index) {
+          <tr class="h-full py-2 cursor-pointer company-table-row">
+            @if (tableHeaders()[0].showHeader) {
+              <td class="table-td flex items-center justify-center">
+                <input
+                  type="checkbox"
+                  name="table-checkbox"
+                  (change)="onChangeBodyCheckboxValue($index, $event)"
+                  [(ngModel)]="tableCheckbox().body[$index]" />
+              </td>
+            }
+            @if (tableHeaders()[1].showHeader) {
+              <td class="table-td">
+                {{ companyData.idCompany }}
+              </td>
+            }
+            @if (tableHeaders()[2].showHeader) {
+              <td class="table-td">{{ companyData.nickname }}</td>
+            }
+            @if (tableHeaders()[3].showHeader) {
+              <td class="table-td">{{ companyData.name }}</td>
+            }
+            @if (tableHeaders()[4].showHeader) {
+              <td class="table-td">
+                {{ companyData.cnpj || '' | mask: setMask('cnpj', $index) }}
+              </td>
+            }
+            @if (tableHeaders()[5].showHeader) {
+              <td class="table-td">{{ companyData.ie }}</td>
+            }
+            @if (tableHeaders()[6].showHeader) {
+              <td class="table-td">{{ companyData.im }}</td>
+            }
+          </tr>
+        } @empty {
+          <tr class="text-center italic">
+            <td [attr.colspan]="tableHeaders().length" class="p-2">
+              Não existem empresas a serem exibidas!
+            </td>
+          </tr>
+        }
+      </tbody>
+    </app-table-base>
+  </div>
+</div>
+
+<app-modal-base
+  [showModal]="modalForm().isActive"
+  [isModalForm]="true"
+  [title]="modalForm().isEditForm ? 'Alterar dados da empresa' : 'Cadastro de nova empresa'"
+  (emitCloseModal)="onCloseModalForm()">
+  <div class="body-block">
+    <div class="flex flex-col gap-2">
+      @if (modalForm().isEditForm) {
+        <div class="flex flex-col gap-1">
+          <label class="font-semibold text-sm" for="">Id</label>
+          <app-input-standard
+            [propsInput]="companyData().idCompany"
+            [isDisabled]="true"
+            [showRightIcon]="false"
+            [inputClass]="'text-black h-9'"></app-input-standard>
+        </div>
+      }
+      <div class="flex flex-col gap-1">
+        <label class="font-semibold text-sm" for="">Apelido</label>
+        <app-input-standard
+          [propsInput]="companyData().nickname"
+          [showRightIcon]="false"
+          (emitInputValue)="companyData().nickname = $event"
+          [inputClass]="'text-black h-9'"></app-input-standard>
+      </div>
+      <div class="flex flex-col gap-1">
+        <label class="font-semibold text-sm" for="">Nome</label>
+        <app-input-standard
+          [propsInput]="companyData().name"
+          [showRightIcon]="false"
+          (emitInputValue)="companyData().name = $event"
+          [inputClass]="'text-black h-9'"></app-input-standard>
+      </div>
+      <div class="flex flex-col gap-1">
+        <label class="font-semibold text-sm" for="">CNPJ/CPF</label>
+        <app-input-standard
+          [propsInput]="companyData().cnpj || ''"
+          [maskType]="'cnpj'"
+          [showRightIcon]="false"
+          (emitInputValue)="companyData().cnpj = $event"
+          [inputClass]="'text-black h-9'"></app-input-standard>
+      </div>
+      <div class="flex flex-col gap-1">
+        <label class="font-semibold text-sm" for="">Inscrição Estadual</label>
+        <app-input-standard
+          [propsInput]="companyData().ie || ''"
+          [showRightIcon]="false"
+          (emitInputValue)="companyData().ie = $event"
+          [inputClass]="'text-black h-9'"></app-input-standard>
+      </div>
+      <div class="flex flex-col gap-1">
+        <label class="font-semibold text-sm" for="">Inscrição Municipal</label>
+        <app-input-standard
+          [propsInput]="companyData().im || ''"
+          [showRightIcon]="false"
+          (emitInputValue)="companyData().im = $event"
+          [inputClass]="'text-black h-9'"></app-input-standard>
+      </div>
+    </div>
+  </div>
+  <div class="grid footer-block md:flex md:justify-center gap-5 mt-6 w-full">
+    <app-button [btnType]="'close'" (click)="onCloseModalForm()"></app-button>
+    <app-button [btnType]="'success-save'" (click)="saveCompany()"></app-button>
+  </div>
+</app-modal-base>
+
+<app-modal-ask
+  [showModal]="modalAsk().isActive"
+  [description]="modalInfo().description"
+  [type]="modalInfo().type"
+  (closeEmitter)="modalAsk().isActive = false"
+  (actionOkEmitter)="onModalAskActionOk()"></app-modal-ask>
+<app-modal-info
+  [showModal]="modalInfo().isActive"
+  [description]="modalInfo().description"
+  [type]="modalInfo().type"
+  (closeModalEmitter)="onCloseModalInfo()"></app-modal-info>
+<app-loading [showLoading]="showLoading()"></app-loading>

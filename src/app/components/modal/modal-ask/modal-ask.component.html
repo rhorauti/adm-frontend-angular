@@ -16,8 +16,8 @@
       </div>
     </div>
   </div>
-  <div class="footer-block grid grid-cols-2 gap-2">
-    <app-button [btnType]="'cancel'" (click)="close()"></app-button>
+  <div class="footer-block flex gap-5 justify-center items-stretch">
+    <app-button [btnType]="'close'" (click)="close()"></app-button>
     <app-button [btnType]="'success-delete'" (click)="OnActionOk()"></app-button>
   </div>
 </app-modal-base>

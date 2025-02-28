@@ -24,6 +24,11 @@ export interface IModalCheck {
   isActionOk: boolean;
 }
 
+export interface ITableCheckbox {
+  header: boolean;
+  body: boolean[];
+}
+
 export interface ICompanyGroup extends IBaseGroup {
   companyTableHeaders: ITableHeader[];
   companiesData: ICompany[];
@@ -31,6 +36,7 @@ export interface ICompanyGroup extends IBaseGroup {
   initialTableData: ICompany[];
   modalFormCompany: IModalForm;
   modalCheckCompany: IModalCheck;
+  tableCheckbox: ITableCheckbox;
 }
 
 export interface ICompanyItemGroup extends IBaseGroup {

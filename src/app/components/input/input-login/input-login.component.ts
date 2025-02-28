@@ -14,7 +14,7 @@ export class InputLoginComponent {
   @Input() showIconRight = true;
   @Input() iconLeft = 'lock';
   @Input() placeholder = '******';
-  @Input() borderColor = 'ring-logo-blue-hover';
+  @Input() borderColor = '';
   @Input() isEmail = false;
   @Output() emitInputValue = new EventEmitter<string>();
 

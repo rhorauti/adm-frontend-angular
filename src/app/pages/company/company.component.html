@@ -27,7 +27,7 @@
       </div>
     </div>
 
-    <app-table>
+    <app-table-base>
       <tr thead-row>
         @for (header of company().companyTableHeaders; track $index) {
           @if (header.showHeader) {
@@ -99,7 +99,7 @@
       <div class="flex justify-end">
         <app-button [showLabel]="false" [showIcon]="true" [btnType]="'icon-arrow-up'"></app-button>
       </div>
-    </app-table>
+    </app-table-base>
 
     <div class="h-0 opacity-0 transition-all duration-300" id="table-company-item">
       <app-tab
@@ -123,7 +123,7 @@
           </div>
         </div>
 
-        <app-table>
+        <app-table-base>
           <tr thead-row>
             @for (header of companyItem().tableHeaderSelected; track $index) {
               @if (header.showHeader) {
@@ -247,7 +247,7 @@
               }
             }
           </tbody>
-        </app-table>
+        </app-table-base>
       </app-tab>
     </div>
   </app-tab>

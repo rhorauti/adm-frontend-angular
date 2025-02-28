@@ -12,8 +12,8 @@ import { FormsModule } from '@angular/forms';
 import { ICompanyItemGroup, ICompanyGroup, ICompany } from '@core/interfaces/ICompany';
 import { TabComponent } from '@components/tab/tab.component';
 import { InputAddonsComponent } from '../../components/input/input-addons/input-addons.component';
-import { TableComponent } from '../../components/table/table.component';
-import { TableHeaderBoxComponent } from '@components/table-header-box/table-header-box.component';
+import { TableBaseComponent } from '@components/table/table-base/table-base.component';
+import { TableHeaderBoxComponent } from '@components/table/table-header-box/table-header-box.component';
 import { ModalBaseComponent } from '@components/modal/modal-base/modal-base.component';
 import { InputStandardComponent } from '@components/input/input-standard/input-standard.component';
 import { IBaseGroup, TableItemType, TableTypeObject } from '@core/interfaces/IBase';
@@ -24,7 +24,6 @@ import { NgxMaskPipe, provideNgxMask } from 'ngx-mask';
 import { SelectComponent } from '../../components/select/select.component';
 import { ThirdPartApi } from '@core/api/http/third.part.api';
 import { REGISTER_TYPE } from 'src/app/enum/register.enum';
-import { ModalCompanyComponent } from '@components/modal/modal-company/modal-company.component';
 
 @Component({
   selector: 'app-company',
@@ -40,11 +39,10 @@ import { ModalCompanyComponent } from '@components/modal/modal-company/modal-com
     LoadingComponent,
     TabComponent,
     InputAddonsComponent,
-    TableComponent,
+    TableBaseComponent,
     TableHeaderBoxComponent,
     NgxMaskPipe,
     SelectComponent,
-    ModalCompanyComponent,
   ],
   providers: [
     RegisterCompanyApi,
@@ -114,6 +112,10 @@ export class CompanyComponent implements OnInit {
     modalCheckCompany: {
       isActive: false,
       isActionOk: false,
+    },
+    tableCheckbox: {
+      header: false,
+      body: [],
     },
     tableIdx: 0,
     qtyPerPage: 12,
