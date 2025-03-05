@@ -1,6 +1,5 @@
-@if (lastPage != 0) {
-  <nav
-    class="text-white text-sm flex justify-between align-middle border border-gray-500 py-1.5 px-3 rounded">
+@if (lastPage > 1) {
+  <nav class="text-sm flex border-01rem justify-between align-middle border py-1.5 px-3 rounded">
     <div
       (click)="goBackPage()"
       (keypress)="goBackPage()"
@@ -22,9 +21,9 @@
       (click)="goForwardPage()"
       (keypress)="goForwardPage()"
       tabindex="0"
-      class="flex items-center cursor-pointer"
+      class="flex items-center"
       [ngClass]="
-        currentPage == lastPage
+        currentPage && currentPage >= lastPage
           ? 'text-gray-500 cursor-not-allowed'
           : 'cursor-pointer hover:text-gray-300'
       ">

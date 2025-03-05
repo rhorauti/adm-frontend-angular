@@ -16,6 +16,7 @@ import { IFilter, IPagination } from '@core/interfaces/IBase';
 import { environment } from '@environments/environment';
 import { FormsModule } from '@angular/forms';
 import { ITableHeader } from '@core/interfaces/ITableHeader';
+import { PaginationComponent } from '../../pagination/pagination.component';
 
 @Component({
   selector: 'app-table-company',
@@ -33,6 +34,7 @@ import { ITableHeader } from '@core/interfaces/ITableHeader';
     ModalInfoComponent,
     LoadingComponent,
     NgxMaskPipe,
+    PaginationComponent,
   ],
   providers: [provideNgxMask()],
   templateUrl: './table-company.component.html',
@@ -48,20 +50,19 @@ export class TableCompanyComponent implements OnInit {
   tabList = ['Clientes', 'Fornecedores', 'MyCompany'];
   tabIdx = signal(0);
   filter = signal<IFilter>({
-    selectValues: [],
-    selectValue: 'Id',
+    selectValue: 'idCompany',
     input: '',
-    placeholder: '',
+    placeholder: 'Digite um(a) Id',
   });
   isHeaderBoxActive = signal(false);
   tableHeaders = signal<ITableHeader[]>([
-    { id: 0, showHeader: true, name: '' },
-    { id: 1, showHeader: true, name: 'Id' },
-    { id: 2, showHeader: true, name: 'Apelido' },
-    { id: 3, showHeader: true, name: 'Razão Social' },
-    { id: 4, showHeader: true, name: 'CNPJ/CPF' },
-    { id: 5, showHeader: false, name: 'Inscr. Estadual' },
-    { id: 6, showHeader: false, name: 'Inscr. Municipal' },
+    { id: 0, showHeader: true, name: '', value: '' },
+    { id: 1, showHeader: true, name: 'Id', value: 'idCompany' },
+    { id: 2, showHeader: true, name: 'Apelido', value: 'nickname' },
+    { id: 3, showHeader: true, name: 'Razão Social', value: 'name' },
+    { id: 4, showHeader: true, name: 'CNPJ/CPF', value: 'cnpj' },
+    { id: 5, showHeader: false, name: 'Inscr. Estadual', value: 'ie' },
+    { id: 6, showHeader: false, name: 'Inscr. Municipal', value: 'im' },
   ]);
   initialTableData = signal<ICompany[]>([]);
   companiesData = signal<ICompany[]>([]);
@@ -79,8 +80,9 @@ export class TableCompanyComponent implements OnInit {
     body: [],
   });
   pagination = signal<IPagination>({
-    firstIdx: 0,
-    qtyPerPage: 12,
+    currentPage: 1,
+    lastPage: 1,
+    qtyPerPage: 3,
   });
   modalForm = signal<IModalForm>({
     isActive: false,
@@ -98,14 +100,12 @@ export class TableCompanyComponent implements OnInit {
     isActionOk: false,
   });
 
-  @Input() isModalCompany = false;
+  @Input() isModal = false;
   isEditBtnDisabled = signal(false);
   isDelBtnDisabled = signal(false);
 
   ngOnInit(): void {
-    this.onShowCompanyList();
-    this.showOptionList();
-    this.showInputPlaceholder();
+    this.onShowDataList();
     this.onBodyCheckboxStatusCheck(this.tableCheckbox().body);
   }
 
@@ -116,6 +116,9 @@ export class TableCompanyComponent implements OnInit {
   set checkboxHeaderValue(isChecked: boolean) {
     this.tableCheckbox().header = isChecked;
     this.tableCheckbox.update(state => ({ ...state, body: state.body.map(() => isChecked) }));
+    this.isDelBtnDisabled.set(!isChecked);
+    const updatedTrueArray = this.tableCheckbox().body.filter(element => element == true);
+    this.isEditBtnDisabled.set(updatedTrueArray.length == 0 || updatedTrueArray.length > 1);
   }
 
   onBodyCheckboxStatusCheck(array: boolean[]) {
@@ -133,88 +136,20 @@ export class TableCompanyComponent implements OnInit {
     this.onBodyCheckboxStatusCheck(updatedArray);
   }
 
-  /**
-   * showOptionList
-   *
-   * Define option list according to table header selected.
-   * @param group
-   */
-  showOptionList(): void {
-    this.filter().selectValues = [];
-    this.tableHeaders().forEach(header => {
-      if (header.showHeader) {
-        this.filter().selectValues.push(header.name);
-        this.showInputPlaceholder();
-      }
-    });
-  }
-
-  /**
-   * showInputPlaceholder
-   *
-   * Change filter´s input placeholder when change select value.
-   * @param group
-   */
-  showInputPlaceholder(): void {
-    this.filter().placeholder = `Digite um(a) ${this.filter().selectValue}`;
-  }
-
+  showDetails(): void {}
   /**
    * changeSelectPlaceHolder
    * Get select value from app-input-addons component and change placeholder
    * @param value string. Value received from app-input-addons component
    */
   changeSelectPlaceHolder(value: string) {
-    this.filter().placeholder = `Digite um(a) ${value}`;
+    this.filter().placeholder = `Digite um(a) ${this.tableHeaders().find(header => header.value == value)?.name}`;
     this.filter().selectValue = value;
   }
 
   filterTable(): void {
-    this.companiesData.set(
-      this.initialTableData().filter(company => {
-        if (this.filter().input == '') {
-          return company.type == this.tabIdx();
-        } else {
-          const key = this.setCompanyKeyValueFilter() as keyof ICompany;
-          return (
-            company?.[key]
-              ?.toString()
-              .toLowerCase()
-              .trim()
-              .includes(this.filter().input.toLowerCase().trim()) && company.type == this.tabIdx()
-          );
-        }
-      })
-    );
-  }
-
-  setCompanyKeyValueFilter(): string {
-    const selectValue = this.filter().selectValue;
-    switch (selectValue) {
-      case 'Id': {
-        return 'idCompany';
-      }
-      case 'Data': {
-        return 'date';
-      }
-      case 'Apelido': {
-        return 'nickname';
-      }
-      case 'Razão Social': {
-        return 'name';
-      }
-      case 'CNPJ/CPF': {
-        return 'cnpj';
-      }
-      case 'Inscr. Estadual': {
-        return 'ie';
-      }
-      case 'Inscr. Municipal': {
-        return 'im';
-      }
-      default:
-        return '';
-    }
+    this.onShowDataList();
+    this.tableCheckbox.update(state => ({ ...state, header: false }));
   }
 
   setMask(type: string, idx?: number): string {
@@ -229,15 +164,15 @@ export class TableCompanyComponent implements OnInit {
     }
   }
 
-  showNewCompanyForm(): void {
-    this.clearCompanyInfo();
+  showNewForm(): void {
+    this.clearData();
     this.modalForm.update(state => ({
       ...state,
       isActive: true,
     }));
   }
 
-  clearCompanyInfo(): void {
+  clearData(): void {
     this.companyData.update(state => ({
       ...state,
       idCompany: 0,
@@ -262,14 +197,14 @@ export class TableCompanyComponent implements OnInit {
     }
   }
 
-  arrayCompaniesChecked = computed(() => {
+  arrayDatasChecked = computed(() => {
     const itemsChecked = this.tableCheckbox()
       .body.map((value, index) => (value == true ? index : null))
       .filter(index => index != null);
-    const companiesChecked = this.companiesData().map((value, index) =>
+    const datasChecked = this.companiesData().map((value, index) =>
       itemsChecked.includes(index) ? value : null
     );
-    return companiesChecked.filter(value => value != null);
+    return datasChecked.filter(value => value != null);
   });
 
   clearCheckbox(): void {
@@ -277,8 +212,8 @@ export class TableCompanyComponent implements OnInit {
   }
 
   onShowModalEditForm(): void {
-    const selectedCompany = this.arrayCompaniesChecked()[0];
-    if (selectedCompany) this.companyData.set(structuredClone(selectedCompany));
+    const selectedData = this.arrayDatasChecked()[0];
+    if (selectedData) this.companyData.set(structuredClone(selectedData));
     this.modalForm.update(state => ({
       ...state,
       isActive: true,
@@ -305,7 +240,7 @@ export class TableCompanyComponent implements OnInit {
 
   onCloseModalInfo(): void {
     if (this.modalInfo().isActionOk) {
-      this.onShowCompanyList();
+      this.onShowDataList();
       this.onCloseModalForm();
       this.onCloseModalAsk();
       this.modalInfo.update(state => ({
@@ -324,19 +259,19 @@ export class TableCompanyComponent implements OnInit {
   }
 
   onShowModalAskToDelete(): void {
-    const selectedCompany = this.arrayCompaniesChecked()[0];
-    if (selectedCompany) {
+    const selectedData = this.arrayDatasChecked()[0];
+    if (selectedData) {
       this.onHandleModalInfo(
         'confirmation',
-        `Deseja excluir ${this.arrayCompaniesChecked().length == 1 ? selectedCompany.name : 'os registros selecionados?'}`
+        `Deseja excluir ${this.arrayDatasChecked().length == 1 ? selectedData.name : 'os registros selecionados?'}`
       );
       this.modalAsk().isActive = true;
     }
   }
 
   onModalAskActionOk(): void {
-    this.deleteCompany();
-    this.clearCompanyInfo();
+    this.delete();
+    this.clearData();
     this.modalInfo.update(state => ({ ...state, isActionOk: true, isActive: true }));
   }
 
@@ -344,6 +279,12 @@ export class TableCompanyComponent implements OnInit {
 
   fillCheckboxArray(dataLength: number): void {
     this.tableCheckbox().body = Array.from({ length: dataLength }, () => false);
+  }
+
+  changePage(page: number) {
+    this.pagination.update(state => ({ ...state, currentPage: page }));
+    this.tableCheckbox.update(state => ({ ...state, header: false }));
+    this.onShowDataList();
   }
 
   /**
@@ -354,17 +295,18 @@ export class TableCompanyComponent implements OnInit {
    * @param baseGroupSignal WritableSignal - Data of the group informed.
    * @param baseGroupName string - Name of the group informed (ex. company, product, etc)
    */
-  async onShowCompanyList(): Promise<void> {
+  async onShowDataList(): Promise<void> {
     try {
       this.showLoading.set(true);
       const response = await this.httpRequestService.sendHttpRequest(
-        `${environment.apiUrl}/${this.version}/company`,
+        `${environment.apiUrl}/${this.version}/company?page=${this.pagination().currentPage}&limit=${this.pagination().qtyPerPage}&input=${this.filter().input}&select=${this.filter().selectValue}`,
         'GET'
       );
-      this.initialTableData.set(response.data);
-      this.companiesData.set(response.data);
+      this.initialTableData.set(response.data.companies);
+      this.companiesData.set(response.data.companies);
+      this.pagination.update(state => ({ ...state, lastPage: response.data.totalPages }));
       this.fillCheckboxArray(this.companiesData().length);
-      this.filterCompanyType();
+      this.filterDatasType();
     } catch (e: any) {
       this.onHandleModalInfo('failure', e?.error?.msg);
     } finally {
@@ -372,15 +314,15 @@ export class TableCompanyComponent implements OnInit {
     }
   }
 
-  filterCompanyType(): void {
+  filterDatasType(): void {
     this.companiesData.set(
-      this.initialTableData().filter(company => {
-        return company.type == this.tabIdx();
+      this.initialTableData().filter(data => {
+        return data.type == this.tabIdx();
       })
     );
   }
 
-  finalCompanyData = {
+  finalData = {
     idCompany: 0,
     date: '',
     type: 0,
@@ -395,24 +337,24 @@ export class TableCompanyComponent implements OnInit {
     return (data ?? '').replace(/[\D]/g, '');
   }
 
-  setCompanyData(): void {
-    this.finalCompanyData.idCompany = this.companyData().idCompany;
-    this.finalCompanyData.type = this.companyData().type;
-    this.finalCompanyData.nickname = this.companyData().nickname;
-    this.finalCompanyData.name = this.companyData().name;
-    this.finalCompanyData.cnpj = this.removeMask(this.companyData()?.cnpj || '');
-    this.finalCompanyData.ie = this.removeMask(this.companyData().ie || '');
-    this.finalCompanyData.im = this.removeMask(this.companyData().im || '');
+  setFinalData(): void {
+    this.finalData.idCompany = this.companyData().idCompany;
+    this.finalData.type = this.companyData().type;
+    this.finalData.nickname = this.companyData().nickname;
+    this.finalData.name = this.companyData().name;
+    this.finalData.cnpj = this.removeMask(this.companyData()?.cnpj || '');
+    this.finalData.ie = this.removeMask(this.companyData().ie || '');
+    this.finalData.im = this.removeMask(this.companyData().im || '');
   }
 
-  async saveCompany(): Promise<void> {
+  async save(): Promise<void> {
     try {
       this.showLoading.set(true);
-      this.setCompanyData();
+      this.setFinalData();
       const response = await this.httpRequestService.sendHttpRequest(
         `${environment.apiUrl}/${this.version}/company`,
         'POST',
-        this.finalCompanyData
+        this.finalData
       );
       this.onHandleModalInfo('success', response.msg);
       this.modalInfo.update(state => ({ ...state, isActionOk: true, isActive: true }));
@@ -424,13 +366,13 @@ export class TableCompanyComponent implements OnInit {
     }
   }
 
-  async deleteCompany(): Promise<void> {
+  async delete(): Promise<void> {
     try {
       this.showLoading.set(true);
       const response = await this.httpRequestService.sendHttpRequest(
         `${environment.apiUrl}/${this.version}/company/delete`,
         'POST',
-        this.arrayCompaniesChecked()
+        this.arrayDatasChecked()
       );
       this.modalAsk.update(state => ({ ...state, isActive: false }));
       this.onHandleModalInfo('success', response.msg);

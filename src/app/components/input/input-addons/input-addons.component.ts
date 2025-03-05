@@ -2,6 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, EventEmitter, Input, OnChanges, Output } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
+import { ITableHeader } from '@core/interfaces/ITableHeader';
 
 @Component({
   selector: 'app-input-addons',
@@ -11,20 +12,19 @@ import { MatIconModule } from '@angular/material/icon';
   styleUrl: './input-addons.component.scss',
 })
 export class InputAddonsComponent implements OnChanges {
-  @Input() optionList: string[] = [];
+  @Input() optionList: ITableHeader[] = [];
   @Input() placeholder = '';
-  @Input() selectValueFilter = 'Id';
+  @Input() selectValueProps = '';
   @Input() btnLabel = 'Buscar';
   @Input() divClass = '';
-  @Input() isTextBlack = false;
 
   public inputValue = '';
-  public selectValue = this.selectValueFilter;
+  public selectValue = '';
   @Output() inputValueEmitter = new EventEmitter<string>();
   @Output() selectValueEmitter = new EventEmitter<string>();
 
   ngOnChanges(): void {
-    this.selectValue = this.selectValueFilter;
+    this.selectValue = this.selectValueProps;
   }
 
   sendInputValue(inputData: Event): void {

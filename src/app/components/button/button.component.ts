@@ -90,6 +90,14 @@ export class ButtonComponent implements OnInit {
         this.label = '';
         break;
       }
+      case 'icon-details': {
+        this.showIcon = true;
+        this.btnClass =
+          'bg-logo-blue hover:bg-logo-blue-hover text-white border border-gray-500 py-1.5 px-1';
+        this.btnIcon = 'insert_drive_file';
+        this.label = '';
+        break;
+      }
       default:
         this.btnClass = 'bg-logo-blue hover:bg-logo-blue-hover';
     }

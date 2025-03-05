@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
+import { Component, EventEmitter, Input, OnChanges, Output } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
 
 @Component({
@@ -9,26 +9,15 @@ import { MatIconModule } from '@angular/material/icon';
   templateUrl: './pagination.component.html',
   styleUrl: './pagination.component.scss',
 })
-export class PaginationComponent implements OnChanges {
+export class PaginationComponent {
+  public version = 'v1';
   public currentPage = 1;
-  @Input() lastPage = 0;
-  @Input() inputValueFilter: number | string = 0;
-  @Input() tableUpdated = false;
-
+  @Input() lastPage = 1;
   @Output() currentPageEmitter = new EventEmitter<number>();
-
-  ngOnChanges(changes: SimpleChanges): void {
-    if (
-      changes['inputValueFilter']?.currentValue != changes['inputValueFilter']?.previousValue ||
-      changes['tableUpdated']?.currentValue != changes['tableUpdated']?.previousValue
-    ) {
-      this.currentPage = 1;
-    }
-  }
 
   goBackPage(): void {
     if (this.currentPage <= 1) {
-      this.currentPage = 1;
+      return;
     } else {
       this.currentPage -= 1;
     }
@@ -37,7 +26,7 @@ export class PaginationComponent implements OnChanges {
 
   goForwardPage(): void {
     if (this.currentPage >= this.lastPage) {
-      this.currentPage = this.lastPage;
+      return;
     } else {
       this.currentPage += 1;
     }

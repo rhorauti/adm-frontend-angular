@@ -8,7 +8,6 @@ export interface IBaseResponse {
   date: string;
   status: boolean;
   message: string;
-  data: TableItemType[];
 }
 
 export interface IBaseGroup {
@@ -42,15 +41,19 @@ export interface TableTypeObject {
 }
 
 export interface IFilter {
-  selectValues: string[];
   selectValue: string;
   input: string;
   placeholder: string;
 }
 
 export interface IPagination {
-  firstIdx: number;
+  currentPage: number;
+  lastPage: number;
   qtyPerPage: number;
+}
+
+export interface IPaginationResponse extends IBaseResponse {
+  data: IPagination;
 }
 
 export interface IBreadcrumb {
