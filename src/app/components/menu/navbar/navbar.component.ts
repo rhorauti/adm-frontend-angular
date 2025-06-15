@@ -30,14 +30,6 @@ export class NavbarComponent {
 
   @Input() isSideBarActive = true;
 
-  hideSideBar(): void {
-    this.isSideBarActive = false;
-  }
-
-  showSideBar(): void {
-    this.isSideBarActive = true;
-  }
-
   public isMenuListMobileActive = false;
   public isColapsed = false;
 

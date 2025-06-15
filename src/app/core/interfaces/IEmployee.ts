@@ -7,5 +7,5 @@ export interface IEmployee {
   email?: string;
   deskphone?: string;
   cellphone?: string;
-  id_Company: number;
+  idCompany: number;
 }

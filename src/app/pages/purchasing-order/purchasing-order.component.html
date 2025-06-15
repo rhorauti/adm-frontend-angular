@@ -4,8 +4,32 @@
   [showModal]="showModalCompany"
   (emitCloseModal)="showModalCompany = false">
   <div class="body-block">
-    <app-table-company [isModal]="true"></app-table-company>
+    <app-table-company [isModal]="true" [companyType]="1"></app-table-company>
   </div>
 </app-modal-base>
 
-<button (click)="showModalCompany = true">Mostrar Modal</button>
+<app-modal-base
+  [isModalForm]="true"
+  [title]="'Selecione o endereço'"
+  [showModal]="showModalAddress"
+  (emitCloseModal)="showModalAddress = false">
+  <div class="body-block">
+    <app-table-address [idCompany]="6" [isSelectItemModal]="true"></app-table-address>
+  </div>
+</app-modal-base>
+
+<app-modal-base
+  [isModalForm]="true"
+  [title]="'Selecione o funcinário'"
+  [showModal]="showModalEmployee"
+  (emitCloseModal)="showModalEmployee = false">
+  <div class="body-block">
+    <app-table-employee [idCompany]="6" [isSelectItemModal]="true"></app-table-employee>
+  </div>
+</app-modal-base>
+
+<div class="flex gap-10">
+  <button (click)="showModalCompany = true">Modal Company</button>
+  <button (click)="showModalAddress = true">Modal Address</button>
+  <button (click)="showModalEmployee = true">Modal Employee</button>
+</div>

@@ -6,14 +6,13 @@
         [selectValueProps]="filter().selectValue"
         [optionList]="tableHeaders()"
         [placeholder]="filter().placeholder"
-        (inputValueEmitter)="filter().input = $event"
-        (selectValueEmitter)="changeSelectPlaceHolder($event)"
-        (btnClickEmitter)="filterTable()"></app-input-addons>
+        (inputValueEmitter)="onFilterInputChange($event)"
+        (selectValueEmitter)="changeSelectPlaceHolder($event)"></app-input-addons>
       <div class="flex justify-center gap-4">
         <div class="is-hidden-mobile">
           <app-table-header-box [tableHeaders]="tableHeaders()"></app-table-header-box>
         </div>
-        @if (isModal) {
+        @if (!isModal) {
           <app-button
             [showIcon]="true"
             [isDisabled]="isEditBtnDisabled()"
@@ -35,7 +34,8 @@
           <app-button
             [showIcon]="true"
             [isDisabled]="isEditBtnDisabled()"
-            [btnType]="'icon-send'"></app-button>
+            [btnType]="'icon-send'"
+            (click)="sendId()"></app-button>
         }
       </div>
     </div>
@@ -59,9 +59,9 @@
           }
         }
       </tr>
-      <tbody tbody-row class="divide-y divide-gray-500 border border-gray-500">
+      <tbody tbody-row>
         @for (companyData of companiesData(); track $index) {
-          <tr class="h-full py-2 cursor-pointer company-table-row">
+          <tr class="h-full py-2 border-b-[1px] border-dotted last:border-none">
             @if (tableHeaders()[0].showHeader) {
               <td class="table-td flex items-center justify-center">
                 <input
@@ -104,6 +104,7 @@
       </tbody>
     </app-table-base>
     <app-pagination
+      [currentPage]="pagination().currentPage"
       [lastPage]="pagination().lastPage"
       (currentPageEmitter)="changePage($event)"></app-pagination>
   </div>

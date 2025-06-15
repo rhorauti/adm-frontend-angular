@@ -40,12 +40,12 @@ export class InputStandardComponent implements OnInit, OnChanges {
     }
     switch (this.maskType) {
       case 'phone': {
-        this.maskPrefix = '+55 ';
-        this.maskValue = '(00) 0000-0000||(00) 00000-0000';
+        // this.maskPrefix = '+55 ';
+        this.maskValue = '(00) 0000-0000 ||(00) 00000-0000';
         break;
       }
       case 'cnpj': {
-        this.maskValue = '000.000.000-00||00.000.000/0000-00';
+        this.maskValue = '000.000.000-00 ||00.000.000/0000-00';
         break;
       }
       case 'postalCode': {

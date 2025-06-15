@@ -1,18 +1,18 @@
-import { CommonModule, DOCUMENT } from '@angular/common';
-import { Component, computed, Inject, Input, OnInit, signal } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { Component, computed, EventEmitter, Input, OnInit, Output, signal } from '@angular/core';
 import { ButtonComponent } from '@components/button/button.component';
 import { InputAddonsComponent } from '@components/input/input-addons/input-addons.component';
 import { TableHeaderBoxComponent } from '@components/table/table-header-box/table-header-box.component';
 import { TableBaseComponent } from '@components/table/table-base/table-base.component';
 import { HttpRequestService } from '@core/api/http-request.service';
-import { ICompany, IModalForm, ITableCheckbox } from '@core/interfaces/ICompany';
+import { ICompany } from '@core/interfaces/ICompany';
 import { ModalBaseComponent } from '@components/modal/modal-base/modal-base.component';
 import { InputStandardComponent } from '@components/input/input-standard/input-standard.component';
 import { ModalAskComponent } from '@components/modal/modal-ask/modal-ask.component';
 import { ModalInfoComponent } from '@components/modal/modal-info/modal-info.component';
 import { LoadingComponent } from '@components/loading/loading.component';
 import { NgxMaskPipe, provideNgxMask } from 'ngx-mask';
-import { IFilter, IPagination } from '@core/interfaces/IBase';
+import { IFilter, IModalForm, IPagination, ITableCheckbox } from '@core/interfaces/IBase';
 import { environment } from '@environments/environment';
 import { FormsModule } from '@angular/forms';
 import { ITableHeader } from '@core/interfaces/ITableHeader';
@@ -41,14 +41,9 @@ import { PaginationComponent } from '../../pagination/pagination.component';
   styleUrl: './table-company.component.scss',
 })
 export class TableCompanyComponent implements OnInit {
-  constructor(
-    @Inject(DOCUMENT) private document: Document,
-    private httpRequestService: HttpRequestService
-  ) {}
+  constructor(private httpRequestService: HttpRequestService) {}
   version = 'v1';
 
-  tabList = ['Clientes', 'Fornecedores', 'MyCompany'];
-  tabIdx = signal(0);
   filter = signal<IFilter>({
     selectValue: 'idCompany',
     input: '',
@@ -82,7 +77,7 @@ export class TableCompanyComponent implements OnInit {
   pagination = signal<IPagination>({
     currentPage: 1,
     lastPage: 1,
-    qtyPerPage: 3,
+    qtyPerPage: 10,
   });
   modalForm = signal<IModalForm>({
     isActive: false,
@@ -100,6 +95,7 @@ export class TableCompanyComponent implements OnInit {
     isActionOk: false,
   });
 
+  @Input() companyType = 1;
   @Input() isModal = false;
   isEditBtnDisabled = signal(false);
   isDelBtnDisabled = signal(false);
@@ -136,7 +132,18 @@ export class TableCompanyComponent implements OnInit {
     this.onBodyCheckboxStatusCheck(updatedArray);
   }
 
-  showDetails(): void {}
+  @Output() showDetailsEmitter = new EventEmitter<boolean>();
+
+  showDetails(): void {
+    this.showDetailsEmitter.emit(true);
+  }
+
+  @Output() sendIdEmitter = new EventEmitter<number>();
+
+  sendId(): void {
+    this.sendIdEmitter.emit(this.companyData().idCompany);
+  }
+
   /**
    * changeSelectPlaceHolder
    * Get select value from app-input-addons component and change placeholder
@@ -147,9 +154,18 @@ export class TableCompanyComponent implements OnInit {
     this.filter().selectValue = value;
   }
 
-  filterTable(): void {
-    this.onShowDataList();
+  onFilterInputChange(inputValue: string): void {
     this.tableCheckbox.update(state => ({ ...state, header: false }));
+    this.filterTable(inputValue);
+  }
+
+  filterTable(inputValue: string): void {
+    this.filter.update(state => ({ ...state, input: inputValue }));
+    const filterData = this.initialTableData().filter(company => {
+      const filterResult = company[this.filter().selectValue as keyof ICompany];
+      return String(filterResult).toLowerCase().trim().includes(inputValue.toLowerCase().trim());
+    });
+    this.companiesData.set(filterData);
   }
 
   setMask(type: string, idx?: number): string {
@@ -299,27 +315,18 @@ export class TableCompanyComponent implements OnInit {
     try {
       this.showLoading.set(true);
       const response = await this.httpRequestService.sendHttpRequest(
-        `${environment.apiUrl}/${this.version}/company?page=${this.pagination().currentPage}&limit=${this.pagination().qtyPerPage}&input=${this.filter().input}&select=${this.filter().selectValue}`,
+        `${environment.apiUrl}/${this.version}/company?page=${this.pagination().currentPage}&limit=${this.pagination().qtyPerPage}&input=${this.filter().input}&select=${this.filter().selectValue}&type=${this.companyType}`,
         'GET'
       );
       this.initialTableData.set(response.data.companies);
       this.companiesData.set(response.data.companies);
       this.pagination.update(state => ({ ...state, lastPage: response.data.totalPages }));
       this.fillCheckboxArray(this.companiesData().length);
-      this.filterDatasType();
     } catch (e: any) {
       this.onHandleModalInfo('failure', e?.error?.msg);
     } finally {
       this.showLoading.set(false);
     }
-  }
-
-  filterDatasType(): void {
-    this.companiesData.set(
-      this.initialTableData().filter(data => {
-        return data.type == this.tabIdx();
-      })
-    );
   }
 
   finalData = {
@@ -339,7 +346,7 @@ export class TableCompanyComponent implements OnInit {
 
   setFinalData(): void {
     this.finalData.idCompany = this.companyData().idCompany;
-    this.finalData.type = this.companyData().type;
+    this.finalData.type = this.companyType;
     this.finalData.nickname = this.companyData().nickname;
     this.finalData.name = this.companyData().name;
     this.finalData.cnpj = this.removeMask(this.companyData()?.cnpj || '');
@@ -356,6 +363,9 @@ export class TableCompanyComponent implements OnInit {
         'POST',
         this.finalData
       );
+      if (!this.modalForm().isEditForm) {
+        this.pagination.update(state => ({ ...state, currentPage: 1 }));
+      }
       this.onHandleModalInfo('success', response.msg);
       this.modalInfo.update(state => ({ ...state, isActionOk: true, isActive: true }));
     } catch (e: any) {
@@ -374,6 +384,7 @@ export class TableCompanyComponent implements OnInit {
         'POST',
         this.arrayDatasChecked()
       );
+      this.pagination.update(state => ({ ...state, currentPage: 1 }));
       this.modalAsk.update(state => ({ ...state, isActive: false }));
       this.onHandleModalInfo('success', response.msg);
       this.modalInfo.update(state => ({ ...state, isActive: true }));

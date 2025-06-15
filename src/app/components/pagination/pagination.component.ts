@@ -9,11 +9,13 @@ import { MatIconModule } from '@angular/material/icon';
   templateUrl: './pagination.component.html',
   styleUrl: './pagination.component.scss',
 })
-export class PaginationComponent {
+export class PaginationComponent implements OnChanges {
   public version = 'v1';
-  public currentPage = 1;
+  @Input() currentPage = 1;
   @Input() lastPage = 1;
   @Output() currentPageEmitter = new EventEmitter<number>();
+
+  ngOnChanges(): void {}
 
   goBackPage(): void {
     if (this.currentPage <= 1) {

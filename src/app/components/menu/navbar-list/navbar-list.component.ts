@@ -75,6 +75,42 @@ export class NavbarListComponent {
     },
     {
       idLink: 1,
+      name: 'Suprimentos',
+      sublinks: [
+        {
+          idSublink: 0,
+          name: 'Estoque',
+          isSelected: false,
+          routerLink: 'stock',
+        },
+      ],
+    },
+    {
+      idLink: 1,
+      name: 'Vendas',
+      sublinks: [
+        {
+          idSublink: 0,
+          name: 'Estoque',
+          isSelected: false,
+          routerLink: 'stock',
+        },
+      ],
+    },
+    {
+      idLink: 1,
+      name: 'Financeiro',
+      sublinks: [
+        {
+          idSublink: 0,
+          name: 'Estoque',
+          isSelected: false,
+          routerLink: 'stock',
+        },
+      ],
+    },
+    {
+      idLink: 2,
       name: 'Relatórios',
       sublinks: [
         {

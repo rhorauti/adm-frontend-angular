@@ -1,40 +1,28 @@
-@if (isSideBarActive) {
-  <nav
-    class="w-full bg-gray-900 adjust-navigation-bar"
-    [ngClass]="isMenuListMobileActive ? '' : 'mb-3'">
-    <div class="flex w-full items-center justify-between px-4 py-3 cursor-pointer adjust-logo">
-      <a routerLink="/login" class="flex items-center">
-        <img class="h-8" src="../../../assets/images/logo.png" alt="Your Company" />
-        <p class="font-semibold text-gray-400 ml-2">Nakano</p>
-      </a>
-      <div class="is-hidden-mobile">
-        <mat-icon
-          (click)="hideSideBar()"
-          class="text-white bg-gray-800 rounded-full cursor-pointer ml-10"
-          >keyboard_arrow_left</mat-icon
-        >
-      </div>
-      <button
-        (click)="isMenuListMobileActive = !isMenuListMobileActive"
-        class="is-hidden-tablet text-gray-300">
-        <mat-icon>menu</mat-icon>
-      </button>
-    </div>
+<nav class="flex justify-between items-center gap-2 w-full bg-gray-900 py-2 px-5">
+  <div class="flex items-center px-4 gap-4">
+    <a routerLink="/login" class="flex items-center">
+      <img class="h-8" src="../../../assets/images/logo.png" alt="Your Company" />
+    </a>
     <div class="is-hidden-mobile">
       <app-navbar-list></app-navbar-list>
     </div>
-  </nav>
-} @else {
-  <nav class="h-screen bg-gray-900 px-2 pt-7">
-    <mat-icon (click)="showSideBar()" class="text-white bg-gray-800 rounded-full cursor-pointer"
-      >keyboard_arrow_right</mat-icon
-    >
-  </nav>
-}
-@if (isMenuListMobileActive) {
-  <div class="bg-white p-3 rounded-md mb-3 mx-3">
-    <app-navbar-list
-      [isMenuListMobileActive]="isMenuListMobileActive"
-      (closeMenuListEmitter)="isMenuListMobileActive = false"></app-navbar-list>
   </div>
-}
+  <div class="flex items-center gap-5 text-white is-hidden-mobile">
+    <div
+      class="flex items-center relative cursor-pointer before:absolute before:-top-1 before:hover:-left-2 before:hover:bg-gray-700 before:hover:rounded-lg before:hover:p-4">
+      <mat-icon class="text-base z-10">notifications</mat-icon>
+    </div>
+    <div
+      class="flex items-center relative cursor-pointer before:absolute before:-top-1 before:hover:-left-2 before:hover:bg-gray-700 before:hover:rounded-lg before:hover:p-4">
+      <mat-icon class="text-base z-10">help</mat-icon>
+    </div>
+    <div
+      class="flex items-center relative cursor-pointer before:absolute before:-top-1 before:hover:-left-2 before:hover:bg-gray-700 before:hover:rounded-lg before:hover:p-4">
+      <mat-icon class="text-base z-10">settings</mat-icon>
+    </div>
+    <span class="border hover:bg-gray-700 px-3 py-1 rounded-full text-sm cursor-pointer">RH</span>
+    <!-- <button class="hover:bg-gray-700 text-sm px-4 py-1 border border-white rounded-full">
+      Logout
+    </button> -->
+  </div>
+</nav>

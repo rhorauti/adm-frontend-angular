@@ -40,6 +40,22 @@ export interface TableTypeObject {
   employee: IEmployee;
 }
 
+export interface IModalForm {
+  isActive: boolean;
+  isInputClear: boolean;
+  isEditForm: boolean;
+}
+
+export interface IModalCheck {
+  isActive: boolean;
+  isActionOk: boolean;
+}
+
+export interface ITableCheckbox {
+  header: boolean;
+  body: boolean[];
+}
+
 export interface IFilter {
   selectValue: string;
   input: string;

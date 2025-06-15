@@ -4,6 +4,11 @@ import { FormsModule } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
 import { ITableHeader } from '@core/interfaces/ITableHeader';
 
+interface ISearchItem {
+  img: string;
+  item: string;
+}
+
 @Component({
   selector: 'app-input-addons',
   standalone: true,
@@ -13,10 +18,16 @@ import { ITableHeader } from '@core/interfaces/ITableHeader';
 })
 export class InputAddonsComponent implements OnChanges {
   @Input() optionList: ITableHeader[] = [];
+  // @Input() searchedItems: ISearchItem[] = [
+  //   { img: '../../../assets/images/logo.png', item: 'Rafael Horauti blá blá 1' },
+  //   { img: '../../../assets/images/logo.png', item: 'Rafael Horauti blá blá 2' },
+  //   { img: '../../../assets/images/logo.png', item: 'Rafael Horauti blá blá 3' },
+  //   { img: '../../../assets/images/logo.png', item: 'Rafael Horauti blá blá 4' },
+  //   { img: '../../../assets/images/logo.png', item: 'Rafael Horauti blá blá 5' },
+  // ];
   @Input() placeholder = '';
   @Input() selectValueProps = '';
-  @Input() btnLabel = 'Buscar';
-  @Input() divClass = '';
+  @Input() showButton = false;
 
   public inputValue = '';
   public selectValue = '';
@@ -35,11 +46,5 @@ export class InputAddonsComponent implements OnChanges {
   outputSelectValue(event: Event): void {
     this.selectValue = (event.target as HTMLSelectElement).value;
     this.selectValueEmitter.emit(this.selectValue);
-  }
-
-  @Output() btnClickEmitter = new EventEmitter();
-
-  click(): void {
-    this.btnClickEmitter.emit();
   }
 }

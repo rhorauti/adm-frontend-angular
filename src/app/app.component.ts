@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
+import { Router, RouterOutlet } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
 import { DataService } from '@core/services/data.service';
 import { NavbarComponent } from '@components/menu/navbar/navbar.component';
@@ -8,19 +8,12 @@ import { NavbarComponent } from '@components/menu/navbar/navbar.component';
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [
-    CommonModule,
-    MatIconModule,
-    RouterOutlet,
-    RouterLink,
-    RouterLinkActive,
-    NavbarComponent,
-  ],
+  imports: [CommonModule, MatIconModule, RouterOutlet, NavbarComponent],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss',
 })
 export class AppComponent implements OnInit {
-  public showNavBar = false;
+  public showNavBar = true;
 
   constructor(
     private dataService: DataService,

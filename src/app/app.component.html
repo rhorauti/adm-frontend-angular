@@ -1,10 +1,6 @@
-<div class="overflow-hidden adjust-menu">
-  @if (showNavBar) {
-    <div>
-      <app-navbar></app-navbar>
-    </div>
-  }
-  <div class="mx-3 adjust-router">
-    <router-outlet (showNavBarEmitter)="showNavBar = true"></router-outlet>
+<div class="flex flex-col">
+  <app-navbar></app-navbar>
+  <div class="md:p-4 p-2">
+    <router-outlet></router-outlet>
   </div>
 </div>
