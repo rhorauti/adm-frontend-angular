@@ -5,12 +5,11 @@ import { MatIconModule } from '@angular/material/icon';
 import { NgxMaskDirective, provideNgxMask } from 'ngx-mask';
 
 @Component({
-  selector: 'app-input-standard',
-  standalone: true,
-  imports: [CommonModule, FormsModule, MatIconModule, NgxMaskDirective],
-  providers: [provideNgxMask()],
-  templateUrl: './input-standard.component.html',
-  styleUrl: './input-standard.component.scss',
+    selector: 'app-input-standard',
+    imports: [CommonModule, FormsModule, MatIconModule, NgxMaskDirective],
+    providers: [provideNgxMask()],
+    templateUrl: './input-standard.component.html',
+    styleUrl: './input-standard.component.scss'
 })
 export class InputStandardComponent implements OnInit, OnChanges {
   @Input() showSearchIcon = true;

@@ -19,26 +19,25 @@ import { PaginationComponent } from '../../pagination/pagination.component';
 import { IEmployee } from '@core/interfaces/IEmployee';
 
 @Component({
-  selector: 'app-table-employee',
-  standalone: true,
-  imports: [
-    CommonModule,
-    InputAddonsComponent,
-    FormsModule,
-    TableBaseComponent,
-    ButtonComponent,
-    TableHeaderBoxComponent,
-    ModalBaseComponent,
-    InputStandardComponent,
-    ModalAskComponent,
-    ModalInfoComponent,
-    LoadingComponent,
-    NgxMaskPipe,
-    PaginationComponent,
-  ],
-  providers: [provideNgxMask()],
-  templateUrl: './table-employee.component.html',
-  styleUrl: './table-employee.component.scss',
+    selector: 'app-table-employee',
+    imports: [
+        CommonModule,
+        InputAddonsComponent,
+        FormsModule,
+        TableBaseComponent,
+        ButtonComponent,
+        TableHeaderBoxComponent,
+        ModalBaseComponent,
+        InputStandardComponent,
+        ModalAskComponent,
+        ModalInfoComponent,
+        LoadingComponent,
+        NgxMaskPipe,
+        PaginationComponent,
+    ],
+    providers: [provideNgxMask()],
+    templateUrl: './table-employee.component.html',
+    styleUrl: './table-employee.component.scss'
 })
 export class TableEmployeeComponent implements OnInit {
   constructor(private httpRequestService: HttpRequestService) {}

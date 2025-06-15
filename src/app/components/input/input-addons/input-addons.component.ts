@@ -10,11 +10,10 @@ interface ISearchItem {
 }
 
 @Component({
-  selector: 'app-input-addons',
-  standalone: true,
-  imports: [CommonModule, FormsModule, MatIconModule],
-  templateUrl: './input-addons.component.html',
-  styleUrl: './input-addons.component.scss',
+    selector: 'app-input-addons',
+    imports: [CommonModule, FormsModule, MatIconModule],
+    templateUrl: './input-addons.component.html',
+    styleUrl: './input-addons.component.scss'
 })
 export class InputAddonsComponent implements OnChanges {
   @Input() optionList: ITableHeader[] = [];

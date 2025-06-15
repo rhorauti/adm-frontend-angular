@@ -3,11 +3,10 @@ import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
 
 @Component({
-  selector: 'app-modal-base',
-  standalone: true,
-  imports: [CommonModule, MatIconModule],
-  templateUrl: './modal-base.component.html',
-  styleUrl: './modal-base.component.scss',
+    selector: 'app-modal-base',
+    imports: [CommonModule, MatIconModule],
+    templateUrl: './modal-base.component.html',
+    styleUrl: './modal-base.component.scss'
 })
 export class ModalBaseComponent {
   @Input() showModal = false;

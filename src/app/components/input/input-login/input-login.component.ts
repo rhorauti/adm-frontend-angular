@@ -4,11 +4,10 @@ import { FormsModule } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
 
 @Component({
-  selector: 'app-input-login',
-  standalone: true,
-  imports: [CommonModule, FormsModule, MatIconModule],
-  templateUrl: './input-login.component.html',
-  styleUrl: './input-login.component.scss',
+    selector: 'app-input-login',
+    imports: [CommonModule, FormsModule, MatIconModule],
+    templateUrl: './input-login.component.html',
+    styleUrl: './input-login.component.scss'
 })
 export class InputLoginComponent {
   @Input() showIconRight = true;

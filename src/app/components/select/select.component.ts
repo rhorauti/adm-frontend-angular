@@ -4,11 +4,10 @@ import { FormsModule } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
 
 @Component({
-  selector: 'app-select',
-  standalone: true,
-  imports: [CommonModule, MatIconModule, FormsModule],
-  templateUrl: './select.component.html',
-  styleUrl: './select.component.scss',
+    selector: 'app-select',
+    imports: [CommonModule, MatIconModule, FormsModule],
+    templateUrl: './select.component.html',
+    styleUrl: './select.component.scss'
 })
 export class SelectComponent implements OnInit {
   public optionList: string[] = [];

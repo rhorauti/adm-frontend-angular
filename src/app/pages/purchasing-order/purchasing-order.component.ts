@@ -6,17 +6,16 @@ import { TableAddressComponent } from '../../components/table/table-address/tabl
 import { TableEmployeeComponent } from '@components/table/table-employee/table-employee.component';
 
 @Component({
-  selector: 'app-purchasing-order',
-  standalone: true,
-  imports: [
-    TableCompanyComponent,
-    CommonModule,
-    ModalBaseComponent,
-    TableAddressComponent,
-    TableEmployeeComponent,
-  ],
-  templateUrl: './purchasing-order.component.html',
-  styleUrl: './purchasing-order.component.scss',
+    selector: 'app-purchasing-order',
+    imports: [
+        TableCompanyComponent,
+        CommonModule,
+        ModalBaseComponent,
+        TableAddressComponent,
+        TableEmployeeComponent,
+    ],
+    templateUrl: './purchasing-order.component.html',
+    styleUrl: './purchasing-order.component.scss'
 })
 export class PurchasingOrderComponent {
   showModalCompany = false;

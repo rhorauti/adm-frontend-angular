@@ -7,12 +7,11 @@ import { AuthApi } from '@core/api/http/auth.api';
 import { HttpRequestService } from '@core/api/http-request.service';
 
 @Component({
-  selector: 'app-redirect',
-  standalone: true,
-  imports: [CommonModule, ButtonComponent, MatIconModule],
-  providers: [AuthApi, HttpRequestService],
-  templateUrl: './redirect.component.html',
-  styleUrl: './redirect.component.scss',
+    selector: 'app-redirect',
+    imports: [CommonModule, ButtonComponent, MatIconModule],
+    providers: [AuthApi, HttpRequestService],
+    templateUrl: './redirect.component.html',
+    styleUrl: './redirect.component.scss'
 })
 export class RedirectComponent implements OnInit {
   private router = inject(Router);

@@ -3,11 +3,10 @@ import { Component, Input, OnInit } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
 
 @Component({
-  selector: 'app-button',
-  standalone: true,
-  imports: [CommonModule, MatIconModule],
-  templateUrl: './button.component.html',
-  styleUrl: './button.component.scss',
+    selector: 'app-button',
+    imports: [CommonModule, MatIconModule],
+    templateUrl: './button.component.html',
+    styleUrl: './button.component.scss'
 })
 export class ButtonComponent implements OnInit {
   @Input() label = '';

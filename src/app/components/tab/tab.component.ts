@@ -3,11 +3,10 @@ import { Component, EventEmitter, Inject, Input, Output } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
 
 @Component({
-  selector: 'app-tab',
-  standalone: true,
-  imports: [CommonModule, MatIconModule],
-  templateUrl: './tab.component.html',
-  styleUrl: './tab.component.scss',
+    selector: 'app-tab',
+    imports: [CommonModule, MatIconModule],
+    templateUrl: './tab.component.html',
+    styleUrl: './tab.component.scss'
 })
 export class TabComponent {
   constructor(@Inject(DOCUMENT) private document: Document) {}

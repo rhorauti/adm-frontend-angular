@@ -23,27 +23,26 @@ import { SelectComponent } from '@components/select/select.component';
 export type AddressIdType = 'idCompany' | 'idEmployee';
 
 @Component({
-  selector: 'app-table-address',
-  standalone: true,
-  imports: [
-    CommonModule,
-    InputAddonsComponent,
-    SelectComponent,
-    FormsModule,
-    TableBaseComponent,
-    ButtonComponent,
-    TableHeaderBoxComponent,
-    ModalBaseComponent,
-    InputStandardComponent,
-    ModalAskComponent,
-    ModalInfoComponent,
-    LoadingComponent,
-    NgxMaskPipe,
-    PaginationComponent,
-  ],
-  providers: [provideNgxMask(), ThirdPartApi],
-  templateUrl: './table-address.component.html',
-  styleUrl: './table-address.component.scss',
+    selector: 'app-table-address',
+    imports: [
+        CommonModule,
+        InputAddonsComponent,
+        SelectComponent,
+        FormsModule,
+        TableBaseComponent,
+        ButtonComponent,
+        TableHeaderBoxComponent,
+        ModalBaseComponent,
+        InputStandardComponent,
+        ModalAskComponent,
+        ModalInfoComponent,
+        LoadingComponent,
+        NgxMaskPipe,
+        PaginationComponent,
+    ],
+    providers: [provideNgxMask(), ThirdPartApi],
+    templateUrl: './table-address.component.html',
+    styleUrl: './table-address.component.scss'
 })
 export class TableAddressComponent implements OnInit {
   constructor(

@@ -12,20 +12,19 @@ import { HttpRequestService } from '@core/api/http-request.service';
 import { IModal } from '@core/interfaces/IModal';
 
 @Component({
-  selector: 'app-reset-password',
-  standalone: true,
-  imports: [
-    CommonModule,
-    FormsModule,
-    ButtonComponent,
-    InputLoginComponent,
-    MatIconModule,
-    ModalInfoComponent,
-    LoadingComponent,
-  ],
-  providers: [AuthApi, HttpRequestService],
-  templateUrl: './reset-password.component.html',
-  styleUrl: './reset-password.component.scss',
+    selector: 'app-reset-password',
+    imports: [
+        CommonModule,
+        FormsModule,
+        ButtonComponent,
+        InputLoginComponent,
+        MatIconModule,
+        ModalInfoComponent,
+        LoadingComponent,
+    ],
+    providers: [AuthApi, HttpRequestService],
+    templateUrl: './reset-password.component.html',
+    styleUrl: './reset-password.component.scss'
 })
 export class ResetPasswordComponent {
   private authApi = inject(AuthApi);

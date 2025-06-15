@@ -4,11 +4,10 @@ import { ButtonComponent } from '@components/button/button.component';
 import { ITableHeader } from '@core/interfaces/ITableHeader';
 
 @Component({
-  selector: 'app-table-header-box',
-  standalone: true,
-  imports: [CommonModule, ButtonComponent],
-  templateUrl: './table-header-box.component.html',
-  styleUrl: './table-header-box.component.scss',
+    selector: 'app-table-header-box',
+    imports: [CommonModule, ButtonComponent],
+    templateUrl: './table-header-box.component.html',
+    styleUrl: './table-header-box.component.scss'
 })
 export class TableHeaderBoxComponent {
   public isHeaderBoxActive = false;

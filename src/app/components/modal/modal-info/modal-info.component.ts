@@ -5,11 +5,10 @@ import { ModalBaseComponent } from '../modal-base/modal-base.component';
 import { ButtonComponent } from '@components/button/button.component';
 
 @Component({
-  selector: 'app-modal-info',
-  standalone: true,
-  imports: [CommonModule, MatIconModule, ButtonComponent, ModalBaseComponent],
-  templateUrl: './modal-info.component.html',
-  styleUrl: './modal-info.component.scss',
+    selector: 'app-modal-info',
+    imports: [CommonModule, MatIconModule, ButtonComponent, ModalBaseComponent],
+    templateUrl: './modal-info.component.html',
+    styleUrl: './modal-info.component.scss'
 })
 export class ModalInfoComponent implements OnChanges {
   @Input() type = '';

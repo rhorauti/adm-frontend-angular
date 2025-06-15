@@ -13,20 +13,19 @@ import { IFormValidationNewPassword, IRequestNewPassword } from '@core/interface
 import { IModal } from '@core/interfaces/IModal';
 
 @Component({
-  selector: 'app-new-password',
-  standalone: true,
-  imports: [
-    CommonModule,
-    ButtonComponent,
-    InputLoginComponent,
-    ModalInfoComponent,
-    LoadingComponent,
-    MatIconModule,
-    InputValidationComponent,
-  ],
-  providers: [AuthApi, HttpRequestService],
-  templateUrl: './new-password.component.html',
-  styleUrl: './new-password.component.scss',
+    selector: 'app-new-password',
+    imports: [
+        CommonModule,
+        ButtonComponent,
+        InputLoginComponent,
+        ModalInfoComponent,
+        LoadingComponent,
+        MatIconModule,
+        InputValidationComponent,
+    ],
+    providers: [AuthApi, HttpRequestService],
+    templateUrl: './new-password.component.html',
+    styleUrl: './new-password.component.scss'
 })
 export class NewPasswordComponent {
   private authApi = inject(AuthApi);

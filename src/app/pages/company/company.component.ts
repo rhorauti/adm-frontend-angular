@@ -8,19 +8,18 @@ import { TableEmployeeComponent } from '@components/table/table-employee/table-e
 import { BreadcrumbComponent } from '../../components/breadcrumb/breadcrumb.component';
 
 @Component({
-  selector: 'app-company',
-  standalone: true,
-  imports: [
-    CommonModule,
-    TabComponent,
-    TableCompanyComponent,
-    TableAddressComponent,
-    TableEmployeeComponent,
-    ModalBaseComponent,
-    BreadcrumbComponent,
-  ],
-  templateUrl: './company.component.html',
-  styleUrl: './company.component.scss',
+    selector: 'app-company',
+    imports: [
+        CommonModule,
+        TabComponent,
+        TableCompanyComponent,
+        TableAddressComponent,
+        TableEmployeeComponent,
+        ModalBaseComponent,
+        BreadcrumbComponent,
+    ],
+    templateUrl: './company.component.html',
+    styleUrl: './company.component.scss'
 })
 export class CompanyComponent {
   companyTabIdx = 0;

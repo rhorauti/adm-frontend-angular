@@ -9,11 +9,10 @@ import {
 import { MatIconModule } from '@angular/material/icon';
 
 @Component({
-  selector: 'app-input-validation',
-  standalone: true,
-  imports: [CommonModule, MatIconModule],
-  templateUrl: './input-validation.component.html',
-  styleUrl: './input-validation.component.scss',
+    selector: 'app-input-validation',
+    imports: [CommonModule, MatIconModule],
+    templateUrl: './input-validation.component.html',
+    styleUrl: './input-validation.component.scss'
 })
 export class InputValidationComponent implements OnChanges {
   @Input() inputValue = '';

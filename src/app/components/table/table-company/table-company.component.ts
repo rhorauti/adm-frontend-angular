@@ -19,26 +19,25 @@ import { ITableHeader } from '@core/interfaces/ITableHeader';
 import { PaginationComponent } from '../../pagination/pagination.component';
 
 @Component({
-  selector: 'app-table-company',
-  standalone: true,
-  imports: [
-    CommonModule,
-    InputAddonsComponent,
-    FormsModule,
-    TableBaseComponent,
-    ButtonComponent,
-    TableHeaderBoxComponent,
-    ModalBaseComponent,
-    InputStandardComponent,
-    ModalAskComponent,
-    ModalInfoComponent,
-    LoadingComponent,
-    NgxMaskPipe,
-    PaginationComponent,
-  ],
-  providers: [provideNgxMask()],
-  templateUrl: './table-company.component.html',
-  styleUrl: './table-company.component.scss',
+    selector: 'app-table-company',
+    imports: [
+        CommonModule,
+        InputAddonsComponent,
+        FormsModule,
+        TableBaseComponent,
+        ButtonComponent,
+        TableHeaderBoxComponent,
+        ModalBaseComponent,
+        InputStandardComponent,
+        ModalAskComponent,
+        ModalInfoComponent,
+        LoadingComponent,
+        NgxMaskPipe,
+        PaginationComponent,
+    ],
+    providers: [provideNgxMask()],
+    templateUrl: './table-company.component.html',
+    styleUrl: './table-company.component.scss'
 })
 export class TableCompanyComponent implements OnInit {
   constructor(private httpRequestService: HttpRequestService) {}

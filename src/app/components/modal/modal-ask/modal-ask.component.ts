@@ -6,11 +6,10 @@ import { ModalBaseComponent } from '../modal-base/modal-base.component';
 import { TableItemType } from '@core/interfaces/IBase';
 
 @Component({
-  selector: 'app-modal-ask',
-  standalone: true,
-  imports: [CommonModule, MatIconModule, ButtonComponent, ModalBaseComponent],
-  templateUrl: './modal-ask.component.html',
-  styleUrl: './modal-ask.component.scss',
+    selector: 'app-modal-ask',
+    imports: [CommonModule, MatIconModule, ButtonComponent, ModalBaseComponent],
+    templateUrl: './modal-ask.component.html',
+    styleUrl: './modal-ask.component.scss'
 })
 export class ModalAskComponent implements OnChanges {
   @Input() showModal = false;

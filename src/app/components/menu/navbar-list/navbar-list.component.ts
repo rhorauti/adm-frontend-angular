@@ -25,11 +25,10 @@ interface ILink {
 }
 
 @Component({
-  selector: 'app-navbar-list',
-  standalone: true,
-  imports: [CommonModule, MatIconModule, RouterModule],
-  templateUrl: './navbar-list.component.html',
-  styleUrl: './navbar-list.component.scss',
+    selector: 'app-navbar-list',
+    imports: [CommonModule, MatIconModule, RouterModule],
+    templateUrl: './navbar-list.component.html',
+    styleUrl: './navbar-list.component.scss'
 })
 export class NavbarListComponent {
   @ViewChildren('linkItem') linksItem!: QueryList<ElementRef>;

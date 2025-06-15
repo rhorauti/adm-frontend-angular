@@ -3,11 +3,10 @@ import { Component, EventEmitter, Input, OnChanges, Output } from '@angular/core
 import { MatIconModule } from '@angular/material/icon';
 
 @Component({
-  selector: 'app-pagination',
-  standalone: true,
-  imports: [CommonModule, MatIconModule],
-  templateUrl: './pagination.component.html',
-  styleUrl: './pagination.component.scss',
+    selector: 'app-pagination',
+    imports: [CommonModule, MatIconModule],
+    templateUrl: './pagination.component.html',
+    styleUrl: './pagination.component.scss'
 })
 export class PaginationComponent implements OnChanges {
   public version = 'v1';

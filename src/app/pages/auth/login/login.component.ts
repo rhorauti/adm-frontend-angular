@@ -17,20 +17,19 @@ import { NavbarComponent } from '@components/menu/navbar/navbar.component';
 import { IModal } from '@core/interfaces/IModal';
 
 @Component({
-  selector: 'app-login',
-  standalone: true,
-  imports: [
-    MatIconModule,
-    CommonModule,
-    FormsModule,
-    InputLoginComponent,
-    ButtonComponent,
-    ModalInfoComponent,
-    LoadingComponent,
-  ],
-  providers: [AuthApi, HttpRequestService],
-  templateUrl: './login.component.html',
-  styleUrl: './login.component.scss',
+    selector: 'app-login',
+    imports: [
+        MatIconModule,
+        CommonModule,
+        FormsModule,
+        InputLoginComponent,
+        ButtonComponent,
+        ModalInfoComponent,
+        LoadingComponent,
+    ],
+    providers: [AuthApi, HttpRequestService],
+    templateUrl: './login.component.html',
+    styleUrl: './login.component.scss'
 })
 export class LoginComponent {
   constructor(

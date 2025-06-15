@@ -13,20 +13,19 @@ import { IFormValidationSignUp, IRequestSignUp } from '@core/interfaces/IAuth';
 import { IModal } from '@core/interfaces/IModal';
 
 @Component({
-  selector: 'app-signup',
-  standalone: true,
-  imports: [
-    CommonModule,
-    ButtonComponent,
-    InputLoginComponent,
-    ModalInfoComponent,
-    LoadingComponent,
-    MatIconModule,
-    InputValidationComponent,
-  ],
-  providers: [AuthApi, HttpRequestService],
-  templateUrl: './signup.component.html',
-  styleUrl: './signup.component.scss',
+    selector: 'app-signup',
+    imports: [
+        CommonModule,
+        ButtonComponent,
+        InputLoginComponent,
+        ModalInfoComponent,
+        LoadingComponent,
+        MatIconModule,
+        InputValidationComponent,
+    ],
+    providers: [AuthApi, HttpRequestService],
+    templateUrl: './signup.component.html',
+    styleUrl: './signup.component.scss'
 })
 export class SignupComponent {
   private authApi = inject(AuthApi);
