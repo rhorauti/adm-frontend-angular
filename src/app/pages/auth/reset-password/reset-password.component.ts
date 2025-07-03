@@ -3,28 +3,25 @@ import { Component, inject } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { ButtonComponent } from '@components/button/button.component';
-import { InputLoginComponent } from '@components/input/input-login/input-login.component';
 import { ModalInfoComponent } from '@components/modal/modal-info/modal-info.component';
 import { LoadingComponent } from '@components/loading/loading.component';
 import { AuthApi } from '@core/api/http/auth.api';
-import { HttpRequestService } from '@core/api/http-request.service';
-import { IModal } from '@core/interfaces/IModal';
+import { ButtonLabelComponent } from '../../../components/button/button-label/button-label.component';
+import { InputComponent } from '@components/input/input.component';
 
 @Component({
-    selector: 'app-reset-password',
-    imports: [
-        CommonModule,
-        FormsModule,
-        ButtonComponent,
-        InputLoginComponent,
-        MatIconModule,
-        ModalInfoComponent,
-        LoadingComponent,
-    ],
-    providers: [AuthApi, HttpRequestService],
-    templateUrl: './reset-password.component.html',
-    styleUrl: './reset-password.component.scss'
+  selector: 'app-reset-password',
+  imports: [
+    CommonModule,
+    FormsModule,
+    InputComponent,
+    MatIconModule,
+    ModalInfoComponent,
+    LoadingComponent,
+    ButtonLabelComponent,
+  ],
+  templateUrl: './reset-password.component.html',
+  styleUrl: './reset-password.component.scss',
 })
 export class ResetPasswordComponent {
   private authApi = inject(AuthApi);
@@ -38,7 +35,7 @@ export class ResetPasswordComponent {
 
   public isModalActive = false;
   public isLoadingActive = false;
-  public modalInfo: IModal = {
+  public modalInfo: any = {
     type: '',
     description: '',
   };

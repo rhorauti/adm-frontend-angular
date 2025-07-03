@@ -1,10 +1,12 @@
-import { inject } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { HttpRequestService } from '../http-request.service';
 import { environment } from '@environments/environment';
-import { IResponseCommonMessage } from '@core/interfaces/ICommonMessage';
-import { ICompany } from '@core/interfaces/ICompany';
-import { IBaseResponse } from '@core/interfaces/IBase';
+import { ICompany } from '@core/interfaces/company.interface';
+import { IBaseResponse } from '@core/interfaces/response.interface';
 
+@Injectable({
+  providedIn: 'root',
+})
 export class RegisterCompanyApi {
   private httpRequestService = inject(HttpRequestService);
 
@@ -25,7 +27,7 @@ export class RegisterCompanyApi {
    * Adiciona um novo registro no banco de dados.
    * @returns Promise com o status e mensagem.
    */
-  async addNewCompany(companyData: ICompany): Promise<IResponseCommonMessage> {
+  async addNewCompany(companyData: ICompany): Promise<IBaseResponse> {
     return await this.httpRequestService.sendHttpRequest(
       `${environment.apiUrl}/company`,
       'POST',
@@ -38,7 +40,7 @@ export class RegisterCompanyApi {
    * Atualiza os dados da empresa.
    * @returns Promise com o status e mensagem.
    */
-  async updateCompany(companyData: ICompany, companyId: number): Promise<IResponseCommonMessage> {
+  async updateCompany(companyData: ICompany, companyId: number): Promise<IBaseResponse> {
     return await this.httpRequestService.sendHttpRequest(
       `${environment.apiUrl}/company/${companyId.toString()}`,
       'PUT',
@@ -51,7 +53,7 @@ export class RegisterCompanyApi {
    * Deleta um registro do banco de dados.
    * @returns Promise com o status e mensagem.
    */
-  async deleteRegister(companyId: number): Promise<IResponseCommonMessage> {
+  async deleteRegister(companyId: number): Promise<IBaseResponse> {
     return await this.httpRequestService.sendHttpRequest(
       `${environment.apiUrl}/company/${companyId}`,
       'DELETE'

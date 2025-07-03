@@ -1,15 +1,22 @@
 import { CommonModule } from '@angular/common';
 import { Component, EventEmitter, Input, OnChanges, Output } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
-import { ButtonComponent } from '@components/button/button.component';
 import { ModalBaseComponent } from '../modal-base/modal-base.component';
-import { TableItemType } from '@core/interfaces/IBase';
+import { TableItemType } from '@core/interfaces/base.interface';
+import { ButtonCloseComponent } from '../../button/button-close/button-close.component';
+import { ButtonLabelComponent } from '../../button/button-label/button-label.component';
 
 @Component({
-    selector: 'app-modal-ask',
-    imports: [CommonModule, MatIconModule, ButtonComponent, ModalBaseComponent],
-    templateUrl: './modal-ask.component.html',
-    styleUrl: './modal-ask.component.scss'
+  selector: 'app-modal-ask',
+  imports: [
+    CommonModule,
+    MatIconModule,
+    ModalBaseComponent,
+    ButtonCloseComponent,
+    ButtonLabelComponent,
+  ],
+  templateUrl: './modal-ask.component.html',
+  styleUrl: './modal-ask.component.scss',
 })
 export class ModalAskComponent implements OnChanges {
   @Input() showModal = false;

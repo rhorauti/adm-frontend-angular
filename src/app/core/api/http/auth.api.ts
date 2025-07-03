@@ -1,4 +1,4 @@
-import { inject } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { HttpRequestService } from '../http-request.service';
 import {
   IRequestlogin,
@@ -6,10 +6,13 @@ import {
   IRequestSignUp,
   IResponseLogin,
   IResponseSignUp,
-} from '../../interfaces/IAuth';
+} from '../../interfaces/auth.interface';
 import { environment } from '@environments/environment';
-import { IResponseCommonMessage } from '../../interfaces/ICommonMessage';
+import { IBaseResponse } from '@core/interfaces/response.interface';
 
+@Injectable({
+  providedIn: 'root',
+})
 export class AuthApi {
   private httpRequestService = inject(HttpRequestService);
 
@@ -34,7 +37,7 @@ export class AuthApi {
    * Função que verifica se o token está valido ou não.
    * @returns retorna a mensagem e o status 200(sucesso) ou 401(falha) dependendo se o token estiver válido.
    */
-  async checkValidToken(token: string | null): Promise<IResponseCommonMessage> {
+  async checkValidToken(token: string | null): Promise<IBaseResponse> {
     return await this.httpRequestService.sendHttpRequest(
       `${environment.apiUrl}/email-validation?token=${token}`,
       'GET'
@@ -61,7 +64,7 @@ export class AuthApi {
    * @param email email informado pelo usuário
    * @returns Promise com a data, status e mensagem
    */
-  async getEmailValidation(email: string): Promise<IResponseCommonMessage> {
+  async getEmailValidation(email: string): Promise<IBaseResponse> {
     return await this.httpRequestService.sendHttpRequest(
       `${environment.apiUrl}/reset-password`,
       'POST',
@@ -75,7 +78,7 @@ export class AuthApi {
    * @param newPassword nova senha digitada pelo usuário
    * @returns Promise com a data, status e mensagem
    */
-  async createNewPassword(newPassword: IRequestNewPasswordHttp): Promise<IResponseCommonMessage> {
+  async createNewPassword(newPassword: IRequestNewPasswordHttp): Promise<IBaseResponse> {
     return await this.httpRequestService.sendHttpRequest(
       `${environment.apiUrl}/new-password?token=${newPassword.token}`,
       'POST',

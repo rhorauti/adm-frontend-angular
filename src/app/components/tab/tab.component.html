@@ -1,16 +1,14 @@
 <div [ngClass]="divClass">
   <div class="relative text-sm overflow-x-auto text-nowrap border border-gray-400 rounded-md p-2">
-    @for (tabLabel of tabList; track $index) {
+    @for (tabLabel of tabContract.tab().tabList; track $index) {
       <button
         [id]="tabLabel"
-        (click)="selectTab($index)"
+        (click)="tabContract.onChangeTabIdx($index)"
         class="px-3 py-2 hover:bg-gray-200 hover:rounded-md mx-1"
-        [ngClass]="selectedTabIdx == $index ? 'is-active' : ''">
+        [ngClass]="tabContract.tab().selectedTabIdx == $index ? 'is-active' : ''">
         {{ tabLabel }}
       </button>
     }
   </div>
-  <!-- <div class="border rounded-tr-lg rounded-br-lg rounded-bl-lg w-full p-4"> -->
   <ng-content></ng-content>
-  <!-- </div> -->
 </div>

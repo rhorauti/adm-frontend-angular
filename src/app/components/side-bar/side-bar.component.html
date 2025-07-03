@@ -1,0 +1,58 @@
+<div>
+  <div
+    class="fixed top-0 left-0 w-full h-screen bg-black opacity-30 z-40"
+    [ngClass]="isSideBarActive ? 'block' : 'hidden'"></div>
+  <div
+    [ngClass]="
+      isSideBarActive
+        ? isTwoThirdWidth
+          ? 'right-0 w-full md:w-2/3'
+          : 'right-0 w-full md:w-1/3'
+        : '-right-[100%]'
+    "
+    class="fixed flex flex-col justify-between top-0 p-6 bg-white transition-all duration-500 ease-in-out h-screen z-50 overflow-auto">
+    <section class="flex flex-col gap-4">
+      <header class="flex justify-between">
+        <div [ngClass]="titleIconName.length > 0 ? 'flex gap-2' : ''">
+          @if (titleIconName.length > 0) {
+            <mat-icon>{{ titleIconName }}</mat-icon>
+          }
+          <h1 class="text-lg font-bold">{{ title }}</h1>
+        </div>
+        <app-button-close (click)="onCloseBtnClicked()"></app-button-close>
+      </header>
+      <ng-content select="[body]" class="overflow-auto"></ng-content>
+    </section>
+    @if (isFooterActive) {
+      <footer class="border-gray-300 border-t flex gap-4 items-center justify-center p-3">
+        <app-button-label
+          (click)="onCloseBtnClicked()"
+          [label]="'Fechar'"
+          [iconName]="'close'"
+          [isColorLogo]="false" />
+        <app-button-label [label]="'Salvar'" [iconName]="'save'" />
+      </footer>
+    }
+  </div>
+</div>
+<!-- </div> -->
+<!-- @if (tableHeaderContract.isTableHeaderModalActive) {
+    <div
+      class="grid md:gap-1 gap-2 md:absolute px-4 py-2 border border-gray-500 bg-white text-black rounded-md text-sm w-full md:w-fit md:-left-48 md:-top-16 z-50">
+      @for (header of tableHeaderContract.headers; track $index) {
+        @if ($index != 0) {
+          <div>
+            <input
+              (click)="tableHeaderContract.onShowHeader($index)"
+              type="checkbox"
+              [value]="header.name"
+              [checked]="header.isHeaderActive"
+              [disabled]="header.name == 'Id'"
+              [id]="header.id"
+              class="mr-2" />
+            <label [for]="header.id">{{ header.name }}</label>
+          </div>
+        }
+      }
+    </div>
+  } -->

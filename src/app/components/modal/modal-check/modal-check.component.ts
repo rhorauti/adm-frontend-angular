@@ -2,9 +2,9 @@ import { CommonModule } from '@angular/common';
 import { Component, EventEmitter, Input, OnChanges, Output } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
 import { ModalBaseComponent } from '../modal-base/modal-base.component';
-import { ButtonComponent } from '@components/button/button.component';
 import { RegisterCompanyApi } from '@core/api/http/company.api';
-import { TableItemType } from '@core/interfaces/IBase';
+import { TableItemType } from '@core/interfaces/base.interface';
+import { ButtonLabelComponent } from '@components/button/button-label/button-label.component';
 
 interface IFormData {
   title: string;
@@ -14,12 +14,7 @@ interface IFormData {
 @Component({
   selector: 'app-modal-check',
   standalone: true,
-  imports: [
-    CommonModule,
-    MatIconModule,
-    ModalBaseComponent,
-    ButtonComponent,
-  ],
+  imports: [CommonModule, MatIconModule, ModalBaseComponent, ButtonLabelComponent],
   providers: [RegisterCompanyApi],
   templateUrl: './modal-check.component.html',
   styleUrl: './modal-check.component.scss',

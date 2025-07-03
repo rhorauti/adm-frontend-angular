@@ -1,0 +1,10 @@
+.tooltip-content {
+  height: 0;
+  overflow: hidden;
+  transition: height 0.2s ease;
+}
+
+.tooltip-parent:hover .tooltip-content {
+  height: auto;
+  padding: 0.5rem;
+}

@@ -2,13 +2,13 @@ import { CommonModule } from '@angular/common';
 import { Component, EventEmitter, Input, OnChanges, Output } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
 import { ModalBaseComponent } from '../modal-base/modal-base.component';
-import { ButtonComponent } from '@components/button/button.component';
+import { ButtonCloseComponent } from '../../button/button-close/button-close.component';
 
 @Component({
-    selector: 'app-modal-info',
-    imports: [CommonModule, MatIconModule, ButtonComponent, ModalBaseComponent],
-    templateUrl: './modal-info.component.html',
-    styleUrl: './modal-info.component.scss'
+  selector: 'app-modal-info',
+  imports: [CommonModule, MatIconModule, ModalBaseComponent, ButtonCloseComponent],
+  templateUrl: './modal-info.component.html',
+  styleUrl: './modal-info.component.scss',
 })
 export class ModalInfoComponent implements OnChanges {
   @Input() type = '';

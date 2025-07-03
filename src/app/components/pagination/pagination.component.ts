@@ -1,20 +1,18 @@
 import { CommonModule } from '@angular/common';
-import { Component, EventEmitter, Input, OnChanges, Output } from '@angular/core';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
 
 @Component({
-    selector: 'app-pagination',
-    imports: [CommonModule, MatIconModule],
-    templateUrl: './pagination.component.html',
-    styleUrl: './pagination.component.scss'
+  selector: 'app-pagination',
+  imports: [CommonModule, MatIconModule],
+  templateUrl: './pagination.component.html',
+  styleUrl: './pagination.component.scss',
 })
-export class PaginationComponent implements OnChanges {
+export class PaginationComponent {
   public version = 'v1';
   @Input() currentPage = 1;
   @Input() lastPage = 1;
   @Output() currentPageEmitter = new EventEmitter<number>();
-
-  ngOnChanges(): void {}
 
   goBackPage(): void {
     if (this.currentPage <= 1) {

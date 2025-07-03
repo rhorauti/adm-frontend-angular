@@ -1,0 +1,28 @@
+import { CommonModule } from '@angular/common';
+import { Component, Input, OnInit } from '@angular/core';
+import { MatIconModule } from '@angular/material/icon';
+import { Icon } from '@core/types/icon.type';
+
+@Component({
+  selector: 'app-button-label',
+  imports: [CommonModule, MatIconModule],
+  templateUrl: './button-label.component.html',
+  styleUrl: './button-label.component.scss',
+})
+export class ButtonLabelComponent implements OnInit {
+  @Input() iconName: Icon = '';
+  @Input() labelClass = '';
+  @Input() showIcon = true;
+  @Input() iconClass = '';
+  @Input() label = '';
+  @Input() isColorLogo = true;
+  @Input() isDisabled = false;
+  btnClass = '';
+  ngOnInit(): void {
+    if (this.isColorLogo) {
+      this.btnClass = 'bg-logo hover:bg-logo-hover text-white';
+    } else {
+      this.btnClass = 'border hover:bg-gray-200 border-gray-400';
+    }
+  }
+}

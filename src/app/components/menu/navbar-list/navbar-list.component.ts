@@ -25,10 +25,10 @@ interface ILink {
 }
 
 @Component({
-    selector: 'app-navbar-list',
-    imports: [CommonModule, MatIconModule, RouterModule],
-    templateUrl: './navbar-list.component.html',
-    styleUrl: './navbar-list.component.scss'
+  selector: 'app-navbar-list',
+  imports: [CommonModule, MatIconModule, RouterModule],
+  templateUrl: './navbar-list.component.html',
+  styleUrl: './navbar-list.component.scss',
 })
 export class NavbarListComponent {
   @ViewChildren('linkItem') linksItem!: QueryList<ElementRef>;
@@ -53,23 +53,23 @@ export class NavbarListComponent {
         },
         {
           idSublink: 2,
-          name: 'Sitio Nakano',
+          name: 'MyCompany',
           isSelected: false,
-          routerLink: '/sitio-nakano',
+          routerLink: '/mycompany',
         },
         {
           idSublink: 3,
-          name: 'Compras',
+          name: 'Produtos',
           isSelected: false,
-          routerLink: '/compras',
+          routerLink: '/produtos',
         },
         {
           idSublink: 4,
-          name: 'Vendas',
+          name: 'Endereços',
           isSelected: false,
-          routerLink: '/vendas',
+          routerLink: '/address',
         },
-        { idSublink: 5, name: 'Misc', isSelected: false, routerLink: '/misc' },
+        { idSublink: 5, name: 'Funcionários', isSelected: false, routerLink: '/employee' },
       ],
     },
     {

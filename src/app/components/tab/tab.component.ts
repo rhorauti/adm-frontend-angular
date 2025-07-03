@@ -1,24 +1,15 @@
-import { CommonModule, DOCUMENT } from '@angular/common';
-import { Component, EventEmitter, Inject, Input, Output } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { Component, inject, Input } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
+import { TabContract } from '@core/component-contract/tab.contract';
 
 @Component({
-    selector: 'app-tab',
-    imports: [CommonModule, MatIconModule],
-    templateUrl: './tab.component.html',
-    styleUrl: './tab.component.scss'
+  selector: 'app-tab',
+  imports: [CommonModule, MatIconModule],
+  templateUrl: './tab.component.html',
+  styleUrl: './tab.component.scss',
 })
 export class TabComponent {
-  constructor(@Inject(DOCUMENT) private document: Document) {}
-
-  @Input() tabList = ['Tab1', 'Tab2', 'Tab3'];
+  tabContract = inject(TabContract);
   @Input() divClass = '';
-  selectedTabIdx = 0;
-
-  @Output() selectedTabEmitter = new EventEmitter<number>();
-
-  selectTab(tabSelected: number): void {
-    this.selectedTabIdx = tabSelected;
-    this.selectedTabEmitter.emit(this.selectedTabIdx);
-  }
 }

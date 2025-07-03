@@ -3,6 +3,7 @@ import { Component, ElementRef, Input, QueryList, ViewChildren } from '@angular/
 import { MatIconModule } from '@angular/material/icon';
 import { RouterModule } from '@angular/router';
 import { NavbarListComponent } from '../navbar-list/navbar-list.component';
+import { TooltipComponent } from "../../tooltip/tooltip.component";
 
 interface ISublink {
   idSublink: number;
@@ -19,7 +20,7 @@ interface ILink {
 
 @Component({
     selector: 'app-navbar',
-    imports: [CommonModule, MatIconModule, RouterModule, NavbarListComponent],
+    imports: [CommonModule, MatIconModule, RouterModule, NavbarListComponent, TooltipComponent],
     templateUrl: './navbar.component.html',
     styleUrl: './navbar.component.scss'
 })

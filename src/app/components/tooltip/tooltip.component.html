@@ -1,0 +1,8 @@
+<div class="tooltip-parent relative">
+  <ng-content select="[content]"></ng-content>
+  <div
+    class="tooltip-content text-nowrap absolute bg-black text-white rounded-md text-xs z-50 opacity-80"
+    [ngClass]="positionClass">
+    <p>{{ description }}</p>
+  </div>
+</div>

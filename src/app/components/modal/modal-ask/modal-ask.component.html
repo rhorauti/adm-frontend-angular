@@ -17,7 +17,7 @@
     </div>
   </div>
   <div class="footer-block flex gap-5 justify-center items-stretch">
-    <app-button [btnType]="'close'" (click)="close()"></app-button>
-    <app-button [btnType]="'success-delete'" (click)="OnActionOk()"></app-button>
+    <app-button-close (click)="close()"></app-button-close>
+    <app-button-label (click)="OnActionOk()"></app-button-label>
   </div>
 </app-modal-base>

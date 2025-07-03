@@ -1,5 +1,5 @@
 import { InjectionToken, Signal } from '@angular/core';
-import { IBaseGroup } from '@core/interfaces/IBase';
+import { IBaseGroup } from '@core/interfaces/base.interface';
 
 export const WINDOW = new InjectionToken<Window>('Global window object', {
   factory: () => window,

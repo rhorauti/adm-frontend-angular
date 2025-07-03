@@ -1,14 +1,8 @@
-<div class="flex flex-col gap-10">
+<!-- <div class="flex flex-col gap-10">
   <div class="flex flex-col gap-5">
     <div
       class="flex flex-col-reverse md:flex-row gap-4 h-full md:items-stretch md:justify-between md:gap-10">
-      <app-input-addons
-        [selectValueProps]="filter().selectValue"
-        [optionList]="tableHeaders()"
-        [placeholder]="filter().placeholder"
-        (inputValueEmitter)="filter().input = $event"
-        (selectValueEmitter)="changeSelectPlaceHolder($event)"
-        (btnClickEmitter)="filterTable()"></app-input-addons>
+      <app-input-addons />
       <div class="flex justify-center gap-4">
         <div class="is-hidden-mobile">
           <app-table-header-box [tableHeaders]="tableHeaders()"></app-table-header-box>
@@ -211,4 +205,4 @@
   [description]="modalInfo().description"
   [type]="modalInfo().type"
   (closeModalEmitter)="onCloseModalInfo()"></app-modal-info>
-<app-loading [showLoading]="showLoading()"></app-loading>
+<app-loading [showLoading]="showLoading()"></app-loading> -->

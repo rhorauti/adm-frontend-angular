@@ -7,13 +7,13 @@
   <!--Nome-->
   <div class="flex flex-col gap-2">
     <label for="name" class="block text-sm font-medium leading-6">Nome</label>
-    <app-input-login
-      (emitInputValue)="getNameValue($event)"
-      [isEmail]="true"
-      [showIconRight]="false"
-      [iconLeft]="'person'"
-      [borderColor]="changeNameBorderColor()"
-      [placeholder]="'Fulano da Silva'"></app-input-login>
+    <app-input
+      [id]="'input-signup-name'"
+      [inputType]="'custom'"
+      [iconName]="'perm_identity'"
+      (inputValueEmitter)="getNameValue($event)"
+      [inputClass]="changeNameBorderColor()"
+      [placeholder]="'Fulano da Silva'" />
     <div>
       <app-input-validation
         (emitValidationResult)="getNameValidation($event)"
@@ -26,13 +26,11 @@
   <!--E-mail-->
   <div class="flex flex-col gap-2">
     <label for="email" class="block text-sm font-medium leading-6">E-mail</label>
-    <app-input-login
-      (emitInputValue)="getEmailValue($event)"
-      [isEmail]="true"
-      [showIconRight]="false"
-      [iconLeft]="'email'"
-      [borderColor]="changeEmailBorderColor()"
-      [placeholder]="'teste@exemplo.com'"></app-input-login>
+    <app-input
+      [id]="'input-signup-email'"
+      [inputType]="'email'"
+      (inputValueEmitter)="getEmailValue($event)"
+      [inputClass]="changeEmailBorderColor()" />
     <div>
       <app-input-validation
         (emitValidationResult)="getEmailValidation($event)"
@@ -44,9 +42,11 @@
   <!--Senha-->
   <div class="flex flex-col gap-2">
     <label for="password" class="block text-sm font-medium leading-6">Senha</label>
-    <app-input-login
-      [borderColor]="changePasswordBorderColor()"
-      (emitInputValue)="getPasswordValue($event)"></app-input-login>
+    <app-input
+      [id]="'input-signup-password'"
+      [inputType]="'password'"
+      [inputClass]="changePasswordBorderColor()"
+      (inputValueEmitter)="getPasswordValue($event)"></app-input>
     <div>
       <app-input-validation
         (emitValidationResult)="getPasswordLettersValidation($event)"
@@ -77,9 +77,11 @@
   <!--Confirmar Senha-->
   <div class="flex flex-col gap-2">
     <label for="password" class="block text-sm font-medium leading-6">Confirmar senha</label>
-    <app-input-login
-      [borderColor]="changeConfirmPasswordBorderColor()"
-      (emitInputValue)="getConfirmPasswordValue($event)"></app-input-login>
+    <app-input
+      [id]="'input-signup-confirm-password'"
+      [inputType]="'password'"
+      [inputClass]="changeConfirmPasswordBorderColor()"
+      (inputValueEmitter)="getConfirmPasswordValue($event)"></app-input>
 
     <div>
       <app-input-validation
@@ -91,10 +93,10 @@
     </div>
   </div>
   <div>
-    <app-button
+    <app-button-label
       (click)="createNewUser()"
       [isDisabled]="!allValidationsOk()"
-      [label]="'Criar'"></app-button>
+      [label]="'Criar'"></app-button-label>
   </div>
   <p class="text-center text-sm">
     Já possui cadastro?
@@ -106,7 +108,7 @@
     >
   </p>
 </div>
-<app-loading [showLoading]="isLoadingActive"></app-loading>
+<app-loading></app-loading>
 <app-modal-info
   [showModal]="isModalActive"
   [type]="modalInfo.type"

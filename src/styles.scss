@@ -1,6 +1,6 @@
-@import 'tailwindcss/base';
-@import 'tailwindcss/components';
-@import 'tailwindcss/utilities';
+@use 'tailwindcss/base';
+@use 'tailwindcss/components';
+@use 'tailwindcss/utilities';
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@100;200;300;400;500;600;700&display=swap');
 
 * {
@@ -9,7 +9,7 @@
 }
 
 body {
-  font-size: 12px;
+  font-size: 16px;
   background-color: #f5f5f5;
   margin: 0;
   padding: 0;
@@ -19,16 +19,13 @@ body {
   margin: 0 0 0;
 }
 
-.table-td {
-  @apply py-1.5 px-3 h-full whitespace-nowrap;
-}
-
-.text-hover {
-  @apply before:absolute before:-top-1 before:hover:-left-1 before:hover:w-full before:hover:h-full before:hover:bg-gray-700 before:hover:rounded-lg before:hover:p-4;
-}
-
 .is-hidden-tablet {
   display: none;
+}
+.mat-icon {
+  height: auto !important;
+  width: auto !important;
+  line-height: normal !important;
 }
 
 @media screen and (max-width: 768px) {

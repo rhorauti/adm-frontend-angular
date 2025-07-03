@@ -2,30 +2,27 @@ import { CommonModule } from '@angular/common';
 import { Component, Signal, computed, inject, signal } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
 import { ActivatedRoute, Router } from '@angular/router';
-import { ButtonComponent } from '@components/button/button.component';
-import { InputLoginComponent } from '@components/input/input-login/input-login.component';
-import { InputValidationComponent } from '@components/input/input-validation/input-validation.component';
+import { InputValidationComponent } from '@components/input-validation/input-validation.component';
 import { LoadingComponent } from '@components/loading/loading.component';
 import { ModalInfoComponent } from '@components/modal/modal-info/modal-info.component';
-import { HttpRequestService } from '@core/api/http-request.service';
 import { AuthApi } from '@core/api/http/auth.api';
-import { IFormValidationNewPassword, IRequestNewPassword } from '@core/interfaces/IAuth';
-import { IModal } from '@core/interfaces/IModal';
+import { IFormValidationNewPassword, IRequestNewPassword } from '@core/interfaces/auth.interface';
+import { ButtonLabelComponent } from '../../../components/button/button-label/button-label.component';
+import { InputComponent } from '@components/input/input.component';
 
 @Component({
-    selector: 'app-new-password',
-    imports: [
-        CommonModule,
-        ButtonComponent,
-        InputLoginComponent,
-        ModalInfoComponent,
-        LoadingComponent,
-        MatIconModule,
-        InputValidationComponent,
-    ],
-    providers: [AuthApi, HttpRequestService],
-    templateUrl: './new-password.component.html',
-    styleUrl: './new-password.component.scss'
+  selector: 'app-new-password',
+  imports: [
+    CommonModule,
+    InputComponent,
+    ModalInfoComponent,
+    LoadingComponent,
+    MatIconModule,
+    InputValidationComponent,
+    ButtonLabelComponent,
+  ],
+  templateUrl: './new-password.component.html',
+  styleUrl: './new-password.component.scss',
 })
 export class NewPasswordComponent {
   private authApi = inject(AuthApi);
@@ -46,7 +43,7 @@ export class NewPasswordComponent {
     confirmPasswordValidation: false,
   });
 
-  public modalInfo: IModal = {
+  public modalInfo: any = {
     type: '',
     description: '',
   };

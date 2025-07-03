@@ -1,7 +1,10 @@
-import { inject } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { HttpRequestService } from '../http-request.service';
-import { IResponseViaCep } from '@core/interfaces/IAddress';
+import { IResponseViaCep } from '@core/interfaces/address.interface';
 
+@Injectable({
+  providedIn: 'root',
+})
 export class ThirdPartApi {
   private httpRequestService = inject(HttpRequestService);
 

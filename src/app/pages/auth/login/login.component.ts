@@ -3,40 +3,31 @@ import { MatIconModule } from '@angular/material/icon';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { Store } from '@ngrx/store';
-import { authDataStore } from '@store/auth/auth.action';
-import { InputLoginComponent } from '@components/input/input-login/input-login.component';
-import { ButtonComponent } from '@components/button/button.component';
 import { ModalInfoComponent } from '@components/modal/modal-info/modal-info.component';
 import { LoadingComponent } from '@components/loading/loading.component';
 import { AuthApi } from '@core/api/http/auth.api';
-import { HttpRequestService } from '@core/api/http-request.service';
 import { DataService } from '@core/services/data.service';
-import { IAuthStore, IRequestlogin } from '@core/interfaces/IAuth';
+import { IAuthStore, IRequestlogin } from '@core/interfaces/auth.interface';
 import { NavbarComponent } from '@components/menu/navbar/navbar.component';
-import { IModal } from '@core/interfaces/IModal';
+import { ButtonLabelComponent } from '../../../components/button/button-label/button-label.component';
+import { InputComponent } from '@components/input/input.component';
 
 @Component({
-    selector: 'app-login',
-    imports: [
-        MatIconModule,
-        CommonModule,
-        FormsModule,
-        InputLoginComponent,
-        ButtonComponent,
-        ModalInfoComponent,
-        LoadingComponent,
-    ],
-    providers: [AuthApi, HttpRequestService],
-    templateUrl: './login.component.html',
-    styleUrl: './login.component.scss'
+  selector: 'app-login',
+  imports: [
+    MatIconModule,
+    CommonModule,
+    FormsModule,
+    InputComponent,
+    ModalInfoComponent,
+    LoadingComponent,
+    ButtonLabelComponent,
+  ],
+  templateUrl: './login.component.html',
+  styleUrl: './login.component.scss',
 })
 export class LoginComponent {
-  constructor(
-    private dataService: DataService,
-    private authStore: Store<{ auth: IAuthStore }>
-  ) {}
-
+  private dataService = inject(DataService);
   private authApi = inject(AuthApi);
   private router = inject(Router);
 
@@ -51,7 +42,7 @@ export class LoginComponent {
   public showPassword = false;
   public isModalActive = false;
   public isLoadingActive = false;
-  public modalInfo: IModal = {
+  public modalInfo: any = {
     type: '',
     description: '',
   };
@@ -108,7 +99,6 @@ export class LoginComponent {
           };
           this.handleSuccessModal(response.message);
           this.isLoginSuccess = true;
-          this.authStore.dispatch(authDataStore({ authData: this.authStoreData }));
           this.dataService.emitData(true);
         }
       }
