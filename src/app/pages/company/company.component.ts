@@ -11,7 +11,6 @@ import { ModalInfoComponent } from '@components/modal/modal-info/modal-info.comp
 import { LoadingComponent } from '@components/loading/loading.component';
 import { InputAddonsContract } from '@core/component-contract/input-addons.contract';
 import { TabContract } from '@core/component-contract/tab.contract';
-import { ISideBar } from '@core/interfaces/side-bar.interface';
 import { MatIconModule } from '@angular/material/icon';
 import { LoadingContract } from '@core/component-contract/loading.contract';
 import { ButtonLabelComponent } from '../../components/button/button-label/button-label.component';
@@ -53,18 +52,8 @@ export class CompanyComponent implements OnInit {
   readonly companyStore = inject(CompanyStore);
   breadcrumb = ['Cadastro', 'Empresas'];
   isLoading = false;
-  tableHeadersSideBar = {
-    isSideBarActive: false,
-    title: 'Colunas Visíveis',
-    isTwoThirdWidth: false,
-  } as ISideBar;
-  isFilterBoxActive = false;
 
   async ngOnInit() {
     this.companyStore.onShowDataList();
-  }
-
-  onShowTableHeadersSideBar(isSideBarActive: boolean): void {
-    this.tableHeadersSideBar.isSideBarActive = isSideBarActive;
   }
 }

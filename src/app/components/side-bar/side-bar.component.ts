@@ -12,14 +12,21 @@ import { MatIconModule } from '@angular/material/icon';
 })
 export class TableHeaderBoxComponent {
   @Input() isSideBarActive = false;
-  @Input() title = '';
+  @Input() title = 'Title';
+  @Input() btnLabel = 'Salvar';
   @Input() titleIconName = '';
   @Input() isTwoThirdWidth = true;
   @Input() isFooterActive = true;
 
-  @Output() isCloseBtnClickedEmitter = new EventEmitter<boolean>();
+  @Output() isCloseBtnClickEmitter = new EventEmitter<boolean>();
 
-  onCloseBtnClicked(): void {
-    this.isCloseBtnClickedEmitter.emit(false);
+  onCloseBtnClick(): void {
+    this.isCloseBtnClickEmitter.emit(false);
+  }
+
+  @Output() primaryBtnClickEmitter = new EventEmitter();
+
+  onPrimaryBtnClick(): void {
+    this.primaryBtnClickEmitter.emit();
   }
 }

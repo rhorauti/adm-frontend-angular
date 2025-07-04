@@ -13,7 +13,9 @@
           <div class="flex gap-3">
             <app-input
               [id]="'input-filter'"
-              [inputType]="'search'"
+              [inputName]="'search'"
+              (clickEmitter)="companyStore.onTableFilterBasedOnSearchInput()"
+              (keyboardEmitter)="companyStore.onKeyPressOnSearchInput($event)"
               (inputValueEmitter)="companyStore.onSetInputSearchValue($event)" />
             <app-tooltip [description]="'Filtro'" [position]="'right'">
               <app-button-icon
@@ -30,7 +32,7 @@
               <app-button-icon
                 content
                 [iconName]="'view_column'"
-                (click)="onShowTableHeadersSideBar(true)" />
+                (click)="companyStore.onShowTableHeaderBox(true)" />
             </app-tooltip>
           </div>
         </div>
@@ -51,23 +53,71 @@
 </div>
 
 <app-side-bar
-  [isSideBarActive]="false"
+  [isSideBarActive]="companyStore.isFilterBoxActive()"
   [isTwoThirdWidth]="false"
   [titleIconName]="'filter_list'"
   [title]="'Filtro'"
-  (isCloseBtnClickedEmitter)="companyStore.onShowFilterBox(false)">
-  <div body>
-    <p>Aplicação do filtro</p>
+  [btnLabel]="'Aplicar'"
+  (primaryBtnClickEmitter)="companyStore.onTableFilterBasedOnFilterBox()"
+  (isCloseBtnClickEmitter)="companyStore.onShowFilterBox(false)">
+  <div body class="flex flex-col gap-4">
+    <div class="flex flex-col gap-2">
+      <p class="font-medium">Id</p>
+      <app-input
+        [id]="'filter-company-id'"
+        [inputName]="'custom'"
+        [type]="'search'"
+        (keyboardEmitter)="companyStore.onTableFilterBasedOnFilterBox()" />
+    </div>
+    <div class="flex flex-col gap-2">
+      <p class="font-medium">Apelido</p>
+      <app-input
+        [id]="'filter-company-nickname'"
+        [inputName]="'custom'"
+        [type]="'search'"
+        (keyboardEmitter)="companyStore.onTableFilterBasedOnFilterBox()" />
+    </div>
+    <div class="flex flex-col gap-2">
+      <p class="font-medium">Razão Social</p>
+      <app-input
+        [id]="'filter-company-name'"
+        [inputName]="'custom'"
+        [type]="'search'"
+        (keyboardEmitter)="companyStore.onTableFilterBasedOnFilterBox()" />
+    </div>
+    <div class="flex flex-col gap-2">
+      <p class="font-medium">CNPJ ou CPF</p>
+      <app-input
+        [id]="'filter-company-cnpj'"
+        [inputName]="'cnpj'"
+        (keyboardEmitter)="companyStore.onTableFilterBasedOnFilterBox()" />
+    </div>
+    <div class="flex flex-col gap-2">
+      <p class="font-medium">Inscrição Estadual</p>
+      <app-input
+        [id]="'filter-company-ie'"
+        [inputName]="'custom'"
+        [type]="'search'"
+        (keyboardEmitter)="companyStore.onTableFilterBasedOnFilterBox()" />
+    </div>
+    <div class="flex flex-col gap-2">
+      <p class="font-medium">Inscrição Municipal</p>
+      <app-input
+        [id]="'filter-company-em'"
+        [inputName]="'custom'"
+        [type]="'search'"
+        (keyboardEmitter)="companyStore.onTableFilterBasedOnFilterBox()" />
+    </div>
   </div>
 </app-side-bar>
 
 <app-side-bar
-  [isSideBarActive]="tableHeadersSideBar.isSideBarActive"
+  [isSideBarActive]="companyStore.isTableHeaderBoxActive()"
   [isTwoThirdWidth]="false"
   [isFooterActive]="false"
-  [title]="tableHeadersSideBar.title"
-  [isTwoThirdWidth]="tableHeadersSideBar.isTwoThirdWidth"
-  (isCloseBtnClickedEmitter)="tableHeadersSideBar.isSideBarActive = false">
+  [title]="'Colunas Visíveis'"
+  [isTwoThirdWidth]="false"
+  (isCloseBtnClickEmitter)="companyStore.onShowTableHeaderBox(false)">
   <div body class="flex flex-col gap-6">
     <p>Selecione abaixo as colunas que deseja estarem visíveis na tabela</p>
     <div class="flex flex-col gap-2">

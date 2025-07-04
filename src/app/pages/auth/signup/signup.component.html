@@ -9,7 +9,7 @@
     <label for="name" class="block text-sm font-medium leading-6">Nome</label>
     <app-input
       [id]="'input-signup-name'"
-      [inputType]="'custom'"
+      [inputName]="'custom'"
       [iconName]="'perm_identity'"
       (inputValueEmitter)="getNameValue($event)"
       [inputClass]="changeNameBorderColor()"
@@ -28,7 +28,7 @@
     <label for="email" class="block text-sm font-medium leading-6">E-mail</label>
     <app-input
       [id]="'input-signup-email'"
-      [inputType]="'email'"
+      [inputName]="'email'"
       (inputValueEmitter)="getEmailValue($event)"
       [inputClass]="changeEmailBorderColor()" />
     <div>
@@ -44,7 +44,7 @@
     <label for="password" class="block text-sm font-medium leading-6">Senha</label>
     <app-input
       [id]="'input-signup-password'"
-      [inputType]="'password'"
+      [inputName]="'password'"
       [inputClass]="changePasswordBorderColor()"
       (inputValueEmitter)="getPasswordValue($event)"></app-input>
     <div>
@@ -79,7 +79,7 @@
     <label for="password" class="block text-sm font-medium leading-6">Confirmar senha</label>
     <app-input
       [id]="'input-signup-confirm-password'"
-      [inputType]="'password'"
+      [inputName]="'password'"
       [inputClass]="changeConfirmPasswordBorderColor()"
       (inputValueEmitter)="getConfirmPasswordValue($event)"></app-input>
 

@@ -17,6 +17,7 @@ export const CompanyStore = signalStore(
       selectedTabIdx: 0,
     },
     inputSearchValue: '',
+    isTableHeaderBoxActive: false,
     tableHeaders: [
       { id: 0, isHeaderActive: true, sort: 0, headerName: '', databaseField: '' },
       { id: 1, isHeaderActive: true, sort: 0, headerName: 'Id', databaseField: 'idCompany' },
@@ -49,9 +50,7 @@ export const CompanyStore = signalStore(
       ie: '',
       im: '',
     } as ICompany,
-    filter: {
-      isFilterBoxActive: false,
-    },
+    isFilterBoxActive: false,
     pagination: {
       currentPage: 1,
       lastPage: 1,
@@ -97,7 +96,6 @@ export const CompanyStore = signalStore(
       patchState(store, {
         inputSearchValue: inputData,
       });
-      console.log('input', store.inputSearchValue());
     };
 
     const onChangeTabIdx = (idx: number): void => {
@@ -123,12 +121,15 @@ export const CompanyStore = signalStore(
       });
     };
 
+    const onShowTableHeaderBox = (isTableHeaderBoxActive: boolean): void => {
+      patchState(store, {
+        isTableHeaderBoxActive: isTableHeaderBoxActive,
+      });
+    };
+
     const onShowFilterBox = (isFilterBoxActive: boolean): void => {
       patchState(store, {
-        filter: {
-          ...store.filter(),
-          isFilterBoxActive: isFilterBoxActive,
-        },
+        isFilterBoxActive: isFilterBoxActive,
       });
     };
 
@@ -264,27 +265,73 @@ export const CompanyStore = signalStore(
       });
     };
 
-    const onHeaderCheckboxDisabled = (keyValue: string): void => {
+    const onHeaderCheckboxDisabled = (): void => {
       patchState(store, {
         tableCheckbox: {
           ...store.tableCheckbox(),
           header: false,
         },
       });
-      onTableFilter(keyValue);
     };
 
-    const onTableFilter = (keyValue: string): void => {
+    const onKeyPressOnSearchInput = (event: KeyboardEvent): void => {
+      if (event.key == 'Enter') {
+        onFilterTable();
+      } else if (event.key == 'Escape') {
+        onResetCompaniesData();
+      }
+    };
+
+    const onResetCompaniesData = (): void => {
+      patchState(store, {
+        companiesData: store.initialTableData(),
+        inputSearchValue: '',
+      });
+    };
+
+    const onFilterTable = (): void => {
       const filterData = store.initialTableData().filter(company => {
-        const filterResult = company[keyValue as keyof ICompany];
-        return String(filterResult)
-          .toLowerCase()
-          .trim()
-          .includes(store.inputSearchValue().toLowerCase().trim());
+        return ['idCompany', 'nickname', 'name', 'cnpj'].some(key => {
+          const filterResult = company[key as keyof ICompany];
+          return String(filterResult)
+            .toLowerCase()
+            .trim()
+            .includes(store.inputSearchValue().toLowerCase().trim());
+        });
       });
       patchState(store, {
         companiesData: filterData,
       });
+    };
+
+    const onTableFilterBasedOnSearchInput = (): void => {
+      if (store.inputSearchValue().length == 0) {
+        onResetCompaniesData();
+      } else {
+        onFilterTable();
+      }
+    };
+
+    const onTableFilterBasedOnFilterBox = (): void => {
+      if (store.inputSearchValue().length == 0) {
+        patchState(store, {
+          companiesData: store.initialTableData(),
+        });
+      } else {
+        const filterData = store.initialTableData().filter(company => {
+          return ['idCompany', 'nickname', 'name', 'cnpj'].some(key => {
+            const filterResult = company[key as keyof ICompany];
+            return String(filterResult)
+              .toLowerCase()
+              .trim()
+              .includes(store.inputSearchValue().toLowerCase().trim());
+          });
+        });
+        patchState(store, {
+          companiesData: filterData,
+        });
+      }
+      console.log('filter', store.companiesData());
     };
 
     const onShowModalEditForm = (): void => {
@@ -521,7 +568,9 @@ export const CompanyStore = signalStore(
       onBodyCheckboxChange,
       onCheckTableCheckboxStatus,
       onHeaderCheckboxDisabled,
-      onTableFilter,
+      onKeyPressOnSearchInput,
+      onTableFilterBasedOnSearchInput,
+      onTableFilterBasedOnFilterBox,
       clearCheckbox,
       onCloseModalAsk,
       onCloseModalInfo,
@@ -532,6 +581,7 @@ export const CompanyStore = signalStore(
       saveRegister,
       deleteRegister,
       onSortTableHeader,
+      onShowTableHeaderBox,
       onShowFilterBox,
     };
   })

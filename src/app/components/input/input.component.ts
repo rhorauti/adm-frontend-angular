@@ -26,7 +26,7 @@ type InputType = 'search' | 'text' | 'password' | 'number';
 })
 export class InputComponent implements OnInit {
   readonly inputAddonsContract = inject(InputAddonsContract);
-  @Input({ required: true }) inputType!: InputName;
+  @Input({ required: true }) inputName!: InputName;
   @Input({ required: true }) id!: string;
   @Input() inputValue = '';
   @Input() isDisabled = false;
@@ -41,9 +41,8 @@ export class InputComponent implements OnInit {
   @Output() inputValueEmitter = new EventEmitter<string>();
 
   ngOnInit(): void {
-    switch (this.inputType) {
+    switch (this.inputName) {
       case 'custom': {
-        this.type = 'text';
         this.tabIndex = -1;
         break;
       }
@@ -69,23 +68,20 @@ export class InputComponent implements OnInit {
       }
       case 'phone': {
         this.maskValue = '(00) 0000-0000 ||(00) 00000-0000';
-        this.placeholder = 'Digite o telefone';
         this.tabIndex = -1;
-        this.type = 'text';
+        this.type = 'search';
         break;
       }
       case 'cnpj': {
         this.maskValue = '000.000.000-00 ||00.000.000/0000-00';
-        this.placeholder = 'Digite o CNPJ ou CPF';
         this.tabIndex = -1;
-        this.type = 'text';
+        this.type = 'search';
         break;
       }
       case 'postalCode': {
         this.maskValue = '00000-000';
-        this.placeholder = 'Digite o CEP';
         this.tabIndex = -1;
-        this.type = 'text';
+        this.type = 'search';
         break;
       }
     }
@@ -101,5 +97,11 @@ export class InputComponent implements OnInit {
   onClick(event: MouseEvent): void {
     event.stopPropagation();
     this.clickEmitter.emit();
+  }
+
+  @Output() keyboardEmitter = new EventEmitter();
+
+  onKeydown(event: KeyboardEvent): void {
+    this.keyboardEmitter.emit(event);
   }
 }

@@ -19,18 +19,14 @@
           }
           <h1 class="text-lg font-bold">{{ title }}</h1>
         </div>
-        <app-button-close (click)="onCloseBtnClicked()"></app-button-close>
+        <app-button-close (click)="onCloseBtnClick()"></app-button-close>
       </header>
       <ng-content select="[body]" class="overflow-auto"></ng-content>
     </section>
     @if (isFooterActive) {
       <footer class="border-gray-300 border-t flex gap-4 items-center justify-center p-3">
-        <app-button-label
-          (click)="onCloseBtnClicked()"
-          [label]="'Fechar'"
-          [iconName]="'close'"
-          [isColorLogo]="false" />
-        <app-button-label [label]="'Salvar'" [iconName]="'save'" />
+        <app-button-label (click)="onCloseBtnClick()" [label]="'Fechar'" [isColorLogo]="false" />
+        <app-button-label (click)="onPrimaryBtnClick()" [label]="btnLabel" />
       </footer>
     }
   </div>
