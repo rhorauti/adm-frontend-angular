@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, Input } from '@angular/core';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
 
 @Component({
@@ -16,5 +16,11 @@ export class ButtonDeleteComponent {
       event.stopPropagation();
       return;
     }
+  }
+
+  @Output() keyboardEmitter = new EventEmitter();
+
+  onKeydown(event: KeyboardEvent): void {
+    this.keyboardEmitter.emit(event);
   }
 }

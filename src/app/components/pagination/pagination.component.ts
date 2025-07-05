@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, EventEmitter, inject, Input, Output } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
+import { CompanyStore } from '@store/company/company.store';
 
 @Component({
   selector: 'app-pagination',
@@ -9,6 +10,7 @@ import { MatIconModule } from '@angular/material/icon';
   styleUrl: './pagination.component.scss',
 })
 export class PaginationComponent {
+  readonly companyStore = inject(CompanyStore);
   public version = 'v1';
   @Input() currentPage = 1;
   @Input() lastPage = 1;

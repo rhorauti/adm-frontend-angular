@@ -10,4 +10,9 @@ export type Icon =
   | 'lock'
   | 'email'
   | 'phone'
-  | 'perm_identity';
+  | 'perm_identity'
+  | 'keyboard_arrow_left'
+  | 'keyboard_arrow_right'
+  | 'keyboard_arrow_up'
+  | 'keyboard_arrow_down'
+  | 'library_add';

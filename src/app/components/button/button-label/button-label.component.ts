@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
 import { Icon } from '@core/types/icon.type';
 
@@ -14,6 +14,7 @@ export class ButtonLabelComponent implements OnInit {
   @Input() labelClass = '';
   @Input() showIcon = true;
   @Input() iconClass = '';
+  @Input() tabIndex = 0;
   @Input() label = '';
   @Input() isColorLogo = true;
   @Input() isDisabled = false;
@@ -24,5 +25,11 @@ export class ButtonLabelComponent implements OnInit {
     } else {
       this.btnClass = 'border hover:bg-gray-200 border-gray-400';
     }
+  }
+
+  @Output() keyboardEmitter = new EventEmitter();
+
+  onKeydown(event: KeyboardEvent): void {
+    this.keyboardEmitter.emit(event);
   }
 }

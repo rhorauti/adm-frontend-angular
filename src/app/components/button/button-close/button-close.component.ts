@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, Input } from '@angular/core';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
 
 @Component({
@@ -10,4 +10,10 @@ import { MatIconModule } from '@angular/material/icon';
 })
 export class ButtonCloseComponent {
   @Input() iconClass = '';
+
+  @Output() keyboardEmitter = new EventEmitter();
+
+  onKeydown(event: KeyboardEvent): void {
+    this.keyboardEmitter.emit(event);
+  }
 }

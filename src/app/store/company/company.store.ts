@@ -50,7 +50,16 @@ export const CompanyStore = signalStore(
       ie: '',
       im: '',
     } as ICompany,
-    isFilterBoxActive: false,
+    filter: {
+      isBoxActive: false,
+      isResultZeroRegister: false,
+      idCompany: '',
+      nickname: '',
+      name: '',
+      cnpj: '',
+      ie: '',
+      im: '',
+    },
     pagination: {
       currentPage: 1,
       lastPage: 1,
@@ -129,12 +138,14 @@ export const CompanyStore = signalStore(
 
     const onShowFilterBox = (isFilterBoxActive: boolean): void => {
       patchState(store, {
-        isFilterBoxActive: isFilterBoxActive,
+        filter: {
+          ...store.filter(),
+          isBoxActive: isFilterBoxActive,
+        },
       });
     };
 
     const onShowHeader = (idx: number): void => {
-      console.log('header idx', idx);
       patchState(store, {
         tableHeaders: store.tableHeaders().map((header, index) => {
           if (index == idx) {
@@ -274,6 +285,12 @@ export const CompanyStore = signalStore(
       });
     };
 
+    const onKeyPressOnNotFoundFilterRegister = (event: KeyboardEvent): void => {
+      if (event.key == 'Escape') {
+        onResetCompaniesData();
+      }
+    };
+
     const onKeyPressOnSearchInput = (event: KeyboardEvent): void => {
       if (event.key == 'Enter') {
         onFilterTable();
@@ -291,7 +308,7 @@ export const CompanyStore = signalStore(
 
     const onFilterTable = (): void => {
       const filterData = store.initialTableData().filter(company => {
-        return ['idCompany', 'nickname', 'name', 'cnpj'].some(key => {
+        return ['idCompany', 'nickname', 'name'].some(key => {
           const filterResult = company[key as keyof ICompany];
           return String(filterResult)
             .toLowerCase()
@@ -299,8 +316,63 @@ export const CompanyStore = signalStore(
             .includes(store.inputSearchValue().toLowerCase().trim());
         });
       });
+      if (filterData.length == 0) {
+        patchState(store, {
+          filter: {
+            ...store.filter(),
+            isResultZeroRegister: true,
+          },
+        });
+      }
       patchState(store, {
         companiesData: filterData,
+      });
+    };
+
+    const onKeyPressOnFilterBox = (event: KeyboardEvent): void => {
+      if (event.key == 'Enter') {
+        onTableFilterThroughFilterBox();
+      }
+    };
+
+    const onTableFilterThroughFilterBox = (): void => {
+      const filter = store.initialTableData().filter(company => {
+        return (
+          String(company.idCompany)
+            .toLowerCase()
+            .trim()
+            .includes(String(store.filter().idCompany).toLowerCase().trim()) &&
+          company.nickname
+            .toLowerCase()
+            .trim()
+            .includes(store.filter().nickname.toLowerCase().trim()) &&
+          company.name.toLowerCase().trim().includes(store.filter().name.toLowerCase().trim()) &&
+          (company.cnpj || '')
+            .toLowerCase()
+            .trim()
+            .includes(store.filter().cnpj.toLowerCase().trim()) &&
+          (company.ie || '')
+            .toLowerCase()
+            .trim()
+            .includes(store.filter().ie.toLowerCase().trim()) &&
+          (company.im || '').toLowerCase().trim().includes(store.filter().im.toLowerCase().trim())
+        );
+      });
+      patchState(store, {
+        companiesData: filter,
+        filter: {
+          ...store.filter(),
+          isBoxActive: false,
+        },
+      });
+    };
+
+    const onInputValueChange = (key: string, value: string): void => {
+      patchState(store, {
+        filter: {
+          ...store.filter(),
+          [key]: value,
+        },
       });
     };
 
@@ -310,28 +382,6 @@ export const CompanyStore = signalStore(
       } else {
         onFilterTable();
       }
-    };
-
-    const onTableFilterBasedOnFilterBox = (): void => {
-      if (store.inputSearchValue().length == 0) {
-        patchState(store, {
-          companiesData: store.initialTableData(),
-        });
-      } else {
-        const filterData = store.initialTableData().filter(company => {
-          return ['idCompany', 'nickname', 'name', 'cnpj'].some(key => {
-            const filterResult = company[key as keyof ICompany];
-            return String(filterResult)
-              .toLowerCase()
-              .trim()
-              .includes(store.inputSearchValue().toLowerCase().trim());
-          });
-        });
-        patchState(store, {
-          companiesData: filterData,
-        });
-      }
-      console.log('filter', store.companiesData());
     };
 
     const onShowModalEditForm = (): void => {
@@ -569,8 +619,12 @@ export const CompanyStore = signalStore(
       onCheckTableCheckboxStatus,
       onHeaderCheckboxDisabled,
       onKeyPressOnSearchInput,
+      onResetCompaniesData,
+      onKeyPressOnNotFoundFilterRegister,
+      onKeyPressOnFilterBox,
       onTableFilterBasedOnSearchInput,
-      onTableFilterBasedOnFilterBox,
+      onTableFilterThroughFilterBox,
+      onInputValueChange,
       clearCheckbox,
       onCloseModalAsk,
       onCloseModalInfo,

@@ -1,6 +1,8 @@
 <button
   [ngClass]="btnClass"
   [disabled]="isDisabled"
+  [tabIndex]="tabIndex"
+  (keydown)="onKeydown($event)"
   class="
         {{ btnClass }}
         flex

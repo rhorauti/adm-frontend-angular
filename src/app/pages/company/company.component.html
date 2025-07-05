@@ -13,6 +13,7 @@
           <div class="flex gap-3">
             <app-input
               [id]="'input-filter'"
+              [placeholder]="'Id, Apelido, Razão Social'"
               [inputName]="'search'"
               (clickEmitter)="companyStore.onTableFilterBasedOnSearchInput()"
               (keyboardEmitter)="companyStore.onKeyPressOnSearchInput($event)"
@@ -42,23 +43,33 @@
     </div>
   } @else {
     <div class="flex flex-col items-center gap-4 w-full mt-10">
-      <mat-icon class="text-logo text-4xl">library_add</mat-icon>
-      <p class="font-semibold italic">Nenhuma empresa registrada</p>
-      <app-button-label
-        [showIcon]="true"
-        [iconName]="'add'"
-        [label]="'Adicionar uma nova empresa'" />
+      <mat-icon class="text-logo text-6xl">{{
+        companyStore.filter().isResultZeroRegister ? 'search_off' : 'library_add'
+      }}</mat-icon>
+      <p class="font-semibold">Nenhum registro encontrado</p>
+      @if (!companyStore.filter().isResultZeroRegister) {
+        <app-button-label
+          [showIcon]="true"
+          [iconName]="'add'"
+          [label]="'Adicionar uma nova empresa'" />
+      } @else {
+        <p>Palavra(s) pesquisada(s) : {{ companyStore.inputSearchValue() }}</p>
+        <app-button-label
+          (keyboardEmitter)="companyStore.onKeyPressOnNotFoundFilterRegister($event)"
+          (click)="companyStore.onResetCompaniesData()"
+          [label]="'Voltar'" />
+      }
     </div>
   }
 </div>
 
 <app-side-bar
-  [isSideBarActive]="companyStore.isFilterBoxActive()"
+  [isSideBarActive]="companyStore.filter().isBoxActive"
   [isTwoThirdWidth]="false"
   [titleIconName]="'filter_list'"
   [title]="'Filtro'"
   [btnLabel]="'Aplicar'"
-  (primaryBtnClickEmitter)="companyStore.onTableFilterBasedOnFilterBox()"
+  (primaryBtnClickEmitter)="companyStore.onTableFilterThroughFilterBox()"
   (isCloseBtnClickEmitter)="companyStore.onShowFilterBox(false)">
   <div body class="flex flex-col gap-4">
     <div class="flex flex-col gap-2">
@@ -67,7 +78,8 @@
         [id]="'filter-company-id'"
         [inputName]="'custom'"
         [type]="'search'"
-        (keyboardEmitter)="companyStore.onTableFilterBasedOnFilterBox()" />
+        (inputValueEmitter)="companyStore.onInputValueChange('idCompany', $event)"
+        (keyboardEmitter)="companyStore.onKeyPressOnFilterBox($event)" />
     </div>
     <div class="flex flex-col gap-2">
       <p class="font-medium">Apelido</p>
@@ -75,7 +87,8 @@
         [id]="'filter-company-nickname'"
         [inputName]="'custom'"
         [type]="'search'"
-        (keyboardEmitter)="companyStore.onTableFilterBasedOnFilterBox()" />
+        (inputValueEmitter)="companyStore.onInputValueChange('nickname', $event)"
+        (keyboardEmitter)="companyStore.onKeyPressOnFilterBox($event)" />
     </div>
     <div class="flex flex-col gap-2">
       <p class="font-medium">Razão Social</p>
@@ -83,14 +96,16 @@
         [id]="'filter-company-name'"
         [inputName]="'custom'"
         [type]="'search'"
-        (keyboardEmitter)="companyStore.onTableFilterBasedOnFilterBox()" />
+        (inputValueEmitter)="companyStore.onInputValueChange('name', $event)"
+        (keyboardEmitter)="companyStore.onKeyPressOnFilterBox($event)" />
     </div>
     <div class="flex flex-col gap-2">
       <p class="font-medium">CNPJ ou CPF</p>
       <app-input
         [id]="'filter-company-cnpj'"
         [inputName]="'cnpj'"
-        (keyboardEmitter)="companyStore.onTableFilterBasedOnFilterBox()" />
+        (inputValueEmitter)="companyStore.onInputValueChange('cnpj', $event)"
+        (keyboardEmitter)="companyStore.onKeyPressOnFilterBox($event)" />
     </div>
     <div class="flex flex-col gap-2">
       <p class="font-medium">Inscrição Estadual</p>
@@ -98,7 +113,8 @@
         [id]="'filter-company-ie'"
         [inputName]="'custom'"
         [type]="'search'"
-        (keyboardEmitter)="companyStore.onTableFilterBasedOnFilterBox()" />
+        (inputValueEmitter)="companyStore.onInputValueChange('ie', $event)"
+        (keyboardEmitter)="companyStore.onKeyPressOnFilterBox($event)" />
     </div>
     <div class="flex flex-col gap-2">
       <p class="font-medium">Inscrição Municipal</p>
@@ -106,7 +122,8 @@
         [id]="'filter-company-em'"
         [inputName]="'custom'"
         [type]="'search'"
-        (keyboardEmitter)="companyStore.onTableFilterBasedOnFilterBox()" />
+        (inputValueEmitter)="companyStore.onInputValueChange('im', $event)"
+        (keyboardEmitter)="companyStore.onKeyPressOnFilterBox($event)" />
     </div>
   </div>
 </app-side-bar>
@@ -129,7 +146,6 @@
               [toggleId]="$index"
               (isCheckedEmitter)="companyStore.onShowHeader($index)" />
             <p>{{ header.headerName }}</p>
-            <p>{{ $index }}</p>
           </div>
         }
       }

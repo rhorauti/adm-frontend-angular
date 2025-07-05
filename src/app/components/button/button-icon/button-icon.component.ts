@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
 import { Icon } from '@core/types/icon.type';
 
@@ -32,5 +32,11 @@ export class ButtonIconComponent implements OnInit {
       event.stopPropagation();
       return;
     }
+  }
+
+  @Output() keyboardEmitter = new EventEmitter();
+
+  onKeydown(event: KeyboardEvent): void {
+    this.keyboardEmitter.emit(event);
   }
 }
