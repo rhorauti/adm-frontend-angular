@@ -7,6 +7,9 @@ import { ITableCheckbox } from '@core/interfaces/table.interface';
 import { IPagination } from '@core/interfaces/pagination.interface';
 import { IModalCheck, IModalForm, IModalInfo } from '@core/interfaces/modal.interface';
 import { ILoading } from '@core/interfaces/loading.interface';
+import { IFilterBoxCompany, IFilterHelpCompany } from '@core/interfaces/filter.interface';
+
+type FilterMethod = 'input-search' | 'filter-box';
 
 export const CompanyStore = signalStore(
   { providedIn: 'root' },
@@ -50,20 +53,30 @@ export const CompanyStore = signalStore(
       ie: '',
       im: '',
     } as ICompany,
-    filter: {
-      isBoxActive: false,
-      isResultZeroRegister: false,
+    isFilterBoxActive: false,
+    isFilterResultZeroRegister: false,
+    filterBox: {
       idCompany: '',
       nickname: '',
       name: '',
       cnpj: '',
       ie: '',
       im: '',
-    },
+    } as IFilterBoxCompany,
+    filterHelp: {
+      inputSearch: '',
+      idCompany: '',
+      nickname: '',
+      name: '',
+      cnpj: '',
+      ie: '',
+      im: '',
+    } as IFilterHelpCompany,
     pagination: {
       currentPage: 1,
-      lastPage: 1,
+      totalPages: 1,
       qtyPerPage: 10,
+      pagesArray: [],
     } as IPagination,
     modalForm: {
       isActive: false,
@@ -96,10 +109,43 @@ export const CompanyStore = signalStore(
         .map((value, index) => (itemsChecked.includes(index) ? value : null));
       return datasChecked.filter(value => value != null);
     }),
+
+    isAtLeastOneFilterBoxNotEmpty: computed(() => {
+      return (
+        store.filterBox().idCompany.length > 0 ||
+        store.filterBox().nickname.length > 0 ||
+        store.filterBox().name.length > 0 ||
+        store.filterBox().cnpj.length > 0 ||
+        store.filterBox().ie.length > 0 ||
+        store.filterBox().im.length > 0
+      );
+    }),
+
+    isAtLeastOneFilterHelpNotEmpty: computed(() => {
+      return (
+        store.filterHelp().inputSearch.length > 0 ||
+        store.filterHelp().idCompany.length > 0 ||
+        store.filterHelp().nickname.length > 0 ||
+        store.filterHelp().name.length > 0 ||
+        store.filterHelp().cnpj.length > 0 ||
+        store.filterHelp().ie.length > 0 ||
+        store.filterHelp().im.length > 0
+      );
+    }),
   })),
 
   withMethods(store => {
     const httpRequestService = inject(HttpRequestService);
+
+    const onTabChange = (tabIdx: number): void => {
+      patchState(store, {
+        tab: {
+          ...store.tab(),
+          selectedTabIdx: tabIdx,
+        },
+      });
+      onShowDataList();
+    };
 
     const onSetInputSearchValue = (inputData: string): void => {
       patchState(store, {
@@ -116,7 +162,7 @@ export const CompanyStore = signalStore(
       });
     };
 
-    const onClearData = (): void => {
+    const onClearCompanyData = (): void => {
       patchState(store, {
         companyData: {
           ...store.companyData(),
@@ -138,10 +184,7 @@ export const CompanyStore = signalStore(
 
     const onShowFilterBox = (isFilterBoxActive: boolean): void => {
       patchState(store, {
-        filter: {
-          ...store.filter(),
-          isBoxActive: isFilterBoxActive,
-        },
+        isFilterBoxActive: isFilterBoxActive,
       });
     };
 
@@ -169,11 +212,7 @@ export const CompanyStore = signalStore(
           `${environment.apiUrl}/company`,
           'GET'
         );
-        patchState(store, {
-          initialTableData: response.data,
-          companiesData: response.data,
-        });
-        fillNewCheckboxArray(store.companiesData().length);
+        onClearAllDatas(response.data);
       } catch (e: any) {
         onHandleModalInfo('failure', e?.error?.msg);
       } finally {
@@ -215,7 +254,7 @@ export const CompanyStore = signalStore(
       }
     };
 
-    const clearCheckbox = (): void => {
+    const clearTableCheckbox = (): void => {
       patchState(store, {
         tableCheckbox: {
           header: false,
@@ -287,90 +326,182 @@ export const CompanyStore = signalStore(
 
     const onKeyPressOnNotFoundFilterRegister = (event: KeyboardEvent): void => {
       if (event.key == 'Escape') {
-        onResetCompaniesData();
+        onClearAllDatas(store.initialTableData());
       }
     };
 
     const onKeyPressOnSearchInput = (event: KeyboardEvent): void => {
       if (event.key == 'Enter') {
-        onFilterTable();
+        onFilterTableThroughSearchInput();
       } else if (event.key == 'Escape') {
-        onResetCompaniesData();
+        onClearAllDatas(store.initialTableData());
       }
     };
 
-    const onResetCompaniesData = (): void => {
+    const onClearAllDatas = (companiesData: ICompany[]): void => {
+      const companiesFilter = companiesData.filter(
+        company => company.type == store.tab().selectedTabIdx
+      );
       patchState(store, {
-        companiesData: store.initialTableData(),
+        initialTableData: companiesFilter,
+        companiesData: companiesFilter,
+        isFilterResultZeroRegister: false,
         inputSearchValue: '',
+        filterBox: {
+          idCompany: '',
+          nickname: '',
+          name: '',
+          cnpj: '',
+          ie: '',
+          im: '',
+        },
+        filterHelp: {
+          inputSearch: '',
+          idCompany: '',
+          nickname: '',
+          name: '',
+          cnpj: '',
+          ie: '',
+          im: '',
+        },
       });
+      fillNewCheckboxArray(companiesFilter.length);
     };
 
-    const onFilterTable = (): void => {
+    const onFilterTableThroughSearchInput = (): void => {
       const filterData = store.initialTableData().filter(company => {
         return ['idCompany', 'nickname', 'name'].some(key => {
           const filterResult = company[key as keyof ICompany];
-          return String(filterResult)
-            .toLowerCase()
-            .trim()
-            .includes(store.inputSearchValue().toLowerCase().trim());
+          return (
+            company.type == store.tab().selectedTabIdx &&
+            String(filterResult)
+              .toLowerCase()
+              .trim()
+              .includes(store.inputSearchValue().toLowerCase().trim())
+          );
         });
       });
       if (filterData.length == 0) {
         patchState(store, {
-          filter: {
-            ...store.filter(),
-            isResultZeroRegister: true,
+          companiesData: filterData,
+          isFilterResultZeroRegister: true,
+        });
+      } else {
+        patchState(store, {
+          companiesData: filterData,
+          inputSearchValue: '',
+          filterBox: {
+            idCompany: '',
+            nickname: '',
+            name: '',
+            cnpj: '',
+            ie: '',
+            im: '',
+          },
+          filterHelp: {
+            inputSearch: store.inputSearchValue(),
+            idCompany: '',
+            nickname: '',
+            name: '',
+            cnpj: '',
+            ie: '',
+            im: '',
           },
         });
       }
-      patchState(store, {
-        companiesData: filterData,
-      });
     };
 
     const onKeyPressOnFilterBox = (event: KeyboardEvent): void => {
       if (event.key == 'Enter') {
-        onTableFilterThroughFilterBox();
+        onFilterThroughFilterBox();
       }
     };
 
-    const onTableFilterThroughFilterBox = (): void => {
+    const onApplyFilterHelp = (): void => {
+      const keys = Object.keys(store.filterBox());
+      keys.forEach(key => {
+        patchState(store, {
+          filterHelp: {
+            ...store.filterHelp(),
+            [key]: store.filterBox()[key as keyof IFilterBoxCompany],
+          },
+        });
+      });
+    };
+
+    const onFilterThroughFilterBox = (): void => {
       const filter = store.initialTableData().filter(company => {
         return (
+          company.type == store.tab().selectedTabIdx &&
           String(company.idCompany)
             .toLowerCase()
             .trim()
-            .includes(String(store.filter().idCompany).toLowerCase().trim()) &&
+            .includes(store.filterBox().idCompany.trim()) &&
           company.nickname
             .toLowerCase()
             .trim()
-            .includes(store.filter().nickname.toLowerCase().trim()) &&
-          company.name.toLowerCase().trim().includes(store.filter().name.toLowerCase().trim()) &&
+            .includes(store.filterBox().nickname.toLowerCase().trim()) &&
+          company.name.toLowerCase().trim().includes(store.filterBox().name.toLowerCase().trim()) &&
           (company.cnpj || '')
             .toLowerCase()
             .trim()
-            .includes(store.filter().cnpj.toLowerCase().trim()) &&
+            .includes(store.filterBox().cnpj.toLowerCase().trim()) &&
           (company.ie || '')
             .toLowerCase()
             .trim()
-            .includes(store.filter().ie.toLowerCase().trim()) &&
-          (company.im || '').toLowerCase().trim().includes(store.filter().im.toLowerCase().trim())
+            .includes(store.filterBox().ie.toLowerCase().trim()) &&
+          (company.im || '')
+            .toLowerCase()
+            .trim()
+            .includes(store.filterBox().im.toLowerCase().trim())
         );
       });
-      patchState(store, {
-        companiesData: filter,
-        filter: {
-          ...store.filter(),
-          isBoxActive: false,
-        },
-      });
+      if (filter.length == 0) {
+        patchState(store, {
+          companiesData: filter,
+          isFilterResultZeroRegister: true,
+          isFilterBoxActive: false,
+        });
+      } else {
+        onApplyFilterHelp();
+        patchState(store, {
+          companiesData: filter,
+          isFilterBoxActive: false,
+          inputSearchValue: '',
+          filterHelp: {
+            ...store.filterHelp(),
+            inputSearch: '',
+          },
+          filterBox: {
+            idCompany: '',
+            nickname: '',
+            name: '',
+            cnpj: '',
+            ie: '',
+            im: '',
+          },
+        });
+      }
+    };
+
+    const onClearFilterItem = (key: string, filterMethod: FilterMethod): void => {
+      if (filterMethod == 'input-search') {
+        onFilterTableThroughSearchInput();
+      } else {
+        patchState(store, {
+          filterBox: {
+            ...store.filterHelp(),
+            [key]: '',
+          },
+        });
+        onFilterThroughFilterBox();
+      }
     };
 
     const onInputValueChange = (key: string, value: string): void => {
       patchState(store, {
-        filter: {
-          ...store.filter(),
+        filterBox: {
+          ...store.filterBox(),
           [key]: value,
         },
       });
@@ -378,9 +509,38 @@ export const CompanyStore = signalStore(
 
     const onTableFilterBasedOnSearchInput = (): void => {
       if (store.inputSearchValue().length == 0) {
-        onResetCompaniesData();
+        onClearAllDatas(store.initialTableData());
       } else {
-        onFilterTable();
+        onFilterTableThroughSearchInput();
+      }
+    };
+
+    const onGeneratePaginationPagesArray = (): void => {
+      store.pagination().totalPages = Math.floor(
+        store.companiesData().length / store.pagination().qtyPerPage
+      );
+      if (store.pagination().totalPages < 7) {
+        patchState(store, {
+          pagination: {
+            ...store.pagination(),
+            pagesArray: Array.from({ length: store.pagination().totalPages }, (_, i) => i + 1),
+          },
+        });
+      } else if (store.pagination().totalPages >= 7) {
+        patchState(store, {
+          pagination: {
+            ...store.pagination(),
+            pagesArray: [
+              1,
+              2,
+              3,
+              '...',
+              store.pagination().totalPages - 2,
+              store.pagination().totalPages - 1,
+              store.pagination().totalPages,
+            ] as string[],
+          },
+        });
       }
     };
 
@@ -429,7 +589,7 @@ export const CompanyStore = signalStore(
             isActive: false,
           },
         });
-        clearCheckbox();
+        clearTableCheckbox();
       } else {
         patchState(store, {
           modalInfo: {
@@ -458,7 +618,7 @@ export const CompanyStore = signalStore(
 
     const onModalAskActionOk = (): void => {
       deleteRegister();
-      onClearData();
+      onClearCompanyData();
       patchState(store, {
         modalInfo: {
           ...store.modalInfo(),
@@ -604,9 +764,10 @@ export const CompanyStore = signalStore(
     };
 
     return {
+      onTabChange,
       onSetInputSearchValue,
       onChangeTabIdx,
-      onClearData,
+      onClearCompanyData,
       onShowHeader,
       onShowDataList,
       fillNewCheckboxArray,
@@ -619,13 +780,14 @@ export const CompanyStore = signalStore(
       onCheckTableCheckboxStatus,
       onHeaderCheckboxDisabled,
       onKeyPressOnSearchInput,
-      onResetCompaniesData,
+      onClearAllDatas,
       onKeyPressOnNotFoundFilterRegister,
       onKeyPressOnFilterBox,
       onTableFilterBasedOnSearchInput,
-      onTableFilterThroughFilterBox,
+      onFilterThroughFilterBox,
+      onClearFilterItem,
       onInputValueChange,
-      clearCheckbox,
+      clearTableCheckbox,
       onCloseModalAsk,
       onCloseModalInfo,
       onModalAskActionOk,
@@ -637,6 +799,7 @@ export const CompanyStore = signalStore(
       onSortTableHeader,
       onShowTableHeaderBox,
       onShowFilterBox,
+      onGeneratePaginationPagesArray,
     };
   })
 );

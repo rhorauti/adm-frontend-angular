@@ -26,7 +26,10 @@
     @if (isFooterActive) {
       <footer class="border-gray-300 border-t flex gap-4 items-center justify-center p-3">
         <app-button-label (click)="onCloseBtnClick()" [label]="'Fechar'" [isColorLogo]="false" />
-        <app-button-label (click)="onPrimaryBtnClick()" [label]="btnLabel" />
+        <app-button-label
+          [isDisabled]="isPrimaryBtnDisabled"
+          (click)="onPrimaryBtnClick()"
+          [label]="btnLabel" />
       </footer>
     }
   </div>

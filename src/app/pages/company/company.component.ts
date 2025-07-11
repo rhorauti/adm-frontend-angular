@@ -19,6 +19,7 @@ import { ButtonIconComponent } from '../../components/button/button-icon/button-
 import { TooltipComponent } from '@components/tooltip/tooltip.component';
 import { ToogleButtonComponent } from '../../components/toogle-button/toogle-button.component';
 import { InputComponent } from '@components/input/input.component';
+import { ButtonCloseComponent } from '@components/button/button-close/button-close.component';
 
 @Component({
   selector: 'app-company',
@@ -39,6 +40,7 @@ import { InputComponent } from '@components/input/input.component';
     ButtonIconComponent,
     TooltipComponent,
     ToogleButtonComponent,
+    ButtonCloseComponent,
   ],
   providers: [
     { provide: InputAddonsContract, useClass: CompanyStore },

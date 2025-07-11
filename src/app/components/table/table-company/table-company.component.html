@@ -3,7 +3,7 @@
     @for (header of companyStore.tableHeaders(); track $index) {
       @if (header.isHeaderActive) {
         @if ($index == 0) {
-          <th class="table-td flex items-center justify-center gap-4">
+          <th class="table-td flex items-center justify-center gap-6">
             <input
               type="checkbox"
               (change)="companyStore.onHeaderCheckboxChecked(companyStore.tableCheckbox().header)"

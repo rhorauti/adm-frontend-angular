@@ -17,6 +17,7 @@ export class TableHeaderBoxComponent {
   @Input() titleIconName = '';
   @Input() isTwoThirdWidth = true;
   @Input() isFooterActive = true;
+  @Input() isPrimaryBtnDisabled = false;
 
   @Output() isCloseBtnClickEmitter = new EventEmitter<boolean>();
 

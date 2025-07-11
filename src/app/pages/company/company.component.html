@@ -1,17 +1,18 @@
 <div class="flex flex-col gap-4">
   <div class="flex justify-between items-center">
     <app-breadcrumb [items]="breadcrumb" />
-    @if (companyStore.companiesData().length > 0) {
-      <app-button-label [iconName]="'add'" [label]="'Adicionar'" />
-    }
+    <app-button-label [iconName]="'add'" [label]="'Adicionar'" />
   </div>
-  <app-tab />
+  <app-tab
+    [tabList]="companyStore.tab().tabList"
+    (tabChangeEmitter)="companyStore.onTabChange($event)" />
   @if (companyStore.companiesData().length > 0) {
     <div class="flex gap-4">
       <div class="flex flex-col gap-5 flex-grow">
         <div class="flex justify-between leading-none">
           <div class="flex gap-3">
             <app-input
+              [inputValue]="companyStore.inputSearchValue()"
               [id]="'input-filter'"
               [placeholder]="'Id, Apelido, Razão Social'"
               [inputName]="'search'"
@@ -37,6 +38,71 @@
             </app-tooltip>
           </div>
         </div>
+        @if (companyStore.isAtLeastOneFilterHelpNotEmpty()) {
+          <div class="flex flex-wrap items-center gap-3 text-sm">
+            @if (companyStore.filterHelp().inputSearch.length > 0) {
+              <div class="flex items-center gap-2">
+                <p>Pesquisa: {{ companyStore.filterHelp().inputSearch }}</p>
+                <app-button-close
+                  (click)="companyStore.onClearFilterItem('inputSearch', 'input-search')"
+                  [isSmallSize]="true"></app-button-close>
+              </div>
+            }
+            @if (companyStore.filterHelp().idCompany.length > 0) {
+              <div class="flex items-center gap-2">
+                <p>Id: {{ companyStore.filterHelp().idCompany }}</p>
+                <app-button-close
+                  (click)="companyStore.onClearFilterItem('idCompany', 'filter-box')"
+                  [isSmallSize]="true"></app-button-close>
+              </div>
+            }
+            @if (companyStore.filterHelp().nickname.length > 0) {
+              <div class="flex items-center gap-2">
+                <p>Apelido: {{ companyStore.filterHelp().nickname }}</p>
+                <app-button-close
+                  (click)="companyStore.onClearFilterItem('nickname', 'filter-box')"
+                  [isSmallSize]="true"></app-button-close>
+              </div>
+            }
+            @if (companyStore.filterHelp().name.length > 0) {
+              <div class="flex items-center gap-2">
+                <p>Raz.Social: {{ companyStore.filterHelp().name }}</p>
+                <app-button-close
+                  (click)="companyStore.onClearFilterItem('name', 'filter-box')"
+                  [isSmallSize]="true"></app-button-close>
+              </div>
+            }
+            @if (companyStore.filterHelp().cnpj.length > 0) {
+              <div class="flex items-center gap-2">
+                <p>CNPJ: {{ companyStore.filterHelp().cnpj }}</p>
+                <app-button-close
+                  (click)="companyStore.onClearFilterItem('cnpj', 'filter-box')"
+                  [isSmallSize]="true"></app-button-close>
+              </div>
+            }
+            @if (companyStore.filterHelp().ie) {
+              <div class="flex items-center gap-2">
+                <p>Inscr.Estadual: {{ companyStore.filterHelp().ie }}</p>
+                <app-button-close
+                  (click)="companyStore.onClearFilterItem('ie', 'filter-box')"
+                  [isSmallSize]="true"></app-button-close>
+              </div>
+            }
+            @if (companyStore.filterHelp().im) {
+              <div class="flex items-center gap-2">
+                <p>Inscr.Municipal: {{ companyStore.filterHelp().im }}</p>
+                <app-button-close
+                  (click)="companyStore.onClearFilterItem('im', 'filter-box')"
+                  [isSmallSize]="true"></app-button-close>
+              </div>
+            }
+            <button
+              (click)="companyStore.onClearAllDatas(companyStore.initialTableData())"
+              class="text-logo font-semibold cursor-pointer hover:text-logo-hover hover:underline">
+              Limpar tudo
+            </button>
+          </div>
+        }
         <app-table-company />
         <app-pagination />
       </div>
@@ -44,19 +110,56 @@
   } @else {
     <div class="flex flex-col items-center gap-4 w-full mt-10">
       <mat-icon class="text-logo text-6xl">{{
-        companyStore.filter().isResultZeroRegister ? 'search_off' : 'library_add'
+        companyStore.isFilterResultZeroRegister() ? 'search_off' : 'library_add'
       }}</mat-icon>
       <p class="font-semibold">Nenhum registro encontrado</p>
-      @if (!companyStore.filter().isResultZeroRegister) {
+      @if (!companyStore.isFilterResultZeroRegister()) {
         <app-button-label
           [showIcon]="true"
           [iconName]="'add'"
           [label]="'Adicionar uma nova empresa'" />
       } @else {
-        <p>Palavra(s) pesquisada(s) : {{ companyStore.inputSearchValue() }}</p>
+        @if (companyStore.inputSearchValue().length > 0) {
+          <p>
+            Palavra(s) Pesquisada(s) :
+            <span class="font-semibold">{{ companyStore.inputSearchValue() }}</span>
+          </p>
+        } @else {
+          <p>Campo(s) pesquisado(s) :</p>
+          @if (companyStore.filterBox().idCompany.length > 0) {
+            <p>Id : <span class="font-semibold"></span>{{ companyStore.filterBox().idCompany }}</p>
+          }
+          @if (companyStore.filterBox().nickname.length > 0) {
+            <p>
+              Apelido : <span class="font-semibold">{{ companyStore.filterBox().nickname }}</span>
+            </p>
+          }
+          @if (companyStore.filterBox().name.length > 0) {
+            <p>
+              Nome : <span class="font-semibold">{{ companyStore.filterBox().name }}</span>
+            </p>
+          }
+          @if (companyStore.filterBox().cnpj.length > 0) {
+            <p>
+              CNPJ / CPF : <span class="font-semibold">{{ companyStore.filterBox().cnpj }}</span>
+            </p>
+          }
+          @if (companyStore.filterBox().ie.length > 0) {
+            <p>
+              Inscrição Estadual :
+              <span class="font-semibold">{{ companyStore.filterBox().ie }}</span>
+            </p>
+          }
+          @if (companyStore.filterBox().im.length > 0) {
+            <p>
+              Inscrição Municipal :
+              <span class="font-semibold">{{ companyStore.filterBox().im }}</span>
+            </p>
+          }
+        }
         <app-button-label
           (keyboardEmitter)="companyStore.onKeyPressOnNotFoundFilterRegister($event)"
-          (click)="companyStore.onResetCompaniesData()"
+          (click)="companyStore.onClearAllDatas(companyStore.initialTableData())"
           [label]="'Voltar'" />
       }
     </div>
@@ -64,12 +167,13 @@
 </div>
 
 <app-side-bar
-  [isSideBarActive]="companyStore.filter().isBoxActive"
+  [isSideBarActive]="companyStore.isFilterBoxActive()"
   [isTwoThirdWidth]="false"
   [titleIconName]="'filter_list'"
   [title]="'Filtro'"
   [btnLabel]="'Aplicar'"
-  (primaryBtnClickEmitter)="companyStore.onTableFilterThroughFilterBox()"
+  [isPrimaryBtnDisabled]="!companyStore.isAtLeastOneFilterBoxNotEmpty()"
+  (primaryBtnClickEmitter)="companyStore.onFilterThroughFilterBox()"
   (isCloseBtnClickEmitter)="companyStore.onShowFilterBox(false)">
   <div body class="flex flex-col gap-4">
     <div class="flex flex-col gap-2">
@@ -77,6 +181,7 @@
       <app-input
         [id]="'filter-company-id'"
         [inputName]="'custom'"
+        [inputValue]="companyStore.filterBox().idCompany"
         [type]="'search'"
         (inputValueEmitter)="companyStore.onInputValueChange('idCompany', $event)"
         (keyboardEmitter)="companyStore.onKeyPressOnFilterBox($event)" />
@@ -86,6 +191,7 @@
       <app-input
         [id]="'filter-company-nickname'"
         [inputName]="'custom'"
+        [inputValue]="companyStore.filterBox().nickname"
         [type]="'search'"
         (inputValueEmitter)="companyStore.onInputValueChange('nickname', $event)"
         (keyboardEmitter)="companyStore.onKeyPressOnFilterBox($event)" />
@@ -95,6 +201,7 @@
       <app-input
         [id]="'filter-company-name'"
         [inputName]="'custom'"
+        [inputValue]="companyStore.filterBox().name"
         [type]="'search'"
         (inputValueEmitter)="companyStore.onInputValueChange('name', $event)"
         (keyboardEmitter)="companyStore.onKeyPressOnFilterBox($event)" />
@@ -104,6 +211,7 @@
       <app-input
         [id]="'filter-company-cnpj'"
         [inputName]="'cnpj'"
+        [inputValue]="companyStore.filterBox().cnpj"
         (inputValueEmitter)="companyStore.onInputValueChange('cnpj', $event)"
         (keyboardEmitter)="companyStore.onKeyPressOnFilterBox($event)" />
     </div>
@@ -112,6 +220,7 @@
       <app-input
         [id]="'filter-company-ie'"
         [inputName]="'custom'"
+        [inputValue]="companyStore.filterBox().ie"
         [type]="'search'"
         (inputValueEmitter)="companyStore.onInputValueChange('ie', $event)"
         (keyboardEmitter)="companyStore.onKeyPressOnFilterBox($event)" />
@@ -121,6 +230,7 @@
       <app-input
         [id]="'filter-company-em'"
         [inputName]="'custom'"
+        [inputValue]="companyStore.filterBox().im"
         [type]="'search'"
         (inputValueEmitter)="companyStore.onInputValueChange('im', $event)"
         (keyboardEmitter)="companyStore.onKeyPressOnFilterBox($event)" />

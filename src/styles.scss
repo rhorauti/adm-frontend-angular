@@ -23,6 +23,8 @@ body {
   display: none;
 }
 .mat-icon {
+  display: flex !important;
+  align-items: center !important;
   height: auto !important;
   width: auto !important;
   line-height: normal !important;

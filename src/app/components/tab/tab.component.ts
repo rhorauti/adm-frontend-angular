@@ -1,7 +1,6 @@
 import { CommonModule } from '@angular/common';
-import { Component, inject, Input } from '@angular/core';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
-import { TabContract } from '@core/component-contract/tab.contract';
 
 @Component({
   selector: 'app-tab',
@@ -10,6 +9,14 @@ import { TabContract } from '@core/component-contract/tab.contract';
   styleUrl: './tab.component.scss',
 })
 export class TabComponent {
-  tabContract = inject(TabContract);
   @Input() divClass = '';
+  selectedTabIdx = 0;
+  @Input({ required: true }) tabList!: string[];
+
+  @Output() tabChangeEmitter = new EventEmitter();
+
+  onChangeTabIdx(tabIdx: number): void {
+    this.selectedTabIdx = tabIdx;
+    this.tabChangeEmitter.emit(tabIdx);
+  }
 }

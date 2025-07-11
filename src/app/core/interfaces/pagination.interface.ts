@@ -1,5 +1,6 @@
 export interface IPagination {
   currentPage: number;
-  lastPage: number;
+  totalPages: number;
   qtyPerPage: number;
+  pagesArray: string[] | number[];
 }

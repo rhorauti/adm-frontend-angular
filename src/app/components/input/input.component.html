@@ -10,7 +10,7 @@
     (input)="onInputValue($event)"
     [ngClass]="inputClass"
     (keydown)="onKeydown($event)"
-    class="flex-1 bg-transparent focus:outline-none pl-3 pr-1 disabled:bg-gray-100 border-gray-500" />
+    class="flex-1 bg-transparent focus:outline-none pl-3 pr-1 disabled:bg-gray-100 border-gray-500 placeholder:text-sm" />
   @if (iconName && iconName.length > 0) {
     <button (click)="onClick($event)" [tabIndex]="tabIndex" class="inline-flex items-center">
       <mat-icon class="text-logo font-semibold">{{ iconName }}</mat-icon>

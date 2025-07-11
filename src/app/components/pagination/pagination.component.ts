@@ -1,7 +1,6 @@
 import { CommonModule } from '@angular/common';
-import { Component, EventEmitter, inject, Input, Output } from '@angular/core';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
-import { CompanyStore } from '@store/company/company.store';
 
 @Component({
   selector: 'app-pagination',
@@ -10,10 +9,11 @@ import { CompanyStore } from '@store/company/company.store';
   styleUrl: './pagination.component.scss',
 })
 export class PaginationComponent {
-  readonly companyStore = inject(CompanyStore);
   public version = 'v1';
+  @Input() pagesArray = [];
   @Input() currentPage = 1;
-  @Input() lastPage = 1;
+  @Input() qtyPerPage = 10;
+  @Input() totalPages = 1;
   @Output() currentPageEmitter = new EventEmitter<number>();
 
   goBackPage(): void {
@@ -26,7 +26,7 @@ export class PaginationComponent {
   }
 
   goForwardPage(): void {
-    if (this.currentPage >= this.lastPage) {
+    if (this.currentPage >= this.totalPages) {
       return;
     } else {
       this.currentPage += 1;
