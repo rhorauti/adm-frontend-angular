@@ -1,0 +1,71 @@
+<div>
+  <div class="flex justify-between">
+    <app-breadcrumb [items]="['Cadastro', 'Empresas', 'Novo Cadastro']" />
+    <app-button-label
+      (click)="router.navigate(['companies'])"
+      [id]="'company-form-back'"
+      [iconName]="'keyboard_arrow_left'"
+      [label]="'Voltar'"
+      [isColorLogo]="false" />
+  </div>
+  <div class="flex flex-col gap-4 p-4">
+    <h1>{{ formTitle() }}</h1>
+    <!-- <div>
+      <div class="flex flex-col gap-2">
+        @if (modalForm().isEditForm) {
+          <div class="flex flex-col gap-1">
+            <label class="font-semibold text-sm" for="">Id</label>
+            <app-input
+              [id]="'company-form-id'"
+              [inputName]="'custom'"
+              [inputValue]="companyStore.companyData().idCompany"
+              [isDisabled]="true"
+              [showRightIcon]="false"
+              [inputClass]="'text-black h-9'"></app-input>
+          </div>
+        }
+        <div class="flex flex-col gap-1">
+          <label class="font-semibold text-sm" for="">Apelido</label>
+          <app-input
+            [inputValue]="store.company"
+            [showRightIcon]="false"
+            (emitInputValue)="companyData().nickname = $event"
+            [inputClass]="'text-black h-9'"></app-input>
+        </div>
+        <div class="flex flex-col gap-1">
+          <label class="font-semibold text-sm" for="">Nome</label>
+          <app-input
+            [propsInput]="companyData().name"
+            [showRightIcon]="false"
+            (emitInputValue)="companyData().name = $event"
+            [inputClass]="'text-black h-9'"></app-input>
+        </div>
+        <div class="flex flex-col gap-1">
+          <label class="font-semibold text-sm" for="">CNPJ/CPF</label>
+          <app-input
+            [propsInput]="companyData().cnpj || ''"
+            [maskType]="'cnpj'"
+            [showRightIcon]="false"
+            (emitInputValue)="companyData().cnpj = $event"
+            [inputClass]="'text-black h-9'"></app-input>
+        </div>
+        <div class="flex flex-col gap-1">
+          <label class="font-semibold text-sm" for="">Inscrição Estadual</label>
+          <app-input
+            [propsInput]="companyData().ie || ''"
+            [showRightIcon]="false"
+            (emitInputValue)="companyData().ie = $event"
+            [inputClass]="'text-black h-9'"></app-input>
+        </div>
+        <div class="flex flex-col gap-1">
+          <label class="font-semibold text-sm" for="">Inscrição Municipal</label>
+          <app-input
+            [propsInput]="companyData().im || ''"
+            [showRightIcon]="false"
+            (emitInputValue)="companyData().im = $event"
+            [inputClass]="'text-black h-9'"></app-input>
+        </div>
+      </div>
+    </div> -->
+  </div>
+</div>

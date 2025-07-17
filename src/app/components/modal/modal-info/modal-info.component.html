@@ -1,24 +1,23 @@
-<app-modal-base [showModal]="showModal" [showHeader]="false">
-  <div class="body-block">
-    <div
-      class="mx-auto flex h-10 w-10 items-center justify-center rounded-full"
-      [ngClass]="iconBackgroundColor">
-      <mat-icon [ngClass]="iconTextColor">{{ icon }}</mat-icon>
+<app-modal-base [showModal]="modalStore.info().isActive" [showHeader]="false">
+  <div class="body-block flex flex-col gap-5">
+    <div class="mx-auto h-8 w-8 rounded-full p-1" [ngClass]="iconBackgroundColor()">
+      <mat-icon class="text-white">{{ icon() }}</mat-icon>
     </div>
-    <div class="bg-white my-5 text-center">
-      <h3 class="text-base font-semibold leading-6 text-gray-900 w-full" id="modal-title">
-        {{ title }}
-      </h3>
-      <div class="mt-2">
-        <p class="text-sm text-gray-500 w-full">
-          {{ description }}
-        </p>
-      </div>
+    <div class="flex flex-col gap-3 text-center text-gray-900">
+      <h1 class="font-semibold">
+        {{ modalStore.info().title }}
+      </h1>
+      <p class="text-sm">
+        {{ modalStore.info().description }}
+      </p>
     </div>
   </div>
   <div class="footer-block">
-    <div class="mt-6 flex justify-center text-white">
-      <app-button-close (click)="closeModalInfo()"></app-button-close>
+    <div class="mt-5 flex justify-center">
+      <app-button-label
+        (click)="modalStore.onHideInfoModal()"
+        [label]="'Fechar'"
+        [isColorLogo]="false"></app-button-label>
     </div>
   </div>
 </app-modal-base>

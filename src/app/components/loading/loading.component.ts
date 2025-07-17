@@ -1,6 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, inject } from '@angular/core';
-import { LoadingContract } from '@core/component-contract/loading.contract';
+import { Component, Input } from '@angular/core';
 
 @Component({
   selector: 'app-loading',
@@ -9,5 +8,5 @@ import { LoadingContract } from '@core/component-contract/loading.contract';
   styleUrl: './loading.component.scss',
 })
 export class LoadingComponent {
-  readonly loadingContract = inject(LoadingContract);
+  @Input() isLoading!: boolean;
 }

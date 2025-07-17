@@ -1,37 +1,39 @@
-<nav class="flex justify-between items-center gap-2 w-full bg-gray-900 py-2 px-5">
-  <div class="flex items-center px-4 gap-4">
-    <a routerLink="/login" class="flex items-center">
-      <img class="h-8" src="../../../assets/images/logo.png" alt="Your Company" />
-    </a>
-    <div class="is-hidden-mobile">
-      <app-navbar-list></app-navbar-list>
+@if (authStore.isMenuBarActive()) {
+  <nav class="flex justify-between items-center gap-2 w-full bg-gray-900 py-2 px-5">
+    <div class="flex items-center px-4 gap-4">
+      <a routerLink="/login" class="flex items-center">
+        <img class="h-8" src="../../../assets/images/logo.png" alt="Your Company" />
+      </a>
+      <div class="is-hidden-mobile">
+        <app-navbar-list></app-navbar-list>
+      </div>
     </div>
-  </div>
-  <div class="flex items-center gap-5 text-white is-hidden-mobile">
-    <app-tooltip position="bottom" description="Notificações">
-      <div
-        content
-        class="flex items-center relative cursor-pointer before:absolute before:-top-1 before:hover:-left-2 before:hover:bg-gray-700 before:hover:rounded-lg before:hover:px-4 before:hover:py-3">
-        <mat-icon aria-label="Notifications" class="text-sm z-10">notifications</mat-icon>
-      </div>
-    </app-tooltip>
-    <app-tooltip position="bottom" description="Central de ajuda">
-      <div
-        content
-        class="flex items-center relative cursor-pointer before:absolute before:-top-1 before:hover:-left-2 before:hover:bg-gray-700 before:hover:rounded-lg before:hover:px-4 before:hover:py-3">
-        <mat-icon aria-label="Central de ajuda" class="text-sm z-10">help</mat-icon>
-      </div>
-    </app-tooltip>
-    <app-tooltip position="bottom" description="Configurações">
-      <div
-        content
-        class="flex items-center relative cursor-pointer before:absolute before:-top-1 before:hover:-left-2 before:hover:bg-gray-700 before:hover:rounded-lg before:hover:px-4 before:hover:py-3">
-        <mat-icon aria-label="settings" class="text-sm z-10">settings</mat-icon>
-      </div>
-    </app-tooltip>
-    <span class="border hover:bg-gray-700 px-3 py-1 rounded-full text-sm cursor-pointer">RH</span>
-    <!-- <button class="hover:bg-gray-700 text-sm px-4 py-1 border border-white rounded-full">
-      Logout
-    </button> -->
-  </div>
-</nav>
+    <div class="flex items-center gap-5 text-white is-hidden-mobile">
+      <app-tooltip position="bottom" description="Notificações">
+        <div
+          content
+          class="flex items-center relative cursor-pointer before:absolute before:-top-1 before:hover:-left-2 before:hover:bg-gray-700 before:hover:rounded-lg before:hover:px-4 before:hover:py-3">
+          <mat-icon aria-label="Notifications" class="text-sm z-10">notifications</mat-icon>
+        </div>
+      </app-tooltip>
+      <app-tooltip position="bottom" description="Central de ajuda">
+        <div
+          content
+          class="flex items-center relative cursor-pointer before:absolute before:-top-1 before:hover:-left-2 before:hover:bg-gray-700 before:hover:rounded-lg before:hover:px-4 before:hover:py-3">
+          <mat-icon aria-label="Central de ajuda" class="text-sm z-10">help</mat-icon>
+        </div>
+      </app-tooltip>
+      <app-tooltip position="bottom" description="Configurações">
+        <div
+          content
+          class="flex items-center relative cursor-pointer before:absolute before:-top-1 before:hover:-left-2 before:hover:bg-gray-700 before:hover:rounded-lg before:hover:px-4 before:hover:py-3">
+          <mat-icon aria-label="settings" class="text-sm z-10">settings</mat-icon>
+        </div>
+      </app-tooltip>
+      <span class="border hover:bg-gray-700 px-3 py-1 rounded-full text-sm cursor-pointer">RH</span>
+      <!-- <button class="hover:bg-gray-700 text-sm px-4 py-1 border border-white rounded-full">
+        Logout
+      </button> -->
+    </div>
+  </nav>
+}

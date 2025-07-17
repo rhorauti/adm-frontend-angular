@@ -1,41 +1,37 @@
 <div
   class="min-h-screen flex flex-col gap-5 justify-center px-4 py-4 sm:mx-auto max-[450px]:mt-2 max-[450px]:mb-2 sm:w-full sm:max-w-sm">
   <div class="flex flex-col gap-4 sm:mx-auto sm:w-full sm:max-w-sm">
-    <img class="mx-auto h-12 w-auto mb-4" src="../../../../assets/images/logo.png" alt="Logo" />
+    <img
+      class="mx-auto h-12 w-auto mb-4"
+      src="../../../../assets/images/logo.png"
+      alt="Logo Image" />
     <p class="text-center text-3xl font-bold">Seja bem-vindo!</p>
   </div>
   <div class="flex flex-col gap-2">
     <label for="email" class="block text-sm font-medium leading-6">E-mail</label>
-    <app-input [id]="'input-email'" [inputName]="'email'" />
+    <app-input
+      [id]="'login-email'"
+      [inputName]="'email'"
+      (inputValueEmitter)="authStore.onSetUserProperty('email', $event)" />
     <label for="password" class="block text-sm font-medium leading-6">Senha</label>
-    <app-input [id]="'input-password'" [inputName]="'password'" />
+    <app-input
+      [id]="'login-password'"
+      [inputName]="'password'"
+      (inputValueEmitter)="authStore.onSetUserProperty('password', $event)" />
   </div>
   <div class="flex flex-col gap-4">
-    <div class="flex items-center max-[420px]:flex-col justify-between">
-      <div class="flex items-center">
-        <input
-          [checked]="loginData.rememberMe"
-          id="remember-me"
-          name="remember-me"
-          type="checkbox"
-          class="h-4 w-4 rounded border-gray-400" />
-        <label for="remember-me" class="ml-2 block text-sm leading-6">Lembrar de mim</label>
-      </div>
-      <div class="text-sm">
-        <span
-          (click)="redirectToGetEmailValidation()"
-          aria-hidden="true"
-          class="font-semibold leading-6 cursor-pointer">
-          Esqueceu sua senha?</span
-        >
-      </div>
-    </div>
+    <span
+      (click)="authStore.onRedirectPage('/reset-password')"
+      aria-hidden="true"
+      class="text-sm text-center font-semibold leading-6 cursor-pointer">
+      Esqueceu sua senha?</span
+    >
     <app-button-label [label]="'Entrar'" (click)="submitUserData()" />
 
     <p class="text-center text-sm">
       Não tem cadastro?
       <span
-        (click)="redirectToNewUserPage()"
+        (click)="authStore.onRedirectPage('/signup')"
         aria-hidden="true"
         class="font-semibold leading-6 cursor-pointer">
         Clique aqui!</span
@@ -43,9 +39,5 @@
     </p>
   </div>
 </div>
-<app-loading></app-loading>
-<app-modal-info
-  [showModal]="isModalActive"
-  [type]="modalInfo.type"
-  [description]="modalInfo.description"
-  (closeModalEmitter)="closeModal($event)"></app-modal-info>
+<app-loading />
+<app-modal-info />

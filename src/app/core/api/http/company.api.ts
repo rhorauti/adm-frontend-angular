@@ -17,7 +17,7 @@ export class RegisterCompanyApi {
    */
   async getCompaniesList(type: number): Promise<IBaseResponse> {
     return await this.httpRequestService.sendHttpRequest(
-      `${environment.apiUrl}/company/${type}`,
+      `${environment.apiUrl}/companies/${type}`,
       'GET'
     );
   }
@@ -29,7 +29,7 @@ export class RegisterCompanyApi {
    */
   async addNewCompany(companyData: ICompany): Promise<IBaseResponse> {
     return await this.httpRequestService.sendHttpRequest(
-      `${environment.apiUrl}/company`,
+      `${environment.apiUrl}/companies`,
       'POST',
       companyData
     );
@@ -42,7 +42,7 @@ export class RegisterCompanyApi {
    */
   async updateCompany(companyData: ICompany, companyId: number): Promise<IBaseResponse> {
     return await this.httpRequestService.sendHttpRequest(
-      `${environment.apiUrl}/company/${companyId.toString()}`,
+      `${environment.apiUrl}/companies/${companyId.toString()}`,
       'PUT',
       companyData
     );
@@ -55,7 +55,7 @@ export class RegisterCompanyApi {
    */
   async deleteRegister(companyId: number): Promise<IBaseResponse> {
     return await this.httpRequestService.sendHttpRequest(
-      `${environment.apiUrl}/company/${companyId}`,
+      `${environment.apiUrl}/companies/${companyId}`,
       'DELETE'
     );
   }

@@ -2,12 +2,14 @@ import { CommonModule } from '@angular/common';
 import { Component, inject } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
 import { ModalInfoComponent } from '@components/modal/modal-info/modal-info.component';
 import { LoadingComponent } from '@components/loading/loading.component';
 import { AuthApi } from '@core/api/http/auth.api';
 import { ButtonLabelComponent } from '../../../components/button/button-label/button-label.component';
 import { InputComponent } from '@components/input/input.component';
+import { HelpComponent } from '@components/help/help.component';
+import { AuthStore } from '@store/auth/auth.store';
+import { ModalStore } from '@store/modal/modal.store';
 
 @Component({
   selector: 'app-reset-password',
@@ -19,112 +21,39 @@ import { InputComponent } from '@components/input/input.component';
     ModalInfoComponent,
     LoadingComponent,
     ButtonLabelComponent,
+    HelpComponent,
   ],
   templateUrl: './reset-password.component.html',
   styleUrl: './reset-password.component.scss',
 })
 export class ResetPasswordComponent {
   private authApi = inject(AuthApi);
-  private router = inject(Router);
-
-  // resetPasswordData: IRequestResetPassword = {
-  //   email: '',
-  // };
-
-  public email = '';
-
-  public isModalActive = false;
-  public isLoadingActive = false;
-  public modalInfo: any = {
-    type: '',
-    description: '',
-  };
-
-  /**
-   * getEmailValue
-   * Função que pega o valor do componente input e-mail
-   * @param emailValue
-   */
-  getEmailValue(emailValue: string): void {
-    this.email = emailValue;
-  }
-
-  /**
-   * handleSuccessModal
-   * Função que popula os dados do modal no caso de email ou senha validados corretamente.
-   */
-  handleSuccessModal(message: string): void {
-    this.modalInfo = {
-      type: 'success',
-      description: message,
-    };
-  }
-
-  /**
-   * handleFailureModal
-   * Função que popula os dados do modal no caso de email ou senha digitados incorretamente.
-   */
-  handleFailureModal(message: string): void {
-    this.modalInfo = {
-      type: 'failure',
-      description: message,
-    };
-  }
-
-  isEmailValid = false;
-
+  readonly authStore = inject(AuthStore);
+  readonly modalStore = inject(ModalStore);
   /**
    * authenticateUser
    * Função que envia os dados do usuário (email e senha) para validação do backend
    */
   async getEmailValidation(): Promise<void> {
-    this.isLoadingActive = true;
+    this.authStore.onLoading(true);
     try {
-      if (this.email.length == 0) {
-        this.handleFailureModal('Campo email vazio!');
+      if (this.authStore.user().email.length == 0) {
+        this.modalStore.onShowInfoModal(
+          'failure',
+          'Autenticação',
+          'Campo de e-mail não pode estar vazio.'
+        );
       } else {
-        const response = await this.authApi.getEmailValidation(this.email);
+        const response = await this.authApi.getEmailValidation(this.authStore.user().email);
         if (response) {
-          this.handleSuccessModal(response.message);
-          this.isEmailValid = true;
+          this.modalStore.onShowInfoModal('success', 'Autenticação', response.message);
+          this.modalStore.onModalInfoActionOk(true);
         }
       }
-      this.isModalActive = true;
     } catch (e: any) {
-      this.handleFailureModal(e.error.message);
-      this.isModalActive = true;
+      this.modalStore.onShowInfoModal('failure', 'Autenticação', e.error.message);
     } finally {
-      this.isLoadingActive = false;
+      this.authStore.onLoading(false);
     }
-  }
-
-  /**
-   * closeModal
-   * Função que fecha o modal e direciona o usuário para a tela inicial da aplicação.
-   * @param modalStatus
-   */
-  closeModal(modalStatus: boolean): void {
-    if (!this.isEmailValid) {
-      this.isModalActive = modalStatus;
-    } else {
-      this.isModalActive = modalStatus;
-      this.redirectToLoginPage();
-    }
-  }
-
-  /**
-   * redirectToNewUser
-   * Função que redireciona o usuário para a tela de cadastro.
-   */
-  redirectToNewUserPage(): void {
-    this.router.navigate(['/signup']);
-  }
-
-  /**
-   * redirectToLoginPage
-   * Função que redireciona o usuário para a tela de login.
-   */
-  redirectToLoginPage(): void {
-    this.router.navigate(['/login']);
   }
 }

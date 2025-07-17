@@ -4,6 +4,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
 import { AuthApi } from '@core/api/http/auth.api';
 import { ButtonLabelComponent } from '@components/button/button-label/button-label.component';
+import { AuthStore } from '@store/auth/auth.store';
 
 @Component({
   selector: 'app-redirect',
@@ -15,6 +16,7 @@ export class RedirectComponent implements OnInit {
   private router = inject(Router);
   private authApi = inject(AuthApi);
   private activatedRoute = inject(ActivatedRoute);
+  readonly authStore = inject(AuthStore);
 
   @Input() iconBackgroundColor = 'bg-green-600';
   @Input() iconTextColor = 'text-white';
@@ -31,9 +33,5 @@ export class RedirectComponent implements OnInit {
       this.icon = 'close';
       this.iconBackgroundColor = 'bg-red-500';
     }
-  }
-
-  redirectToLogin() {
-    this.router.navigate(['/login']);
   }
 }

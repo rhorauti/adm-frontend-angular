@@ -1,56 +1,22 @@
 import { CommonModule } from '@angular/common';
-import { Component, EventEmitter, Input, OnChanges, Output } from '@angular/core';
+import { Component, computed, inject } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
 import { ModalBaseComponent } from '../modal-base/modal-base.component';
-import { ButtonCloseComponent } from '../../button/button-close/button-close.component';
+import { ButtonLabelComponent } from '@components/button/button-label/button-label.component';
+import { ModalStore } from '@store/modal/modal.store';
+
+export type ModalIconType = 'success' | 'failure';
 
 @Component({
   selector: 'app-modal-info',
-  imports: [CommonModule, MatIconModule, ModalBaseComponent, ButtonCloseComponent],
+  imports: [CommonModule, MatIconModule, ModalBaseComponent, ButtonLabelComponent],
   templateUrl: './modal-info.component.html',
   styleUrl: './modal-info.component.scss',
 })
-export class ModalInfoComponent implements OnChanges {
-  @Input() type = '';
-  @Input() showModal = false;
-  @Input() icon = 'check';
-  @Input() iconBackgroundColor = 'bg-green-600';
-  @Input() iconTextColor = 'text-green-100';
-  @Input() title = 'Sucesso!';
-  @Input() description = 'Dados registrados com sucesso!';
-  @Output() closeEmitter = new EventEmitter<boolean>();
-  @Output() actionOkEmitter = new EventEmitter<boolean>();
-
-  ngOnChanges() {
-    switch (this.type) {
-      case 'success': {
-        this.icon = 'check';
-        this.title = 'Sucesso!';
-        this.iconBackgroundColor = 'bg-green-600';
-        this.iconTextColor = 'text-green-100';
-        break;
-      }
-      case 'failure': {
-        this.icon = 'close';
-        this.title = 'Erro!';
-        this.iconBackgroundColor = 'bg-red-500';
-        this.iconTextColor = 'text-white';
-        break;
-      }
-    }
-  }
-
-  @Output() closeModalEmitter = new EventEmitter<boolean>();
-
-  /**
-   * closeModalInfo
-   * Emite um evento para o componente pai para fechar o modal Info.
-   */
-  closeModalInfo(): void {
-    this.closeModalEmitter.emit(false);
-  }
-
-  onActionOk(): void {
-    this.actionOkEmitter.emit();
-  }
+export class ModalInfoComponent {
+  readonly modalStore = inject(ModalStore);
+  readonly icon = computed(() => (this.modalStore.info().type == 'success' ? 'check' : 'close'));
+  readonly iconBackgroundColor = computed(() =>
+    this.modalStore.info().type == 'success' ? 'bg-green-600' : 'bg-red-500'
+  );
 }

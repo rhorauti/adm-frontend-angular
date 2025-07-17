@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Output, ViewChild, inject } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -6,11 +6,10 @@ import { Router } from '@angular/router';
 import { ModalInfoComponent } from '@components/modal/modal-info/modal-info.component';
 import { LoadingComponent } from '@components/loading/loading.component';
 import { AuthApi } from '@core/api/http/auth.api';
-import { DataService } from '@core/services/data.service';
-import { IAuthStore, IRequestlogin } from '@core/interfaces/auth.interface';
-import { NavbarComponent } from '@components/menu/navbar/navbar.component';
 import { ButtonLabelComponent } from '../../../components/button/button-label/button-label.component';
 import { InputComponent } from '@components/input/input.component';
+import { ModalStore } from '@store/modal/modal.store';
+import { AuthStore } from '@store/auth/auth.store';
 
 @Component({
   selector: 'app-login',
@@ -27,114 +26,47 @@ import { InputComponent } from '@components/input/input.component';
   styleUrl: './login.component.scss',
 })
 export class LoginComponent {
-  private dataService = inject(DataService);
-  private authApi = inject(AuthApi);
-  private router = inject(Router);
-
-  @ViewChild(NavbarComponent) menuComponent?: NavbarComponent;
-
-  loginData: IRequestlogin = {
-    email: '',
-    password: '',
-    rememberMe: false,
-  };
-
-  public showPassword = false;
-  public isModalActive = false;
-  public isLoadingActive = false;
-  public modalInfo: any = {
-    type: '',
-    description: '',
-  };
-
-  /**
-   * handleSuccessModal
-   * Função que popula os dados do modal no caso de email ou senha validados corretamente.
-   */
-  handleSuccessModal(message: string): void {
-    this.modalInfo = {
-      type: 'success',
-      description: message,
-    };
-  }
-
-  /**
-   * handleFailureModal
-   * Função que popula os dados do modal no caso de email ou senha digitados incorretamente.
-   */
-  handleFailureModal(message: string): void {
-    this.modalInfo = {
-      type: 'failure',
-      description: message,
-    };
-  }
-
-  public isLoginSuccess = false;
-  @Output() showNavBarEmitter = new EventEmitter<boolean>();
-
-  public authStoreData: IAuthStore = {
-    id: 0,
-    name: '',
-    email: '',
-  };
+  readonly authApi = inject(AuthApi);
+  readonly router = inject(Router);
+  readonly modalStore = inject(ModalStore);
+  readonly authStore = inject(AuthStore);
 
   /**
    * authenticateUser
    * Função que envia os dados do usuário (email e senha) para validação do backend
    */
   async submitUserData(): Promise<void> {
-    this.isLoadingActive = true;
+    this.authStore.onLoading(true);
     try {
-      if (this.loginData.email.length == 0) {
-        this.handleFailureModal('Campo email vazio!');
-      } else if (this.loginData.password.length == 0) {
-        this.handleFailureModal('Campo senha vazio!');
+      if (this.authStore.user().email.length == 0) {
+        this.modalStore.onShowInfoModal(
+          'failure',
+          'Autenticação',
+          'Campo de e-mail não pode estar vazio.'
+        );
+      } else if (this.authStore.user().password.length == 0) {
+        this.modalStore.onShowInfoModal(
+          'failure',
+          'Autenticação',
+          'Campo de senha não pode estar vazio.'
+        );
       } else {
-        const response = await this.authApi.authenticateUser(this.loginData);
+        const response = await this.authApi.authenticateUser({
+          email: this.authStore.user().email,
+          password: this.authStore.user().password,
+        });
         if (response) {
-          this.authStoreData = {
-            id: response.data.id,
-            name: response.data.name,
-            email: response.data.email,
-          };
-          this.handleSuccessModal(response.message);
-          this.isLoginSuccess = true;
-          this.dataService.emitData(true);
+          this.authStore.onSetUserProperty('id', response.data.id);
+          this.authStore.onSetUserProperty('name', response.data.name);
+          this.authStore.onSetUserProperty('email', response.data.email);
+          this.modalStore.onShowInfoModal('success', 'Autenticação', response.message);
+          this.modalStore.onModalInfoActionOk(true);
         }
       }
-      this.isModalActive = true;
     } catch (e: any) {
-      this.handleFailureModal(e.error.message);
-      this.isModalActive = true;
+      this.modalStore.onShowInfoModal('failure', 'Autenticação', e.error.message);
     } finally {
-      this.isLoadingActive = false;
+      this.authStore.onLoading(false);
     }
-  }
-
-  /**
-   * closeModal
-   * Função que fecha o modal e direciona o usuário para a tela inicial da aplicação.
-   * @param modalStatus
-   */
-  closeModal(modalStatus: boolean): void {
-    if (!this.isLoginSuccess) {
-      this.isModalActive = modalStatus;
-    } else {
-      this.isModalActive = modalStatus;
-      this.dataService.emitData(true);
-      this.router.navigate(['/company/1']);
-    }
-  }
-
-  /**
-   * redirectToNewUser
-   * Função que redireciona o usuário para a tela de cadastro.
-   */
-  redirectToNewUserPage(): void {
-    this.router.navigate(['/signup']);
-  }
-
-  redirectToGetEmailValidation(): void {
-    this.router.navigate(['/reset-password']);
   }
 }

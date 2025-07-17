@@ -8,6 +8,7 @@ export type Icon =
   | 'delete_outline'
   | 'save'
   | 'lock'
+  | 'lock_open'
   | 'email'
   | 'phone'
   | 'perm_identity'
@@ -15,4 +16,6 @@ export type Icon =
   | 'keyboard_arrow_right'
   | 'keyboard_arrow_up'
   | 'keyboard_arrow_down'
-  | 'library_add';
+  | 'library_add'
+  | 'check'
+  | 'cancel';

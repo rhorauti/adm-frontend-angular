@@ -1,8 +1,17 @@
-import { Component, EventEmitter, inject, Input, OnInit, Output } from '@angular/core';
+import {
+  Component,
+  computed,
+  EventEmitter,
+  inject,
+  Input,
+  OnChanges,
+  OnInit,
+  Output,
+  signal,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
-import { InputAddonsContract } from '@core/component-contract/input-addons.contract';
 import { NgxMaskDirective, provideNgxMask } from 'ngx-mask';
 import { Icon } from '@core/types/icon.type';
 
@@ -24,12 +33,12 @@ type InputType = 'search' | 'text' | 'password' | 'number';
   templateUrl: './input.component.html',
   styleUrl: './input.component.scss',
 })
-export class InputComponent implements OnInit {
-  readonly inputAddonsContract = inject(InputAddonsContract);
+export class InputComponent implements OnInit, OnChanges {
   @Input({ required: true }) inputName!: InputName;
   @Input({ required: true }) id!: string;
   @Input() inputValue = '';
   @Input() isDisabled = false;
+  @Input() borderType = '';
   @Input() inputClass = '';
   @Input() placeholder = '';
   @Input() iconName: Icon = '';
@@ -42,22 +51,16 @@ export class InputComponent implements OnInit {
 
   ngOnInit(): void {
     switch (this.inputName) {
-      case 'custom': {
-        this.tabIndex = -1;
-        break;
-      }
       case 'email': {
         this.placeholder = 'Digite o e-mail';
         this.placeholder = 'teste@exemplo.com';
         this.iconName = 'email';
-        this.tabIndex = -1;
         this.type = 'text';
         break;
       }
       case 'password': {
         this.placeholder = '******';
         this.iconName = 'lock';
-        this.tabIndex = -1;
         this.type = this.showPassword ? 'text' : 'password';
         break;
       }
@@ -68,20 +71,30 @@ export class InputComponent implements OnInit {
       }
       case 'phone': {
         this.maskValue = '(00) 0000-0000 ||(00) 00000-0000';
-        this.tabIndex = -1;
         this.type = 'search';
         break;
       }
       case 'cnpj': {
         this.maskValue = '000.000.000-00 ||00.000.000/0000-00';
-        this.tabIndex = -1;
         this.type = 'search';
         break;
       }
       case 'postalCode': {
         this.maskValue = '00000-000';
-        this.tabIndex = -1;
         this.type = 'search';
+        break;
+      }
+    }
+  }
+
+  ngOnChanges(): void {
+    switch (this.borderType) {
+      case 'success': {
+        this.inputClass = 'border-logo';
+        break;
+      }
+      case 'failure': {
+        this.inputClass = 'border-red-400';
         break;
       }
     }
@@ -96,7 +109,18 @@ export class InputComponent implements OnInit {
 
   onClick(event: MouseEvent): void {
     event.stopPropagation();
+    if (this.inputName == 'password') {
+      if (this.showPassword) {
+        this.iconName = 'lock';
+        this.type = 'password';
+      } else {
+        this.iconName = 'lock_open';
+        this.type = 'text';
+      }
+    }
+    this.showPassword = !this.showPassword;
     this.clickEmitter.emit();
+    console.log('show password', this.showPassword);
   }
 
   @Output() keyboardEmitter = new EventEmitter();

@@ -10,7 +10,8 @@ import { MatIconModule } from '@angular/material/icon';
 })
 export class PaginationComponent {
   public version = 'v1';
-  @Input() pagesArray = [];
+  @Input() pagesArray: string[] | number[] = [];
+  @Input() dataLength = 1;
   @Input() currentPage = 1;
   @Input() qtyPerPage = 10;
   @Input() totalPages = 1;

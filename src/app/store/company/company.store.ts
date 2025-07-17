@@ -6,7 +6,6 @@ import { environment } from '@environments/environment';
 import { ITableCheckbox } from '@core/interfaces/table.interface';
 import { IPagination } from '@core/interfaces/pagination.interface';
 import { IModalCheck, IModalForm, IModalInfo } from '@core/interfaces/modal.interface';
-import { ILoading } from '@core/interfaces/loading.interface';
 import { IFilterBoxCompany, IFilterHelpCompany } from '@core/interfaces/filter.interface';
 
 type FilterMethod = 'input-search' | 'filter-box';
@@ -93,9 +92,7 @@ export const CompanyStore = signalStore(
       isActive: false,
       isActionOk: false,
     } as IModalCheck,
-    loading: {
-      isLoading: false,
-    } as ILoading,
+    isLoading: false,
   })),
 
   withComputed(store => ({
@@ -203,13 +200,10 @@ export const CompanyStore = signalStore(
     const onShowDataList = async (): Promise<void> => {
       try {
         patchState(store, {
-          loading: {
-            ...store.loading(),
-            isLoading: true,
-          },
+          isLoading: true,
         });
         const response = await httpRequestService.sendHttpRequest(
-          `${environment.apiUrl}/company`,
+          `${environment.apiUrl}/companies`,
           'GET'
         );
         onClearAllDatas(response.data);
@@ -217,10 +211,7 @@ export const CompanyStore = signalStore(
         onHandleModalInfo('failure', e?.error?.msg);
       } finally {
         patchState(store, {
-          loading: {
-            ...store.loading(),
-            isLoading: false,
-          },
+          isLoading: false,
         });
       }
     };
@@ -366,6 +357,7 @@ export const CompanyStore = signalStore(
         },
       });
       fillNewCheckboxArray(companiesFilter.length);
+      onGeneratePaginationPagesArray();
     };
 
     const onFilterTableThroughSearchInput = (): void => {
@@ -516,9 +508,12 @@ export const CompanyStore = signalStore(
     };
 
     const onGeneratePaginationPagesArray = (): void => {
-      store.pagination().totalPages = Math.floor(
-        store.companiesData().length / store.pagination().qtyPerPage
-      );
+      patchState(store, {
+        pagination: {
+          ...store.pagination(),
+          totalPages: Math.ceil(store.companiesData().length / store.pagination().qtyPerPage),
+        },
+      });
       if (store.pagination().totalPages < 7) {
         patchState(store, {
           pagination: {
@@ -526,7 +521,7 @@ export const CompanyStore = signalStore(
             pagesArray: Array.from({ length: store.pagination().totalPages }, (_, i) => i + 1),
           },
         });
-      } else if (store.pagination().totalPages >= 7) {
+      } else {
         patchState(store, {
           pagination: {
             ...store.pagination(),
@@ -670,10 +665,7 @@ export const CompanyStore = signalStore(
     const saveRegister = async (): Promise<void> => {
       try {
         patchState(store, {
-          loading: {
-            ...store.loading(),
-            isLoading: true,
-          },
+          isLoading: true,
         });
         setFinalData();
         const response = await httpRequestService.sendHttpRequest(
@@ -707,10 +699,7 @@ export const CompanyStore = signalStore(
         });
       } finally {
         patchState(store, {
-          loading: {
-            ...store.loading(),
-            isLoading: false,
-          },
+          isLoading: false,
         });
       }
     };
@@ -718,13 +707,10 @@ export const CompanyStore = signalStore(
     const deleteRegister = async (): Promise<void> => {
       try {
         patchState(store, {
-          loading: {
-            ...store.loading(),
-            isLoading: true,
-          },
+          isLoading: true,
         });
         const response = await httpRequestService.sendHttpRequest(
-          `${environment.apiUrl}/company/delete`,
+          `${environment.apiUrl}/companies/delete`,
           'POST',
           store.arrayDatasChecked()
         );
@@ -755,10 +741,7 @@ export const CompanyStore = signalStore(
         });
       } finally {
         patchState(store, {
-          loading: {
-            ...store.loading(),
-            isLoading: false,
-          },
+          isLoading: false,
         });
       }
     };

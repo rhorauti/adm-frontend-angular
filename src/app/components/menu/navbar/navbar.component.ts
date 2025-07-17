@@ -1,9 +1,10 @@
 import { CommonModule } from '@angular/common';
-import { Component, ElementRef, Input, QueryList, ViewChildren } from '@angular/core';
+import { Component, ElementRef, inject, QueryList, ViewChildren } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
 import { RouterModule } from '@angular/router';
 import { NavbarListComponent } from '../navbar-list/navbar-list.component';
-import { TooltipComponent } from "../../tooltip/tooltip.component";
+import { TooltipComponent } from '../../tooltip/tooltip.component';
+import { AuthStore } from '@store/auth/auth.store';
 
 interface ISublink {
   idSublink: number;
@@ -19,16 +20,15 @@ interface ILink {
 }
 
 @Component({
-    selector: 'app-navbar',
-    imports: [CommonModule, MatIconModule, RouterModule, NavbarListComponent, TooltipComponent],
-    templateUrl: './navbar.component.html',
-    styleUrl: './navbar.component.scss'
+  selector: 'app-navbar',
+  imports: [CommonModule, MatIconModule, RouterModule, NavbarListComponent, TooltipComponent],
+  templateUrl: './navbar.component.html',
+  styleUrl: './navbar.component.scss',
 })
 export class NavbarComponent {
   @ViewChildren('linkItem') linksItem!: QueryList<ElementRef>;
   @ViewChildren('linkIcon') linkIcon!: QueryList<ElementRef>;
-
-  @Input() isSideBarActive = true;
+  readonly authStore = inject(AuthStore);
 
   public isMenuListMobileActive = false;
   public isColapsed = false;

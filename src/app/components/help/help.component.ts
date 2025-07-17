@@ -1,0 +1,35 @@
+import { CommonModule } from '@angular/common';
+import { Component, Input, OnChanges } from '@angular/core';
+import { MatIconModule } from '@angular/material/icon';
+import { Icon } from '@core/types/icon.type';
+
+type HelpType = 'success' | 'failure' | '';
+
+@Component({
+  selector: 'app-help',
+  imports: [CommonModule, MatIconModule],
+  templateUrl: './help.component.html',
+  styleUrl: './help.component.scss',
+})
+export class HelpComponent implements OnChanges {
+  @Input({ required: true }) text!: string;
+  @Input() type: HelpType = '';
+  @Input() isHelpTextActive = false;
+  icon: Icon = '';
+  textColor = '';
+
+  ngOnChanges() {
+    switch (this.type) {
+      case 'success': {
+        this.icon = 'check';
+        this.textColor = 'text-green-500';
+        break;
+      }
+      case 'failure': {
+        this.icon = 'cancel';
+        this.textColor = 'text-red-400';
+        break;
+      }
+    }
+  }
+}

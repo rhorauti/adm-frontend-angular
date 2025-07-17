@@ -2,19 +2,20 @@ import { inject, Injectable } from '@angular/core';
 import { HttpRequestService } from '../http-request.service';
 import {
   IRequestlogin,
-  IRequestNewPasswordHttp,
   IRequestSignUp,
   IResponseLogin,
   IResponseSignUp,
 } from '../../interfaces/auth.interface';
 import { environment } from '@environments/environment';
 import { IBaseResponse } from '@core/interfaces/response.interface';
+import { AuthStore } from '@store/auth/auth.store';
 
 @Injectable({
   providedIn: 'root',
 })
 export class AuthApi {
   private httpRequestService = inject(HttpRequestService);
+  readonly authStore = inject(AuthStore);
 
   /**
    * authenticateUser
@@ -78,9 +79,9 @@ export class AuthApi {
    * @param newPassword nova senha digitada pelo usuário
    * @returns Promise com a data, status e mensagem
    */
-  async createNewPassword(newPassword: IRequestNewPasswordHttp): Promise<IBaseResponse> {
+  async createNewPassword(newPassword: string): Promise<IBaseResponse> {
     return await this.httpRequestService.sendHttpRequest(
-      `${environment.apiUrl}/new-password?token=${newPassword.token}`,
+      `${environment.apiUrl}/new-password?token=${this.authStore.token()}`,
       'POST',
       newPassword
     );

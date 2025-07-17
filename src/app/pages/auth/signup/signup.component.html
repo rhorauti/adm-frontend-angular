@@ -11,16 +11,14 @@
       [id]="'input-signup-name'"
       [inputName]="'custom'"
       [iconName]="'perm_identity'"
-      (inputValueEmitter)="getNameValue($event)"
-      [inputClass]="changeNameBorderColor()"
+      (inputValueEmitter)="authStore.onSetUserProperty('name', $event)"
+      [borderType]="authStore.helpAndBorderColor('name')()"
       [placeholder]="'Fulano da Silva'" />
     <div>
-      <app-input-validation
-        (emitValidationResult)="getNameValidation($event)"
-        [inputValue]="signupData().name"
-        [validationType]="'letters'"
-        [validationLettersQty]="3"
-        [validationText]="'Nome deve ter no mínimo 3 caracteres'"></app-input-validation>
+      <app-help
+        [isHelpTextActive]="authStore.user().name.length > 0"
+        [text]="'Nome deve ter no mínimo 3 caracteres'"
+        [type]="authStore.helpAndBorderColor('name', false)()" />
     </div>
   </div>
   <!--E-mail-->
@@ -29,14 +27,13 @@
     <app-input
       [id]="'input-signup-email'"
       [inputName]="'email'"
-      (inputValueEmitter)="getEmailValue($event)"
-      [inputClass]="changeEmailBorderColor()" />
+      (inputValueEmitter)="authStore.onSetUserProperty('email', $event)"
+      [borderType]="authStore.helpAndBorderColor('email')()" />
     <div>
-      <app-input-validation
-        (emitValidationResult)="getEmailValidation($event)"
-        [inputValue]="signupData().email"
-        [validationType]="'email'"
-        [validationText]="'Email valido!'"></app-input-validation>
+      <app-help
+        [isHelpTextActive]="authStore.user().email.length > 0"
+        [text]="'Email válido!'"
+        [type]="authStore.helpAndBorderColor('email', false)()" />
     </div>
   </div>
   <!--Senha-->
@@ -45,33 +42,25 @@
     <app-input
       [id]="'input-signup-password'"
       [inputName]="'password'"
-      [inputClass]="changePasswordBorderColor()"
-      (inputValueEmitter)="getPasswordValue($event)"></app-input>
+      [borderType]="authStore.helpAndBorderColor('password')()"
+      (inputValueEmitter)="authStore.onSetUserProperty('password', $event)" />
     <div>
-      <app-input-validation
-        (emitValidationResult)="getPasswordLettersValidation($event)"
-        [inputValue]="signupData().password"
-        [validationType]="'letters'"
-        [validationLettersQty]="6"
-        [validationText]="'A senha deve ter no mínimo 6 caracteres!'"></app-input-validation>
-      <app-input-validation
-        (emitValidationResult)="getPasswordUpperCaseValidation($event)"
-        [inputValue]="signupData().password"
-        [validationType]="'passwordUppercase'"
-        [validationText]="'A senha deve ter no mínimo 1 letra maiúscula!'"></app-input-validation>
-      <app-input-validation
-        (emitValidationResult)="getPasswordNumberValidation($event)"
-        [inputValue]="signupData().password"
-        [validationType]="'passwordNumber'"
-        s
-        [validationText]="'A senha deve ter no mínimo 1 número!'"></app-input-validation>
-      <app-input-validation
-        (emitValidationResult)="getPasswordSymbolValidation($event)"
-        [inputValue]="signupData().password"
-        [validationType]="'passwordSymbol'"
-        [validationText]="
-          'A senha deve ter no mínimo 1 caractere especial!'
-        "></app-input-validation>
+      <app-help
+        [isHelpTextActive]="authStore.user().password.length > 0"
+        [text]="'A senha deve ter no mínimo 6 caracteres!'"
+        [type]="authStore.passwordHelpColor('isPasswordLetterQtyOk')()" />
+      <app-help
+        [isHelpTextActive]="authStore.user().password.length > 0"
+        [text]="'A senha deve ter no mínimo 1 letra maiúscula!'"
+        [type]="authStore.passwordHelpColor('isPasswordUpperCaseLetterOk')()" />
+      <app-help
+        [isHelpTextActive]="authStore.user().password.length > 0"
+        [text]="'A senha deve ter no mínimo 1 número!'"
+        [type]="authStore.passwordHelpColor('isPasswordNumberOk')()" />
+      <app-help
+        [isHelpTextActive]="authStore.user().password.length > 0"
+        [text]="'A senha deve ter no mínimo 1 caractere especial!'"
+        [type]="authStore.passwordHelpColor('isPasswordSymbolOk')()" />
     </div>
   </div>
   <!--Confirmar Senha-->
@@ -80,28 +69,23 @@
     <app-input
       [id]="'input-signup-confirm-password'"
       [inputName]="'password'"
-      [inputClass]="changeConfirmPasswordBorderColor()"
-      (inputValueEmitter)="getConfirmPasswordValue($event)"></app-input>
-
-    <div>
-      <app-input-validation
-        (emitValidationResult)="getConfirmPasswordValidation($event)"
-        [inputValue]="signupData().confirmPassword"
-        [validationType]="'passwordConfirmation'"
-        [inputValueToCompare]="signupData().password"
-        [validationText]="'As 2 senhas devem ser iguais'"></app-input-validation>
-    </div>
+      [borderType]="authStore.helpAndBorderColor('confirmPassword')()"
+      (inputValueEmitter)="authStore.onSetUserProperty('confirmPassword', $event)" />
+    <app-help
+      [isHelpTextActive]="authStore.user().confirmPassword.length > 0"
+      [text]="'As 2 senhas devem ser iguais'"
+      [type]="authStore.helpAndBorderColor('confirmPassword', false)()" />
   </div>
   <div>
     <app-button-label
       (click)="createNewUser()"
-      [isDisabled]="!allValidationsOk()"
-      [label]="'Criar'"></app-button-label>
+      [isDisabled]="!authStore.isFormOk()"
+      [label]="'Criar'" />
   </div>
   <p class="text-center text-sm">
     Já possui cadastro?
     <span
-      (click)="redirectToLoginPage()"
+      (click)="authStore.onRedirectPage('/login')"
       aria-hidden="true"
       class="font-semibold leading-6 cursor-pointer">
       Clique aqui!</span
@@ -109,8 +93,4 @@
   </p>
 </div>
 <app-loading></app-loading>
-<app-modal-info
-  [showModal]="isModalActive"
-  [type]="modalInfo.type"
-  [description]="modalInfo.description"
-  (closeModalEmitter)="closeModal($event)"></app-modal-info>
+<app-modal-info />

@@ -1,7 +1,10 @@
 <div class="flex flex-col gap-4">
   <div class="flex justify-between items-center">
-    <app-breadcrumb [items]="breadcrumb" />
-    <app-button-label [iconName]="'add'" [label]="'Adicionar'" />
+    <app-breadcrumb [items]="['Cadastro', 'Empresas']" />
+    <app-button-label
+      (click)="router.navigate(['/companies/new'])"
+      [iconName]="'add'"
+      [label]="'Adicionar'" />
   </div>
   <app-tab
     [tabList]="companyStore.tab().tabList"
@@ -104,7 +107,12 @@
           </div>
         }
         <app-table-company />
-        <app-pagination />
+        <app-pagination
+          [currentPage]="companyStore.pagination().currentPage"
+          [dataLength]="companyStore.companiesData().length"
+          [pagesArray]="companyStore.pagination().pagesArray"
+          [qtyPerPage]="companyStore.pagination().qtyPerPage"
+          [totalPages]="companyStore.pagination().totalPages" />
       </div>
     </div>
   } @else {
@@ -331,7 +339,7 @@
 
 <app-modal-ask />
 <app-modal-info />
-<app-loading />
+<app-loading [isLoading]="companyStore.isLoading()" />
 <!-- <app-modal-base
   [isModalForm]="true"
   [title]="'Selecione o endereço'"
