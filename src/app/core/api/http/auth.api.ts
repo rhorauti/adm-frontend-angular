@@ -66,10 +66,11 @@ export class AuthApi {
    * @returns Promise com a data, status e mensagem
    */
   async getEmailValidation(email: string): Promise<IBaseResponse> {
+    const requestBody = { email: email };
     return await this.httpRequestService.sendHttpRequest(
       `${environment.apiUrl}/reset-password`,
       'POST',
-      email
+      requestBody
     );
   }
 
@@ -80,10 +81,11 @@ export class AuthApi {
    * @returns Promise com a data, status e mensagem
    */
   async createNewPassword(newPassword: string): Promise<IBaseResponse> {
+    const requestBody = { password: newPassword };
     return await this.httpRequestService.sendHttpRequest(
       `${environment.apiUrl}/new-password?token=${this.authStore.token()}`,
       'POST',
-      newPassword
+      requestBody
     );
   }
 }

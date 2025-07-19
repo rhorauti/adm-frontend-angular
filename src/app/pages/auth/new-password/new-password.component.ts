@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, inject } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
 import { ActivatedRoute } from '@angular/router';
 import { HelpComponent } from '@components/help/help.component';
@@ -25,11 +25,18 @@ import { ModalStore } from '@store/modal/modal.store';
   templateUrl: './new-password.component.html',
   styleUrl: './new-password.component.scss',
 })
-export class NewPasswordComponent {
+export class NewPasswordComponent implements OnInit {
   private authApi = inject(AuthApi);
   private activatedRoute = inject(ActivatedRoute);
   readonly authStore = inject(AuthStore);
   readonly modalStore = inject(ModalStore);
+
+  ngOnInit() {
+    this.activatedRoute.queryParams.subscribe(params => {
+      const token = params['token'];
+      this.authStore.onGetToken(token);
+    });
+  }
 
   /**
    * authenticateUser
@@ -39,12 +46,12 @@ export class NewPasswordComponent {
     this.authStore.onLoading(true);
     try {
       const response = await this.authApi.createNewPassword(this.authStore.user().password);
-      if (response) {
-        this.modalStore.onShowInfoModal('success', 'Autenticação', response.message);
+      if (response.status) {
         this.modalStore.onModalInfoActionOk(true);
       }
+      this.modalStore.onShowInfoModal('Autenticação', response.message);
     } catch (e: any) {
-      this.modalStore.onShowInfoModal('failure', 'Autenticação', e.error.message);
+      this.modalStore.onShowInfoModal('Autenticação', e.error.message);
     } finally {
       this.authStore.onLoading(false);
     }

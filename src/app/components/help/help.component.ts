@@ -2,8 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, Input, OnChanges } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
 import { Icon } from '@core/types/icon.type';
-
-type HelpType = 'success' | 'failure' | '';
+import { ValidationType } from '@core/types/validation.type';
 
 @Component({
   selector: 'app-help',
@@ -13,7 +12,7 @@ type HelpType = 'success' | 'failure' | '';
 })
 export class HelpComponent implements OnChanges {
   @Input({ required: true }) text!: string;
-  @Input() type: HelpType = '';
+  @Input() type: ValidationType = 'initial';
   @Input() isHelpTextActive = false;
   icon: Icon = '';
   textColor = '';
@@ -23,11 +22,13 @@ export class HelpComponent implements OnChanges {
       case 'success': {
         this.icon = 'check';
         this.textColor = 'text-green-500';
+        this.isHelpTextActive = true;
         break;
       }
       case 'failure': {
         this.icon = 'cancel';
         this.textColor = 'text-red-400';
+        this.isHelpTextActive = true;
         break;
       }
     }

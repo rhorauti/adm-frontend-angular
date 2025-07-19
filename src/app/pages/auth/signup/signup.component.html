@@ -12,13 +12,14 @@
       [inputName]="'custom'"
       [iconName]="'perm_identity'"
       (inputValueEmitter)="authStore.onSetUserProperty('name', $event)"
+      (blurEmitter)="authStore.onSetErrorProperty('name', true)"
       [borderType]="authStore.helpAndBorderColor('name')()"
       [placeholder]="'Fulano da Silva'" />
     <div>
       <app-help
         [isHelpTextActive]="authStore.user().name.length > 0"
         [text]="'Nome deve ter no mínimo 3 caracteres'"
-        [type]="authStore.helpAndBorderColor('name', false)()" />
+        [type]="authStore.helpAndBorderColor('name')()" />
     </div>
   </div>
   <!--E-mail-->
@@ -28,12 +29,13 @@
       [id]="'input-signup-email'"
       [inputName]="'email'"
       (inputValueEmitter)="authStore.onSetUserProperty('email', $event)"
+      (blurEmitter)="authStore.onSetErrorProperty('email', true)"
       [borderType]="authStore.helpAndBorderColor('email')()" />
     <div>
       <app-help
         [isHelpTextActive]="authStore.user().email.length > 0"
         [text]="'Email válido!'"
-        [type]="authStore.helpAndBorderColor('email', false)()" />
+        [type]="authStore.helpAndBorderColor('email')()" />
     </div>
   </div>
   <!--Senha-->
@@ -43,6 +45,7 @@
       [id]="'input-signup-password'"
       [inputName]="'password'"
       [borderType]="authStore.helpAndBorderColor('password')()"
+      (blurEmitter)="authStore.onSetErrorProperty('password', true)"
       (inputValueEmitter)="authStore.onSetUserProperty('password', $event)" />
     <div>
       <app-help
@@ -70,11 +73,12 @@
       [id]="'input-signup-confirm-password'"
       [inputName]="'password'"
       [borderType]="authStore.helpAndBorderColor('confirmPassword')()"
+      (blurEmitter)="authStore.onSetErrorProperty('confirmPassword', true)"
       (inputValueEmitter)="authStore.onSetUserProperty('confirmPassword', $event)" />
     <app-help
       [isHelpTextActive]="authStore.user().confirmPassword.length > 0"
       [text]="'As 2 senhas devem ser iguais'"
-      [type]="authStore.helpAndBorderColor('confirmPassword', false)()" />
+      [type]="authStore.helpAndBorderColor('confirmPassword')()" />
   </div>
   <div>
     <app-button-label
@@ -85,7 +89,7 @@
   <p class="text-center text-sm">
     Já possui cadastro?
     <span
-      (click)="authStore.onRedirectPage('/login')"
+      (click)="modalStore.onRedirectPage('/login')"
       aria-hidden="true"
       class="font-semibold leading-6 cursor-pointer">
       Clique aqui!</span
@@ -93,4 +97,4 @@
   </p>
 </div>
 <app-loading></app-loading>
-<app-modal-info />
+<app-modal-info (clickEmitter)="modalStore.onHideInfoModal('/login')" />

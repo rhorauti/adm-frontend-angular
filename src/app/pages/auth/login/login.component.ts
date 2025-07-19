@@ -31,6 +31,12 @@ export class LoginComponent {
   readonly modalStore = inject(ModalStore);
   readonly authStore = inject(AuthStore);
 
+  onKeyBordEnter(event: KeyboardEvent): void {
+    if (event.key == 'Enter') {
+      this.submitUserData();
+    }
+  }
+
   /**
    * authenticateUser
    * Função que envia os dados do usuário (email e senha) para validação do backend
@@ -39,32 +45,25 @@ export class LoginComponent {
     this.authStore.onLoading(true);
     try {
       if (this.authStore.user().email.length == 0) {
-        this.modalStore.onShowInfoModal(
-          'failure',
-          'Autenticação',
-          'Campo de e-mail não pode estar vazio.'
-        );
+        this.modalStore.onShowInfoModal('Autenticação', 'Campo de e-mail não pode estar vazio.');
       } else if (this.authStore.user().password.length == 0) {
-        this.modalStore.onShowInfoModal(
-          'failure',
-          'Autenticação',
-          'Campo de senha não pode estar vazio.'
-        );
+        this.modalStore.onShowInfoModal('Autenticação', 'Campo de senha não pode estar vazio.');
       } else {
         const response = await this.authApi.authenticateUser({
           email: this.authStore.user().email,
           password: this.authStore.user().password,
         });
-        if (response) {
+        if (response.status) {
           this.authStore.onSetUserProperty('id', response.data.id);
           this.authStore.onSetUserProperty('name', response.data.name);
           this.authStore.onSetUserProperty('email', response.data.email);
-          this.modalStore.onShowInfoModal('success', 'Autenticação', response.message);
+          this.authStore.onSetUserProperty('token', response.data.token);
           this.modalStore.onModalInfoActionOk(true);
         }
+        this.modalStore.onShowInfoModal('Autenticação', response.message);
       }
     } catch (e: any) {
-      this.modalStore.onShowInfoModal('failure', 'Autenticação', e.error.message);
+      this.modalStore.onShowInfoModal('Autenticação', e.error.message);
     } finally {
       this.authStore.onLoading(false);
     }

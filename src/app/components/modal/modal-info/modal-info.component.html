@@ -15,7 +15,8 @@
   <div class="footer-block">
     <div class="mt-5 flex justify-center">
       <app-button-label
-        (click)="modalStore.onHideInfoModal()"
+        (click)="onClick()"
+        (keyboardEmitter)="onKeyBoardEnter($event)"
         [label]="'Fechar'"
         [isColorLogo]="false"></app-button-label>
     </div>

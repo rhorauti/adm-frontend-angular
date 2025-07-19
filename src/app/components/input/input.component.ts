@@ -1,19 +1,10 @@
-import {
-  Component,
-  computed,
-  EventEmitter,
-  inject,
-  Input,
-  OnChanges,
-  OnInit,
-  Output,
-  signal,
-} from '@angular/core';
+import { Component, EventEmitter, Input, OnChanges, OnInit, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
 import { NgxMaskDirective, provideNgxMask } from 'ngx-mask';
 import { Icon } from '@core/types/icon.type';
+import { ValidationType } from '@core/types/validation.type';
 
 type InputName =
   | 'phone'
@@ -38,11 +29,12 @@ export class InputComponent implements OnInit, OnChanges {
   @Input({ required: true }) id!: string;
   @Input() inputValue = '';
   @Input() isDisabled = false;
-  @Input() borderType = '';
+  @Input() borderType: ValidationType = 'initial';
   @Input() inputClass = '';
   @Input() placeholder = '';
   @Input() iconName: Icon = '';
   @Input() type: InputType = 'search';
+  @Input() divClass = '';
   @Input() tabIndex = 0;
   maskValue = '';
   showPassword = false;
@@ -89,12 +81,16 @@ export class InputComponent implements OnInit, OnChanges {
 
   ngOnChanges(): void {
     switch (this.borderType) {
+      case 'initial': {
+        this.divClass = 'border-gray-400';
+        break;
+      }
       case 'success': {
-        this.inputClass = 'border-logo';
+        this.divClass = 'focus-within:border-logo border-logo';
         break;
       }
       case 'failure': {
-        this.inputClass = 'border-red-400';
+        this.divClass = 'focus-within:border-red-400 border-red-400';
         break;
       }
     }
@@ -127,5 +123,11 @@ export class InputComponent implements OnInit, OnChanges {
 
   onKeydown(event: KeyboardEvent): void {
     this.keyboardEmitter.emit(event);
+  }
+
+  @Output() blurEmitter = new EventEmitter();
+
+  onBlur(): void {
+    this.blurEmitter.emit();
   }
 }

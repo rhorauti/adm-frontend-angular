@@ -1,7 +1,7 @@
 import { inject } from '@angular/core';
 import { Router } from '@angular/router';
-import { ModalIconType } from '@components/modal/modal-info/modal-info.component';
 import { patchState, signalStore, withMethods, withState } from '@ngrx/signals';
+import { AuthStore } from '@store/auth/auth.store';
 
 export const ModalStore = signalStore(
   { providedIn: 'root' },
@@ -9,14 +9,12 @@ export const ModalStore = signalStore(
     info: {
       isActive: false,
       isActionOk: false,
-      type: 'success' as ModalIconType,
       title: '',
       description: '',
     },
     ask: {
       isActive: false,
       isActionOk: false,
-      type: '',
       title: '',
       description: '',
     },
@@ -24,11 +22,11 @@ export const ModalStore = signalStore(
 
   withMethods(store => {
     const router = inject(Router);
-    const onShowInfoModal = (type: string, title: string, description: string): void => {
+    const authStore = inject(AuthStore);
+    const onShowInfoModal = (title: string, description: string): void => {
       patchState(store, {
         info: {
           ...store.info(),
-          type: type as ModalIconType,
           isActive: true,
           title: title as string,
           description: description as string,
@@ -43,8 +41,14 @@ export const ModalStore = signalStore(
           isActive: false,
         },
       });
-      if (path) {
-        router.navigate([path]);
+      if (path && store.info().isActionOk) {
+        if (authStore.isAuthPage()) {
+          authStore.onShowAuthPage(false);
+          authStore.onShowMenuBar(true);
+          router.navigate([path]);
+        } else {
+          router.navigate([path]);
+        }
       }
     };
 
@@ -86,6 +90,11 @@ export const ModalStore = signalStore(
       });
     };
 
+    const onRedirectPage = (path: string): void => {
+      authStore.onClearAllData();
+      router.navigate([path]);
+    };
+
     return {
       onShowInfoModal,
       onHideInfoModal,
@@ -93,6 +102,7 @@ export const ModalStore = signalStore(
       onShowAskModal,
       onHideAskModal,
       onModalAskActionOk,
+      onRedirectPage,
     };
   })
 );

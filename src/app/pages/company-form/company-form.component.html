@@ -1,71 +1,170 @@
-<div>
-  <div class="flex justify-between">
-    <app-breadcrumb [items]="['Cadastro', 'Empresas', 'Novo Cadastro']" />
+<div class="flex flex-col gap-4 md:p-4 p-2">
+  <div class="flex items-center md:justify-between">
+    <app-breadcrumb [items]="['Cadastro', 'Empresas', `${formTitle()}`]" />
     <app-button-label
+      class="is-hidden-mobile"
       (click)="router.navigate(['companies'])"
       [id]="'company-form-back'"
       [iconName]="'keyboard_arrow_left'"
       [label]="'Voltar'"
-      [isColorLogo]="false" />
+      [isColorLogo]="false"
+      (click)="modalStore.onRedirectPage('/companies')" />
   </div>
-  <div class="flex flex-col gap-4 p-4">
-    <h1>{{ formTitle() }}</h1>
-    <!-- <div>
-      <div class="flex flex-col gap-2">
-        @if (modalForm().isEditForm) {
-          <div class="flex flex-col gap-1">
-            <label class="font-semibold text-sm" for="">Id</label>
-            <app-input
-              [id]="'company-form-id'"
-              [inputName]="'custom'"
-              [inputValue]="companyStore.companyData().idCompany"
-              [isDisabled]="true"
-              [showRightIcon]="false"
-              [inputClass]="'text-black h-9'"></app-input>
-          </div>
-        }
-        <div class="flex flex-col gap-1">
-          <label class="font-semibold text-sm" for="">Apelido</label>
+
+  <!-- Dados cadastrais -->
+
+  <div class="flex flex-col gap-4">
+    <h1 class="text-lg font-semibold bg-gray-200 p-1 rounded-md">Dados cadastrais</h1>
+    <div class="flex flex-col gap-2">
+      <div class="flex flex-col md:flex-row gap-4">
+        <div class="flex flex-col gap-1 grow">
+          <label class="font-medium text-sm" for="company-form-nickname">Apelido</label>
           <app-input
-            [inputValue]="store.company"
-            [showRightIcon]="false"
-            (emitInputValue)="companyData().nickname = $event"
-            [inputClass]="'text-black h-9'"></app-input>
+            [id]="'company-form-nickname'"
+            [inputName]="'custom'"
+            (inputValueEmitter)="companyStore.onSetCompanyProperty('nickname', $event)" />
         </div>
-        <div class="flex flex-col gap-1">
-          <label class="font-semibold text-sm" for="">Nome</label>
+        <div class="flex flex-col gap-1 grow">
+          <label class="font-medium text-sm" for="company-form-name">Nome</label>
           <app-input
-            [propsInput]="companyData().name"
-            [showRightIcon]="false"
-            (emitInputValue)="companyData().name = $event"
-            [inputClass]="'text-black h-9'"></app-input>
-        </div>
-        <div class="flex flex-col gap-1">
-          <label class="font-semibold text-sm" for="">CNPJ/CPF</label>
-          <app-input
-            [propsInput]="companyData().cnpj || ''"
-            [maskType]="'cnpj'"
-            [showRightIcon]="false"
-            (emitInputValue)="companyData().cnpj = $event"
-            [inputClass]="'text-black h-9'"></app-input>
-        </div>
-        <div class="flex flex-col gap-1">
-          <label class="font-semibold text-sm" for="">Inscrição Estadual</label>
-          <app-input
-            [propsInput]="companyData().ie || ''"
-            [showRightIcon]="false"
-            (emitInputValue)="companyData().ie = $event"
-            [inputClass]="'text-black h-9'"></app-input>
-        </div>
-        <div class="flex flex-col gap-1">
-          <label class="font-semibold text-sm" for="">Inscrição Municipal</label>
-          <app-input
-            [propsInput]="companyData().im || ''"
-            [showRightIcon]="false"
-            (emitInputValue)="companyData().im = $event"
-            [inputClass]="'text-black h-9'"></app-input>
+            [id]="'company-form-name'"
+            [inputName]="'custom'"
+            (inputValueEmitter)="companyStore.onSetCompanyProperty('name', $event)" />
         </div>
       </div>
-    </div> -->
+      <div class="flex flex-col md:flex-row gap-4">
+        <div class="flex flex-col gap-1 grow">
+          <label class="font-medium text-sm" for="company-form-cnpj">CNPJ</label>
+          <app-input
+            [id]="'company-form-cnpj'"
+            [inputName]="'cnpj'"
+            (inputValueEmitter)="companyStore.onSetCompanyProperty('cnpj', $event)" />
+        </div>
+        <div class="flex flex-col gap-1 grow">
+          <label class="font-medium text-sm" for="company-form-ie">Inscrição Estadual</label>
+          <app-input
+            [id]="'company-form-ie'"
+            [inputName]="'custom'"
+            (inputValueEmitter)="companyStore.onSetCompanyProperty('ie', $event)" />
+        </div>
+        <div class="flex flex-col gap-1 grow">
+          <label class="font-medium text-sm" for="company-form-im">Inscrição Municipal</label>
+          <app-input
+            [id]="'company-form-im'"
+            [inputName]="'custom'"
+            (inputValueEmitter)="companyStore.onSetCompanyProperty('im', $event)" />
+        </div>
+      </div>
+    </div>
   </div>
+
+  <!-- Endereço -->
+
+  <div class="flex flex-col gap-4">
+    <h1 class="text-lg font-semibold bg-gray-200 p-1 rounded-md">Endereço</h1>
+    <div class="flex flex-col gap-2">
+      <div class="flex flex-col md:flex-row gap-4">
+        <div class="flex flex-col gap-1">
+          <label class="font-medium text-sm" for="company-form-nickname">CEP</label>
+          <app-input
+            [id]="'company-form-cep'"
+            [inputName]="'custom'"
+            (inputValueEmitter)="companyStore.onSetCompanyProperty('cep', $event)" />
+        </div>
+        <div class="flex flex-col gap-1 grow">
+          <label class="font-medium text-sm" for="company-form-nickname">Logradouro</label>
+          <app-input
+            [id]="'company-form-address'"
+            [inputName]="'custom'"
+            (inputValueEmitter)="companyStore.onSetCompanyProperty('nickname', $event)" />
+        </div>
+        <div class="flex flex-col gap-1">
+          <label class="font-medium text-sm" for="company-form-name">Número</label>
+          <app-input
+            [id]="'company-form-number'"
+            [inputName]="'custom'"
+            (inputValueEmitter)="companyStore.onSetCompanyProperty('name', $event)" />
+        </div>
+        <div class="flex flex-col gap-1 grow">
+          <label class="font-medium text-sm" for="company-form-cnpj">Complemento</label>
+          <app-input
+            [id]="'company-form-complement'"
+            [inputName]="'cnpj'"
+            (inputValueEmitter)="companyStore.onSetCompanyProperty('cnpj', $event)" />
+        </div>
+      </div>
+      <div class="flex flex-col md:flex-row gap-4">
+        <div class="flex flex-col gap-1 grow">
+          <label class="font-medium text-sm" for="company-form-ie">Bairro</label>
+          <app-input
+            [id]="'company-form-district'"
+            [inputName]="'custom'"
+            (inputValueEmitter)="companyStore.onSetCompanyProperty('ie', $event)" />
+        </div>
+        <div class="flex flex-col gap-1 grow">
+          <label class="font-medium text-sm" for="company-form-im">Cidade</label>
+          <app-input
+            [id]="'company-form-city'"
+            [inputName]="'custom'"
+            (inputValueEmitter)="companyStore.onSetCompanyProperty('im', $event)" />
+        </div>
+        <div class="flex flex-col gap-1">
+          <label class="font-medium text-sm" for="company-form-im">UF</label>
+          <app-input
+            [id]="'company-form-state'"
+            [inputName]="'custom'"
+            (inputValueEmitter)="companyStore.onSetCompanyProperty('im', $event)" />
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Contato -->
+
+  <div class="flex flex-col gap-4">
+    <h1 class="text-lg font-semibold bg-gray-200 p-1 rounded-md">Contato</h1>
+    <div class="flex flex-col gap-2">
+      <div class="flex flex-col md:flex-row gap-4">
+        <div class="flex flex-col gap-1 grow">
+          <label class="font-medium text-sm" for="company-form-name">Nome</label>
+          <app-input
+            [id]="'company-form-employee-name'"
+            [inputName]="'custom'"
+            (inputValueEmitter)="companyStore.onSetCompanyProperty('name', $event)" />
+        </div>
+      </div>
+      <div class="flex flex-col md:flex-row gap-4">
+        <div class="flex flex-col gap-1 grow">
+          <label class="font-medium text-sm" for="company-form-cnpj">CNPJ</label>
+          <app-input
+            [id]="'company-form-employee-'"
+            [inputName]="'cnpj'"
+            (inputValueEmitter)="companyStore.onSetCompanyProperty('cnpj', $event)" />
+        </div>
+        <div class="flex flex-col gap-1 grow">
+          <label class="font-medium text-sm" for="company-form-ie">Inscrição Estadual</label>
+          <app-input
+            [id]="'company-form-ie'"
+            [inputName]="'custom'"
+            (inputValueEmitter)="companyStore.onSetCompanyProperty('ie', $event)" />
+        </div>
+        <div class="flex flex-col gap-1 grow">
+          <label class="font-medium text-sm" for="company-form-im">Inscrição Municipal</label>
+          <app-input
+            [id]="'company-form-im'"
+            [inputName]="'custom'"
+            (inputValueEmitter)="companyStore.onSetCompanyProperty('im', $event)" />
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer class="flex gap-4 items-center justify-center md:justify-end">
+    <app-button-label
+      (click)="router.navigate(['companies'])"
+      [iconName]="'close'"
+      [label]="'Cancelar'"
+      [isColorLogo]="false"></app-button-label>
+    <app-button-label [iconName]="'save'" [label]="'Salvar'"></app-button-label>
+  </footer>
 </div>

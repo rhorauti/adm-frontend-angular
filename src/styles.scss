@@ -30,6 +30,31 @@ body {
   line-height: normal !important;
 }
 
+@layer utilities {
+  .scrollbar-thin {
+    scrollbar-width: thin;
+    scrollbar-color: #a0aec0 transparent; /* cor da barra e do track */
+  }
+
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    background-color: #a0aec0; /* cor do thumb */
+    border-radius: 4px;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+    background-color: #718096; /* cor no hover */
+  }
+}
+
 @media screen and (max-width: 768px) {
   body {
     font-size: 12px;

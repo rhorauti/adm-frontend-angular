@@ -1,5 +1,4 @@
-import { computed, inject } from '@angular/core';
-import { Router } from '@angular/router';
+import { computed } from '@angular/core';
 import { patchState, signalStore, withComputed, withMethods, withState } from '@ngrx/signals';
 
 type UserField = 'name' | 'email' | 'password' | 'confirmPassword';
@@ -15,7 +14,14 @@ export const AuthStore = signalStore(
       confirmPassword: '',
       photoUrl: '',
     },
-    isMenuBarActive: false,
+    errors: {
+      showNameError: false,
+      showEmailError: false,
+      showPasswordError: false,
+      showConfirmPasswordError: false,
+    },
+    isMenuBarActive: true,
+    isAuthPage: false,
     token: '',
     isLoading: false,
   })),
@@ -58,6 +64,7 @@ export const AuthStore = signalStore(
 
     const isPasswordOk = computed(() => {
       return (
+        store.user().password.length > 0 &&
         isPasswordLetterQtyOk() &&
         isPasswordUpperCaseLetterOk() &&
         isPasswordSymbolOk() &&
@@ -83,11 +90,15 @@ export const AuthStore = signalStore(
   }),
 
   withMethods(store => {
-    const router = inject(Router);
-
     const onShowMenuBar = (isMenuBarActive: boolean): void => {
       patchState(store, {
         isMenuBarActive: isMenuBarActive,
+      });
+    };
+
+    const onShowAuthPage = (isAuthPage: boolean): void => {
+      patchState(store, {
+        isAuthPage: isAuthPage,
       });
     };
 
@@ -100,25 +111,41 @@ export const AuthStore = signalStore(
       });
     };
 
+    const onSetErrorProperty = (property: string, value: boolean): void => {
+      const computedErrorProperty = `show${property.charAt(0).toUpperCase() + property.slice(1)}Error`;
+      patchState(store, {
+        errors: {
+          ...store.errors(),
+          [computedErrorProperty]: value,
+        },
+      });
+    };
+
     const onGetToken = (token: string): void => {
       patchState(store, {
         token: token,
       });
     };
 
-    const onClearLoginData = (): void => {
+    const onClearAllData = (): void => {
       patchState(store, {
         user: {
           ...store.user(),
           id: 0,
+          name: '',
           email: '',
           password: '',
+          confirmPassword: '',
+          photoUrl: '',
+        },
+        errors: {
+          ...store.errors(),
+          showNameError: false,
+          showEmailError: false,
+          showPasswordError: false,
+          showConfirmPasswordError: false,
         },
       });
-    };
-
-    const onRedirectPage = (path: string): void => {
-      router.navigate([path]);
     };
 
     const onLoading = (isLoading: boolean): void => {
@@ -127,37 +154,46 @@ export const AuthStore = signalStore(
       });
     };
 
-    const helpAndBorderColor = (property: string, isInput = true) => {
+    type ValidationKey = `is${Capitalize<UserField>}Ok`;
+    type ErrorKey = `show${Capitalize<UserField>}Error`;
+
+    const helpAndBorderColor = (property: string) => {
       return computed(() => {
-        const isInputLengthOk = store.user()[property as UserField].length > 0;
-        const computedPropName = `is${property.charAt(0).toUpperCase() + property.slice(1)}Ok`;
-        const isInputValidationOk = store[computedPropName as keyof typeof store]();
-        console.log('isInputValidationOk', computedPropName, isInputValidationOk);
-        if (isInput) {
-          return isInputLengthOk && !isInputValidationOk ? 'failure' : 'success';
-        } else {
-          return isInputLengthOk && !isInputValidationOk ? 'failure' : 'success';
-        }
+        const computedValidationName = `is${property.charAt(0).toUpperCase() + property.slice(1)}Ok`;
+        const computedErrorName = `show${property.charAt(0).toUpperCase() + property.slice(1)}Error`;
+        const propertyField = store.user()[property as UserField];
+        const isInputValidationOk = store[computedValidationName as ValidationKey]();
+        const isInputErrorTrue = store.errors()[computedErrorName as ErrorKey];
+        console.log('isInputErrorTrue', isInputErrorTrue);
+        return !isInputErrorTrue && propertyField.length == 0
+          ? 'initial'
+          : !isInputValidationOk
+            ? 'failure'
+            : 'success';
       });
     };
 
     const passwordHelpColor = (validationName: string) => {
       return computed(() => {
-        const isInputLengthOk = store.user().password.length > 0;
         const isValidationNameOk = store[validationName as keyof typeof store]();
-        return isInputLengthOk && !isValidationNameOk ? 'failure' : 'success';
+        return !store.errors().showPasswordError && store.user().password.length == 0
+          ? 'initial'
+          : !isValidationNameOk
+            ? 'failure'
+            : 'success';
       });
     };
 
     return {
       onShowMenuBar,
       onGetToken,
-      onClearLoginData,
-      onRedirectPage,
+      onClearAllData,
       onLoading,
       onSetUserProperty,
       helpAndBorderColor,
       passwordHelpColor,
+      onShowAuthPage,
+      onSetErrorProperty,
     };
   })
 );

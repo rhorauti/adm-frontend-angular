@@ -5,6 +5,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { AuthApi } from '@core/api/http/auth.api';
 import { ButtonLabelComponent } from '@components/button/button-label/button-label.component';
 import { AuthStore } from '@store/auth/auth.store';
+import { ModalStore } from '@store/modal/modal.store';
 
 @Component({
   selector: 'app-redirect',
@@ -13,10 +14,10 @@ import { AuthStore } from '@store/auth/auth.store';
   styleUrl: './redirect.component.scss',
 })
 export class RedirectComponent implements OnInit {
-  private router = inject(Router);
   private authApi = inject(AuthApi);
   private activatedRoute = inject(ActivatedRoute);
   readonly authStore = inject(AuthStore);
+  readonly modalStore = inject(ModalStore);
 
   @Input() iconBackgroundColor = 'bg-green-600';
   @Input() iconTextColor = 'text-white';

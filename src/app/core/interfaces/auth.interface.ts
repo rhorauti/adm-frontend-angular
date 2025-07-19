@@ -13,6 +13,7 @@ export interface IResponseLogin {
     id: number;
     name: string;
     email: string;
+    photoUrl?: string;
     token: string;
   };
 }
@@ -32,17 +33,9 @@ export interface IResponseSignUp {
     id: number;
     name: string;
     email: string;
-    photoUrl: string;
+    photoUrl?: string;
     createdAt: string;
   };
-}
-
-export interface IFormValidationNewPassword {
-  passwordLettersValidation: boolean;
-  passwordUpperCaseValidation: boolean;
-  passwordNumberValidation: boolean;
-  passwordSymbolValidation: boolean;
-  confirmPasswordValidation: boolean;
 }
 
 export interface IRequestNewPassword {

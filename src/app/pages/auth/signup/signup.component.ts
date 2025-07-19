@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, inject } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
 import { Router } from '@angular/router';
 import { HelpComponent } from '@components/help/help.component';
@@ -44,12 +44,12 @@ export class SignupComponent {
         password: this.authStore.user().password,
         photoUrl: this.authStore.user().photoUrl,
       });
-      if (response) {
-        this.modalStore.onShowInfoModal('success', 'Autenticação', response.message);
+      if (response.status) {
         this.modalStore.onModalInfoActionOk(true);
       }
+      this.modalStore.onShowInfoModal('Autenticação', response.message);
     } catch (e: any) {
-      this.modalStore.onShowInfoModal('failure', 'Autenticação', e.error.message);
+      this.modalStore.onShowInfoModal('Autenticação', e.error.message);
     } finally {
       this.authStore.onLoading(false);
     }

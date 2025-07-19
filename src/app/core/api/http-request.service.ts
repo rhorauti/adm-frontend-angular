@@ -1,12 +1,14 @@
 import { Injectable, inject } from '@angular/core';
 import { lastValueFrom } from 'rxjs';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { AuthStore } from '@store/auth/auth.store';
 
 @Injectable({
   providedIn: 'root',
 })
 export class HttpRequestService {
   private httpClient = inject(HttpClient);
+  readonly authStore = inject(AuthStore);
 
   /**
    *sendHttpRequest
@@ -21,9 +23,10 @@ export class HttpRequestService {
    */
   async sendHttpRequest(path: string, method = 'GET', data?: any): Promise<any> {
     const headers = new HttpHeaders({
-      Authorization: `Bearer ${localStorage.getItem('@authToken')}`,
+      Authorization: `Bearer ${this.authStore.token()}`,
       'Content-Type': 'application/json',
     });
+    console.log('headers token', this.authStore.token());
     // const body = data && data.length > 0 ? data : undefined;
     switch (method) {
       case 'GET': {

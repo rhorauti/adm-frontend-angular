@@ -539,6 +539,15 @@ export const CompanyStore = signalStore(
       }
     };
 
+    const onSetCompanyProperty = (property: string, newValue: string): void => {
+      patchState(store, {
+        companyData: {
+          ...store.companyData(),
+          [property]: newValue,
+        },
+      });
+    };
+
     const onShowModalEditForm = (): void => {
       const selectedData = store.arrayDatasChecked()[0];
       if (selectedData) patchState(store, { companyData: structuredClone(selectedData) });
@@ -783,6 +792,7 @@ export const CompanyStore = signalStore(
       onShowTableHeaderBox,
       onShowFilterBox,
       onGeneratePaginationPagesArray,
+      onSetCompanyProperty,
     };
   })
 );
