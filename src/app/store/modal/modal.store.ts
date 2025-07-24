@@ -34,21 +34,17 @@ export const ModalStore = signalStore(
       });
     };
 
-    const onHideInfoModal = (path?: string): void => {
+    const onCloseInfoModal = (onActionOk?: () => void, onActionNok?: () => void): void => {
       patchState(store, {
         info: {
           ...store.info(),
           isActive: false,
         },
       });
-      if (path && store.info().isActionOk) {
-        if (authStore.isAuthPage()) {
-          authStore.onShowAuthPage(false);
-          authStore.onShowMenuBar(true);
-          router.navigate([path]);
-        } else {
-          router.navigate([path]);
-        }
+      if (store.info().isActionOk) {
+        if (onActionOk) onActionOk();
+      } else {
+        if (onActionNok) onActionNok();
       }
     };
 
@@ -72,13 +68,29 @@ export const ModalStore = signalStore(
       });
     };
 
-    const onHideAskModal = (): void => {
+    const onCloseAskModalActionOk = (onActionOk?: () => void): void => {
+      patchState(store, {
+        ask: {
+          ...store.ask(),
+          isActionOk: true,
+          isActive: false,
+        },
+      });
+      if (store.ask().isActionOk) {
+        if (onActionOk) onActionOk();
+      }
+    };
+
+    const onCloseAskModalActionNok = (onActionNok?: () => void): void => {
       patchState(store, {
         ask: {
           ...store.ask(),
           isActive: false,
         },
       });
+      if (!store.ask().isActionOk) {
+        if (onActionNok) onActionNok();
+      }
     };
 
     const onModalAskActionOk = (isActionOk: boolean): void => {
@@ -97,10 +109,11 @@ export const ModalStore = signalStore(
 
     return {
       onShowInfoModal,
-      onHideInfoModal,
+      onCloseInfoModal,
       onModalInfoActionOk,
       onShowAskModal,
-      onHideAskModal,
+      onCloseAskModalActionOk,
+      onCloseAskModalActionNok,
       onModalAskActionOk,
       onRedirectPage,
     };

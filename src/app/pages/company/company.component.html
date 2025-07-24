@@ -17,7 +17,7 @@
             <app-input
               [inputValue]="companyStore.inputSearchValue()"
               [id]="'input-filter'"
-              [placeholder]="'Id, Apelido, Razão Social'"
+              [placeholder]="'Id, Nome Fantasia, Razão Social'"
               [inputName]="'search'"
               (clickEmitter)="companyStore.onTableFilterBasedOnSearchInput()"
               (keyboardEmitter)="companyStore.onKeyPressOnSearchInput($event)"
@@ -31,7 +31,7 @@
           </div>
           <div class="flex gap-3">
             <app-button-delete
-              (click)="companyStore.onShowModalAskToDelete()"
+              (click)="modalStore.onShowAskModal()"
               [isDisabled]="companyStore.isDelBtnDisabled()" />
             <app-tooltip [position]="'left'" [description]="'Colunas visíveis'">
               <app-button-icon
@@ -61,7 +61,7 @@
             }
             @if (companyStore.filterHelp().nickname.length > 0) {
               <div class="flex items-center gap-2">
-                <p>Apelido: {{ companyStore.filterHelp().nickname }}</p>
+                <p>Nome Fantasia: {{ companyStore.filterHelp().nickname }}</p>
                 <app-button-close
                   (click)="companyStore.onClearFilterItem('nickname', 'filter-box')"
                   [isSmallSize]="true"></app-button-close>
@@ -100,7 +100,7 @@
               </div>
             }
             <button
-              (click)="companyStore.onClearAllDatas(companyStore.initialTableData())"
+              (click)="companyStore.onClearData()"
               class="text-logo font-semibold cursor-pointer hover:text-logo-hover hover:underline">
               Limpar tudo
             </button>
@@ -109,10 +109,11 @@
         <app-table-company />
         <app-pagination
           [currentPage]="companyStore.pagination().currentPage"
-          [dataLength]="companyStore.companiesData().length"
+          [totalRegister]="companyStore.companiesData().length"
           [pagesArray]="companyStore.pagination().pagesArray"
           [qtyPerPage]="companyStore.pagination().qtyPerPage"
-          [totalPages]="companyStore.pagination().totalPages" />
+          [totalPages]="companyStore.pagination().totalPages"
+          (currentPageEmitter)="companyStore.onSetNewCurrentPagePagination($event)" />
       </div>
     </div>
   } @else {
@@ -139,7 +140,8 @@
           }
           @if (companyStore.filterBox().nickname.length > 0) {
             <p>
-              Apelido : <span class="font-semibold">{{ companyStore.filterBox().nickname }}</span>
+              Nome Fantasia :
+              <span class="font-semibold">{{ companyStore.filterBox().nickname }}</span>
             </p>
           }
           @if (companyStore.filterBox().name.length > 0) {
@@ -167,7 +169,7 @@
         }
         <app-button-label
           (keyboardEmitter)="companyStore.onKeyPressOnNotFoundFilterRegister($event)"
-          (click)="companyStore.onClearAllDatas(companyStore.initialTableData())"
+          (click)="companyStore.onClearData()"
           [label]="'Voltar'" />
       }
     </div>
@@ -195,7 +197,7 @@
         (keyboardEmitter)="companyStore.onKeyPressOnFilterBox($event)" />
     </div>
     <div class="flex flex-col gap-2">
-      <p class="font-medium">Apelido</p>
+      <p class="font-medium">Nome Fantasia</p>
       <app-input
         [id]="'filter-company-nickname'"
         [inputName]="'custom'"
@@ -271,90 +273,16 @@
   </div>
 </app-side-bar>
 
-<!-- <app-modal-base
-  [showModal]="modalForm().isActive"
-  [isModalForm]="true"
-  [title]="modalForm().isEditForm ? 'Alterar dados da empresa' : 'Cadastro de nova empresa'"
-  (emitCloseModal)="onCloseModalForm()">
-  <div class="body-block">
-    <div class="flex flex-col gap-2">
-      @if (modalForm().isEditForm) {
-        <div class="flex flex-col gap-1">
-          <label class="font-semibold text-sm" for="">Id</label>
-          <app-input-standard
-            [propsInput]="companyData().idCompany"
-            [isDisabled]="true"
-            [showRightIcon]="false"
-            [inputClass]="'text-black h-9'"></app-input-standard>
-        </div>
-      }
-      <div class="flex flex-col gap-1">
-        <label class="font-semibold text-sm" for="">Apelido</label>
-        <app-input-standard
-          [propsInput]="companyData().nickname"
-          [showRightIcon]="false"
-          (emitInputValue)="companyData().nickname = $event"
-          [inputClass]="'text-black h-9'"></app-input-standard>
-      </div>
-      <div class="flex flex-col gap-1">
-        <label class="font-semibold text-sm" for="">Nome</label>
-        <app-input-standard
-          [propsInput]="companyData().name"
-          [showRightIcon]="false"
-          (emitInputValue)="companyData().name = $event"
-          [inputClass]="'text-black h-9'"></app-input-standard>
-      </div>
-      <div class="flex flex-col gap-1">
-        <label class="font-semibold text-sm" for="">CNPJ/CPF</label>
-        <app-input-standard
-          [propsInput]="companyData().cnpj || ''"
-          [maskType]="'cnpj'"
-          [showRightIcon]="false"
-          (emitInputValue)="companyData().cnpj = $event"
-          [inputClass]="'text-black h-9'"></app-input-standard>
-      </div>
-      <div class="flex flex-col gap-1">
-        <label class="font-semibold text-sm" for="">Inscrição Estadual</label>
-        <app-input-standard
-          [propsInput]="companyData().ie || ''"
-          [showRightIcon]="false"
-          (emitInputValue)="companyData().ie = $event"
-          [inputClass]="'text-black h-9'"></app-input-standard>
-      </div>
-      <div class="flex flex-col gap-1">
-        <label class="font-semibold text-sm" for="">Inscrição Municipal</label>
-        <app-input-standard
-          [propsInput]="companyData().im || ''"
-          [showRightIcon]="false"
-          (emitInputValue)="companyData().im = $event"
-          [inputClass]="'text-black h-9'"></app-input-standard>
-      </div>
-    </div>
-  </div>
-  <div class="grid footer-block md:flex md:justify-center gap-5 mt-6 w-full">
-    <app-button [btnType]="'close'" (click)="onCloseModalForm()"></app-button>
-    <app-button [btnType]="'success-save'" (click)="save()"></app-button>
-  </div>
-</app-modal-base> -->
-
-<app-modal-ask />
-<app-modal-info />
+<app-modal-ask
+  [isModalActive]="modalStore.ask().isActive"
+  [type]="'warning'"
+  [title]="'Cadastro de empresas'"
+  [description]="`Deseja excluir o registro ${companyStore.companyData().name}`"
+  (closeActionNokEmitter)="modalStore.onCloseAskModalActionNok()"
+  (closeActionOkEmitter)="onCloseAskModalActionOk()" />
+<app-modal-info
+  [isModalActive]="modalStore.info().isActive"
+  [description]="modalStore.info().description"
+  [title]="modalStore.info().title"
+  (clickEmitter)="modalStore.onCloseInfoModal()" />
 <app-loading [isLoading]="companyStore.isLoading()" />
-<!-- <app-modal-base
-  [isModalForm]="true"
-  [title]="'Selecione o endereço'"
-  [showModal]="showModal"
-  (emitCloseModal)="showModal = false">
-  <div class="body-block">
-    <app-tab
-      [tabList]="['Endereços', 'Funcionários']"
-      [tabIndex]="modalTabIdx"
-      (selectedTabEmitter)="onChangeTabIdx('modal', $event)">
-      @if (modalTabIdx == 0) {
-        <app-table-address [idCompany]="idCompany"></app-table-address>
-      } @else {
-        <app-table-employee [idCompany]="idCompany"></app-table-employee>
-      }
-    </app-tab>
-  </div>
-</app-modal-base> -->

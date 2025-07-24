@@ -11,6 +11,7 @@ export type Icon =
   | 'lock_open'
   | 'email'
   | 'phone'
+  | 'warning'
   | 'perm_identity'
   | 'keyboard_arrow_left'
   | 'keyboard_arrow_right'

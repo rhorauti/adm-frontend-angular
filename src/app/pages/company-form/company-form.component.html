@@ -8,7 +8,7 @@
       [iconName]="'keyboard_arrow_left'"
       [label]="'Voltar'"
       [isColorLogo]="false"
-      (click)="modalStore.onRedirectPage('/companies')" />
+      (click)="onBackToCompaniesPage()" />
   </div>
 
   <!-- Dados cadastrais -->
@@ -18,41 +18,57 @@
     <div class="flex flex-col gap-2">
       <div class="flex flex-col md:flex-row gap-4">
         <div class="flex flex-col gap-1 grow">
-          <label class="font-medium text-sm" for="company-form-nickname">Apelido</label>
+          <label class="font-medium text-sm" for="company-form-nickname"
+            >Nome Fantasia <span class="font-bold text-red-400">*</span></label
+          >
           <app-input
             [id]="'company-form-nickname'"
             [inputName]="'custom'"
-            (inputValueEmitter)="companyStore.onSetCompanyProperty('nickname', $event)" />
+            [inputValue]="companyStore.companyData().nickname"
+            [type]="'search'"
+            (inputValueEmitter)="companyStore.onSetInputNewValue('nickname', $event)" />
         </div>
         <div class="flex flex-col gap-1 grow">
-          <label class="font-medium text-sm" for="company-form-name">Nome</label>
+          <label class="font-medium text-sm" for="company-form-name"
+            >Nome <span class="font-bold text-red-400">*</span></label
+          >
           <app-input
             [id]="'company-form-name'"
             [inputName]="'custom'"
-            (inputValueEmitter)="companyStore.onSetCompanyProperty('name', $event)" />
+            [inputValue]="companyStore.companyData().name"
+            [type]="'search'"
+            (inputValueEmitter)="companyStore.onSetInputNewValue('name', $event)" />
         </div>
       </div>
       <div class="flex flex-col md:flex-row gap-4">
         <div class="flex flex-col gap-1 grow">
-          <label class="font-medium text-sm" for="company-form-cnpj">CNPJ</label>
+          <label class="font-medium text-sm" for="company-form-cnpj"
+            >CNPJ ou CPF <span class="font-bold text-red-400">*</span></label
+          >
           <app-input
             [id]="'company-form-cnpj'"
             [inputName]="'cnpj'"
-            (inputValueEmitter)="companyStore.onSetCompanyProperty('cnpj', $event)" />
+            [inputValue]="companyStore.companyData().cnpj || ''"
+            [type]="'search'"
+            (inputValueEmitter)="companyStore.onSetInputNewValue('cnpj', $event)" />
         </div>
         <div class="flex flex-col gap-1 grow">
           <label class="font-medium text-sm" for="company-form-ie">Inscrição Estadual</label>
           <app-input
             [id]="'company-form-ie'"
             [inputName]="'custom'"
-            (inputValueEmitter)="companyStore.onSetCompanyProperty('ie', $event)" />
+            [inputValue]="companyStore.companyData().ie || ''"
+            [type]="'search'"
+            (inputValueEmitter)="companyStore.onSetInputNewValue('ie', $event)" />
         </div>
         <div class="flex flex-col gap-1 grow">
           <label class="font-medium text-sm" for="company-form-im">Inscrição Municipal</label>
           <app-input
             [id]="'company-form-im'"
             [inputName]="'custom'"
-            (inputValueEmitter)="companyStore.onSetCompanyProperty('im', $event)" />
+            [inputValue]="companyStore.companyData().im || ''"
+            [type]="'search'"
+            (inputValueEmitter)="companyStore.onSetInputNewValue('im', $event)" />
         </div>
       </div>
     </div>
@@ -61,36 +77,44 @@
   <!-- Endereço -->
 
   <div class="flex flex-col gap-4">
-    <h1 class="text-lg font-semibold bg-gray-200 p-1 rounded-md">Endereço</h1>
+    <h1 class="text-lg font-semibold bg-gray-200 p-1 rounded-md">Endereço (Opcional)</h1>
     <div class="flex flex-col gap-2">
       <div class="flex flex-col md:flex-row gap-4">
         <div class="flex flex-col gap-1">
           <label class="font-medium text-sm" for="company-form-nickname">CEP</label>
           <app-input
             [id]="'company-form-cep'"
-            [inputName]="'custom'"
-            (inputValueEmitter)="companyStore.onSetCompanyProperty('cep', $event)" />
+            [inputName]="'postalCode'"
+            [inputValue]="addressStore.addressData().postalCode"
+            (changeEmitter)="addressStore.onSetAddressPropertiesValues()"
+            (inputValueEmitter)="addressStore.onSetInputNewValue('postalCode', $event)" />
         </div>
         <div class="flex flex-col gap-1 grow">
           <label class="font-medium text-sm" for="company-form-nickname">Logradouro</label>
           <app-input
             [id]="'company-form-address'"
             [inputName]="'custom'"
-            (inputValueEmitter)="companyStore.onSetCompanyProperty('nickname', $event)" />
+            [inputValue]="addressStore.addressData().address"
+            [type]="'search'"
+            (inputValueEmitter)="addressStore.onSetInputNewValue('address', $event)" />
         </div>
         <div class="flex flex-col gap-1">
           <label class="font-medium text-sm" for="company-form-name">Número</label>
           <app-input
             [id]="'company-form-number'"
             [inputName]="'custom'"
-            (inputValueEmitter)="companyStore.onSetCompanyProperty('name', $event)" />
+            [inputValue]="addressStore.addressData().number || ''"
+            [type]="'search'"
+            (inputValueEmitter)="addressStore.onSetInputNewValue('number', $event)" />
         </div>
         <div class="flex flex-col gap-1 grow">
           <label class="font-medium text-sm" for="company-form-cnpj">Complemento</label>
           <app-input
             [id]="'company-form-complement'"
-            [inputName]="'cnpj'"
-            (inputValueEmitter)="companyStore.onSetCompanyProperty('cnpj', $event)" />
+            [inputName]="'custom'"
+            [inputValue]="addressStore.addressData().complement || ''"
+            [type]="'search'"
+            (inputValueEmitter)="addressStore.onSetInputNewValue('complement', $event)" />
         </div>
       </div>
       <div class="flex flex-col md:flex-row gap-4">
@@ -99,21 +123,25 @@
           <app-input
             [id]="'company-form-district'"
             [inputName]="'custom'"
-            (inputValueEmitter)="companyStore.onSetCompanyProperty('ie', $event)" />
+            [inputValue]="addressStore.addressData().district || ''"
+            [type]="'search'"
+            (inputValueEmitter)="addressStore.onSetInputNewValue('district', $event)" />
         </div>
         <div class="flex flex-col gap-1 grow">
           <label class="font-medium text-sm" for="company-form-im">Cidade</label>
           <app-input
             [id]="'company-form-city'"
             [inputName]="'custom'"
-            (inputValueEmitter)="companyStore.onSetCompanyProperty('im', $event)" />
+            [inputValue]="addressStore.addressData().city || ''"
+            [type]="'search'"
+            (inputValueEmitter)="addressStore.onSetInputNewValue('city', $event)" />
         </div>
         <div class="flex flex-col gap-1">
           <label class="font-medium text-sm" for="company-form-im">UF</label>
-          <app-input
-            [id]="'company-form-state'"
-            [inputName]="'custom'"
-            (inputValueEmitter)="companyStore.onSetCompanyProperty('im', $event)" />
+          <app-select
+            [selectType]="'state'"
+            [selectValue]="addressStore.addressData().state || 'Selecione um item'"
+            (selectValueEmitter)="addressStore.onSetInputNewValue('state', $event)" />
         </div>
       </div>
     </div>
@@ -122,7 +150,7 @@
   <!-- Contato -->
 
   <div class="flex flex-col gap-4">
-    <h1 class="text-lg font-semibold bg-gray-200 p-1 rounded-md">Contato</h1>
+    <h1 class="text-lg font-semibold bg-gray-200 p-1 rounded-md">Contato (Opcional)</h1>
     <div class="flex flex-col gap-2">
       <div class="flex flex-col md:flex-row gap-4">
         <div class="flex flex-col gap-1 grow">
@@ -130,30 +158,54 @@
           <app-input
             [id]="'company-form-employee-name'"
             [inputName]="'custom'"
-            (inputValueEmitter)="companyStore.onSetCompanyProperty('name', $event)" />
+            [inputValue]="employeeStore.employeeData().name"
+            [type]="'search'"
+            (inputValueEmitter)="employeeStore.onSetInputNewValue('name', $event)" />
+        </div>
+        <div class="flex flex-col gap-1 grow">
+          <label class="font-medium text-sm" for="company-form-cnpj">Depto</label>
+          <app-input
+            [id]="'company-form-employee-department'"
+            [inputName]="'custom'"
+            [inputValue]="employeeStore.employeeData().department || ''"
+            [type]="'search'"
+            (inputValueEmitter)="employeeStore.onSetInputNewValue('department', $event)" />
+        </div>
+        <div class="flex flex-col gap-1 grow">
+          <label class="font-medium text-sm" for="company-form-cnpj">Cargo</label>
+          <app-input
+            [id]="'company-form-employee-position'"
+            [inputName]="'custom'"
+            [inputValue]="employeeStore.employeeData().position || ''"
+            [type]="'search'"
+            (inputValueEmitter)="employeeStore.onSetInputNewValue('position', $event)" />
         </div>
       </div>
       <div class="flex flex-col md:flex-row gap-4">
         <div class="flex flex-col gap-1 grow">
-          <label class="font-medium text-sm" for="company-form-cnpj">CNPJ</label>
+          <label class="font-medium text-sm" for="company-form-ie">E-mail</label>
           <app-input
-            [id]="'company-form-employee-'"
-            [inputName]="'cnpj'"
-            (inputValueEmitter)="companyStore.onSetCompanyProperty('cnpj', $event)" />
+            [id]="'company-form-employee-email'"
+            [inputName]="'custom'"
+            [inputValue]="employeeStore.employeeData().email || ''"
+            [type]="'search'"
+            (inputValueEmitter)="employeeStore.onSetInputNewValue('email', $event)" />
         </div>
         <div class="flex flex-col gap-1 grow">
-          <label class="font-medium text-sm" for="company-form-ie">Inscrição Estadual</label>
+          <label class="font-medium text-sm" for="company-form-im">Telefone fixo</label>
           <app-input
-            [id]="'company-form-ie'"
-            [inputName]="'custom'"
-            (inputValueEmitter)="companyStore.onSetCompanyProperty('ie', $event)" />
+            [id]="'company-form-employee-deskphone'"
+            [inputName]="'phone'"
+            [inputValue]="employeeStore.employeeData().deskphone || ''"
+            (inputValueEmitter)="employeeStore.onSetInputNewValue('deskphone', $event)" />
         </div>
         <div class="flex flex-col gap-1 grow">
-          <label class="font-medium text-sm" for="company-form-im">Inscrição Municipal</label>
+          <label class="font-medium text-sm" for="company-form-im">Celular</label>
           <app-input
-            [id]="'company-form-im'"
-            [inputName]="'custom'"
-            (inputValueEmitter)="companyStore.onSetCompanyProperty('im', $event)" />
+            [id]="'company-form-employee-mobile'"
+            [inputName]="'phone'"
+            [inputValue]="employeeStore.employeeData().cellphone || ''"
+            (inputValueEmitter)="employeeStore.onSetInputNewValue('cellphone', $event)" />
         </div>
       </div>
     </div>
@@ -161,10 +213,19 @@
 
   <footer class="flex gap-4 items-center justify-center md:justify-end">
     <app-button-label
-      (click)="router.navigate(['companies'])"
+      (click)="onBackToCompaniesPage()"
       [iconName]="'close'"
       [label]="'Cancelar'"
       [isColorLogo]="false"></app-button-label>
-    <app-button-label [iconName]="'save'" [label]="'Salvar'"></app-button-label>
+    <app-button-label
+      [iconName]="'save'"
+      [label]="'Salvar'"
+      (click)="companyStore.onSaveRegister()"></app-button-label>
   </footer>
+
+  <app-modal-info
+    [isModalActive]="modalStore.info().isActive"
+    [description]="modalStore.info().description"
+    [title]="modalStore.info().title"
+    (clickEmitter)="onCloseCompanyFormInfoModal()" />
 </div>

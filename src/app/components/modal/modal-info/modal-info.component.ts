@@ -1,13 +1,5 @@
 import { CommonModule } from '@angular/common';
-import {
-  Component,
-  computed,
-  ElementRef,
-  EventEmitter,
-  inject,
-  Output,
-  ViewChild,
-} from '@angular/core';
+import { Component, computed, EventEmitter, inject, Input, Output } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
 import { ModalBaseComponent } from '../modal-base/modal-base.component';
 import { ButtonLabelComponent } from '@components/button/button-label/button-label.component';
@@ -22,12 +14,16 @@ export type ModalIconType = 'success' | 'failure';
   styleUrl: './modal-info.component.scss',
 })
 export class ModalInfoComponent {
-  @ViewChild('modalInfoButton') modalInfoButton!: ElementRef<HTMLElement>;
   readonly modalStore = inject(ModalStore);
   readonly icon = computed(() => (this.modalStore.info().isActionOk ? 'check' : 'close'));
   readonly iconBackgroundColor = computed(() =>
     this.modalStore.info().isActionOk ? 'bg-green-600' : 'bg-red-500'
   );
+
+  @Input({ required: true }) isModalActive!: boolean;
+  @Input({ required: true }) title!: string;
+  @Input({ required: true }) description!: string;
+  @Input() showHeader = false;
 
   onKeyBoardEnter(event: KeyboardEvent): void {
     if (event.key == 'Enter') {

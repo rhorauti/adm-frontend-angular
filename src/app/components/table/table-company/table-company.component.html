@@ -49,7 +49,12 @@
     }
   </tr>
   <tbody tbody-row>
-    @for (companyData of companyStore.companiesData(); track $index) {
+    @for (
+      companyData of companyStore
+        .companiesData()
+        .slice(computedFirstRegister(), computedLastRegister());
+      track $index
+    ) {
       <tr
         class="h-full py-2 border-b-[2px] border-solid last:border-gray-300 hover:bg-gray-200 cursor-pointer">
         @if (companyStore.tableHeaders()[0].isHeaderActive) {

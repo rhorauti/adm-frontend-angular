@@ -1,8 +1,9 @@
 export interface ITableHeader {
   id: number;
   isHeaderActive: boolean;
-  name: string;
-  value: string;
+  sort: number;
+  headerName: string;
+  databaseField: string;
 }
 
 export interface ITableCheckbox {

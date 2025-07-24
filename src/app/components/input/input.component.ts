@@ -116,7 +116,6 @@ export class InputComponent implements OnInit, OnChanges {
     }
     this.showPassword = !this.showPassword;
     this.clickEmitter.emit();
-    console.log('show password', this.showPassword);
   }
 
   @Output() keyboardEmitter = new EventEmitter();
@@ -127,7 +126,18 @@ export class InputComponent implements OnInit, OnChanges {
 
   @Output() blurEmitter = new EventEmitter();
 
-  onBlur(): void {
-    this.blurEmitter.emit();
+  onBlur(event: Event): void {
+    this.blurEmitter.emit(event);
+  }
+  @Output() focusEmitter = new EventEmitter();
+
+  onFocus(event: Event): void {
+    this.focusEmitter.emit(event);
+  }
+
+  @Output() changeEmitter = new EventEmitter();
+
+  onChange(event: Event): void {
+    this.changeEmitter.emit(event);
   }
 }

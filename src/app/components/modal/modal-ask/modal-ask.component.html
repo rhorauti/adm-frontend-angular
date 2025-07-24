@@ -1,12 +1,10 @@
-<app-modal-base [showModal]="showModal" [showHeader]="false">
+<app-modal-base [showModal]="isModalActive" [showHeader]="false">
   <div class="body-block">
-    <div
-      class="mx-auto flex h-10 w-10 items-center justify-center rounded-full"
-      [ngClass]="iconBackgroundColor">
-      <mat-icon [ngClass]="iconModalTextColor">{{ icon }}</mat-icon>
+    <div class="mx-auto flex items-center justify-center" [ngClass]="divIconClass">
+      <mat-icon [ngClass]="iconClass">{{ iconName }}</mat-icon>
     </div>
     <div class="bg-white my-5 text-center">
-      <h5 class="text-base font-semibold leading-6 text-gray-900 w-full" id="modal-title">
+      <h5 class="text-base font-semibold leading-6 text-gray-900 w-full">
         {{ title }}
       </h5>
       <div class="mt-2">
@@ -17,7 +15,11 @@
     </div>
   </div>
   <div class="footer-block flex gap-5 justify-center items-stretch">
-    <app-button-close (click)="close()"></app-button-close>
-    <app-button-label (click)="OnActionOk()"></app-button-label>
+    <app-button-label
+      [label]="'Não'"
+      [isColorLogo]="false"
+      [iconName]="'close'"
+      (click)="OnActionNok()"></app-button-label>
+    <app-button-label [label]="'Sim'" [iconName]="'save'" (click)="OnActionOk()"></app-button-label>
   </div>
 </app-modal-base>

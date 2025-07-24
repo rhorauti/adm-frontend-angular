@@ -1,63 +1,46 @@
 import { CommonModule } from '@angular/common';
-import { Component, EventEmitter, Input, OnChanges, Output } from '@angular/core';
+import { Component, EventEmitter, inject, Input, OnChanges, Output } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
 import { ModalBaseComponent } from '../modal-base/modal-base.component';
-import { TableItemType } from '@core/interfaces/base.interface';
-import { ButtonCloseComponent } from '../../button/button-close/button-close.component';
 import { ButtonLabelComponent } from '../../button/button-label/button-label.component';
+import { Icon } from '@core/types/icon.type';
+import { ModalStore } from '@store/modal/modal.store';
 
 @Component({
   selector: 'app-modal-ask',
-  imports: [
-    CommonModule,
-    MatIconModule,
-    ModalBaseComponent,
-    ButtonCloseComponent,
-    ButtonLabelComponent,
-  ],
+  imports: [CommonModule, MatIconModule, ModalBaseComponent, ButtonLabelComponent],
   templateUrl: './modal-ask.component.html',
   styleUrl: './modal-ask.component.scss',
 })
 export class ModalAskComponent implements OnChanges {
-  @Input() showModal = false;
-  @Input() description = '';
-  @Input() type = '';
-  @Input() icon = '';
-  @Input() iconBackgroundColor = '';
-  @Input() iconModalTextColor = '';
-  @Input() title = '';
-  @Input() tableItemSelected: TableItemType = {
-    idCompany: 0,
-    date: '',
-    type: 1,
-    nickname: '',
-    name: '',
-    cnpj: '',
-    ie: '',
-    im: '',
-  };
+  readonly modalStore = inject(ModalStore);
+  @Input() isModalActive!: boolean;
+  @Input() type = 'warning';
+  @Input({ required: true }) title!: string;
+  @Input({ required: true }) description!: string;
+  iconName: Icon = 'warning';
+  divIconClass = '';
+  iconClass = '';
 
   ngOnChanges() {
     switch (this.type) {
-      case 'confirmation': {
-        this.icon = 'question_answer';
-        this.iconBackgroundColor = 'bg-yellow-500';
-        this.iconModalTextColor = 'text-white';
-        this.title = 'Alerta!';
+      case 'warning': {
+        this.iconName = 'warning';
+        this.iconClass = 'text-yellow-500';
         break;
       }
     }
   }
 
-  @Output() closeEmitter = new EventEmitter<boolean>();
+  @Output() closeActionNokEmitter = new EventEmitter<boolean>();
 
-  close(): void {
-    this.closeEmitter.emit(false);
+  OnActionNok(): void {
+    this.closeActionNokEmitter.emit();
   }
 
-  @Output() actionOkEmitter = new EventEmitter<TableItemType>();
+  @Output() closeActionOkEmitter = new EventEmitter();
 
   OnActionOk(): void {
-    this.actionOkEmitter.emit(this.tableItemSelected);
+    this.closeActionOkEmitter.emit();
   }
 }

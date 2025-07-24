@@ -18,6 +18,8 @@ import { ToogleButtonComponent } from '../../components/toogle-button/toogle-but
 import { InputComponent } from '@components/input/input.component';
 import { ButtonCloseComponent } from '@components/button/button-close/button-close.component';
 import { Router } from '@angular/router';
+import { ModalStore } from '@store/modal/modal.store';
+import { ICompany } from '@core/interfaces/company.interface';
 
 @Component({
   selector: 'app-company',
@@ -44,11 +46,18 @@ import { Router } from '@angular/router';
   styleUrl: './company.component.scss',
 })
 export class CompanyComponent implements OnInit {
-  readonly companyStore = inject(CompanyStore);
   readonly router = inject(Router);
-  isLoading = false;
+  readonly companyStore = inject(CompanyStore);
+  readonly modalStore = inject(ModalStore);
 
   async ngOnInit() {
     this.companyStore.onShowDataList();
+  }
+
+  onCloseAskModalActionOk(): void {
+    this.modalStore.onCloseAskModalActionOk(() => {
+      const itemToDelete = this.companyStore.itemSelected() as ICompany;
+      this.companyStore.onDeleteRegister(itemToDelete?.idCompany);
+    });
   }
 }

@@ -1,12 +1,17 @@
 import { signalStore, withState, withMethods, patchState, withComputed } from '@ngrx/signals';
 import { ICompany } from '@core/interfaces/company.interface';
 import { computed, inject } from '@angular/core';
-import { HttpRequestService } from '@core/api/http-request.service';
-import { environment } from '@environments/environment';
-import { ITableCheckbox } from '@core/interfaces/table.interface';
+import { ITableCheckbox, ITableHeader } from '@core/interfaces/table.interface';
 import { IPagination } from '@core/interfaces/pagination.interface';
-import { IModalCheck, IModalForm, IModalInfo } from '@core/interfaces/modal.interface';
 import { IFilterBoxCompany, IFilterHelpCompany } from '@core/interfaces/filter.interface';
+import { ModalStore } from '@store/modal/modal.store';
+import { CompanyApi } from '@core/http/company/company.api';
+import { HttpErrorResponse } from '@angular/common/http';
+import { ITab } from '@core/interfaces/tab.interface';
+import { AddressStore } from '@store/address/address.store';
+import { EmployeeStore } from '@store/employee/employee.store';
+import { IAddress } from '@core/interfaces/address.interface';
+import { IEmployee } from '@core/interfaces/employee.interface';
 
 type FilterMethod = 'input-search' | 'filter-box';
 
@@ -17,13 +22,19 @@ export const CompanyStore = signalStore(
     tab: {
       tabList: ['Clientes', 'Fornecedores', 'MyCompany'],
       selectedTabIdx: 0,
-    },
+    } as ITab,
     inputSearchValue: '',
     isTableHeaderBoxActive: false,
     tableHeaders: [
       { id: 0, isHeaderActive: true, sort: 0, headerName: '', databaseField: '' },
       { id: 1, isHeaderActive: true, sort: 0, headerName: 'Id', databaseField: 'idCompany' },
-      { id: 2, isHeaderActive: true, sort: 0, headerName: 'Apelido', databaseField: 'nickname' },
+      {
+        id: 2,
+        isHeaderActive: true,
+        sort: 0,
+        headerName: 'Nome Fantasia',
+        databaseField: 'nickname',
+      },
       { id: 3, isHeaderActive: true, sort: 0, headerName: 'Razão Social', databaseField: 'name' },
       { id: 4, isHeaderActive: true, sort: 0, headerName: 'CNPJ/CPF', databaseField: 'cnpj' },
       { id: 5, isHeaderActive: false, sort: 0, headerName: 'Inscr. Estadual', databaseField: 'ie' },
@@ -34,7 +45,7 @@ export const CompanyStore = signalStore(
         headerName: 'Inscr. Municipal',
         databaseField: 'im',
       },
-    ],
+    ] as ITableHeader[],
     tableHeaderSortList: ['normal', 'asc', 'desc'],
     tableCheckbox: {
       header: false,
@@ -77,34 +88,21 @@ export const CompanyStore = signalStore(
       qtyPerPage: 10,
       pagesArray: [],
     } as IPagination,
-    modalForm: {
-      isActive: false,
-      isEditForm: false,
-      isInputClear: false,
-    } as IModalForm,
-    modalInfo: {
-      type: '',
-      description: '',
-      isActive: false,
-      isActionOk: false,
-    } as IModalInfo,
-    modalAsk: {
-      isActive: false,
-      isActionOk: false,
-    } as IModalCheck,
+    isEditRegister: false,
     isLoading: false,
   })),
 
   withComputed(store => ({
-    arrayDatasChecked: computed(() => {
-      const itemsChecked = store
-        .tableCheckbox()
-        .body.map((value, index) => (value == true ? index : null))
-        .filter(index => index != null);
-      const datasChecked = store
-        .companiesData()
-        .map((value, index) => (itemsChecked.includes(index) ? value : null));
-      return datasChecked.filter(value => value != null);
+    itemSelected: computed(() => {
+      const indexArray: number[] = [];
+      store.tableCheckbox().body.forEach((value, index) => {
+        if (value == true) indexArray.push(index);
+      });
+      if (indexArray.length == 1) {
+        return store.companiesData()[indexArray[0]];
+      } else {
+        return null;
+      }
     }),
 
     isAtLeastOneFilterBoxNotEmpty: computed(() => {
@@ -129,10 +127,31 @@ export const CompanyStore = signalStore(
         store.filterHelp().im.length > 0
       );
     }),
+
+    isNicknameValid: computed(() => {
+      return store.companyData().nickname.length > 2;
+    }),
+
+    isNameValid: computed(() => {
+      return store.companyData().name.length > 2;
+    }),
+
+    isCnpjValid: computed(() => {
+      return store.companyData().cnpj?.length == 14 || store.companyData().cnpj?.length == 18;
+    }),
   })),
 
   withMethods(store => {
-    const httpRequestService = inject(HttpRequestService);
+    const companyApi = inject(CompanyApi);
+    const addressStore = inject(AddressStore);
+    const employeeStore = inject(EmployeeStore);
+    const modalStore = inject(ModalStore);
+
+    const onLoading = (isLoading: boolean): void => {
+      patchState(store, {
+        isLoading: isLoading,
+      });
+    };
 
     const onTabChange = (tabIdx: number): void => {
       patchState(store, {
@@ -155,20 +174,6 @@ export const CompanyStore = signalStore(
         tab: {
           ...store.tab(),
           selectedTabIdx: idx,
-        },
-      });
-    };
-
-    const onClearCompanyData = (): void => {
-      patchState(store, {
-        companyData: {
-          ...store.companyData(),
-          idCompany: 0,
-          nickname: '',
-          name: '',
-          cnpj: '',
-          ie: '',
-          im: '',
         },
       });
     };
@@ -197,26 +202,7 @@ export const CompanyStore = signalStore(
       });
     };
 
-    const onShowDataList = async (): Promise<void> => {
-      try {
-        patchState(store, {
-          isLoading: true,
-        });
-        const response = await httpRequestService.sendHttpRequest(
-          `${environment.apiUrl}/companies`,
-          'GET'
-        );
-        onClearAllDatas(response.data);
-      } catch (e: any) {
-        onHandleModalInfo('failure', e?.error?.msg);
-      } finally {
-        patchState(store, {
-          isLoading: false,
-        });
-      }
-    };
-
-    const fillNewCheckboxArray = (dataLength: number): void => {
+    const onFillNewCheckboxArray = (dataLength: number): void => {
       patchState(store, {
         tableCheckbox: {
           ...store.tableCheckbox(),
@@ -225,27 +211,7 @@ export const CompanyStore = signalStore(
       });
     };
 
-    const onCloseModalForm = (): void => {
-      if (store.modalForm().isActive) {
-        if (store.modalForm().isEditForm) {
-          patchState(store, {
-            modalForm: {
-              ...store.modalForm(),
-              isEditForm: false,
-              isInputClear: true,
-            },
-          });
-          patchState(store, {
-            modalForm: {
-              ...store.modalForm(),
-              isActive: false,
-            },
-          });
-        }
-      }
-    };
-
-    const clearTableCheckbox = (): void => {
+    const onClearTableCheckbox = (): void => {
       patchState(store, {
         tableCheckbox: {
           header: false,
@@ -317,7 +283,7 @@ export const CompanyStore = signalStore(
 
     const onKeyPressOnNotFoundFilterRegister = (event: KeyboardEvent): void => {
       if (event.key == 'Escape') {
-        onClearAllDatas(store.initialTableData());
+        onClearData();
       }
     };
 
@@ -325,11 +291,11 @@ export const CompanyStore = signalStore(
       if (event.key == 'Enter') {
         onFilterTableThroughSearchInput();
       } else if (event.key == 'Escape') {
-        onClearAllDatas(store.initialTableData());
+        onClearData();
       }
     };
 
-    const onClearAllDatas = (companiesData: ICompany[]): void => {
+    const onClearData = (companiesData: ICompany[] = store.initialTableData()): void => {
       const companiesFilter = companiesData.filter(
         company => company.type == store.tab().selectedTabIdx
       );
@@ -338,6 +304,15 @@ export const CompanyStore = signalStore(
         companiesData: companiesFilter,
         isFilterResultZeroRegister: false,
         inputSearchValue: '',
+        companyData: {
+          idCompany: 0,
+          type: 0,
+          nickname: '',
+          name: '',
+          cnpj: '',
+          ie: '',
+          im: '',
+        },
         filterBox: {
           idCompany: '',
           nickname: '',
@@ -355,8 +330,18 @@ export const CompanyStore = signalStore(
           ie: '',
           im: '',
         },
+        tableCheckbox: {
+          ...store.tableCheckbox(),
+          header: false,
+        },
+        pagination: {
+          ...store.pagination(),
+          currentPage: 1,
+          totalPages: 1,
+          pagesArray: [],
+        },
       });
-      fillNewCheckboxArray(companiesFilter.length);
+      onFillNewCheckboxArray(companiesFilter.length);
       onGeneratePaginationPagesArray();
     };
 
@@ -501,7 +486,7 @@ export const CompanyStore = signalStore(
 
     const onTableFilterBasedOnSearchInput = (): void => {
       if (store.inputSearchValue().length == 0) {
-        onClearAllDatas(store.initialTableData());
+        onClearData();
       } else {
         onFilterTableThroughSearchInput();
       }
@@ -539,7 +524,16 @@ export const CompanyStore = signalStore(
       }
     };
 
-    const onSetCompanyProperty = (property: string, newValue: string): void => {
+    const onSetNewCurrentPagePagination = (currentPage: number): void => {
+      patchState(store, {
+        pagination: {
+          ...store.pagination(),
+          currentPage: currentPage,
+        },
+      });
+    };
+
+    const onSetInputNewValue = (property: string, newValue: string): void => {
       patchState(store, {
         companyData: {
           ...store.companyData(),
@@ -548,210 +542,121 @@ export const CompanyStore = signalStore(
       });
     };
 
-    const onShowModalEditForm = (): void => {
-      const selectedData = store.arrayDatasChecked()[0];
-      if (selectedData) patchState(store, { companyData: structuredClone(selectedData) });
-      patchState(store, {
-        modalForm: {
-          ...store.modalForm(),
-          isActive: true,
-          isEditForm: true,
-        },
-      });
-    };
-
-    const onHandleModalInfo = (type: string, description: string): void => {
-      patchState(store, {
-        modalInfo: {
-          ...store.modalInfo(),
-          type: type,
-          description: description,
-        },
-      });
-    };
-
-    const onCloseModalAsk = (): void => {
-      if (store.modalAsk().isActive) {
-        patchState(store, {
-          modalAsk: {
-            ...store.modalAsk(),
-            isActive: false,
-          },
-        });
+    const onShowDataList = async (): Promise<void> => {
+      try {
+        onLoading(true);
+        const response = await companyApi.getCompaniesList();
+        onClearData(response.data);
+      } catch (e: unknown) {
+        const error = e as HttpErrorResponse;
+        modalStore.onShowInfoModal('failure', error?.message);
+      } finally {
+        onLoading(false);
       }
-    };
-
-    const onCloseModalInfo = (): void => {
-      if (store.modalInfo().isActionOk) {
-        onShowDataList();
-        onCloseModalForm();
-        onCloseModalAsk();
-        patchState(store, {
-          modalInfo: {
-            ...store.modalInfo(),
-            isActionOk: false,
-            isActive: false,
-          },
-        });
-        clearTableCheckbox();
-      } else {
-        patchState(store, {
-          modalInfo: {
-            ...store.modalInfo(),
-            isActive: false,
-          },
-        });
-      }
-    };
-
-    const onShowModalAskToDelete = (): void => {
-      const selectedData = store.arrayDatasChecked()[0];
-      if (selectedData) {
-        onHandleModalInfo(
-          'confirmation',
-          `Deseja excluir ${store.arrayDatasChecked().length == 1 ? selectedData.name : 'os registros selecionados?'}`
-        );
-        patchState(store, {
-          modalAsk: {
-            ...store.modalAsk(),
-            isActive: true,
-          },
-        });
-      }
-    };
-
-    const onModalAskActionOk = (): void => {
-      deleteRegister();
-      onClearCompanyData();
-      patchState(store, {
-        modalInfo: {
-          ...store.modalInfo(),
-          isActive: true,
-          isActionOk: true,
-        },
-      });
-    };
-
-    const changePage = (page: number): void => {
-      patchState(store, {
-        pagination: {
-          ...store.pagination(),
-          currentPage: page,
-        },
-        tableCheckbox: {
-          ...store.tableCheckbox(),
-          header: false,
-        },
-      });
-      onShowDataList();
     };
 
     const finalData = {
-      idCompany: 0,
-      date: '',
-      type: 0,
-      nickname: '',
-      name: '',
-      cnpj: '',
-      ie: '',
-      im: '',
-    } as ICompany;
+      company: {
+        idCompany: 0,
+        type: 0,
+        nickname: '',
+        name: '',
+        cnpj: '',
+        ie: '',
+        im: '',
+      } as ICompany,
+      address: {
+        idAddress: 0,
+        postalCode: '',
+        address: '',
+        number: '',
+        complement: '',
+        district: '',
+        city: '',
+        state: '',
+      } as IAddress,
+      employee: {
+        idEmployee: 0,
+        name: '',
+        cpf: '',
+        department: '',
+        position: '',
+        email: '',
+        deskphone: '',
+        cellphone: '',
+      } as IEmployee,
+    };
 
-    const removeMask = (data: string): string => {
+    const onMaskNumericalField = (data: string): string => {
       return (data ?? '').replace(/[\D]/g, '');
     };
 
-    const setFinalData = (): void => {
-      finalData.idCompany = store.companyData().idCompany;
-      finalData.type = store.companyData().type;
-      finalData.nickname = store.companyData().nickname;
-      finalData.name = store.companyData().name;
-      finalData.cnpj = removeMask(store.companyData()?.cnpj || '');
-      finalData.ie = removeMask(store.companyData().ie || '');
-      finalData.im = removeMask(store.companyData().im || '');
+    const onSetFinalData = (): void => {
+      finalData.company.idCompany = store.companyData().idCompany;
+      finalData.company.type = store.companyData().type;
+      finalData.company.nickname = store.companyData().nickname;
+      finalData.company.name = store.companyData().name;
+      finalData.company.cnpj = onMaskNumericalField(store.companyData()?.cnpj || '');
+      finalData.company.ie = onMaskNumericalField(store.companyData().ie || '');
+      finalData.company.im = onMaskNumericalField(store.companyData().im || '');
+      finalData.address.idAddress = addressStore.addressData().idAddress;
+      finalData.address.postalCode = onMaskNumericalField(addressStore.addressData().postalCode);
+      finalData.address.address = addressStore.addressData().address;
+      finalData.address.number = addressStore.addressData().number;
+      finalData.address.complement = addressStore.addressData().complement;
+      finalData.address.district = addressStore.addressData().district;
+      finalData.address.city = addressStore.addressData().city;
+      finalData.address.state = addressStore.addressData().state;
+      finalData.employee.isDefault = employeeStore.employeeData().isDefault;
+      finalData.employee.idEmployee = employeeStore.employeeData().idEmployee;
+      finalData.employee.name = employeeStore.employeeData().name;
+      finalData.employee.department = employeeStore.employeeData().department;
+      finalData.employee.position = employeeStore.employeeData().position;
+      finalData.employee.email = employeeStore.employeeData().email;
+      finalData.employee.deskphone = onMaskNumericalField(
+        employeeStore.employeeData().deskphone || ''
+      );
+      finalData.employee.cellphone = onMaskNumericalField(
+        employeeStore.employeeData().cellphone || ''
+      );
     };
 
-    const saveRegister = async (): Promise<void> => {
+    const onSaveRegister = async (): Promise<void> => {
       try {
-        patchState(store, {
-          isLoading: true,
-        });
-        setFinalData();
-        const response = await httpRequestService.sendHttpRequest(
-          `${environment.apiUrl}/company`,
-          'POST',
-          finalData
-        );
-        if (!store.modalForm().isEditForm) {
-          patchState(store, {
-            pagination: {
-              ...store.pagination(),
-              currentPage: 1,
-            },
-          });
+        onLoading(true);
+        onSetFinalData();
+        const response = await companyApi.saveCompany(finalData);
+        if (response.status) {
+          modalStore.onModalInfoActionOk(true);
+          modalStore.onShowInfoModal('success', response.message);
+          onShowDataList();
+        } else {
+          modalStore.onShowInfoModal('failure', response.message);
         }
-        onHandleModalInfo('success', response.msg);
-        patchState(store, {
-          modalInfo: {
-            ...store.modalInfo(),
-            isActionOk: true,
-            isActive: true,
-          },
-        });
-      } catch (e: any) {
-        onHandleModalInfo('failure', e?.error?.msg);
-        patchState(store, {
-          modalInfo: {
-            ...store.modalInfo(),
-            isActive: true,
-          },
-        });
+      } catch (e: unknown) {
+        const error = e as HttpErrorResponse;
+        modalStore.onShowInfoModal('failure', error?.message);
       } finally {
-        patchState(store, {
-          isLoading: false,
-        });
+        onLoading(false);
       }
     };
 
-    const deleteRegister = async (): Promise<void> => {
+    const onDeleteRegister = async (idCompany: number): Promise<void> => {
       try {
-        patchState(store, {
-          isLoading: true,
-        });
-        const response = await httpRequestService.sendHttpRequest(
-          `${environment.apiUrl}/companies/delete`,
-          'POST',
-          store.arrayDatasChecked()
-        );
-        patchState(store, {
-          pagination: {
-            ...store.pagination(),
-            currentPage: 1,
-          },
-          modalAsk: {
-            ...store.modalAsk(),
-            isActive: true,
-          },
-        });
-        onHandleModalInfo('success', response.msg);
-        patchState(store, {
-          modalInfo: {
-            ...store.modalInfo(),
-            isActive: true,
-          },
-        });
-      } catch (e: any) {
-        onHandleModalInfo('failure', e?.error?.msg);
-        patchState(store, {
-          modalInfo: {
-            ...store.modalInfo(),
-            isActive: true,
-          },
-        });
+        onLoading(true);
+        const response = await companyApi.deleteCompany(idCompany);
+        if (response.status) {
+          modalStore.onModalInfoActionOk(true);
+          modalStore.onShowInfoModal('success', response.message);
+          onShowDataList();
+        } else {
+          modalStore.onShowInfoModal('failure', response.message);
+        }
+      } catch (e: unknown) {
+        const error = e as HttpErrorResponse;
+        modalStore.onShowInfoModal('failure', error?.message);
       } finally {
-        patchState(store, {
-          isLoading: false,
-        });
+        onLoading(false);
       }
     };
 
@@ -759,40 +664,33 @@ export const CompanyStore = signalStore(
       onTabChange,
       onSetInputSearchValue,
       onChangeTabIdx,
-      onClearCompanyData,
       onShowHeader,
       onShowDataList,
-      fillNewCheckboxArray,
-      onHandleModalInfo,
-      onShowModalAskToDelete,
-      onCloseModalForm,
-      onShowModalEditForm,
+      onFillNewCheckboxArray,
       onHeaderCheckboxChecked,
       onBodyCheckboxChange,
       onCheckTableCheckboxStatus,
       onHeaderCheckboxDisabled,
       onKeyPressOnSearchInput,
-      onClearAllDatas,
+      onClearData,
       onKeyPressOnNotFoundFilterRegister,
       onKeyPressOnFilterBox,
       onTableFilterBasedOnSearchInput,
       onFilterThroughFilterBox,
       onClearFilterItem,
       onInputValueChange,
-      clearTableCheckbox,
-      onCloseModalAsk,
-      onCloseModalInfo,
-      onModalAskActionOk,
-      changePage,
-      removeMask,
-      setFinalData,
-      saveRegister,
-      deleteRegister,
+      onClearTableCheckbox,
+      onRemoveNumericalMask: onMaskNumericalField,
+      onSetFinalData,
+      onSaveRegister,
+      onDeleteRegister,
       onSortTableHeader,
       onShowTableHeaderBox,
       onShowFilterBox,
       onGeneratePaginationPagesArray,
-      onSetCompanyProperty,
+      onSetInputNewValue,
+      onSetNewCurrentPagePagination,
+      onLoading,
     };
   })
 );

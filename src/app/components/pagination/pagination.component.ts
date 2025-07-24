@@ -11,11 +11,18 @@ import { MatIconModule } from '@angular/material/icon';
 export class PaginationComponent {
   public version = 'v1';
   @Input() pagesArray: string[] | number[] = [];
-  @Input() dataLength = 1;
+  @Input() totalRegister = 1;
   @Input() currentPage = 1;
   @Input() qtyPerPage = 10;
   @Input() totalPages = 1;
   @Output() currentPageEmitter = new EventEmitter<number>();
+
+  onPageNumberClick(page: string | number): void {
+    if (typeof page == 'number') {
+      const pageNumber = Number(page);
+      this.currentPageEmitter.emit(pageNumber);
+    }
+  }
 
   goBackPage(): void {
     if (this.currentPage <= 1) {

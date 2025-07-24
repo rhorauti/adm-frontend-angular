@@ -21,7 +21,6 @@ export const AuthStore = signalStore(
       showConfirmPasswordError: false,
     },
     isMenuBarActive: true,
-    isAuthPage: false,
     token: '',
     isLoading: false,
   })),
@@ -93,12 +92,6 @@ export const AuthStore = signalStore(
     const onShowMenuBar = (isMenuBarActive: boolean): void => {
       patchState(store, {
         isMenuBarActive: isMenuBarActive,
-      });
-    };
-
-    const onShowAuthPage = (isAuthPage: boolean): void => {
-      patchState(store, {
-        isAuthPage: isAuthPage,
       });
     };
 
@@ -192,7 +185,6 @@ export const AuthStore = signalStore(
       onSetUserProperty,
       helpAndBorderColor,
       passwordHelpColor,
-      onShowAuthPage,
       onSetErrorProperty,
     };
   })

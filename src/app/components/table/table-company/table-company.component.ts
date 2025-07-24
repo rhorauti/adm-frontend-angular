@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, computed, inject, OnInit } from '@angular/core';
 import { TableBaseComponent } from '@components/table/table-base/table-base.component';
 import { NgxMaskPipe, provideNgxMask } from 'ngx-mask';
 import { FormsModule } from '@angular/forms';
@@ -19,6 +19,16 @@ export class TableCompanyComponent implements OnInit {
   ngOnInit() {
     this.companyStore.onCheckTableCheckboxStatus(this.companyStore.tableCheckbox().body);
   }
+
+  computedFirstRegister = computed(() => {
+    return (
+      (this.companyStore.pagination().currentPage - 1) * this.companyStore.pagination().qtyPerPage
+    );
+  });
+
+  computedLastRegister = computed(() => {
+    return this.companyStore.pagination().currentPage * this.companyStore.pagination().qtyPerPage;
+  });
 
   setMask(type: string, idx?: number): string {
     if (type == 'cnpj') {

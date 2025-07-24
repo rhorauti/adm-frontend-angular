@@ -1,4 +1,5 @@
 export interface IEmployee {
+  isDefault: boolean;
   idEmployee: number;
   name: string;
   cpf?: string;
@@ -7,5 +8,4 @@ export interface IEmployee {
   email?: string;
   deskphone?: string;
   cellphone?: string;
-  idCompany: number;
 }

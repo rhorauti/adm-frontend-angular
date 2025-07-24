@@ -1,4 +1,4 @@
-<div>
+<aside>
   <div
     class="fixed top-0 left-0 w-full h-screen bg-black opacity-30 z-40"
     [ngClass]="isSideBarActive ? 'block' : 'hidden'"></div>
@@ -33,25 +33,4 @@
       </footer>
     }
   </div>
-</div>
-<!-- </div> -->
-<!-- @if (tableHeaderContract.isTableHeaderModalActive) {
-    <div
-      class="grid md:gap-1 gap-2 md:absolute px-4 py-2 border border-gray-500 bg-white text-black rounded-md text-sm w-full md:w-fit md:-left-48 md:-top-16 z-50">
-      @for (header of tableHeaderContract.headers; track $index) {
-        @if ($index != 0) {
-          <div>
-            <input
-              (click)="tableHeaderContract.onShowHeader($index)"
-              type="checkbox"
-              [value]="header.name"
-              [checked]="header.isHeaderActive"
-              [disabled]="header.name == 'Id'"
-              [id]="header.id"
-              class="mr-2" />
-            <label [for]="header.id">{{ header.name }}</label>
-          </div>
-        }
-      }
-    </div>
-  } -->
+</aside>

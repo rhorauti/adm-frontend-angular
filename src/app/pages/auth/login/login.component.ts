@@ -5,11 +5,12 @@ import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { ModalInfoComponent } from '@components/modal/modal-info/modal-info.component';
 import { LoadingComponent } from '@components/loading/loading.component';
-import { AuthApi } from '@core/api/http/auth.api';
+import { AuthApi } from '@core/http/auth/auth.api';
 import { ButtonLabelComponent } from '../../../components/button/button-label/button-label.component';
 import { InputComponent } from '@components/input/input.component';
 import { ModalStore } from '@store/modal/modal.store';
 import { AuthStore } from '@store/auth/auth.store';
+import { HttpErrorResponse } from '@angular/common/http';
 
 @Component({
   selector: 'app-login',
@@ -37,6 +38,13 @@ export class LoginComponent {
     }
   }
 
+  onCloseLoginModal(): void {
+    this.modalStore.onCloseInfoModal(() => {
+      this.authStore.onShowMenuBar(true);
+      this.router.navigate(['/companies']);
+    });
+  }
+
   /**
    * authenticateUser
    * Função que envia os dados do usuário (email e senha) para validação do backend
@@ -62,8 +70,9 @@ export class LoginComponent {
         }
         this.modalStore.onShowInfoModal('Autenticação', response.message);
       }
-    } catch (e: any) {
-      this.modalStore.onShowInfoModal('Autenticação', e.error.message);
+    } catch (e: unknown) {
+      const error = e as HttpErrorResponse;
+      this.modalStore.onShowInfoModal('Autenticação', error.message);
     } finally {
       this.authStore.onLoading(false);
     }

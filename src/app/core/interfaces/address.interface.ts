@@ -1,8 +1,5 @@
 export interface IAddress {
   idAddress: number;
-  nickname: string;
-  isDelivery: number;
-  isBilling: number;
   postalCode: string;
   address: string;
   number?: string;
@@ -10,7 +7,6 @@ export interface IAddress {
   district?: string;
   city?: string;
   state?: string;
-  idCompany: number;
 }
 
 export interface IResponseViaCep {

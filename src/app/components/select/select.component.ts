@@ -3,16 +3,18 @@ import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
 
+type SelectType = 'state' | 'addressType';
+
 @Component({
-    selector: 'app-select',
-    imports: [CommonModule, MatIconModule, FormsModule],
-    templateUrl: './select.component.html',
-    styleUrl: './select.component.scss'
+  selector: 'app-select',
+  imports: [CommonModule, MatIconModule, FormsModule],
+  templateUrl: './select.component.html',
+  styleUrl: './select.component.scss',
 })
 export class SelectComponent implements OnInit {
   public optionList: string[] = [];
   @Input() selectValue = 'Selecione um item';
-  @Input() selectType = '';
+  @Input() selectType: SelectType = 'state';
   @Output() selectValueEmitter = new EventEmitter<string>();
 
   ngOnInit(): void {
@@ -49,7 +51,7 @@ export class SelectComponent implements OnInit {
         ];
         break;
       }
-      case 'tipoLogradouro': {
+      case 'addressType': {
         this.optionList = [
           'Rua',
           'Avenida',

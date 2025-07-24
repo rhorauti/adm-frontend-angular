@@ -1,3 +1,7 @@
+import { IAddress } from './address.interface';
+import { IEmployee } from './employee.interface';
+import { IBaseResponse } from './response.interface';
+
 export interface ICompany {
   idCompany: number;
   type: number;
@@ -8,12 +12,12 @@ export interface ICompany {
   im?: string;
 }
 
-export interface IModalCheck {
-  isActive: boolean;
-  isActionOk: boolean;
+export interface ICompanyRequest {
+  company: ICompany;
+  address: IAddress;
+  employee: IEmployee;
 }
 
-export interface ITableCheckbox {
-  header: boolean;
-  body: boolean[];
+export interface IResponseCompany extends IBaseResponse {
+  data: ICompany[];
 }
