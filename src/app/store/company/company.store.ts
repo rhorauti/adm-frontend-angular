@@ -12,8 +12,10 @@ import { AddressStore } from '@store/address/address.store';
 import { EmployeeStore } from '@store/employee/employee.store';
 import { IAddress } from '@core/interfaces/address.interface';
 import { IEmployee } from '@core/interfaces/employee.interface';
+import { Router } from '@angular/router';
 
 type FilterMethod = 'input-search' | 'filter-box';
+const defaultTableHeaderIcon = 'unfold_more';
 
 export const CompanyStore = signalStore(
   { providedIn: 'root' },
@@ -26,27 +28,55 @@ export const CompanyStore = signalStore(
     inputSearchValue: '',
     isTableHeaderBoxActive: false,
     tableHeaders: [
-      { id: 0, isHeaderActive: true, sort: 0, headerName: '', databaseField: '' },
-      { id: 1, isHeaderActive: true, sort: 0, headerName: 'Id', databaseField: 'idCompany' },
+      {
+        id: 0,
+        isHeaderActive: true,
+        sort: 0,
+        icon: defaultTableHeaderIcon,
+        headerName: 'Id',
+        databaseField: 'idCompany',
+      },
+      {
+        id: 1,
+        isHeaderActive: true,
+        sort: 0,
+        icon: defaultTableHeaderIcon,
+        headerName: 'Nome Fantasia',
+        databaseField: 'nickname',
+      },
       {
         id: 2,
         isHeaderActive: true,
         sort: 0,
-        headerName: 'Nome Fantasia',
-        databaseField: 'nickname',
+        icon: defaultTableHeaderIcon,
+        headerName: 'Razão Social',
+        databaseField: 'name',
       },
-      { id: 3, isHeaderActive: true, sort: 0, headerName: 'Razão Social', databaseField: 'name' },
-      { id: 4, isHeaderActive: true, sort: 0, headerName: 'CNPJ/CPF', databaseField: 'cnpj' },
-      { id: 5, isHeaderActive: false, sort: 0, headerName: 'Inscr. Estadual', databaseField: 'ie' },
       {
-        id: 6,
+        id: 3,
+        isHeaderActive: true,
+        sort: 0,
+        icon: defaultTableHeaderIcon,
+        headerName: 'CNPJ/CPF',
+        databaseField: 'cnpj',
+      },
+      {
+        id: 4,
         isHeaderActive: false,
         sort: 0,
+        icon: defaultTableHeaderIcon,
+        headerName: 'Inscr. Estadual',
+        databaseField: 'ie',
+      },
+      {
+        id: 5,
+        isHeaderActive: false,
+        sort: 0,
+        icon: defaultTableHeaderIcon,
         headerName: 'Inscr. Municipal',
         databaseField: 'im',
       },
     ] as ITableHeader[],
-    tableHeaderSortList: ['normal', 'asc', 'desc'],
     tableCheckbox: {
       header: false,
       body: [],
@@ -88,7 +118,6 @@ export const CompanyStore = signalStore(
       qtyPerPage: 10,
       pagesArray: [],
     } as IPagination,
-    isEditRegister: false,
     isLoading: false,
   })),
 
@@ -220,21 +249,71 @@ export const CompanyStore = signalStore(
       });
     };
 
+    const onSetTableHeaderIcon = (): void => {
+      patchState(store, {
+        tableHeaders: store.tableHeaders().map(header => {
+          if (header.sort == 0) {
+            return { ...header, icon: defaultTableHeaderIcon };
+          } else if (header.sort == 1) {
+            return { ...header, icon: 'expand_more' };
+          } else {
+            return { ...header, icon: 'expand_less' };
+          }
+        }),
+      });
+    };
+
+    const onClearSortFilterIcon = (): void => {
+      const sortedHeaders: ITableHeader[] = [];
+      store.tableHeaders().forEach(header => {
+        if (header.sort != 0) sortedHeaders.push(header);
+      });
+      if (sortedHeaders.length > 1) {
+        onClearData();
+      }
+    };
+
     const onSetTableHeaderSortMethod = (idx: number) => {
-      if (idx != store.tableHeaders().length - 1) {
+      patchState(store, {
+        tableHeaders: store.tableHeaders().map((header, index) => {
+          if (idx == index) {
+            return { ...header, sort: (header.sort + 1) % 3 };
+          }
+          return { ...header, sort: 0 };
+        }),
+      });
+    };
+
+    const onSortTable = (idx: number): void => {
+      if (store.tableHeaders()[idx].sort == 0) {
         patchState(store, {
-          tableHeaders: store.tableHeaders().map((header, index) => {
-            if (idx == index) {
-              return { ...header, sort: (header.sort + 1) % 3 };
+          companiesData: store.initialTableData(),
+        });
+      } else {
+        const header = store.tableHeaders()[idx];
+        const key = header.databaseField as keyof ICompany;
+        const sortDirection = header.sort;
+        patchState(store, {
+          companiesData: [...store.companiesData()].sort((a, b) => {
+            const valueA = a[key];
+            const valueB = b[key];
+            let comparison = 0;
+            if (typeof valueA === 'number' && typeof valueB === 'number') {
+              comparison = valueA - valueB;
+            } else if (typeof valueA === 'string' && typeof valueB === 'string') {
+              comparison = valueA.localeCompare(valueB);
             }
-            return { ...header, sort: 0 };
+            return sortDirection == 2 ? comparison * -1 : comparison;
           }),
         });
       }
     };
 
     const onSortTableHeader = (idx: number) => {
+      onClearSortFilterIcon();
       onSetTableHeaderSortMethod(idx);
+      onSetTableHeaderIcon();
+      onSortTable(idx);
     };
 
     const onHeaderCheckboxChecked = (isChecked: boolean): void => {
@@ -303,6 +382,7 @@ export const CompanyStore = signalStore(
         initialTableData: companiesFilter,
         companiesData: companiesFilter,
         isFilterResultZeroRegister: false,
+        isDelBtnDisabled: true,
         inputSearchValue: '',
         companyData: {
           idCompany: 0,
@@ -341,8 +421,17 @@ export const CompanyStore = signalStore(
           pagesArray: [],
         },
       });
+      onClearSortFilter();
       onFillNewCheckboxArray(companiesFilter.length);
       onGeneratePaginationPagesArray();
+    };
+
+    const onClearSortFilter = (): void => {
+      patchState(store, {
+        tableHeaders: store.tableHeaders().map(header => {
+          return { ...header, sort: 0, icon: defaultTableHeaderIcon };
+        }),
+      });
     };
 
     const onFilterTableThroughSearchInput = (): void => {
@@ -490,6 +579,17 @@ export const CompanyStore = signalStore(
       } else {
         onFilterTableThroughSearchInput();
       }
+    };
+
+    const onRedirectToEditPage = (companyData: ICompany): void => {
+      onSetCompanyData(companyData);
+      modalStore.onRedirectPage(`/companies/edit/${store.companyData().idCompany}`);
+    };
+
+    const onSetCompanyData = (companyData: ICompany): void => {
+      patchState(store, {
+        companyData: companyData,
+      });
     };
 
     const onGeneratePaginationPagesArray = (): void => {
@@ -690,6 +790,8 @@ export const CompanyStore = signalStore(
       onGeneratePaginationPagesArray,
       onSetInputNewValue,
       onSetNewCurrentPagePagination,
+      onRedirectToEditPage,
+      onSetCompanyData,
       onLoading,
     };
   })

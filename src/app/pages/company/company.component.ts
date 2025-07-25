@@ -1,4 +1,4 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, computed, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { TabComponent } from '@components/tab/tab.component';
 import { TableCompanyComponent } from '../../components/table/table-company/table-company.component';

@@ -1,9 +1,7 @@
-import { HttpErrorResponse } from '@angular/common/http';
 import { computed, inject } from '@angular/core';
 import { ThirdPartApi } from '@core/http/third-part/third-part.api';
 import { IAddress } from '@core/interfaces/address.interface';
 import { patchState, signalStore, withComputed, withMethods, withState } from '@ngrx/signals';
-import { ModalStore } from '@store/modal/modal.store';
 
 export const AddressStore = signalStore(
   { providedIn: 'root' },
@@ -40,7 +38,13 @@ export const AddressStore = signalStore(
       });
     };
 
-    const onSetAddressPropertiesValues = async (): Promise<void> => {
+    const onSetAddressValue = (address: IAddress): void => {
+      patchState(store, {
+        addressData: { ...address },
+      });
+    };
+
+    const onSetAddressViaCEPValues = async (): Promise<void> => {
       const response = await thirdPartApi.getAddressFromCep(store.addressData().postalCode);
       if (response) {
         patchState(store, {
@@ -73,6 +77,11 @@ export const AddressStore = signalStore(
       });
     };
 
-    return { onSetInputNewValue, onClearData, onSetAddressPropertiesValues };
+    return {
+      onSetInputNewValue,
+      onClearData,
+      onSetAddressViaCEPValues,
+      onSetAddressValue,
+    };
   })
 );

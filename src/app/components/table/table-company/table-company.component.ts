@@ -5,10 +5,19 @@ import { NgxMaskPipe, provideNgxMask } from 'ngx-mask';
 import { FormsModule } from '@angular/forms';
 import { CompanyStore } from '@store/company/company.store';
 import { MatIconModule } from '@angular/material/icon';
+import { ButtonCloseComponent } from '@components/button/button-close/button-close.component';
 
 @Component({
   selector: 'app-table-company',
-  imports: [CommonModule, FormsModule, TableBaseComponent, NgxMaskPipe, MatIconModule],
+  imports: [
+    CommonModule,
+    FormsModule,
+    TableBaseComponent,
+    NgxMaskPipe,
+    MatIconModule,
+    ButtonCloseComponent,
+    ButtonCloseComponent,
+  ],
   providers: [provideNgxMask()],
   templateUrl: './table-company.component.html',
   styleUrl: './table-company.component.scss',

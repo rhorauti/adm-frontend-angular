@@ -19,7 +19,7 @@
           }
           <h1 class="text-lg font-bold">{{ title }}</h1>
         </div>
-        <app-button-close (click)="onCloseBtnClick()"></app-button-close>
+        <app-button-close (click)="onCloseBtnClick()" [isSmallSize]="false"></app-button-close>
       </header>
       <ng-content select="[body]" class="overflow-auto"></ng-content>
     </section>

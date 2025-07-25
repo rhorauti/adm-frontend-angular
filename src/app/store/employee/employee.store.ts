@@ -26,6 +26,12 @@ export const EmployeeStore = signalStore(
       });
     };
 
+    const onSetEmployeeValue = (employee: IEmployee): void => {
+      patchState(store, {
+        employeeData: { ...employee },
+      });
+    };
+
     const onClearData = (): void => {
       patchState(store, {
         employeeData: {
@@ -41,6 +47,6 @@ export const EmployeeStore = signalStore(
       });
     };
 
-    return { onSetInputNewValue, onClearData };
+    return { onSetInputNewValue, onClearData, onSetEmployeeValue };
   })
 );

@@ -10,7 +10,7 @@ import { MatIconModule } from '@angular/material/icon';
 })
 export class ButtonCloseComponent implements OnInit {
   @Input() iconClass = '';
-  @Input() isSmallSize = false;
+  @Input() isSmallSize = true;
 
   @Output() keyboardEmitter = new EventEmitter();
 

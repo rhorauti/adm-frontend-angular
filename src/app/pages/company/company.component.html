@@ -47,56 +47,55 @@
               <div class="flex items-center gap-2">
                 <p>Pesquisa: {{ companyStore.filterHelp().inputSearch }}</p>
                 <app-button-close
-                  (click)="companyStore.onClearFilterItem('inputSearch', 'input-search')"
-                  [isSmallSize]="true"></app-button-close>
+                  (click)="
+                    companyStore.onClearFilterItem('inputSearch', 'input-search')
+                  "></app-button-close>
               </div>
             }
             @if (companyStore.filterHelp().idCompany.length > 0) {
               <div class="flex items-center gap-2">
                 <p>Id: {{ companyStore.filterHelp().idCompany }}</p>
                 <app-button-close
-                  (click)="companyStore.onClearFilterItem('idCompany', 'filter-box')"
-                  [isSmallSize]="true"></app-button-close>
+                  (click)="
+                    companyStore.onClearFilterItem('idCompany', 'filter-box')
+                  "></app-button-close>
               </div>
             }
             @if (companyStore.filterHelp().nickname.length > 0) {
               <div class="flex items-center gap-2">
                 <p>Nome Fantasia: {{ companyStore.filterHelp().nickname }}</p>
                 <app-button-close
-                  (click)="companyStore.onClearFilterItem('nickname', 'filter-box')"
-                  [isSmallSize]="true"></app-button-close>
+                  (click)="
+                    companyStore.onClearFilterItem('nickname', 'filter-box')
+                  "></app-button-close>
               </div>
             }
             @if (companyStore.filterHelp().name.length > 0) {
               <div class="flex items-center gap-2">
                 <p>Raz.Social: {{ companyStore.filterHelp().name }}</p>
                 <app-button-close
-                  (click)="companyStore.onClearFilterItem('name', 'filter-box')"
-                  [isSmallSize]="true"></app-button-close>
+                  (click)="companyStore.onClearFilterItem('name', 'filter-box')"></app-button-close>
               </div>
             }
             @if (companyStore.filterHelp().cnpj.length > 0) {
               <div class="flex items-center gap-2">
                 <p>CNPJ: {{ companyStore.filterHelp().cnpj }}</p>
                 <app-button-close
-                  (click)="companyStore.onClearFilterItem('cnpj', 'filter-box')"
-                  [isSmallSize]="true"></app-button-close>
+                  (click)="companyStore.onClearFilterItem('cnpj', 'filter-box')"></app-button-close>
               </div>
             }
             @if (companyStore.filterHelp().ie) {
               <div class="flex items-center gap-2">
                 <p>Inscr.Estadual: {{ companyStore.filterHelp().ie }}</p>
                 <app-button-close
-                  (click)="companyStore.onClearFilterItem('ie', 'filter-box')"
-                  [isSmallSize]="true"></app-button-close>
+                  (click)="companyStore.onClearFilterItem('ie', 'filter-box')"></app-button-close>
               </div>
             }
             @if (companyStore.filterHelp().im) {
               <div class="flex items-center gap-2">
                 <p>Inscr.Municipal: {{ companyStore.filterHelp().im }}</p>
                 <app-button-close
-                  (click)="companyStore.onClearFilterItem('im', 'filter-box')"
-                  [isSmallSize]="true"></app-button-close>
+                  (click)="companyStore.onClearFilterItem('im', 'filter-box')"></app-button-close>
               </div>
             }
             <button
@@ -277,7 +276,7 @@
   [isModalActive]="modalStore.ask().isActive"
   [type]="'warning'"
   [title]="'Cadastro de empresas'"
-  [description]="`Deseja excluir o registro ${companyStore.companyData().name}`"
+  [description]="`Deseja excluir o registro <b>${this.companyStore.itemSelected()?.name || ''}</b>?`"
   (closeActionNokEmitter)="modalStore.onCloseAskModalActionNok()"
   (closeActionOkEmitter)="onCloseAskModalActionOk()" />
 <app-modal-info

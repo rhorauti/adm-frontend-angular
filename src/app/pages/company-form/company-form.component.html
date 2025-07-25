@@ -86,7 +86,7 @@
             [id]="'company-form-cep'"
             [inputName]="'postalCode'"
             [inputValue]="addressStore.addressData().postalCode"
-            (changeEmitter)="addressStore.onSetAddressPropertiesValues()"
+            (changeEmitter)="addressStore.onSetAddressViaCEPValues()"
             (inputValueEmitter)="addressStore.onSetInputNewValue('postalCode', $event)" />
         </div>
         <div class="flex flex-col gap-1 grow">

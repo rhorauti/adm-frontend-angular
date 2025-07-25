@@ -1,3 +1,5 @@
+import { IBaseResponse } from './response.interface';
+
 export interface IAddress {
   idAddress: number;
   postalCode: string;
@@ -7,6 +9,10 @@ export interface IAddress {
   district?: string;
   city?: string;
   state?: string;
+}
+
+export interface IResponseAddress extends IBaseResponse {
+  data: IAddress;
 }
 
 export interface IResponseViaCep {
