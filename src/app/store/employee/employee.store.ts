@@ -1,5 +1,9 @@
+import { HttpErrorResponse } from '@angular/common/http';
+import { inject } from '@angular/core';
+import { EmployeeApi } from '@core/http/employee/employee.api';
 import { IEmployee } from '@core/interfaces/employee.interface';
 import { patchState, signalStore, withMethods, withState } from '@ngrx/signals';
+import { ModalStore } from '@store/modal/modal.store';
 
 export const EmployeeStore = signalStore(
   { providedIn: 'root' },
@@ -17,6 +21,9 @@ export const EmployeeStore = signalStore(
   })),
 
   withMethods(store => {
+    const modalStore = inject(ModalStore);
+    const employeeApi = inject(EmployeeApi);
+
     const onSetInputNewValue = (property: string, value: string | number): void => {
       patchState(store, {
         employeeData: {
@@ -28,7 +35,16 @@ export const EmployeeStore = signalStore(
 
     const onSetEmployeeValue = (employee: IEmployee): void => {
       patchState(store, {
-        employeeData: { ...employee },
+        employeeData: {
+          ...store.employeeData(),
+          name: !employee.name ? '' : employee.name,
+          cpf: !employee.cpf ? '' : employee.cpf,
+          department: !employee.department ? '' : employee.department,
+          position: !employee.position ? '' : employee.position,
+          email: !employee.email ? '' : employee.email,
+          deskphone: !employee.deskphone ? '' : employee.deskphone,
+          cellphone: !employee.cellphone ? '' : employee.cellphone,
+        },
       });
     };
 
@@ -47,6 +63,24 @@ export const EmployeeStore = signalStore(
       });
     };
 
-    return { onSetInputNewValue, onClearData, onSetEmployeeValue };
+    const onGetEmployeeInfo = async (idCompany: number): Promise<void> => {
+      try {
+        const employee = await employeeApi.onGetCompanyEmployee(idCompany);
+        if (employee.data) {
+          onSetEmployeeValue(employee.data);
+        } else {
+          return;
+        }
+      } catch (e: unknown) {
+        const error = e as HttpErrorResponse;
+        console.log('Erro ao trazer as informações de contato' + error.message);
+        modalStore.onShowInfoModal(
+          'Formulário de cadastro',
+          'Erro ao trazer as informações do contato.'
+        );
+      }
+    };
+
+    return { onSetInputNewValue, onClearData, onSetEmployeeValue, onGetEmployeeInfo };
   })
 );

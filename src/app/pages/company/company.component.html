@@ -123,6 +123,7 @@
       <p class="font-semibold">Nenhum registro encontrado</p>
       @if (!companyStore.isFilterResultZeroRegister()) {
         <app-button-label
+          (click)="router.navigate(['/companies/new'])"
           [showIcon]="true"
           [iconName]="'add'"
           [label]="'Adicionar uma nova empresa'" />

@@ -12,7 +12,6 @@ import { AddressStore } from '@store/address/address.store';
 import { EmployeeStore } from '@store/employee/employee.store';
 import { IAddress } from '@core/interfaces/address.interface';
 import { IEmployee } from '@core/interfaces/employee.interface';
-import { Router } from '@angular/router';
 
 type FilterMethod = 'input-search' | 'filter-box';
 const defaultTableHeaderIcon = 'unfold_more';
@@ -81,6 +80,7 @@ export const CompanyStore = signalStore(
       header: false,
       body: [],
     } as ITableCheckbox,
+    tableItemsBox: [] as boolean[],
     initialTableData: [] as ICompany[],
     companiesData: [] as ICompany[],
     isDelBtnDisabled: false,
@@ -237,6 +237,12 @@ export const CompanyStore = signalStore(
           ...store.tableCheckbox(),
           body: Array.from({ length: dataLength }, () => false),
         },
+      });
+    };
+
+    const onFillNewTableItemBoxArray = (dataLength: number): void => {
+      patchState(store, {
+        tableItemsBox: Array.from({ length: dataLength }, () => false),
       });
     };
 
@@ -423,6 +429,7 @@ export const CompanyStore = signalStore(
       });
       onClearSortFilter();
       onFillNewCheckboxArray(companiesFilter.length);
+      onFillNewTableItemBoxArray(companiesFilter.length);
       onGeneratePaginationPagesArray();
     };
 
@@ -642,6 +649,40 @@ export const CompanyStore = signalStore(
       });
     };
 
+    const onCloseTableItemBox = (): void => {
+      patchState(store, {
+        tableItemsBox: store.tableItemsBox().map(() => false),
+      });
+    };
+
+    const onShowTableItemBox = (event: MouseEvent | KeyboardEvent, idx: number): void => {
+      event.stopPropagation();
+      patchState(store, {
+        tableItemsBox: store.tableItemsBox().map((value, index) => {
+          if (!value && index == idx) {
+            return true;
+          } else {
+            return false;
+          }
+        }),
+      });
+    };
+
+    const onCloneRegister = (companyData: ICompany): void => {
+      patchState(store, {
+        companyData: companyData,
+      });
+      addressStore.onGetAddressInfo(companyData.idCompany);
+      employeeStore.onGetEmployeeInfo(companyData.idCompany);
+      patchState(store, {
+        companyData: {
+          ...store.companyData(),
+          idCompany: 0,
+        },
+      });
+      modalStore.onRedirectPage('/companies/new');
+    };
+
     const onShowDataList = async (): Promise<void> => {
       try {
         onLoading(true);
@@ -649,7 +690,7 @@ export const CompanyStore = signalStore(
         onClearData(response.data);
       } catch (e: unknown) {
         const error = e as HttpErrorResponse;
-        modalStore.onShowInfoModal('failure', error?.message);
+        modalStore.onShowInfoModal('Listar empresas', error.error?.message);
       } finally {
         onLoading(false);
       }
@@ -728,14 +769,14 @@ export const CompanyStore = signalStore(
         const response = await companyApi.saveCompany(finalData);
         if (response.status) {
           modalStore.onModalInfoActionOk(true);
-          modalStore.onShowInfoModal('success', response.message);
+          modalStore.onShowInfoModal('Cadastro de empresa', response.message);
           onShowDataList();
         } else {
-          modalStore.onShowInfoModal('failure', response.message);
+          modalStore.onShowInfoModal('Cadastro de empresa', response.error?.message || '');
         }
       } catch (e: unknown) {
         const error = e as HttpErrorResponse;
-        modalStore.onShowInfoModal('failure', error?.message);
+        modalStore.onShowInfoModal('Cadastro de empresa', error.error.message);
       } finally {
         onLoading(false);
       }
@@ -747,14 +788,14 @@ export const CompanyStore = signalStore(
         const response = await companyApi.deleteCompany(idCompany);
         if (response.status) {
           modalStore.onModalInfoActionOk(true);
-          modalStore.onShowInfoModal('success', response.message);
+          modalStore.onShowInfoModal('Excluir empresa', response.message);
           onShowDataList();
         } else {
-          modalStore.onShowInfoModal('failure', response.message);
+          modalStore.onShowInfoModal('Excluir empresa', response.error?.message || '');
         }
       } catch (e: unknown) {
         const error = e as HttpErrorResponse;
-        modalStore.onShowInfoModal('failure', error?.message);
+        modalStore.onShowInfoModal('Excluir empresa', error.error.message);
       } finally {
         onLoading(false);
       }
@@ -767,6 +808,7 @@ export const CompanyStore = signalStore(
       onShowHeader,
       onShowDataList,
       onFillNewCheckboxArray,
+      onFillNewTableItemBoxArray,
       onHeaderCheckboxChecked,
       onBodyCheckboxChange,
       onCheckTableCheckboxStatus,
@@ -780,7 +822,7 @@ export const CompanyStore = signalStore(
       onClearFilterItem,
       onInputValueChange,
       onClearTableCheckbox,
-      onRemoveNumericalMask: onMaskNumericalField,
+      onMaskNumericalField,
       onSetFinalData,
       onSaveRegister,
       onDeleteRegister,
@@ -792,6 +834,9 @@ export const CompanyStore = signalStore(
       onSetNewCurrentPagePagination,
       onRedirectToEditPage,
       onSetCompanyData,
+      onShowTableItemBox,
+      onCloseTableItemBox,
+      onCloneRegister,
       onLoading,
     };
   })

@@ -26,9 +26,9 @@
           (keydown)="goBackPage()"
           (click)="goBackPage()"
           [ngClass]="
-            currentPage == 1 ? 'text-gray-300' : 'text-gray-400 hover:bg-gray-200 cursor-pointer'
+            currentPage == 1 ? 'text-gray-300' : 'text-gray-500 hover:bg-gray-200 cursor-pointer'
           "
-          class="relative inline-flex items-center rounded-l-md px-2 py-2 ring-1 ring-gray-300 ring-inset">
+          class="relative inline-flex items-center rounded-l-md px-2 py-2 border-t border-b border-l border-gray-400">
           <mat-icon>keyboard_arrow_left</mat-icon>
         </span>
         @for (page of pagesArray; track $index) {
@@ -39,7 +39,7 @@
             [ngClass]="
               currentPage == $index + 1
                 ? 'is-active'
-                : 'text-gray-900 ring-1 ring-gray-300 hover:bg-gray-200 cursor-pointer'
+                : 'text-gray-900 border-t border-b border-l border-gray-400 hover:bg-gray-200 cursor-pointer'
             "
             class="relative inline-flex items-center px-4 py-2 text-sm"
             >{{ page }}</span
@@ -52,9 +52,9 @@
           [ngClass]="
             currentPage == totalPages
               ? 'text-gray-300'
-              : 'text-gray-400 hover:bg-gray-200 cursor-pointer'
+              : 'text-gray-500 hover:bg-gray-200 cursor-pointer'
           "
-          class="relative inline-flex items-center rounded-r-md px-2 py-2 ring-1 ring-gray-300 ring-inset">
+          class="relative inline-flex items-center rounded-r-md px-2 py-2 border border-gray-400">
           <mat-icon>keyboard_arrow_right</mat-icon>
         </span>
       </nav>

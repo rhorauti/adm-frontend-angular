@@ -1,7 +1,10 @@
+import { HttpErrorResponse } from '@angular/common/http';
 import { computed, inject } from '@angular/core';
+import { AddressApi } from '@core/http/address/address.api';
 import { ThirdPartApi } from '@core/http/third-part/third-part.api';
 import { IAddress } from '@core/interfaces/address.interface';
 import { patchState, signalStore, withComputed, withMethods, withState } from '@ngrx/signals';
+import { ModalStore } from '@store/modal/modal.store';
 
 export const AddressStore = signalStore(
   { providedIn: 'root' },
@@ -28,6 +31,8 @@ export const AddressStore = signalStore(
 
   withMethods(store => {
     const thirdPartApi = inject(ThirdPartApi);
+    const modalStore = inject(ModalStore);
+    const addressApi = inject(AddressApi);
 
     const onSetInputNewValue = (property: string, value: string | number): void => {
       patchState(store, {
@@ -40,7 +45,16 @@ export const AddressStore = signalStore(
 
     const onSetAddressValue = (address: IAddress): void => {
       patchState(store, {
-        addressData: { ...address },
+        addressData: {
+          ...store.addressData(),
+          postalCode: address.postalCode ? '' : address.postalCode,
+          address: address.address ? '' : address.address,
+          number: address.number ? '' : address.number,
+          complement: address.complement ? '' : address.complement,
+          district: address.district ? '' : address.district,
+          city: address.city ? '' : address.city,
+          state: address.state ? '' : address.state,
+        },
       });
     };
 
@@ -77,11 +91,30 @@ export const AddressStore = signalStore(
       });
     };
 
+    const onGetAddressInfo = async (idCompany: number): Promise<void> => {
+      try {
+        const address = await addressApi.onGetCompanyAddress(idCompany);
+        if (address.data) {
+          onSetAddressValue(address.data);
+        } else {
+          return;
+        }
+      } catch (e: unknown) {
+        const error = e as HttpErrorResponse;
+        console.log('Erro ao trazer as informações de endereço' + error.message);
+        modalStore.onShowInfoModal(
+          'Formulário de cadastro',
+          'Erro ao trazer as informações de endereço.'
+        );
+      }
+    };
+
     return {
       onSetInputNewValue,
       onClearData,
       onSetAddressViaCEPValues,
       onSetAddressValue,
+      onGetAddressInfo,
     };
   })
 );

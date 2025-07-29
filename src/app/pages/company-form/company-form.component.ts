@@ -37,8 +37,6 @@ export class CompanyFormComponent implements OnInit, OnDestroy {
   private activatedRoute = inject(ActivatedRoute);
   readonly router = inject(Router);
   readonly modalStore = inject(ModalStore);
-  private addressApi = inject(AddressApi);
-  private employeeApi = inject(EmployeeApi);
 
   subscription: Subscription | undefined = undefined;
   idCompany = '';
@@ -47,44 +45,8 @@ export class CompanyFormComponent implements OnInit, OnDestroy {
     this.subscription = this.activatedRoute.paramMap.subscribe(params => {
       this.idCompany = params.get('id') || '';
     });
-    this.onGetAddressInfo(Number(this.idCompany));
-    this.onGetEmployeeInfo(Number(this.idCompany));
-  }
-
-  async onGetAddressInfo(idCompany: number): Promise<void> {
-    try {
-      const address = await this.addressApi.onGetCompanyAddress(idCompany);
-      if (address.data) {
-        this.addressStore.onSetAddressValue(address.data);
-      } else {
-        return;
-      }
-    } catch (e: unknown) {
-      const error = e as HttpErrorResponse;
-      console.log('Erro ao trazer as informações de endereço' + error.message);
-      this.modalStore.onShowInfoModal(
-        'Formulário de cadastro',
-        'Erro ao trazer as informações de endereço.'
-      );
-    }
-  }
-
-  async onGetEmployeeInfo(idCompany: number): Promise<void> {
-    try {
-      const employee = await this.employeeApi.onGetCompanyEmployee(idCompany);
-      if (employee.data) {
-        this.employeeStore.onSetEmployeeValue(employee.data);
-      } else {
-        return;
-      }
-    } catch (e: unknown) {
-      const error = e as HttpErrorResponse;
-      console.log('Erro ao trazer as informações de contato' + error.message);
-      this.modalStore.onShowInfoModal(
-        'Formulário de cadastro',
-        'Erro ao trazer as informações do contato.'
-      );
-    }
+    this.addressStore.onGetAddressInfo(Number(this.idCompany));
+    this.employeeStore.onGetEmployeeInfo(Number(this.idCompany));
   }
 
   ngOnDestroy() {

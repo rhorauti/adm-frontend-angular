@@ -1,11 +1,21 @@
-import { CommonModule } from '@angular/common';
-import { Component, computed, inject, OnInit } from '@angular/core';
+import { CommonModule, DOCUMENT } from '@angular/common';
+import {
+  Component,
+  computed,
+  ElementRef,
+  inject,
+  OnDestroy,
+  OnInit,
+  QueryList,
+  ViewChildren,
+} from '@angular/core';
 import { TableBaseComponent } from '@components/table/table-base/table-base.component';
 import { NgxMaskPipe, provideNgxMask } from 'ngx-mask';
 import { FormsModule } from '@angular/forms';
 import { CompanyStore } from '@store/company/company.store';
 import { MatIconModule } from '@angular/material/icon';
 import { ButtonCloseComponent } from '@components/button/button-close/button-close.component';
+import { RouterModule } from '@angular/router';
 
 @Component({
   selector: 'app-table-company',
@@ -16,18 +26,38 @@ import { ButtonCloseComponent } from '@components/button/button-close/button-clo
     NgxMaskPipe,
     MatIconModule,
     ButtonCloseComponent,
-    ButtonCloseComponent,
+    RouterModule,
   ],
   providers: [provideNgxMask()],
   templateUrl: './table-company.component.html',
   styleUrl: './table-company.component.scss',
 })
-export class TableCompanyComponent implements OnInit {
-  companyStore = inject(CompanyStore);
+export class TableCompanyComponent implements OnInit, OnDestroy {
+  readonly companyStore = inject(CompanyStore);
+  private document = inject(DOCUMENT);
+  @ViewChildren('divBoxes') private divBoxes!: QueryList<ElementRef>;
+  @ViewChildren('iconOptions', { read: ElementRef }) private iconOptions!: QueryList<ElementRef>;
 
   ngOnInit() {
     this.companyStore.onCheckTableCheckboxStatus(this.companyStore.tableCheckbox().body);
+    this.document.addEventListener('mousedown', this.onTableItemClick);
   }
+
+  ngOnDestroy(): void {
+    this.document.removeEventListener('mousedown', this.onTableItemClick);
+  }
+
+  onTableItemClick = (event: MouseEvent): void => {
+    const targetNode = event.target as Node;
+    if (
+      !this.divBoxes.some(box => box && box.nativeElement.contains(targetNode)) &&
+      !this.iconOptions.some(icon => icon && icon.nativeElement.contains(targetNode))
+    ) {
+      this.companyStore.onCloseTableItemBox();
+    } else {
+      return;
+    }
+  };
 
   computedFirstRegister = computed(() => {
     return (

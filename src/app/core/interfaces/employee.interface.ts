@@ -1,8 +1,8 @@
 import { IBaseResponse } from './response.interface';
 
 export interface IEmployee {
-  isDefault: boolean;
   idEmployee: number;
+  isDefault: boolean;
   name: string;
   cpf?: string;
   department?: string;
