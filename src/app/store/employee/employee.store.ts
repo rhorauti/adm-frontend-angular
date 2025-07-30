@@ -35,16 +35,7 @@ export const EmployeeStore = signalStore(
 
     const onSetEmployeeValue = (employee: IEmployee): void => {
       patchState(store, {
-        employeeData: {
-          ...store.employeeData(),
-          name: !employee.name ? '' : employee.name,
-          cpf: !employee.cpf ? '' : employee.cpf,
-          department: !employee.department ? '' : employee.department,
-          position: !employee.position ? '' : employee.position,
-          email: !employee.email ? '' : employee.email,
-          deskphone: !employee.deskphone ? '' : employee.deskphone,
-          cellphone: !employee.cellphone ? '' : employee.cellphone,
-        },
+        employeeData: { ...employee },
       });
     };
 

@@ -1,119 +1,118 @@
-<div class="flex flex-col gap-4 md:p-4 p-2">
+<div class="flex flex-col gap-4">
   <div class="flex justify-between items-center">
     <app-breadcrumb [items]="['Cadastro', 'Empresas']" />
     <app-button-label
-      (click)="router.navigate(['/companies/new'])"
+      (click)="modalStore.onRedirectPage('/companies/new')"
       [iconName]="'add'"
       [label]="'Adicionar'" />
   </div>
   <app-tab
     [tabList]="companyStore.tab().tabList"
+    [selectedTabIdx]="companyStore.tab().selectedTabIdx"
     (tabChangeEmitter)="companyStore.onTabChange($event)" />
   @if (companyStore.companiesData().length > 0) {
-    <div class="flex gap-4">
-      <div class="flex flex-col gap-5 flex-grow">
-        <div class="flex justify-between leading-none">
-          <div class="flex gap-3">
-            <app-input
-              [inputValue]="companyStore.inputSearchValue()"
-              [id]="'input-filter'"
-              [placeholder]="'Id, Nome Fantasia, Razão Social'"
-              [inputName]="'search'"
-              (clickEmitter)="companyStore.onTableFilterBasedOnSearchInput()"
-              (keyboardEmitter)="companyStore.onKeyPressOnSearchInput($event)"
-              (inputValueEmitter)="companyStore.onSetInputSearchValue($event)" />
-            <app-tooltip [description]="'Filtro'" [position]="'right'">
-              <app-button-icon
-                content
-                (click)="companyStore.onShowFilterBox(true)"
-                [iconName]="'filter_list'" />
-            </app-tooltip>
-          </div>
-          <div class="flex gap-3">
-            <app-button-delete
-              (click)="modalStore.onShowAskModal()"
-              [isDisabled]="companyStore.isDelBtnDisabled()" />
-            <app-tooltip [position]="'left'" [description]="'Colunas visíveis'">
-              <app-button-icon
-                content
-                [iconName]="'view_column'"
-                (click)="companyStore.onShowTableHeaderBox(true)" />
-            </app-tooltip>
-          </div>
+    <div class="flex flex-col gap-5 flex-grow">
+      <div class="flex md:justify-between gap-3 overflow-x-auto">
+        <div class="flex gap-3">
+          <app-input
+            [inputValue]="companyStore.inputSearchValue()"
+            [id]="'input-filter'"
+            [placeholder]="'Id, Nome Fantasia, Razão Social'"
+            [inputName]="'search'"
+            (clickEmitter)="companyStore.onTableFilterBasedOnSearchInput()"
+            (keyboardEmitter)="companyStore.onKeyPressOnSearchInput($event)"
+            (inputValueEmitter)="companyStore.onSetInputSearchValue($event)" />
+          <app-tooltip [description]="'Filtro'" [position]="'right'">
+            <app-button-icon
+              content
+              (click)="companyStore.onShowFilterBox(true)"
+              [iconName]="'filter_list'" />
+          </app-tooltip>
         </div>
-        @if (companyStore.isAtLeastOneFilterHelpNotEmpty()) {
-          <div class="flex flex-wrap items-center gap-3 text-sm">
-            @if (companyStore.filterHelp().inputSearch.length > 0) {
-              <div class="flex items-center gap-2">
-                <p>Pesquisa: {{ companyStore.filterHelp().inputSearch }}</p>
-                <app-button-close
-                  (click)="
-                    companyStore.onClearFilterItem('inputSearch', 'input-search')
-                  "></app-button-close>
-              </div>
-            }
-            @if (companyStore.filterHelp().idCompany.length > 0) {
-              <div class="flex items-center gap-2">
-                <p>Id: {{ companyStore.filterHelp().idCompany }}</p>
-                <app-button-close
-                  (click)="
-                    companyStore.onClearFilterItem('idCompany', 'filter-box')
-                  "></app-button-close>
-              </div>
-            }
-            @if (companyStore.filterHelp().nickname.length > 0) {
-              <div class="flex items-center gap-2">
-                <p>Nome Fantasia: {{ companyStore.filterHelp().nickname }}</p>
-                <app-button-close
-                  (click)="
-                    companyStore.onClearFilterItem('nickname', 'filter-box')
-                  "></app-button-close>
-              </div>
-            }
-            @if (companyStore.filterHelp().name.length > 0) {
-              <div class="flex items-center gap-2">
-                <p>Raz.Social: {{ companyStore.filterHelp().name }}</p>
-                <app-button-close
-                  (click)="companyStore.onClearFilterItem('name', 'filter-box')"></app-button-close>
-              </div>
-            }
-            @if (companyStore.filterHelp().cnpj.length > 0) {
-              <div class="flex items-center gap-2">
-                <p>CNPJ: {{ companyStore.filterHelp().cnpj }}</p>
-                <app-button-close
-                  (click)="companyStore.onClearFilterItem('cnpj', 'filter-box')"></app-button-close>
-              </div>
-            }
-            @if (companyStore.filterHelp().ie) {
-              <div class="flex items-center gap-2">
-                <p>Inscr.Estadual: {{ companyStore.filterHelp().ie }}</p>
-                <app-button-close
-                  (click)="companyStore.onClearFilterItem('ie', 'filter-box')"></app-button-close>
-              </div>
-            }
-            @if (companyStore.filterHelp().im) {
-              <div class="flex items-center gap-2">
-                <p>Inscr.Municipal: {{ companyStore.filterHelp().im }}</p>
-                <app-button-close
-                  (click)="companyStore.onClearFilterItem('im', 'filter-box')"></app-button-close>
-              </div>
-            }
-            <button
-              (click)="companyStore.onClearData()"
-              class="text-logo font-semibold cursor-pointer hover:text-logo-hover hover:underline">
-              Limpar tudo
-            </button>
-          </div>
-        }
-        <app-table-company />
-        <app-pagination
-          [currentPage]="companyStore.pagination().currentPage"
-          [totalRegister]="companyStore.companiesData().length"
-          [pagesArray]="companyStore.pagination().pagesArray"
-          [qtyPerPage]="companyStore.pagination().qtyPerPage"
-          [totalPages]="companyStore.pagination().totalPages"
-          (currentPageEmitter)="companyStore.onSetNewCurrentPagePagination($event)" />
+        <div class="flex gap-3">
+          <app-button-delete
+            (click)="modalStore.onShowAskModal()"
+            [isDisabled]="companyStore.isDelBtnDisabled()" />
+          <app-tooltip [position]="'left'" [description]="'Colunas visíveis'">
+            <app-button-icon
+              content
+              [iconName]="'view_column'"
+              (click)="companyStore.onShowTableHeaderBox(true)" />
+          </app-tooltip>
+        </div>
       </div>
+      @if (companyStore.isAtLeastOneFilterHelpNotEmpty()) {
+        <div class="flex flex-wrap items-center gap-3 text-sm">
+          @if (companyStore.filterHelp().inputSearch.length > 0) {
+            <div class="flex items-center gap-2">
+              <p>Pesquisa: {{ companyStore.filterHelp().inputSearch }}</p>
+              <app-button-close
+                (click)="
+                  companyStore.onClearFilterItem('inputSearch', 'input-search')
+                "></app-button-close>
+            </div>
+          }
+          @if (companyStore.filterHelp().idCompany.length > 0) {
+            <div class="flex items-center gap-2">
+              <p>Id: {{ companyStore.filterHelp().idCompany }}</p>
+              <app-button-close
+                (click)="
+                  companyStore.onClearFilterItem('idCompany', 'filter-box')
+                "></app-button-close>
+            </div>
+          }
+          @if (companyStore.filterHelp().nickname.length > 0) {
+            <div class="flex items-center gap-2">
+              <p>Nome Fantasia: {{ companyStore.filterHelp().nickname }}</p>
+              <app-button-close
+                (click)="
+                  companyStore.onClearFilterItem('nickname', 'filter-box')
+                "></app-button-close>
+            </div>
+          }
+          @if (companyStore.filterHelp().name.length > 0) {
+            <div class="flex items-center gap-2">
+              <p>Raz.Social: {{ companyStore.filterHelp().name }}</p>
+              <app-button-close
+                (click)="companyStore.onClearFilterItem('name', 'filter-box')"></app-button-close>
+            </div>
+          }
+          @if (companyStore.filterHelp().cnpj.length > 0) {
+            <div class="flex items-center gap-2">
+              <p>CNPJ: {{ companyStore.filterHelp().cnpj }}</p>
+              <app-button-close
+                (click)="companyStore.onClearFilterItem('cnpj', 'filter-box')"></app-button-close>
+            </div>
+          }
+          @if (companyStore.filterHelp().ie) {
+            <div class="flex items-center gap-2">
+              <p>Inscr.Estadual: {{ companyStore.filterHelp().ie }}</p>
+              <app-button-close
+                (click)="companyStore.onClearFilterItem('ie', 'filter-box')"></app-button-close>
+            </div>
+          }
+          @if (companyStore.filterHelp().im) {
+            <div class="flex items-center gap-2">
+              <p>Inscr.Municipal: {{ companyStore.filterHelp().im }}</p>
+              <app-button-close
+                (click)="companyStore.onClearFilterItem('im', 'filter-box')"></app-button-close>
+            </div>
+          }
+          <button
+            (click)="companyStore.onClearData()"
+            class="text-logo font-semibold cursor-pointer hover:text-logo-hover hover:underline">
+            Limpar tudo
+          </button>
+        </div>
+      }
+      <app-table-company />
+      <app-pagination
+        [currentPage]="companyStore.pagination().currentPage"
+        [totalRegister]="companyStore.companiesData().length"
+        [pagesArray]="companyStore.pagination().pagesArray"
+        [qtyPerPage]="companyStore.pagination().qtyPerPage"
+        [totalPages]="companyStore.pagination().totalPages"
+        (currentPageEmitter)="companyStore.onSetNewCurrentPagePagination($event)" />
     </div>
   } @else {
     <div class="flex flex-col items-center gap-4 w-full mt-10">
@@ -123,7 +122,7 @@
       <p class="font-semibold">Nenhum registro encontrado</p>
       @if (!companyStore.isFilterResultZeroRegister()) {
         <app-button-label
-          (click)="router.navigate(['/companies/new'])"
+          (click)="modalStore.onRedirectPage('/companies/new')"
           [showIcon]="true"
           [iconName]="'add'"
           [label]="'Adicionar uma nova empresa'" />
@@ -253,7 +252,6 @@
   [isTwoThirdWidth]="false"
   [isFooterActive]="false"
   [title]="'Colunas Visíveis'"
-  [isTwoThirdWidth]="false"
   (isCloseBtnClickEmitter)="companyStore.onShowTableHeaderBox(false)">
   <div body class="flex flex-col gap-6">
     <p>Selecione abaixo as colunas que deseja estarem visíveis na tabela</p>

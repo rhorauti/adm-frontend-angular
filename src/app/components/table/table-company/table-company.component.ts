@@ -16,6 +16,7 @@ import { CompanyStore } from '@store/company/company.store';
 import { MatIconModule } from '@angular/material/icon';
 import { ButtonCloseComponent } from '@components/button/button-close/button-close.component';
 import { RouterModule } from '@angular/router';
+import { ModalStore } from '@store/modal/modal.store';
 
 @Component({
   selector: 'app-table-company',
@@ -34,6 +35,7 @@ import { RouterModule } from '@angular/router';
 })
 export class TableCompanyComponent implements OnInit, OnDestroy {
   readonly companyStore = inject(CompanyStore);
+  readonly modalStore = inject(ModalStore);
   private document = inject(DOCUMENT);
   @ViewChildren('divBoxes') private divBoxes!: QueryList<ElementRef>;
   @ViewChildren('iconOptions', { read: ElementRef }) private iconOptions!: QueryList<ElementRef>;

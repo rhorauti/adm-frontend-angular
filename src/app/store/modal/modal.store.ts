@@ -1,7 +1,6 @@
 import { inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { patchState, signalStore, withMethods, withState } from '@ngrx/signals';
-import { AuthStore } from '@store/auth/auth.store';
 
 export const ModalStore = signalStore(
   { providedIn: 'root' },
@@ -22,7 +21,6 @@ export const ModalStore = signalStore(
 
   withMethods(store => {
     const router = inject(Router);
-    const authStore = inject(AuthStore);
     const onShowInfoModal = (title: string, description: string): void => {
       patchState(store, {
         info: {
@@ -103,7 +101,6 @@ export const ModalStore = signalStore(
     };
 
     const onRedirectPage = (path: string): void => {
-      authStore.onClearAllData();
       router.navigate([path]);
     };
 

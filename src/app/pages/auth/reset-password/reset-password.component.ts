@@ -63,4 +63,9 @@ export class ResetPasswordComponent {
       this.authStore.onLoading(false);
     }
   }
+
+  onRedirectToLoginPage(): void {
+    this.authStore.onClearAllData();
+    this.modalStore.onRedirectPage('/login');
+  }
 }

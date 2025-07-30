@@ -6,11 +6,14 @@
     [ngClass]="
       isSideBarActive
         ? isTwoThirdWidth
-          ? 'right-0 w-full md:w-2/3'
-          : 'right-0 w-full md:w-1/3'
-        : '-right-[100%]'
+          ? 'translate-x-0 md:w-2/3 w-full'
+          : 'translate-x-0 md:w-1/3 w-full'
+        : 'translate-x-full w-0'
     "
-    class="fixed flex flex-col justify-between top-0 p-6 bg-white transition-all duration-500 ease-in-out h-screen z-50 overflow-auto">
+    class="fixed flex flex-col justify-between top-0 right-0 p-6 bg-white h-screen z-50 overflow-auto"
+    [class.transition-all]="isTransitionEnabled"
+    [class.duration-500]="isTransitionEnabled"
+    [class.ease-in-out]="isTransitionEnabled">
     <section class="flex flex-col gap-4">
       <header class="flex justify-between">
         <div [ngClass]="titleIconName.length > 0 ? 'flex gap-2' : ''">

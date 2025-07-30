@@ -45,16 +45,7 @@ export const AddressStore = signalStore(
 
     const onSetAddressValue = (address: IAddress): void => {
       patchState(store, {
-        addressData: {
-          ...store.addressData(),
-          postalCode: address.postalCode ? '' : address.postalCode,
-          address: address.address ? '' : address.address,
-          number: address.number ? '' : address.number,
-          complement: address.complement ? '' : address.complement,
-          district: address.district ? '' : address.district,
-          city: address.city ? '' : address.city,
-          state: address.state ? '' : address.state,
-        },
+        addressData: address,
       });
     };
 

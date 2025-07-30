@@ -74,7 +74,7 @@ export class NavbarListComponent {
     },
     {
       idLink: 1,
-      name: 'Suprimentos',
+      name: 'Produção',
       sublinks: [
         {
           idSublink: 0,
@@ -86,7 +86,7 @@ export class NavbarListComponent {
     },
     {
       idLink: 1,
-      name: 'Vendas',
+      name: 'Suprimentos',
       sublinks: [
         {
           idSublink: 0,

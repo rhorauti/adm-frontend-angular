@@ -1,7 +1,7 @@
-<div class="flex gap-2 text-white">
+<div class="flex gap-2">
   @for (link of links; track $index) {
     <div
-      class="relative mx-2 menu-container before:absolute before:-top-1 before:hover:-left-1 before:hover:w-full before:hover:h-full before:hover:bg-gray-700 before:hover:rounded-lg before:hover:p-4">
+      class="relative text-white mx-1 menu-container before:absolute before:-top-1 before:hover:-left-1 before:hover:w-full before:hover:h-full before:hover:bg-gray-700 before:hover:rounded-lg before:hover:p-4">
       <div
         (click)="toogleLink(link)"
         (keypress)="toogleLink(link)"
@@ -23,6 +23,31 @@
           }
         </div>
       </div>
+    </div>
+  }
+</div>
+
+<div
+  class="absolute top-0 left-0 flex flex-col w-full h-screen z-100 bg-gray-200 border border-gray-400 p-2">
+  @for (link of links; track $index) {
+    <div
+      (click)="toogleLink(link)"
+      (keypress)="toogleLink(link)"
+      tabindex="0"
+      class="flex flex-col cursor-pointer px-1 toogle-link">
+      <div class="flex items-center">
+        <p class="mb-1 font-bold z-10">{{ link.name }}</p>
+        <mat-icon class="z-10" #linkIcon>keyboard_arrow_down</mat-icon>
+      </div>
+      @for (sublink of link.sublinks; track $index) {
+        <a
+          (click)="selectSubLink(sublink)"
+          [routerLink]="sublink.routerLink"
+          class="block text-black px-4 py-1 first:mt-2 last:mb-2"
+          [ngClass]="sublink.isSelected ? 'bg-gray-800 text-white' : ''">
+          {{ sublink.name }}
+        </a>
+      }
     </div>
   }
 </div>

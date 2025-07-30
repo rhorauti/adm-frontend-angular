@@ -45,6 +45,16 @@ export class LoginComponent {
     });
   }
 
+  onRedirectToResetPasswordPage(): void {
+    this.authStore.onClearAllData();
+    this.modalStore.onRedirectPage('/reset-password');
+  }
+
+  onRedirectToSignUpPage(): void {
+    this.authStore.onClearAllData();
+    this.modalStore.onRedirectPage('/signup');
+  }
+
   /**
    * authenticateUser
    * Função que envia os dados do usuário (email e senha) para validação do backend

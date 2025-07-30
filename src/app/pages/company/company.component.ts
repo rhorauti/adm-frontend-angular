@@ -1,4 +1,4 @@
-import { Component, computed, inject, OnInit } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { TabComponent } from '@components/tab/tab.component';
 import { TableCompanyComponent } from '../../components/table/table-company/table-company.component';
@@ -17,7 +17,6 @@ import { TooltipComponent } from '@components/tooltip/tooltip.component';
 import { ToogleButtonComponent } from '../../components/toogle-button/toogle-button.component';
 import { InputComponent } from '@components/input/input.component';
 import { ButtonCloseComponent } from '@components/button/button-close/button-close.component';
-import { Router } from '@angular/router';
 import { ModalStore } from '@store/modal/modal.store';
 import { ICompany } from '@core/interfaces/company.interface';
 
@@ -46,7 +45,6 @@ import { ICompany } from '@core/interfaces/company.interface';
   styleUrl: './company.component.scss',
 })
 export class CompanyComponent implements OnInit {
-  readonly router = inject(Router);
   readonly companyStore = inject(CompanyStore);
   readonly modalStore = inject(ModalStore);
 

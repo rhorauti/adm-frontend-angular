@@ -7,7 +7,5 @@
   <p class="mb-8 text-lg text-center">
     {{ description }}
   </p>
-  <app-button-label
-    (click)="modalStore.onRedirectPage('/login')"
-    [label]="'Ir para login'"></app-button-label>
+  <app-button-label (click)="onRedirectToLoginPage()" [label]="'Ir para login'"></app-button-label>
 </div>

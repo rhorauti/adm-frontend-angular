@@ -45,6 +45,11 @@ export class NewPasswordComponent implements OnInit {
     });
   }
 
+  onRedirectToLoginPage(): void {
+    this.authStore.onClearAllData();
+    this.modalStore.onRedirectPage('/login');
+  }
+
   /**
    * authenticateUser
    * Função que submete os dados para o backend para criação do novo usuário.

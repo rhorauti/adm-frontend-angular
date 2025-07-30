@@ -1,5 +1,4 @@
 import { CommonModule } from '@angular/common';
-import { HttpErrorResponse } from '@angular/common/http';
 import { Component, computed, inject, OnDestroy, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -8,8 +7,6 @@ import { ButtonLabelComponent } from '@components/button/button-label/button-lab
 import { InputComponent } from '@components/input/input.component';
 import { ModalInfoComponent } from '@components/modal/modal-info/modal-info.component';
 import { SelectComponent } from '@components/select/select.component';
-import { AddressApi } from '@core/http/address/address.api';
-import { EmployeeApi } from '@core/http/employee/employee.api';
 import { AddressStore } from '@store/address/address.store';
 import { CompanyStore } from '@store/company/company.store';
 import { EmployeeStore } from '@store/employee/employee.store';
@@ -39,14 +36,16 @@ export class CompanyFormComponent implements OnInit, OnDestroy {
   readonly modalStore = inject(ModalStore);
 
   subscription: Subscription | undefined = undefined;
-  idCompany = '';
+  idCompany = 0;
+  companyName = this.companyStore.companyData().name;
 
   ngOnInit(): void {
     this.subscription = this.activatedRoute.paramMap.subscribe(params => {
-      this.idCompany = params.get('id') || '';
+      this.idCompany = Number(params.get('id')) || 0;
     });
     this.addressStore.onGetAddressInfo(Number(this.idCompany));
     this.employeeStore.onGetEmployeeInfo(Number(this.idCompany));
+    console.log('tab', this.companyStore.tab().selectedTabIdx);
   }
 
   ngOnDestroy() {
@@ -54,12 +53,16 @@ export class CompanyFormComponent implements OnInit, OnDestroy {
   }
 
   formTitle = computed(() => {
-    if (this.companyStore.tab().selectedTabIdx == 0) {
-      return 'Novo Cliente';
-    } else if (this.companyStore.tab().selectedTabIdx == 1) {
-      return 'Novo Fornecedor';
+    if (this.idCompany == 0) {
+      if (this.companyStore.tab().selectedTabIdx == 0) {
+        return 'Novo Cliente';
+      } else if (this.companyStore.tab().selectedTabIdx == 1) {
+        return 'Novo Fornecedor';
+      } else {
+        return 'MyCompany';
+      }
     } else {
-      return 'MyCompany';
+      return this.companyName;
     }
   });
 

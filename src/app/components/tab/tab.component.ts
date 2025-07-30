@@ -10,7 +10,7 @@ import { MatIconModule } from '@angular/material/icon';
 })
 export class TabComponent {
   @Input() divClass = '';
-  selectedTabIdx = 0;
+  @Input() selectedTabIdx = 0;
   @Input({ required: true }) tabList!: string[];
 
   @Output() tabChangeEmitter = new EventEmitter();

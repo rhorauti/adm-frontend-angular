@@ -37,4 +37,9 @@ export class RedirectComponent implements OnInit {
       this.iconBackgroundColor = 'bg-red-500';
     }
   }
+
+  onRedirectToLoginPage(): void {
+    this.authStore.onClearAllData();
+    this.modalStore.onRedirectPage('/login');
+  }
 }
