@@ -41,6 +41,12 @@ export const ModalStore = signalStore(
       });
       if (store.info().isActionOk) {
         if (onActionOk) onActionOk();
+        patchState(store, {
+          info: {
+            ...store.info(),
+            isActionOk: false,
+          },
+        });
       } else {
         if (onActionNok) onActionNok();
       }
@@ -70,12 +76,18 @@ export const ModalStore = signalStore(
       patchState(store, {
         ask: {
           ...store.ask(),
-          isActionOk: true,
           isActive: false,
+          isActionOk: true,
         },
       });
       if (store.ask().isActionOk) {
         if (onActionOk) onActionOk();
+        patchState(store, {
+          ask: {
+            ...store.ask(),
+            isActionOk: false,
+          },
+        });
       }
     };
 

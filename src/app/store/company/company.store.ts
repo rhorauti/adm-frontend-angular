@@ -7,7 +7,6 @@ import { IFilterBoxCompany, IFilterHelpCompany } from '@core/interfaces/filter.i
 import { ModalStore } from '@store/modal/modal.store';
 import { CompanyApi } from '@core/http/company/company.api';
 import { HttpErrorResponse } from '@angular/common/http';
-import { ITab } from '@core/interfaces/tab.interface';
 import { AddressStore } from '@store/address/address.store';
 import { EmployeeStore } from '@store/employee/employee.store';
 import { IAddress } from '@core/interfaces/address.interface';
@@ -20,10 +19,6 @@ export const CompanyStore = signalStore(
   { providedIn: 'root' },
 
   withState(() => ({
-    tab: {
-      tabList: ['Clientes', 'Fornecedores', 'MyCompany'],
-      selectedTabIdx: 0,
-    } as ITab,
     inputSearchValue: '',
     isTableHeaderBoxActive: false,
     tableHeaders: [
@@ -86,7 +81,6 @@ export const CompanyStore = signalStore(
     isDelBtnDisabled: false,
     companyData: {
       idCompany: 0,
-      type: 0,
       nickname: '',
       name: '',
       cnpj: '',
@@ -182,28 +176,9 @@ export const CompanyStore = signalStore(
       });
     };
 
-    const onTabChange = (tabIdx: number): void => {
-      patchState(store, {
-        tab: {
-          ...store.tab(),
-          selectedTabIdx: tabIdx,
-        },
-      });
-      onShowDataList();
-    };
-
     const onSetInputSearchValue = (inputData: string): void => {
       patchState(store, {
         inputSearchValue: inputData,
-      });
-    };
-
-    const onChangeTabIdx = (idx: number): void => {
-      patchState(store, {
-        tab: {
-          ...store.tab(),
-          selectedTabIdx: idx,
-        },
       });
     };
 
@@ -381,18 +356,13 @@ export const CompanyStore = signalStore(
     };
 
     const onClearData = (companiesData: ICompany[] = store.initialTableData()): void => {
-      const companiesFilter = companiesData.filter(
-        company => company.type == store.tab().selectedTabIdx
-      );
       patchState(store, {
-        initialTableData: companiesFilter,
-        companiesData: companiesFilter,
+        companiesData: companiesData,
         isFilterResultZeroRegister: false,
         isDelBtnDisabled: true,
         inputSearchValue: '',
         companyData: {
           idCompany: 0,
-          type: 0,
           nickname: '',
           name: '',
           cnpj: '',
@@ -428,8 +398,8 @@ export const CompanyStore = signalStore(
         },
       });
       onClearSortFilter();
-      onFillNewCheckboxArray(companiesFilter.length);
-      onFillNewTableItemBoxArray(companiesFilter.length);
+      onFillNewCheckboxArray(companiesData.length);
+      onFillNewTableItemBoxArray(companiesData.length);
       onGeneratePaginationPagesArray();
     };
 
@@ -445,13 +415,10 @@ export const CompanyStore = signalStore(
       const filterData = store.initialTableData().filter(company => {
         return ['idCompany', 'nickname', 'name'].some(key => {
           const filterResult = company[key as keyof ICompany];
-          return (
-            company.type == store.tab().selectedTabIdx &&
-            String(filterResult)
-              .toLowerCase()
-              .trim()
-              .includes(store.inputSearchValue().toLowerCase().trim())
-          );
+          return String(filterResult)
+            .toLowerCase()
+            .trim()
+            .includes(store.inputSearchValue().toLowerCase().trim());
         });
       });
       if (filterData.length == 0) {
@@ -505,7 +472,6 @@ export const CompanyStore = signalStore(
     const onFilterThroughFilterBox = (): void => {
       const filter = store.initialTableData().filter(company => {
         return (
-          company.type == store.tab().selectedTabIdx &&
           String(company.idCompany)
             .toLowerCase()
             .trim()
@@ -668,18 +634,20 @@ export const CompanyStore = signalStore(
       });
     };
 
-    const onCloneRegister = (companyData: ICompany): void => {
+    const onCloneRegister = async (companyData: ICompany): Promise<void> => {
       patchState(store, {
         companyData: companyData,
       });
-      addressStore.onGetAddressInfo(companyData.idCompany);
-      employeeStore.onGetEmployeeInfo(companyData.idCompany);
+      await addressStore.onGetAddressInfo(companyData.idCompany);
+      await employeeStore.onGetEmployeeInfo(companyData.idCompany);
       patchState(store, {
         companyData: {
           ...store.companyData(),
           idCompany: 0,
         },
       });
+      addressStore.onSetInputNewValue('idAddress', 0);
+      employeeStore.onSetInputNewValue('idEmployee', 0);
       modalStore.onRedirectPage('/companies/new');
     };
 
@@ -699,7 +667,6 @@ export const CompanyStore = signalStore(
     const finalData = {
       company: {
         idCompany: 0,
-        type: 0,
         nickname: '',
         name: '',
         cnpj: '',
@@ -734,7 +701,6 @@ export const CompanyStore = signalStore(
 
     const onSetFinalData = (): void => {
       finalData.company.idCompany = store.companyData().idCompany;
-      finalData.company.type = store.companyData().type;
       finalData.company.nickname = store.companyData().nickname;
       finalData.company.name = store.companyData().name;
       finalData.company.cnpj = onMaskNumericalField(store.companyData()?.cnpj || '');
@@ -771,6 +737,8 @@ export const CompanyStore = signalStore(
           modalStore.onModalInfoActionOk(true);
           modalStore.onShowInfoModal('Cadastro de empresa', response.message);
           onShowDataList();
+          console.log('modalAsk', modalStore.ask());
+          console.log('response', response);
         } else {
           modalStore.onShowInfoModal('Cadastro de empresa', response.error?.message || '');
         }
@@ -786,6 +754,7 @@ export const CompanyStore = signalStore(
       try {
         onLoading(true);
         const response = await companyApi.deleteCompany(idCompany);
+        console.log('response delete', response);
         if (response.status) {
           modalStore.onModalInfoActionOk(true);
           modalStore.onShowInfoModal('Excluir empresa', response.message);
@@ -802,9 +771,7 @@ export const CompanyStore = signalStore(
     };
 
     return {
-      onTabChange,
       onSetInputSearchValue,
-      onChangeTabIdx,
       onShowHeader,
       onShowDataList,
       onFillNewCheckboxArray,

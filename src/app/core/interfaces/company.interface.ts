@@ -4,7 +4,6 @@ import { IBaseResponse } from './response.interface';
 
 export interface ICompany {
   idCompany: number;
-  type: number;
   nickname: string;
   name: string;
   cnpj?: string;

@@ -34,7 +34,7 @@ export const AddressStore = signalStore(
     const modalStore = inject(ModalStore);
     const addressApi = inject(AddressApi);
 
-    const onSetInputNewValue = (property: string, value: string | number): void => {
+    const onSetInputNewValue = (property: keyof IAddress, value: string | number): void => {
       patchState(store, {
         addressData: {
           ...store.addressData(),

@@ -24,7 +24,7 @@ export const EmployeeStore = signalStore(
     const modalStore = inject(ModalStore);
     const employeeApi = inject(EmployeeApi);
 
-    const onSetInputNewValue = (property: string, value: string | number): void => {
+    const onSetInputNewValue = (property: keyof IEmployee, value: string | number): void => {
       patchState(store, {
         employeeData: {
           ...store.employeeData(),

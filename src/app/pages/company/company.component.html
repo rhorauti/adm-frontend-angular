@@ -1,18 +1,10 @@
-<div class="flex flex-col gap-4">
-  <div class="flex justify-between items-center">
+<div class="flex flex-col gap-5">
+  <div class="top-button-layout">
     <app-breadcrumb [items]="['Cadastro', 'Empresas']" />
-    <app-button-label
-      (click)="modalStore.onRedirectPage('/companies/new')"
-      [iconName]="'add'"
-      [label]="'Adicionar'" />
   </div>
-  <app-tab
-    [tabList]="companyStore.tab().tabList"
-    [selectedTabIdx]="companyStore.tab().selectedTabIdx"
-    (tabChangeEmitter)="companyStore.onTabChange($event)" />
   @if (companyStore.companiesData().length > 0) {
     <div class="flex flex-col gap-5 flex-grow">
-      <div class="flex md:justify-between gap-3 overflow-x-auto">
+      <div class="top-button-layout gap-3 overflow-x-auto">
         <div class="flex gap-3">
           <app-input
             [inputValue]="companyStore.inputSearchValue()"
@@ -30,6 +22,9 @@
           </app-tooltip>
         </div>
         <div class="flex gap-3">
+          <app-button-icon
+            (click)="modalStore.onRedirectPage('/companies/new')"
+            [iconName]="'add'" />
           <app-button-delete
             (click)="modalStore.onShowAskModal()"
             [isDisabled]="companyStore.isDelBtnDisabled()" />

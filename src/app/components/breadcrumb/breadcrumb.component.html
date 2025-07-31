@@ -1,9 +1,11 @@
 <nav class="flex justify-between text-nowrap overflow-auto">
   <p class="flex items-center gap-2">
     @for (item of items; track $index) {
-      <span [ngClass]="items.length - 1 == $index ? 'font-semibold text-logo' : ''">{{
-        item
-      }}</span>
+      <span
+        [ngClass]="items.length - 1 == $index ? 'font-semibold text-logo' : ''"
+        class="text-lg"
+        >{{ item }}</span
+      >
       @if (items.length - 1 != $index) {
         <span>\</span>
       }

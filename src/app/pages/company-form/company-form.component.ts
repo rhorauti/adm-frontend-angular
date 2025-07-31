@@ -45,7 +45,6 @@ export class CompanyFormComponent implements OnInit, OnDestroy {
     });
     this.addressStore.onGetAddressInfo(Number(this.idCompany));
     this.employeeStore.onGetEmployeeInfo(Number(this.idCompany));
-    console.log('tab', this.companyStore.tab().selectedTabIdx);
   }
 
   ngOnDestroy() {
@@ -54,13 +53,7 @@ export class CompanyFormComponent implements OnInit, OnDestroy {
 
   formTitle = computed(() => {
     if (this.idCompany == 0) {
-      if (this.companyStore.tab().selectedTabIdx == 0) {
-        return 'Novo Cliente';
-      } else if (this.companyStore.tab().selectedTabIdx == 1) {
-        return 'Novo Fornecedor';
-      } else {
-        return 'MyCompany';
-      }
+      return 'Nova Empresa';
     } else {
       return this.companyName;
     }

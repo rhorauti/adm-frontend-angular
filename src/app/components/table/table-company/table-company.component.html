@@ -15,16 +15,20 @@
     @for (header of companyStore.tableHeaders(); track $index) {
       @if (header.isHeaderActive) {
         <th class="table-td">
-          <div class="flex items-center gap-2">
+          <div class="relative flex items-center gap-2">
             <p>{{ header.headerName }}</p>
-            <mat-icon
-              (click)="companyStore.onSortTableHeader($index)"
-              class="text-logo hover:bg-gray-200 hover:rounded-md text-sm font-bold cursor-pointer"
-              >{{ header.icon }}</mat-icon
-            >
-            @if (header.sort != 0) {
-              <app-button-close (click)="companyStore.onClearData()" />
-            }
+            <div class="relative flex items-center">
+              <mat-icon
+                (click)="companyStore.onSortTableHeader($index)"
+                class="text-logo hover:bg-gray-200 hover:rounded-md text-sm font-bold cursor-pointer"
+                >{{ header.icon }}</mat-icon
+              >
+              @if (header.sort != 0) {
+                <div class="absolute left-[1.5rem] top-0">
+                  <app-button-close (click)="companyStore.onClearData()" />
+                </div>
+              }
+            </div>
           </div>
         </th>
       }

@@ -1,85 +1,76 @@
 import { CommonModule } from '@angular/common';
-import {
-  Component,
-  ElementRef,
-  EventEmitter,
-  Input,
-  Output,
-  QueryList,
-  ViewChildren,
-} from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
 import { RouterModule } from '@angular/router';
+import { TooltipComponent } from '@components/tooltip/tooltip.component';
+import { AuthStore } from '@store/auth/auth.store';
+import { ButtonCloseComponent } from '@components/button/button-close/button-close.component';
 
 interface ISublink {
   idSublink: number;
   name: string;
-  isSelected: boolean;
   routerLink: string;
 }
 
 interface ILink {
   idLink: number;
   name: string;
+  isColapsed: boolean;
   sublinks: ISublink[];
 }
 
 @Component({
-  selector: 'app-navbar-list',
-  imports: [CommonModule, MatIconModule, RouterModule],
-  templateUrl: './navbar-list.component.html',
-  styleUrl: './navbar-list.component.scss',
+  selector: 'app-menu',
+  imports: [CommonModule, MatIconModule, RouterModule, TooltipComponent, ButtonCloseComponent],
+  templateUrl: './menu.component.html',
+  styleUrl: './menu.component.scss',
 })
-export class NavbarListComponent {
-  @ViewChildren('linkItem') linksItem!: QueryList<ElementRef>;
-  @ViewChildren('linkIcon') linkIcon!: QueryList<ElementRef>;
-
+export class MenuComponent {
+  readonly authStore = inject(AuthStore);
+  public isNavBarActive = false;
   public links: ILink[] = [
     {
       idLink: 0,
       name: 'Cadastros',
+      isColapsed: false,
       sublinks: [
         {
           idSublink: 0,
           name: 'Clientes',
-          isSelected: false,
           routerLink: '/companies',
         },
         {
           idSublink: 1,
           name: 'Fornecedores',
-          isSelected: false,
           routerLink: '/companies',
         },
         {
           idSublink: 2,
           name: 'MyCompany',
-          isSelected: false,
           routerLink: '/companies',
         },
         {
           idSublink: 3,
           name: 'Produtos',
-          isSelected: false,
           routerLink: '/products',
         },
         {
           idSublink: 4,
           name: 'Endereços',
-          isSelected: false,
           routerLink: '/addresses',
         },
-        { idSublink: 5, name: 'Funcionários', isSelected: false, routerLink: '/employees' },
+        { idSublink: 5, name: 'Funcionários', routerLink: '/employees' },
       ],
     },
     {
       idLink: 1,
       name: 'Produção',
+      isColapsed: false,
       sublinks: [
         {
           idSublink: 0,
           name: 'Estoque',
-          isSelected: false,
+
           routerLink: 'stock',
         },
       ],
@@ -87,11 +78,12 @@ export class NavbarListComponent {
     {
       idLink: 1,
       name: 'Suprimentos',
+      isColapsed: false,
       sublinks: [
         {
           idSublink: 0,
           name: 'Estoque',
-          isSelected: false,
+
           routerLink: 'stock',
         },
       ],
@@ -99,11 +91,12 @@ export class NavbarListComponent {
     {
       idLink: 1,
       name: 'Financeiro',
+      isColapsed: false,
       sublinks: [
         {
           idSublink: 0,
           name: 'Estoque',
-          isSelected: false,
+
           routerLink: 'stock',
         },
       ],
@@ -111,55 +104,41 @@ export class NavbarListComponent {
     {
       idLink: 2,
       name: 'Relatórios',
+      isColapsed: false,
       sublinks: [
         {
           idSublink: 0,
           name: 'Clientes',
-          isSelected: false,
+
           routerLink: 'customers',
         },
         {
           idSublink: 1,
           name: 'Fornecedores',
-          isSelected: false,
+
           routerLink: '/suppliers',
         },
         {
           idSublink: 1,
           name: 'Sitio Nakano',
-          isSelected: false,
+
           routerLink: '/sitio-nakano',
         },
       ],
     },
   ];
 
-  @Input() isMenuListMobileActive = false;
-  public isColapsed = false;
-
-  toogleLink(link: ILink): void {
-    console.log(link);
-    // this.linksItem.get(link.idLink).nativeElement.classList.toggle('is-colapsed');
-    // if (
-    //   this.linkIcon.get(link.idLink).nativeElement.firstChild.innerHTML == 'keyboard_arrow_down'
-    // ) {
-    //   this.linkIcon.get(link.idLink).nativeElement.firstChild.innerHTML = 'keyboard_arrow_up';
-    // } else if (
-    //   this.linkIcon.get(link.idLink).nativeElement.firstChild.innerHTML == 'keyboard_arrow_up'
-    // ) {
-    //   this.linkIcon.get(link.idLink).nativeElement.firstChild.innerHTML = 'keyboard_arrow_down';
-    // }
+  toogleLink(idx: number): void {
+    this.links[idx].isColapsed = !this.links[idx].isColapsed;
   }
 
   clearSubLinkSelection(): void {
-    this.links.forEach(link => link.sublinks.forEach(sublink => (sublink.isSelected = false)));
+    this.links.forEach(link => {
+      link.isColapsed = false;
+    });
   }
 
-  @Output() closeMenuListEmitter = new EventEmitter<boolean>();
-
-  selectSubLink(sublink: ISublink): void {
-    this.clearSubLinkSelection();
-    sublink.isSelected = true;
-    this.closeMenuListEmitter.emit();
+  onShowNavBar(isActive: boolean): void {
+    this.isNavBarActive = isActive;
   }
 }
