@@ -5,7 +5,6 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { BreadcrumbComponent } from '@components/breadcrumb/breadcrumb.component';
 import { ButtonLabelComponent } from '@components/button/button-label/button-label.component';
 import { InputComponent } from '@components/input/input.component';
-import { ModalInfoComponent } from '@components/modal/modal-info/modal-info.component';
 import { SelectComponent } from '@components/select/select.component';
 import { AddressStore } from '@store/address/address.store';
 import { CompanyStore } from '@store/company/company.store';
@@ -22,7 +21,6 @@ import { Subscription } from 'rxjs';
     FormsModule,
     InputComponent,
     SelectComponent,
-    ModalInfoComponent,
   ],
   templateUrl: './company-form.component.html',
   styleUrl: './company-form.component.scss',
@@ -59,19 +57,10 @@ export class CompanyFormComponent implements OnInit, OnDestroy {
     }
   });
 
-  onCloseCompanyFormInfoModal(): void {
-    this.modalStore.onCloseInfoModal(() => {
-      this.addressStore.onClearData();
-      this.employeeStore.onClearData();
-      this.companyStore.onShowDataList();
-      this.modalStore.onRedirectPage('/companies');
-    });
-  }
-
-  onBackToCompaniesPage(): void {
+  onBackToCompaniesPage = (): void => {
     this.addressStore.onClearData();
     this.employeeStore.onClearData();
     this.companyStore.onClearData();
     this.modalStore.onRedirectPage('/companies');
-  }
+  };
 }

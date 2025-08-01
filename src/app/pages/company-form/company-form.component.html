@@ -3,7 +3,7 @@
     <app-breadcrumb [items]="['Cadastro', 'Empresas', `${formTitle()}`]" />
     <app-button-label
       class="is-hidden-mobile"
-      (click)="router.navigate(['companies'])"
+      (click)="onBackToCompaniesPage()"
       [id]="'company-form-back'"
       [iconName]="'keyboard_arrow_left'"
       [label]="'Voltar'"
@@ -220,12 +220,12 @@
     <app-button-label
       [iconName]="'save'"
       [label]="'Salvar'"
-      (click)="companyStore.onSaveRegister()"></app-button-label>
+      (click)="companyStore.onSaveRegister(onBackToCompaniesPage)"></app-button-label>
   </footer>
 
-  <app-modal-info
+  <!-- <app-modal-info
     [isModalActive]="modalStore.info().isActive"
     [description]="modalStore.info().description"
     [title]="modalStore.info().title"
-    (clickEmitter)="onCloseCompanyFormInfoModal()" />
+    (clickEmitter)="onCloseCompanyFormInfoModal()" /> -->
 </div>

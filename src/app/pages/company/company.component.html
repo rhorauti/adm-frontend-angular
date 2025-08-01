@@ -1,7 +1,5 @@
 <div class="flex flex-col gap-5">
-  <div class="top-button-layout">
-    <app-breadcrumb [items]="['Cadastro', 'Empresas']" />
-  </div>
+  <app-breadcrumb [items]="['Cadastro', 'Empresas']" />
   @if (companyStore.companiesData().length > 0) {
     <div class="flex flex-col gap-5 flex-grow">
       <div class="top-button-layout gap-3 overflow-x-auto">
@@ -26,7 +24,7 @@
             (click)="modalStore.onRedirectPage('/companies/new')"
             [iconName]="'add'" />
           <app-button-delete
-            (click)="modalStore.onShowAskModal()"
+            (click)="onShowModalToDelete()"
             [isDisabled]="companyStore.isDelBtnDisabled()" />
           <app-tooltip [position]="'left'" [description]="'Colunas visíveis'">
             <app-button-icon
@@ -130,7 +128,9 @@
         } @else {
           <p>Campo(s) pesquisado(s) :</p>
           @if (companyStore.filterBox().idCompany.length > 0) {
-            <p>Id : <span class="font-semibold"></span>{{ companyStore.filterBox().idCompany }}</p>
+            <p>
+              Id : <span class="font-semibold">{{ companyStore.filterBox().idCompany }}</span>
+            </p>
           }
           @if (companyStore.filterBox().nickname.length > 0) {
             <p>
@@ -265,17 +265,3 @@
     </div>
   </div>
 </app-side-bar>
-
-<app-modal-ask
-  [isModalActive]="modalStore.ask().isActive"
-  [type]="'warning'"
-  [title]="'Cadastro de empresas'"
-  [description]="`Deseja excluir o registro <b>${this.companyStore.itemSelected()?.name || ''}</b>?`"
-  (closeActionNokEmitter)="modalStore.onCloseAskModalActionNok()"
-  (closeActionOkEmitter)="onCloseAskModalActionOk()" />
-<app-modal-info
-  [isModalActive]="modalStore.info().isActive"
-  [description]="modalStore.info().description"
-  [title]="modalStore.info().title"
-  (clickEmitter)="modalStore.onCloseInfoModal()" />
-<app-loading [isLoading]="companyStore.isLoading()" />

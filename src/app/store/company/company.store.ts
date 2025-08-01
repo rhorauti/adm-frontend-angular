@@ -14,6 +14,7 @@ import { IEmployee } from '@core/interfaces/employee.interface';
 
 type FilterMethod = 'input-search' | 'filter-box';
 const defaultTableHeaderIcon = 'unfold_more';
+type ActionCallback = (() => void | Promise<void>) | null | undefined;
 
 export const CompanyStore = signalStore(
   { providedIn: 'root' },
@@ -112,7 +113,6 @@ export const CompanyStore = signalStore(
       qtyPerPage: 10,
       pagesArray: [],
     } as IPagination,
-    isLoading: false,
   })),
 
   withComputed(store => ({
@@ -169,12 +169,6 @@ export const CompanyStore = signalStore(
     const addressStore = inject(AddressStore);
     const employeeStore = inject(EmployeeStore);
     const modalStore = inject(ModalStore);
-
-    const onLoading = (isLoading: boolean): void => {
-      patchState(store, {
-        isLoading: isLoading,
-      });
-    };
 
     const onSetInputSearchValue = (inputData: string): void => {
       patchState(store, {
@@ -653,14 +647,17 @@ export const CompanyStore = signalStore(
 
     const onShowDataList = async (): Promise<void> => {
       try {
-        onLoading(true);
+        modalStore.onLoading(true);
         const response = await companyApi.getCompaniesList();
+        patchState(store, {
+          initialTableData: response.data,
+        });
         onClearData(response.data);
       } catch (e: unknown) {
         const error = e as HttpErrorResponse;
         modalStore.onShowInfoModal('Listar empresas', error.error?.message);
       } finally {
-        onLoading(false);
+        modalStore.onLoading(false);
       }
     };
 
@@ -728,17 +725,15 @@ export const CompanyStore = signalStore(
       );
     };
 
-    const onSaveRegister = async (): Promise<void> => {
+    const onSaveRegister = async (onActionOk?: ActionCallback): Promise<void> => {
       try {
-        onLoading(true);
+        modalStore.onLoading(true);
         onSetFinalData();
         const response = await companyApi.saveCompany(finalData);
         if (response.status) {
-          modalStore.onModalInfoActionOk(true);
-          modalStore.onShowInfoModal('Cadastro de empresa', response.message);
+          modalStore.onSetModalInfoType('success');
+          modalStore.onShowInfoModal('Cadastro de empresa', response.message, onActionOk);
           onShowDataList();
-          console.log('modalAsk', modalStore.ask());
-          console.log('response', response);
         } else {
           modalStore.onShowInfoModal('Cadastro de empresa', response.error?.message || '');
         }
@@ -746,19 +741,21 @@ export const CompanyStore = signalStore(
         const error = e as HttpErrorResponse;
         modalStore.onShowInfoModal('Cadastro de empresa', error.error.message);
       } finally {
-        onLoading(false);
+        modalStore.onLoading(false);
       }
     };
 
-    const onDeleteRegister = async (idCompany: number): Promise<void> => {
+    const onDeleteRegister = async (
+      idCompany: number,
+      onActionOk?: ActionCallback
+    ): Promise<void> => {
       try {
-        onLoading(true);
+        modalStore.onLoading(true);
         const response = await companyApi.deleteCompany(idCompany);
-        console.log('response delete', response);
         if (response.status) {
-          modalStore.onModalInfoActionOk(true);
-          modalStore.onShowInfoModal('Excluir empresa', response.message);
           onShowDataList();
+          modalStore.onSetModalInfoType('success');
+          modalStore.onShowInfoModal('Excluir empresa', response.message, onActionOk);
         } else {
           modalStore.onShowInfoModal('Excluir empresa', response.error?.message || '');
         }
@@ -766,7 +763,7 @@ export const CompanyStore = signalStore(
         const error = e as HttpErrorResponse;
         modalStore.onShowInfoModal('Excluir empresa', error.error.message);
       } finally {
-        onLoading(false);
+        modalStore.onLoading(false);
       }
     };
 
@@ -804,7 +801,6 @@ export const CompanyStore = signalStore(
       onShowTableItemBox,
       onCloseTableItemBox,
       onCloneRegister,
-      onLoading,
     };
   })
 );

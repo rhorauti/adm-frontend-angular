@@ -44,7 +44,9 @@
       <tr
         (click)="companyStore.onRedirectToEditPage(companyData)"
         class="h-full py-2 border-b-[2px] border-solid last:border-gray-300 hover:bg-gray-200 cursor-pointer">
-        <td class="relative table-td flex items-center justify-center gap-4">
+        <td
+          (click)="$event.stopPropagation()"
+          class="relative table-td flex items-center justify-center gap-4">
           <input
             type="checkbox"
             name="table-checkbox"
@@ -72,8 +74,8 @@
             </p>
             <p
               tabindex="0"
-              (keydown)="modalStore.onShowAskModal()"
-              (click)="modalStore.onShowAskModal()"
+              (keydown)="onShowModalAskToDelete($event, companyData)"
+              (click)="onShowModalAskToDelete($event, companyData)"
               class="hover:bg-gray-200 hover:rounded-md px-2">
               Excluir
             </p>
@@ -105,3 +107,17 @@
     }
   </tbody>
 </app-table-base>
+
+<!-- <app-modal-ask
+  [isModalActive]="modalStore.ask().isActive"
+  [type]="'warning'"
+  [title]="modalStore.ask().title"
+  [description]="modalStore.ask().description"
+  (closeActionNokEmitter)="modalStore.onCloseAskModalActionNok()"
+  (closeActionOkEmitter)="onCloseAskModalActionOk()" />
+<app-modal-info
+  [isModalActive]="modalStore.info().isActive"
+  [description]="modalStore.info().description"
+  [title]="modalStore.info().title"
+  (clickEmitter)="modalStore.onCloseAskModalActionOk()" />
+<app-loading [isLoading]="modalStore.isLoading()" /> -->

@@ -3,8 +3,6 @@ import { MatIconModule } from '@angular/material/icon';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { ModalInfoComponent } from '@components/modal/modal-info/modal-info.component';
-import { LoadingComponent } from '@components/loading/loading.component';
 import { AuthApi } from '@core/http/auth/auth.api';
 import { ButtonLabelComponent } from '../../../components/button/button-label/button-label.component';
 import { InputComponent } from '@components/input/input.component';
@@ -14,15 +12,7 @@ import { HttpErrorResponse } from '@angular/common/http';
 
 @Component({
   selector: 'app-login',
-  imports: [
-    MatIconModule,
-    CommonModule,
-    FormsModule,
-    InputComponent,
-    ModalInfoComponent,
-    LoadingComponent,
-    ButtonLabelComponent,
-  ],
+  imports: [MatIconModule, CommonModule, FormsModule, InputComponent, ButtonLabelComponent],
   templateUrl: './login.component.html',
   styleUrl: './login.component.scss',
 })
@@ -38,12 +28,12 @@ export class LoginComponent {
     }
   }
 
-  onCloseLoginModal(): void {
-    this.modalStore.onCloseInfoModal(() => {
-      this.authStore.onShowMenuBar(true);
-      this.router.navigate(['/companies']);
-    });
-  }
+  // onCloseLoginModal(): void {
+  //   this.modalStore.onCloseInfoModal(() => {
+  //     this.authStore.onShowMenuBar(true);
+  //     this.router.navigate(['/companies']);
+  //   });
+  // }
 
   onRedirectToResetPasswordPage(): void {
     this.authStore.onClearAllData();
@@ -55,12 +45,17 @@ export class LoginComponent {
     this.modalStore.onRedirectPage('/signup');
   }
 
+  onModalInfoActionOk(): void {
+    this.authStore.onShowMenuBar(true);
+    this.router.navigate(['/companies']);
+  }
+
   /**
    * authenticateUser
    * Função que envia os dados do usuário (email e senha) para validação do backend
    */
   async submitUserData(): Promise<void> {
-    this.authStore.onLoading(true);
+    this.modalStore.onLoading(true);
     try {
       if (this.authStore.user().email.length == 0) {
         this.modalStore.onShowInfoModal('Autenticação', 'Campo de e-mail não pode estar vazio.');
@@ -76,15 +71,14 @@ export class LoginComponent {
           this.authStore.onSetUserProperty('name', response.data.name);
           this.authStore.onSetUserProperty('email', response.data.email);
           this.authStore.onSetUserProperty('token', response.data.token);
-          this.modalStore.onModalInfoActionOk(true);
         }
-        this.modalStore.onShowInfoModal('Autenticação', response.message);
+        this.modalStore.onShowInfoModal('Autenticação', response.message, this.onModalInfoActionOk);
       }
     } catch (e: unknown) {
       const error = e as HttpErrorResponse;
       this.modalStore.onShowInfoModal('Autenticação', error.message);
     } finally {
-      this.authStore.onLoading(false);
+      this.modalStore.onLoading(false);
     }
   }
 }

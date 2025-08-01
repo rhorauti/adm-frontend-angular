@@ -5,9 +5,6 @@ import { BreadcrumbComponent } from '../../components/breadcrumb/breadcrumb.comp
 import { CompanyStore } from '@store/company/company.store';
 import { TableHeaderBoxComponent } from '@components/side-bar/side-bar.component';
 import { PaginationComponent } from '@components/pagination/pagination.component';
-import { ModalAskComponent } from '@components/modal/modal-ask/modal-ask.component';
-import { ModalInfoComponent } from '@components/modal/modal-info/modal-info.component';
-import { LoadingComponent } from '@components/loading/loading.component';
 import { MatIconModule } from '@angular/material/icon';
 import { ButtonLabelComponent } from '../../components/button/button-label/button-label.component';
 import { ButtonDeleteComponent } from '../../components/button/button-delete/button-delete.component';
@@ -28,9 +25,6 @@ import { ICompany } from '@core/interfaces/company.interface';
     TableCompanyComponent,
     PaginationComponent,
     BreadcrumbComponent,
-    ModalAskComponent,
-    ModalInfoComponent,
-    LoadingComponent,
     MatIconModule,
     ButtonLabelComponent,
     ButtonDeleteComponent,
@@ -50,10 +44,16 @@ export class CompanyComponent implements OnInit {
     this.companyStore.onShowDataList();
   }
 
-  onCloseAskModalActionOk(): void {
-    this.modalStore.onCloseAskModalActionOk(() => {
-      const itemToDelete = this.companyStore.itemSelected() as ICompany;
-      this.companyStore.onDeleteRegister(itemToDelete?.idCompany);
-    });
+  async onDeleteCompany(): Promise<void> {
+    const itemToDelete = this.companyStore.itemSelected() as ICompany;
+    await this.companyStore.onDeleteRegister(itemToDelete?.idCompany);
+  }
+
+  onShowModalToDelete(): void {
+    this.modalStore.onShowAskModal(
+      'Cadastro de empresas',
+      `Deseja excluir o registro <b>${this.companyStore.itemSelected()?.name || ''}</b>?`,
+      () => this.onDeleteCompany()
+    );
   }
 }

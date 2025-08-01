@@ -4,3 +4,17 @@
     <router-outlet></router-outlet>
   </div>
 </div>
+
+<app-modal-ask
+  [isModalActive]="modalStore.ask().isActive"
+  [type]="'warning'"
+  [title]="modalStore.ask().title"
+  [description]="modalStore.ask().description"
+  (closeActionNokEmitter)="modalStore.onCloseAskModalAction(false)"
+  (closeActionOkEmitter)="modalStore.onCloseAskModalAction(true)" />
+<app-modal-info
+  [isModalActive]="modalStore.info().isActive"
+  [description]="modalStore.info().description"
+  [title]="modalStore.info().title"
+  (clickEmitter)="modalStore.onCloseInfoModal()" />
+<app-loading [isLoading]="modalStore.isLoading()" />

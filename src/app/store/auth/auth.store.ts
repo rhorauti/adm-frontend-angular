@@ -22,7 +22,6 @@ export const AuthStore = signalStore(
     },
     isMenuBarActive: true,
     token: '',
-    isLoading: false,
   })),
 
   withComputed(store => {
@@ -141,12 +140,6 @@ export const AuthStore = signalStore(
       });
     };
 
-    const onLoading = (isLoading: boolean): void => {
-      patchState(store, {
-        isLoading: isLoading,
-      });
-    };
-
     type ValidationKey = `is${Capitalize<UserField>}Ok`;
     type ErrorKey = `show${Capitalize<UserField>}Error`;
 
@@ -157,7 +150,6 @@ export const AuthStore = signalStore(
         const propertyField = store.user()[property as UserField];
         const isInputValidationOk = store[computedValidationName as ValidationKey]();
         const isInputErrorTrue = store.errors()[computedErrorName as ErrorKey];
-        console.log('isInputErrorTrue', isInputErrorTrue);
         return !isInputErrorTrue && propertyField.length == 0
           ? 'initial'
           : !isInputValidationOk
@@ -181,7 +173,6 @@ export const AuthStore = signalStore(
       onShowMenuBar,
       onGetToken,
       onClearAllData,
-      onLoading,
       onSetUserProperty,
       helpAndBorderColor,
       passwordHelpColor,

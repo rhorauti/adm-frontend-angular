@@ -17,6 +17,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { ButtonCloseComponent } from '@components/button/button-close/button-close.component';
 import { RouterModule } from '@angular/router';
 import { ModalStore } from '@store/modal/modal.store';
+import { ICompany } from '@core/interfaces/company.interface';
 
 @Component({
   selector: 'app-table-company',
@@ -82,4 +83,18 @@ export class TableCompanyComponent implements OnInit, OnDestroy {
       return '';
     }
   }
+
+  onShowModalAskToDelete(event: MouseEvent | KeyboardEvent, companyData: ICompany): void {
+    event.stopPropagation();
+    this.companyStore.onSetCompanyData(companyData);
+    this.modalStore.onShowAskModal(
+      'Excluir Registro',
+      `Deseja excluir o registro <b>${this.companyStore.companyData().name || ''}</b>?`,
+      this.onCloseAskModalActionOk
+    );
+  }
+
+  onCloseAskModalActionOk = (): void => {
+    this.companyStore.onDeleteRegister(this.companyStore.companyData().idCompany);
+  };
 }

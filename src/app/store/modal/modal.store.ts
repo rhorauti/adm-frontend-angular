@@ -2,112 +2,105 @@ import { inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { patchState, signalStore, withMethods, withState } from '@ngrx/signals';
 
+type ActionCallback = (() => void | Promise<void>) | null | undefined;
+export type ModalType = 'success' | 'failure';
+
 export const ModalStore = signalStore(
   { providedIn: 'root' },
   withState(() => ({
     info: {
       isActive: false,
-      isActionOk: false,
       title: '',
       description: '',
+      type: 'failure' as ModalType,
+      onActionOk: null as ActionCallback,
     },
     ask: {
       isActive: false,
-      isActionOk: false,
       title: '',
       description: '',
+      onActionOk: null as ActionCallback,
+      onActionNok: null as ActionCallback,
     },
+    isLoading: false,
   })),
 
   withMethods(store => {
     const router = inject(Router);
-    const onShowInfoModal = (title: string, description: string): void => {
+
+    const onSetModalInfoType = (type: ModalType): void => {
       patchState(store, {
         info: {
           ...store.info(),
-          isActive: true,
-          title: title as string,
-          description: description as string,
+          type: type,
         },
       });
     };
 
-    const onCloseInfoModal = (onActionOk?: () => void, onActionNok?: () => void): void => {
+    const onShowInfoModal = (
+      title: string,
+      description: string,
+      onActionOk?: ActionCallback
+    ): void => {
+      patchState(store, {
+        info: {
+          ...store.info(),
+          isActive: true,
+          title: title,
+          description: description,
+          onActionOk: onActionOk,
+        },
+      });
+    };
+
+    const onCloseInfoModal = async (): Promise<void> => {
+      const callback = store.info().onActionOk;
+      if (callback) await Promise.resolve(callback());
       patchState(store, {
         info: {
           ...store.info(),
           isActive: false,
+          onActionOk: null,
+          type: 'failure',
         },
       });
-      if (store.info().isActionOk) {
-        if (onActionOk) onActionOk();
+    };
+
+    const onShowAskModal = (
+      title: string,
+      description: string,
+      onActionOk?: ActionCallback,
+      onActionNok?: ActionCallback
+    ): void => {
+      patchState(store, {
+        ask: {
+          ...store.ask(),
+          isActive: true,
+          title: title,
+          description: description,
+          onActionOk: onActionOk,
+          onActionNok: onActionNok,
+        },
+      });
+    };
+
+    const onCloseAskModalAction = async (isConfirmed: boolean): Promise<void> => {
+      const callback = isConfirmed ? store.ask().onActionOk : store.ask().onActionNok;
+      if (callback) {
+        await Promise.resolve(callback());
         patchState(store, {
           info: {
             ...store.info(),
-            isActionOk: false,
+            type: 'success',
           },
         });
-      } else {
-        if (onActionNok) onActionNok();
       }
-    };
-
-    const onModalInfoActionOk = (isActionOk: boolean): void => {
-      patchState(store, {
-        info: {
-          ...store.info(),
-          isActionOk: isActionOk,
-        },
-      });
-    };
-
-    const onShowAskModal = (title?: string, description?: string): void => {
-      patchState(store, {
-        ask: {
-          ...store.ask(),
-          isActive: true,
-          title: title as string,
-          description: description as string,
-        },
-      });
-    };
-
-    const onCloseAskModalActionOk = (onActionOk?: () => void): void => {
       patchState(store, {
         ask: {
           ...store.ask(),
           isActive: false,
-          isActionOk: true,
-        },
-      });
-      if (store.ask().isActionOk) {
-        if (onActionOk) onActionOk();
-        patchState(store, {
-          ask: {
-            ...store.ask(),
-            isActionOk: false,
-          },
-        });
-      }
-    };
-
-    const onCloseAskModalActionNok = (onActionNok?: () => void): void => {
-      patchState(store, {
-        ask: {
-          ...store.ask(),
-          isActive: false,
-        },
-      });
-      if (!store.ask().isActionOk) {
-        if (onActionNok) onActionNok();
-      }
-    };
-
-    const onModalAskActionOk = (isActionOk: boolean): void => {
-      patchState(store, {
-        ask: {
-          ...store.ask(),
-          isActionOk: isActionOk,
+          onActionOk: null,
+          onActionNok: null,
         },
       });
     };
@@ -116,15 +109,20 @@ export const ModalStore = signalStore(
       router.navigate([path]);
     };
 
+    const onLoading = (isLoading: boolean): void => {
+      patchState(store, {
+        isLoading: isLoading,
+      });
+    };
+
     return {
       onShowInfoModal,
       onCloseInfoModal,
-      onModalInfoActionOk,
       onShowAskModal,
-      onCloseAskModalActionOk,
-      onCloseAskModalActionNok,
-      onModalAskActionOk,
+      onSetModalInfoType,
+      onCloseAskModalAction,
       onRedirectPage,
+      onLoading,
     };
   })
 );

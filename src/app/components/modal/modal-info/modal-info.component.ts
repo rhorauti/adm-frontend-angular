@@ -15,9 +15,9 @@ export type ModalIconType = 'success' | 'failure';
 })
 export class ModalInfoComponent {
   readonly modalStore = inject(ModalStore);
-  readonly icon = computed(() => (this.modalStore.info().isActionOk ? 'check' : 'close'));
+  readonly icon = computed(() => (this.modalStore.info().type == 'success' ? 'check' : 'close'));
   readonly iconBackgroundColor = computed(() =>
-    this.modalStore.info().isActionOk ? 'bg-green-600' : 'bg-red-500'
+    this.modalStore.info().type == 'success' ? 'bg-green-600' : 'bg-red-500'
   );
 
   @Input({ required: true }) isModalActive!: boolean;
