@@ -60,7 +60,7 @@ export class CompanyFormComponent implements OnInit, OnDestroy {
   onBackToCompaniesPage = (): void => {
     this.addressStore.onClearData();
     this.employeeStore.onClearData();
-    this.companyStore.onClearData();
+    this.companyStore.onShowDataList();
     this.modalStore.onRedirectPage('/companies');
   };
 }

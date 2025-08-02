@@ -733,7 +733,6 @@ export const CompanyStore = signalStore(
         if (response.status) {
           modalStore.onSetModalInfoType('success');
           modalStore.onShowInfoModal('Cadastro de empresa', response.message, onActionOk);
-          onShowDataList();
         } else {
           modalStore.onShowInfoModal('Cadastro de empresa', response.error?.message || '');
         }
