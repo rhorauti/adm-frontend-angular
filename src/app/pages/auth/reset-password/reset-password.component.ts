@@ -30,10 +30,10 @@ export class ResetPasswordComponent {
   readonly modalStore = inject(ModalStore);
   private router = inject(Router);
 
-  onRedirectToLoginPage(): void {
+  onRedirectToLoginPage = (): void => {
     this.authStore.onClearAllData();
     this.modalStore.onRedirectPage('/login');
-  }
+  };
 
   /**
    * authenticateUser
@@ -49,6 +49,7 @@ export class ResetPasswordComponent {
         );
       } else {
         const response = await this.authApi.getEmailValidation(this.authStore.user().email);
+        this.modalStore.onSetModalInfoType('success');
         this.modalStore.onShowInfoModal(
           'Recuperação de senha',
           response.message,
@@ -57,7 +58,7 @@ export class ResetPasswordComponent {
       }
     } catch (e: any) {
       const error = e as HttpErrorResponse;
-      this.modalStore.onShowInfoModal('Recuperação de senha', error.message);
+      this.modalStore.onShowInfoModal('Recuperação de senha', error.error.message);
     } finally {
       this.modalStore.onLoading(false);
     }

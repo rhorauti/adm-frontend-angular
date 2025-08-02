@@ -32,7 +32,7 @@ export class RedirectComponent implements OnInit {
       this.description = response.message;
     } catch (e: unknown) {
       const error = e as HttpErrorResponse;
-      this.description = error.message;
+      this.description = error.error.message;
       this.icon = 'close';
       this.iconBackgroundColor = 'bg-red-500';
     }

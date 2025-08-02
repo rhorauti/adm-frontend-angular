@@ -30,10 +30,10 @@ export class NewPasswordComponent implements OnInit {
     });
   }
 
-  onRedirectToLoginPage(): void {
+  onRedirectToLoginPage = (): void => {
     this.authStore.onClearAllData();
     this.modalStore.onRedirectPage('/login');
-  }
+  };
 
   /**
    * authenticateUser
@@ -43,10 +43,11 @@ export class NewPasswordComponent implements OnInit {
     this.modalStore.onLoading(true);
     try {
       const response = await this.authApi.createNewPassword(this.authStore.user().password);
+      this.modalStore.onSetModalInfoType('success');
       this.modalStore.onShowInfoModal('Nova senha', response.message, this.onRedirectToLoginPage);
     } catch (e: unknown) {
       const error = e as HttpErrorResponse;
-      this.modalStore.onShowInfoModal('Nova senha', error.message);
+      this.modalStore.onShowInfoModal('Nova senha', error.error.message);
     } finally {
       this.modalStore.onLoading(false);
     }

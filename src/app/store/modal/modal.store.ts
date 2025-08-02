@@ -64,6 +64,7 @@ export const ModalStore = signalStore(
           type: 'failure',
         },
       });
+      console.log('onCloseModalInfo', store.info());
     };
 
     const onShowAskModal = (

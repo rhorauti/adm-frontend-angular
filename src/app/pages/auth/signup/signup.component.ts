@@ -40,10 +40,11 @@ export class SignupComponent {
         password: this.authStore.user().password,
         photoUrl: this.authStore.user().photoUrl,
       });
+      this.modalStore.onSetModalInfoType('success');
       this.modalStore.onShowInfoModal('Novo usuário', response.message, this.onRedirectToLoginPage);
     } catch (e: unknown) {
       const error = e as HttpErrorResponse;
-      this.modalStore.onShowInfoModal('Novo usuário', error.message);
+      this.modalStore.onShowInfoModal('Novo usuário', error.error.message);
     } finally {
       this.modalStore.onLoading(false);
     }

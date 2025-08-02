@@ -45,10 +45,10 @@ export class LoginComponent {
     this.modalStore.onRedirectPage('/signup');
   }
 
-  onModalInfoActionOk(): void {
+  onModalInfoActionOk = (): void => {
     this.authStore.onShowMenuBar(true);
     this.router.navigate(['/companies']);
-  }
+  };
 
   /**
    * authenticateUser
@@ -72,11 +72,12 @@ export class LoginComponent {
           this.authStore.onSetUserProperty('email', response.data.email);
           this.authStore.onSetUserProperty('token', response.data.token);
         }
+        this.modalStore.onSetModalInfoType('success');
         this.modalStore.onShowInfoModal('Autenticação', response.message, this.onModalInfoActionOk);
       }
     } catch (e: unknown) {
       const error = e as HttpErrorResponse;
-      this.modalStore.onShowInfoModal('Autenticação', error.message);
+      this.modalStore.onShowInfoModal('Autenticação', error.error.message);
     } finally {
       this.modalStore.onLoading(false);
     }
