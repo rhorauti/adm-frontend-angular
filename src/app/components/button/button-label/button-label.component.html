@@ -17,8 +17,11 @@
         px-4
         py-2
         disabled:bg-gray-400">
-  @if (showIcon) {
-    <mat-icon [ngClass]="iconClass" class="text-sm">{{ iconName }}</mat-icon>
+  @if (showLeftIcon) {
+    <mat-icon [ngClass]="iconLeftClass" class="text-sm">{{ iconRightName }}</mat-icon>
   }
-  <span class="flex self-center is-hidden-350px" [ngClass]="labelClass">{{ label }}</span>
+  <span class="flex self-center" [ngClass]="labelClass">{{ label }}</span>
+  @if (showRightIcon) {
+    <mat-icon [ngClass]="iconRightClass" class="text-sm">{{ iconRightName }}</mat-icon>
+  }
 </button>

@@ -1,15 +1,15 @@
 <div class="flex flex-col gap-5">
   <app-breadcrumb [items]="['Cadastro', 'Empresas']" />
   @if (companyStore.companiesData().length > 0) {
-    <div class="flex flex-col gap-5 flex-grow">
-      <div class="top-button-layout gap-3 overflow-x-auto">
+    <div class="flex flex-col gap-5">
+      <div class="top-button-layout gap-6 sm:gap-3 overflow-x-auto">
         <div class="flex gap-3">
           <app-input
             [inputValue]="companyStore.inputSearchValue()"
             [id]="'input-filter'"
             [placeholder]="'Id, Nome Fantasia, Razão Social'"
             [inputName]="'search'"
-            (clickEmitter)="companyStore.onTableFilterBasedOnSearchInput()"
+            (clickEmitter)="companyStore.onFilterTableThroughSearchInput()"
             (keyboardEmitter)="companyStore.onKeyPressOnSearchInput($event)"
             (inputValueEmitter)="companyStore.onSetInputSearchValue($event)" />
           <app-tooltip [description]="'Filtro'" [position]="'right'">
@@ -32,6 +32,10 @@
               [iconName]="'view_column'"
               (click)="companyStore.onShowTableHeaderBox(true)" />
           </app-tooltip>
+          <app-button-icon
+            [iconClass]="'block sm:hidden'"
+            [iconName]="'refresh'"
+            (click)="companyStore.onShowDataList()" />
         </div>
       </div>
       @if (companyStore.isAtLeastOneFilterHelpNotEmpty()) {
@@ -41,7 +45,16 @@
               <p>Pesquisa: {{ companyStore.filterHelp().inputSearch }}</p>
               <app-button-close
                 (click)="
-                  companyStore.onClearFilterItem('inputSearch', 'input-search')
+                  companyStore.onSetFilterItemToDefault('inputSearch', 'input-search')
+                "></app-button-close>
+            </div>
+          }
+          @if (companyStore.filterHelp().inputSearch.length > 0) {
+            <div class="flex items-center gap-2">
+              <p>Pesquisa: {{ companyStore.filterHelp().inputSearch }}</p>
+              <app-button-close
+                (click)="
+                  companyStore.onSetFilterItemToDefault('inputSearch', 'input-search')
                 "></app-button-close>
             </div>
           }
@@ -50,7 +63,7 @@
               <p>Id: {{ companyStore.filterHelp().idCompany }}</p>
               <app-button-close
                 (click)="
-                  companyStore.onClearFilterItem('idCompany', 'filter-box')
+                  companyStore.onSetFilterItemToDefault('idCompany', 'filter-box')
                 "></app-button-close>
             </div>
           }
@@ -59,7 +72,7 @@
               <p>Nome Fantasia: {{ companyStore.filterHelp().nickname }}</p>
               <app-button-close
                 (click)="
-                  companyStore.onClearFilterItem('nickname', 'filter-box')
+                  companyStore.onSetFilterItemToDefault('nickname', 'filter-box')
                 "></app-button-close>
             </div>
           }
@@ -67,34 +80,42 @@
             <div class="flex items-center gap-2">
               <p>Raz.Social: {{ companyStore.filterHelp().name }}</p>
               <app-button-close
-                (click)="companyStore.onClearFilterItem('name', 'filter-box')"></app-button-close>
+                (click)="
+                  companyStore.onSetFilterItemToDefault('name', 'filter-box')
+                "></app-button-close>
             </div>
           }
           @if (companyStore.filterHelp().cnpj.length > 0) {
             <div class="flex items-center gap-2">
               <p>CNPJ: {{ companyStore.filterHelp().cnpj }}</p>
               <app-button-close
-                (click)="companyStore.onClearFilterItem('cnpj', 'filter-box')"></app-button-close>
+                (click)="
+                  companyStore.onSetFilterItemToDefault('cnpj', 'filter-box')
+                "></app-button-close>
             </div>
           }
           @if (companyStore.filterHelp().ie) {
             <div class="flex items-center gap-2">
               <p>Inscr.Estadual: {{ companyStore.filterHelp().ie }}</p>
               <app-button-close
-                (click)="companyStore.onClearFilterItem('ie', 'filter-box')"></app-button-close>
+                (click)="
+                  companyStore.onSetFilterItemToDefault('ie', 'filter-box')
+                "></app-button-close>
             </div>
           }
           @if (companyStore.filterHelp().im) {
             <div class="flex items-center gap-2">
               <p>Inscr.Municipal: {{ companyStore.filterHelp().im }}</p>
               <app-button-close
-                (click)="companyStore.onClearFilterItem('im', 'filter-box')"></app-button-close>
+                (click)="
+                  companyStore.onSetFilterItemToDefault('im', 'filter-box')
+                "></app-button-close>
             </div>
           }
           <button
             (click)="companyStore.onClearData()"
             class="text-logo font-semibold cursor-pointer hover:text-logo-hover hover:underline">
-            Limpar tudo
+            Limpar
           </button>
         </div>
       }
@@ -105,7 +126,7 @@
         [pagesArray]="companyStore.pagination().pagesArray"
         [qtyPerPage]="companyStore.pagination().qtyPerPage"
         [totalPages]="companyStore.pagination().totalPages"
-        (currentPageEmitter)="companyStore.onSetNewCurrentPagePagination($event)" />
+        (currentPageEmitter)="companyStore.onSetCurrentPagePagination($event)" />
     </div>
   } @else {
     <div class="flex flex-col items-center gap-4 w-full mt-10">
@@ -116,8 +137,8 @@
       @if (!companyStore.isFilterResultZeroRegister()) {
         <app-button-label
           (click)="modalStore.onRedirectPage('/companies/new')"
-          [showIcon]="true"
-          [iconName]="'add'"
+          [showLeftIcon]="true"
+          [iconRightName]="'add'"
           [label]="'Adicionar uma nova empresa'" />
       } @else {
         @if (companyStore.inputSearchValue().length > 0) {
@@ -187,7 +208,7 @@
         [inputName]="'custom'"
         [inputValue]="companyStore.filterBox().idCompany"
         [type]="'search'"
-        (inputValueEmitter)="companyStore.onInputValueChange('idCompany', $event)"
+        (inputValueEmitter)="companyStore.onSetFilterBoxValue('idCompany', $event)"
         (keyboardEmitter)="companyStore.onKeyPressOnFilterBox($event)" />
     </div>
     <div class="flex flex-col gap-2">
@@ -197,7 +218,7 @@
         [inputName]="'custom'"
         [inputValue]="companyStore.filterBox().nickname"
         [type]="'search'"
-        (inputValueEmitter)="companyStore.onInputValueChange('nickname', $event)"
+        (inputValueEmitter)="companyStore.onSetFilterBoxValue('nickname', $event)"
         (keyboardEmitter)="companyStore.onKeyPressOnFilterBox($event)" />
     </div>
     <div class="flex flex-col gap-2">
@@ -207,7 +228,7 @@
         [inputName]="'custom'"
         [inputValue]="companyStore.filterBox().name"
         [type]="'search'"
-        (inputValueEmitter)="companyStore.onInputValueChange('name', $event)"
+        (inputValueEmitter)="companyStore.onSetFilterBoxValue('name', $event)"
         (keyboardEmitter)="companyStore.onKeyPressOnFilterBox($event)" />
     </div>
     <div class="flex flex-col gap-2">
@@ -216,7 +237,7 @@
         [id]="'filter-company-cnpj'"
         [inputName]="'cnpj'"
         [inputValue]="companyStore.filterBox().cnpj"
-        (inputValueEmitter)="companyStore.onInputValueChange('cnpj', $event)"
+        (inputValueEmitter)="companyStore.onSetFilterBoxValue('cnpj', $event)"
         (keyboardEmitter)="companyStore.onKeyPressOnFilterBox($event)" />
     </div>
     <div class="flex flex-col gap-2">
@@ -226,7 +247,7 @@
         [inputName]="'custom'"
         [inputValue]="companyStore.filterBox().ie"
         [type]="'search'"
-        (inputValueEmitter)="companyStore.onInputValueChange('ie', $event)"
+        (inputValueEmitter)="companyStore.onSetFilterBoxValue('ie', $event)"
         (keyboardEmitter)="companyStore.onKeyPressOnFilterBox($event)" />
     </div>
     <div class="flex flex-col gap-2">
@@ -236,7 +257,7 @@
         [inputName]="'custom'"
         [inputValue]="companyStore.filterBox().im"
         [type]="'search'"
-        (inputValueEmitter)="companyStore.onInputValueChange('im', $event)"
+        (inputValueEmitter)="companyStore.onSetFilterBoxValue('im', $event)"
         (keyboardEmitter)="companyStore.onKeyPressOnFilterBox($event)" />
     </div>
   </div>

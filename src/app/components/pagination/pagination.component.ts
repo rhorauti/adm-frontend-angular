@@ -1,10 +1,11 @@
 import { CommonModule } from '@angular/common';
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
+import { ButtonLabelComponent } from '@components/button/button-label/button-label.component';
 
 @Component({
   selector: 'app-pagination',
-  imports: [CommonModule, MatIconModule],
+  imports: [CommonModule, MatIconModule, ButtonLabelComponent],
   templateUrl: './pagination.component.html',
   styleUrl: './pagination.component.scss',
 })

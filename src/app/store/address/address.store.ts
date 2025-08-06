@@ -34,7 +34,7 @@ export const AddressStore = signalStore(
     const modalStore = inject(ModalStore);
     const addressApi = inject(AddressApi);
 
-    const onSetInputNewValue = (property: keyof IAddress, value: string | number): void => {
+    const onSetFormInputNewValue = (property: keyof IAddress, value: string | number): void => {
       patchState(store, {
         addressData: {
           ...store.addressData(),
@@ -84,6 +84,7 @@ export const AddressStore = signalStore(
 
     const onGetAddressInfo = async (idCompany: number): Promise<void> => {
       try {
+        modalStore.onLoading(true);
         const address = await addressApi.onGetCompanyAddress(idCompany);
         if (address.data) {
           onSetAddressValue(address.data);
@@ -97,11 +98,13 @@ export const AddressStore = signalStore(
           'Formulário de cadastro',
           'Erro ao trazer as informações de endereço.'
         );
+      } finally {
+        modalStore.onLoading(false);
       }
     };
 
     return {
-      onSetInputNewValue,
+      onSetFormInputNewValue,
       onClearData,
       onSetAddressViaCEPValues,
       onSetAddressValue,

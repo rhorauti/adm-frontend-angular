@@ -1,11 +1,10 @@
 <div class="flex flex-col gap-4">
-  <div class="flex items-center md:justify-between overflow-auto">
+  <div class="flex items-center justify-between gap-4 overflow-auto">
     <app-breadcrumb [items]="['Cadastro', 'Empresas', `${formTitle()}`]" />
     <app-button-label
-      class="is-hidden-mobile"
       (click)="onBackToCompaniesPage()"
       [id]="'company-form-back'"
-      [iconName]="'keyboard_arrow_left'"
+      [iconRightName]="'keyboard_arrow_left'"
       [label]="'Voltar'"
       [isColorLogo]="false"
       (click)="onBackToCompaniesPage()" />
@@ -26,7 +25,7 @@
             [inputName]="'custom'"
             [inputValue]="companyStore.companyData().nickname"
             [type]="'search'"
-            (inputValueEmitter)="companyStore.onSetInputNewValue('nickname', $event)" />
+            (inputValueEmitter)="companyStore.onSetFormInputNewValue('nickname', $event)" />
         </div>
         <div class="flex flex-col gap-1 grow">
           <label class="font-medium text-sm" for="company-form-name"
@@ -37,7 +36,7 @@
             [inputName]="'custom'"
             [inputValue]="companyStore.companyData().name"
             [type]="'search'"
-            (inputValueEmitter)="companyStore.onSetInputNewValue('name', $event)" />
+            (inputValueEmitter)="companyStore.onSetFormInputNewValue('name', $event)" />
         </div>
       </div>
       <div class="flex flex-col md:flex-row gap-4">
@@ -50,7 +49,7 @@
             [inputName]="'cnpj'"
             [inputValue]="companyStore.companyData().cnpj || ''"
             [type]="'search'"
-            (inputValueEmitter)="companyStore.onSetInputNewValue('cnpj', $event)" />
+            (inputValueEmitter)="companyStore.onSetFormInputNewValue('cnpj', $event)" />
         </div>
         <div class="flex flex-col gap-1 grow">
           <label class="font-medium text-sm" for="company-form-ie">Inscrição Estadual</label>
@@ -59,7 +58,7 @@
             [inputName]="'custom'"
             [inputValue]="companyStore.companyData().ie || ''"
             [type]="'search'"
-            (inputValueEmitter)="companyStore.onSetInputNewValue('ie', $event)" />
+            (inputValueEmitter)="companyStore.onSetFormInputNewValue('ie', $event)" />
         </div>
         <div class="flex flex-col gap-1 grow">
           <label class="font-medium text-sm" for="company-form-im">Inscrição Municipal</label>
@@ -68,7 +67,7 @@
             [inputName]="'custom'"
             [inputValue]="companyStore.companyData().im || ''"
             [type]="'search'"
-            (inputValueEmitter)="companyStore.onSetInputNewValue('im', $event)" />
+            (inputValueEmitter)="companyStore.onSetFormInputNewValue('im', $event)" />
         </div>
       </div>
     </div>
@@ -87,7 +86,7 @@
             [inputName]="'postalCode'"
             [inputValue]="addressStore.addressData().postalCode"
             (changeEmitter)="addressStore.onSetAddressViaCEPValues()"
-            (inputValueEmitter)="addressStore.onSetInputNewValue('postalCode', $event)" />
+            (inputValueEmitter)="addressStore.onSetFormInputNewValue('postalCode', $event)" />
         </div>
         <div class="flex flex-col gap-1 grow">
           <label class="font-medium text-sm" for="company-form-nickname">Logradouro</label>
@@ -96,7 +95,7 @@
             [inputName]="'custom'"
             [inputValue]="addressStore.addressData().address"
             [type]="'search'"
-            (inputValueEmitter)="addressStore.onSetInputNewValue('address', $event)" />
+            (inputValueEmitter)="addressStore.onSetFormInputNewValue('address', $event)" />
         </div>
         <div class="flex flex-col gap-1">
           <label class="font-medium text-sm" for="company-form-name">Número</label>
@@ -105,7 +104,7 @@
             [inputName]="'custom'"
             [inputValue]="addressStore.addressData().number || ''"
             [type]="'search'"
-            (inputValueEmitter)="addressStore.onSetInputNewValue('number', $event)" />
+            (inputValueEmitter)="addressStore.onSetFormInputNewValue('number', $event)" />
         </div>
         <div class="flex flex-col gap-1 grow">
           <label class="font-medium text-sm" for="company-form-cnpj">Complemento</label>
@@ -114,7 +113,7 @@
             [inputName]="'custom'"
             [inputValue]="addressStore.addressData().complement || ''"
             [type]="'search'"
-            (inputValueEmitter)="addressStore.onSetInputNewValue('complement', $event)" />
+            (inputValueEmitter)="addressStore.onSetFormInputNewValue('complement', $event)" />
         </div>
       </div>
       <div class="flex flex-col md:flex-row gap-4">
@@ -125,7 +124,7 @@
             [inputName]="'custom'"
             [inputValue]="addressStore.addressData().district || ''"
             [type]="'search'"
-            (inputValueEmitter)="addressStore.onSetInputNewValue('district', $event)" />
+            (inputValueEmitter)="addressStore.onSetFormInputNewValue('district', $event)" />
         </div>
         <div class="flex flex-col gap-1 grow">
           <label class="font-medium text-sm" for="company-form-im">Cidade</label>
@@ -134,14 +133,14 @@
             [inputName]="'custom'"
             [inputValue]="addressStore.addressData().city || ''"
             [type]="'search'"
-            (inputValueEmitter)="addressStore.onSetInputNewValue('city', $event)" />
+            (inputValueEmitter)="addressStore.onSetFormInputNewValue('city', $event)" />
         </div>
         <div class="flex flex-col gap-1">
           <label class="font-medium text-sm" for="company-form-im">UF</label>
           <app-select
             [selectType]="'state'"
             [selectValue]="addressStore.addressData().state || 'Selecione um item'"
-            (selectValueEmitter)="addressStore.onSetInputNewValue('state', $event)" />
+            (selectValueEmitter)="addressStore.onSetFormInputNewValue('state', $event)" />
         </div>
       </div>
     </div>
@@ -160,7 +159,7 @@
             [inputName]="'custom'"
             [inputValue]="employeeStore.employeeData().name"
             [type]="'search'"
-            (inputValueEmitter)="employeeStore.onSetInputNewValue('name', $event)" />
+            (inputValueEmitter)="employeeStore.onSetFormInputNewValue('name', $event)" />
         </div>
         <div class="flex flex-col gap-1 grow">
           <label class="font-medium text-sm" for="company-form-cnpj">Depto</label>
@@ -169,7 +168,7 @@
             [inputName]="'custom'"
             [inputValue]="employeeStore.employeeData().department || ''"
             [type]="'search'"
-            (inputValueEmitter)="employeeStore.onSetInputNewValue('department', $event)" />
+            (inputValueEmitter)="employeeStore.onSetFormInputNewValue('department', $event)" />
         </div>
         <div class="flex flex-col gap-1 grow">
           <label class="font-medium text-sm" for="company-form-cnpj">Cargo</label>
@@ -178,7 +177,7 @@
             [inputName]="'custom'"
             [inputValue]="employeeStore.employeeData().position || ''"
             [type]="'search'"
-            (inputValueEmitter)="employeeStore.onSetInputNewValue('position', $event)" />
+            (inputValueEmitter)="employeeStore.onSetFormInputNewValue('position', $event)" />
         </div>
       </div>
       <div class="flex flex-col md:flex-row gap-4">
@@ -189,7 +188,7 @@
             [inputName]="'custom'"
             [inputValue]="employeeStore.employeeData().email || ''"
             [type]="'search'"
-            (inputValueEmitter)="employeeStore.onSetInputNewValue('email', $event)" />
+            (inputValueEmitter)="employeeStore.onSetFormInputNewValue('email', $event)" />
         </div>
         <div class="flex flex-col gap-1 grow">
           <label class="font-medium text-sm" for="company-form-im">Telefone fixo</label>
@@ -197,7 +196,7 @@
             [id]="'company-form-employee-deskphone'"
             [inputName]="'phone'"
             [inputValue]="employeeStore.employeeData().deskphone || ''"
-            (inputValueEmitter)="employeeStore.onSetInputNewValue('deskphone', $event)" />
+            (inputValueEmitter)="employeeStore.onSetFormInputNewValue('deskphone', $event)" />
         </div>
         <div class="flex flex-col gap-1 grow">
           <label class="font-medium text-sm" for="company-form-im">Celular</label>
@@ -205,7 +204,7 @@
             [id]="'company-form-employee-mobile'"
             [inputName]="'phone'"
             [inputValue]="employeeStore.employeeData().cellphone || ''"
-            (inputValueEmitter)="employeeStore.onSetInputNewValue('cellphone', $event)" />
+            (inputValueEmitter)="employeeStore.onSetFormInputNewValue('cellphone', $event)" />
         </div>
       </div>
     </div>
@@ -214,11 +213,11 @@
   <footer class="flex gap-4 items-center justify-center md:justify-end">
     <app-button-label
       (click)="onBackToCompaniesPage()"
-      [iconName]="'close'"
+      [iconRightName]="'close'"
       [label]="'Cancelar'"
       [isColorLogo]="false"></app-button-label>
     <app-button-label
-      [iconName]="'save'"
+      [iconRightName]="'save'"
       [label]="'Salvar'"
       (click)="companyStore.onSaveRegister(onBackToCompaniesPage)"></app-button-label>
   </footer>

@@ -10,10 +10,13 @@ import { Icon } from '@core/types/icon.type';
   styleUrl: './button-label.component.scss',
 })
 export class ButtonLabelComponent implements OnInit {
-  @Input() iconName: Icon = '';
+  @Input() iconLeftName: Icon = '';
+  @Input() iconRightName: Icon = '';
   @Input() labelClass = '';
-  @Input() showIcon = true;
-  @Input() iconClass = '';
+  @Input() showLeftIcon = true;
+  @Input() showRightIcon = false;
+  @Input() iconLeftClass = '';
+  @Input() iconRightClass = '';
   @Input() tabIndex = 0;
   @Input() label = '';
   @Input() isColorLogo = true;

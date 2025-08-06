@@ -9,7 +9,6 @@ import {
   QueryList,
   ViewChildren,
 } from '@angular/core';
-import { TableBaseComponent } from '@components/table/table-base/table-base.component';
 import { NgxMaskPipe, provideNgxMask } from 'ngx-mask';
 import { FormsModule } from '@angular/forms';
 import { CompanyStore } from '@store/company/company.store';
@@ -24,7 +23,6 @@ import { ICompany } from '@core/interfaces/company.interface';
   imports: [
     CommonModule,
     FormsModule,
-    TableBaseComponent,
     NgxMaskPipe,
     MatIconModule,
     ButtonCloseComponent,
@@ -50,13 +48,29 @@ export class TableCompanyComponent implements OnInit, OnDestroy {
     this.document.removeEventListener('mousedown', this.onTableItemClick);
   }
 
+  gridTemplateColumns = computed(() => {
+    const columnsWidth: string[] = ['2fr'];
+    this.companyStore.tableHeaders().forEach(header => {
+      if (header.isHeaderActive) {
+        if (header.id != 0 && header.id != 2) {
+          columnsWidth.push('2fr');
+        } else if (header.id == 2) {
+          columnsWidth.push('3fr');
+        } else {
+          columnsWidth.push('1fr');
+        }
+      }
+    });
+    return columnsWidth.join(' ');
+  });
+
   onTableItemClick = (event: MouseEvent): void => {
     const targetNode = event.target as Node;
     if (
       !this.divBoxes.some(box => box && box.nativeElement.contains(targetNode)) &&
       !this.iconOptions.some(icon => icon && icon.nativeElement.contains(targetNode))
     ) {
-      this.companyStore.onCloseTableItemBox();
+      this.companyStore.onCloseTableItemsBox();
     } else {
       return;
     }

@@ -1,9 +1,10 @@
-<app-table-base>
-  <tr thead-row class="h-full py-2 border-b-[2px] border-solid border-gray-300">
-    <th class="table-td flex items-center justify-center gap-6">
+<div class="flex flex-col overflow-x-auto">
+  <div class="hidden sm:grid dynamic-grid sm:gap-2" [style.--grid-layout]="gridTemplateColumns()">
+    <div class="table-td flex items-center gap-6 sm:justify-center overflow-hidden text-ellipsis">
       <input
         type="checkbox"
-        (change)="companyStore.onHeaderCheckboxChecked(companyStore.tableCheckbox().header)"
+        name="table-checkbox"
+        (change)="companyStore.onHeaderCheckboxChecked($event)"
         [(ngModel)]="companyStore.tableCheckbox().header" />
       <mat-icon
         (click)="companyStore.onShowDataList()"
@@ -11,47 +12,50 @@
         class="text-sm text-logo hover:bg-gray-200 hover:rounded-md cursor-pointer"
         >refresh</mat-icon
       >
-    </th>
+    </div>
     @for (header of companyStore.tableHeaders(); track $index) {
       @if (header.isHeaderActive) {
-        <th class="table-td">
-          <div class="relative flex items-center gap-2">
-            <p>{{ header.headerName }}</p>
-            <div class="relative flex items-center">
-              <mat-icon
-                (click)="companyStore.onSortTableHeader($index)"
-                class="text-logo hover:bg-gray-200 hover:rounded-md text-sm font-bold cursor-pointer"
-                >{{ header.icon }}</mat-icon
-              >
-              @if (header.sort != 0) {
-                <div class="absolute left-[1.5rem] top-0">
-                  <app-button-close (click)="companyStore.onClearData()" />
-                </div>
-              }
-            </div>
+        <div
+          class="table-td relative flex font-semibold items-center gap-1 overflow-hidden text-ellipsis">
+          <p>{{ header.headerName }}</p>
+          <div class="relative flex items-center">
+            <mat-icon
+              (click)="companyStore.onSortTableHeader($index)"
+              class="text-logo hover:bg-gray-200 hover:rounded-md text-sm font-bold cursor-pointer"
+              >{{ header.icon }}</mat-icon
+            >
+            @if (header.sort != 0) {
+              <div class="absolute left-[1.2rem] -top-[0.1rem]">
+                <app-button-close (click)="companyStore.onClearData()" />
+              </div>
+            }
           </div>
-        </th>
+        </div>
       }
     }
-  </tr>
-  <tbody tbody-row>
+  </div>
+  <div class="flex flex-col sm:gap-0">
     @for (
       companyData of companyStore
         .companiesData()
         .slice(computedFirstRegister(), computedLastRegister());
       track $index
     ) {
-      <tr
+      <div
+        tabindex="0"
         (click)="companyStore.onRedirectToEditPage(companyData)"
-        class="h-full py-2 border-b-[2px] border-solid last:border-gray-300 hover:bg-gray-200 cursor-pointer">
-        <td
+        (keydown)="companyStore.onRedirectToEditPage(companyData)"
+        [style.--grid-layout]="gridTemplateColumns()"
+        class="grid grid-cols-1 sm:gap-2 dynamic-grid mb-2 pb-2 sm:pb-0 sm:mb-0 border-b-[2.5px] border-solid border-gray-200 hover:bg-gray-200 cursor-pointer">
+        <div
+          tabindex="0"
           (click)="$event.stopPropagation()"
-          class="relative table-td flex items-center justify-center gap-4">
+          (keydown)="$event.stopPropagation()"
+          class="table-td relative flex sm:justify-center items-center gap-4">
           <input
             type="checkbox"
             name="table-checkbox"
-            (click)="$event.stopPropagation()"
-            (change)="companyStore.onBodyCheckboxChange($index, $event)"
+            (change)="companyStore.onBodyCheckboxCheckChange($index, $event)"
             [(ngModel)]="companyStore.tableCheckbox().body[$index]" />
           <mat-icon
             #iconOptions
@@ -60,64 +64,50 @@
             class="border border-gray-800 rounded-full hover:text-white hover:bg-logo text-center text-sm cursor-pointer p-1 font-semibold"
             >more_horiz</mat-icon
           >
-          <div
-            #divBoxes
-            tabindex="0"
-            [ngClass]="companyStore.tableItemsBox()[$index] ? 'opacity-100' : 'opacity-0'"
-            class="absolute flex flex-col gap-1 left-[7.3rem] p-2 border border-gray-400 rounded-md bg-gray-100 text-xs transition-all duration-300 ease-in-out">
-            <p
+          @if (companyStore.tableItemsBox()[$index]) {
+            <div
+              #divBoxes
               tabindex="0"
-              (keydown)="companyStore.onCloneRegister(companyData)"
-              (click)="companyStore.onCloneRegister(companyData)"
-              class="hover:bg-gray-200 hover:rounded-md px-2">
-              Clonar
-            </p>
-            <p
-              tabindex="0"
-              (keydown)="onShowModalAskToDelete($event, companyData)"
-              (click)="onShowModalAskToDelete($event, companyData)"
-              class="hover:bg-gray-200 hover:rounded-md px-2">
-              Excluir
-            </p>
-          </div>
-        </td>
-        @if (companyStore.tableHeaders()[0].isHeaderActive) {
-          <td class="table-td">
-            {{ companyData.idCompany }}
-          </td>
-        }
-        @if (companyStore.tableHeaders()[1].isHeaderActive) {
-          <td class="table-td">{{ companyData.nickname }}</td>
-        }
-        @if (companyStore.tableHeaders()[2].isHeaderActive) {
-          <td class="table-td">{{ companyData.name }}</td>
-        }
-        @if (companyStore.tableHeaders()[3].isHeaderActive) {
-          <td class="table-td">
-            {{ companyData.cnpj || '' | mask: setMask('cnpj', $index) }}
-          </td>
-        }
-        @if (companyStore.tableHeaders()[4].isHeaderActive) {
-          <td class="table-td">{{ companyData.ie }}</td>
-        }
-        @if (companyStore.tableHeaders()[5].isHeaderActive) {
-          <td class="table-td">{{ companyData.im }}</td>
-        }
-      </tr>
-    }
-  </tbody>
-</app-table-base>
+              [ngClass]="{
+                'opacity-100': companyStore.tableItemsBox()[$index],
+                'opacity-0': !companyStore.tableItemsBox()[$index],
+                'sm:-top-8': $last,
+              }"
+              class="absolute flex flex-col gap-1 left-[4.5rem] sm:left-[11rem] p-2 border border-gray-400 rounded-md bg-gray-100 text-xs transition-opacity duration-300 ease-in-out">
+              <button
+                (click)="companyStore.onCloneRegister(companyData)"
+                class="hover:bg-gray-200 hover:rounded-md px-2">
+                Clonar
+              </button>
+              <button
+                (click)="onShowModalAskToDelete($event, companyData)"
+                class="hover:bg-gray-200 hover:rounded-md px-2">
+                Excluir
+              </button>
+            </div>
+          }
+        </div>
+        @for (header of companyStore.tableHeaders(); track header.id) {
+          @if (header.isHeaderActive) {
+            <div class="table-td overflow-hidden text-ellipsis">
+              @if (companyData[header.databaseField]) {
+                <span class="block sm:hidden font-semibold">{{ header.headerName }}: </span>
+              }
 
-<!-- <app-modal-ask
-  [isModalActive]="modalStore.ask().isActive"
-  [type]="'warning'"
-  [title]="modalStore.ask().title"
-  [description]="modalStore.ask().description"
-  (closeActionNokEmitter)="modalStore.onCloseAskModalActionNok()"
-  (closeActionOkEmitter)="onCloseAskModalActionOk()" />
-<app-modal-info
-  [isModalActive]="modalStore.info().isActive"
-  [description]="modalStore.info().description"
-  [title]="modalStore.info().title"
-  (clickEmitter)="modalStore.onCloseAskModalActionOk()" />
-<app-loading [isLoading]="modalStore.isLoading()" /> -->
+              <span>
+                @switch (header.databaseField) {
+                  @case ('cnpj') {
+                    {{ companyData.cnpj || '' | mask: setMask('cnpj', $index) }}
+                  }
+                  @default {
+                    {{ companyData[header.databaseField] }}
+                  }
+                }
+              </span>
+            </div>
+          }
+        }
+      </div>
+    }
+  </div>
+</div>

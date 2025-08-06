@@ -3,7 +3,7 @@
     @for (item of items; track $index) {
       <span
         [ngClass]="items.length - 1 == $index ? 'font-semibold text-logo' : ''"
-        class="text-lg"
+        class="sm:text-lg"
         >{{ item }}</span
       >
       @if (items.length - 1 != $index) {

@@ -1,5 +1,5 @@
 import { signalStore, withState, withMethods, patchState, withComputed } from '@ngrx/signals';
-import { ICompany } from '@core/interfaces/company.interface';
+import { ICompany, ICompanyStore } from '@core/interfaces/company.interface';
 import { computed, inject } from '@angular/core';
 import { ITableCheckbox, ITableHeader } from '@core/interfaces/table.interface';
 import { IPagination } from '@core/interfaces/pagination.interface';
@@ -19,101 +19,104 @@ type ActionCallback = (() => void | Promise<void>) | null | undefined;
 export const CompanyStore = signalStore(
   { providedIn: 'root' },
 
-  withState(() => ({
-    inputSearchValue: '',
-    isTableHeaderBoxActive: false,
-    tableHeaders: [
-      {
-        id: 0,
-        isHeaderActive: true,
-        sort: 0,
-        icon: defaultTableHeaderIcon,
-        headerName: 'Id',
-        databaseField: 'idCompany',
-      },
-      {
-        id: 1,
-        isHeaderActive: true,
-        sort: 0,
-        icon: defaultTableHeaderIcon,
-        headerName: 'Nome Fantasia',
-        databaseField: 'nickname',
-      },
-      {
-        id: 2,
-        isHeaderActive: true,
-        sort: 0,
-        icon: defaultTableHeaderIcon,
-        headerName: 'Razão Social',
-        databaseField: 'name',
-      },
-      {
-        id: 3,
-        isHeaderActive: true,
-        sort: 0,
-        icon: defaultTableHeaderIcon,
-        headerName: 'CNPJ/CPF',
-        databaseField: 'cnpj',
-      },
-      {
-        id: 4,
-        isHeaderActive: false,
-        sort: 0,
-        icon: defaultTableHeaderIcon,
-        headerName: 'Inscr. Estadual',
-        databaseField: 'ie',
-      },
-      {
-        id: 5,
-        isHeaderActive: false,
-        sort: 0,
-        icon: defaultTableHeaderIcon,
-        headerName: 'Inscr. Municipal',
-        databaseField: 'im',
-      },
-    ] as ITableHeader[],
-    tableCheckbox: {
-      header: false,
-      body: [],
-    } as ITableCheckbox,
-    tableItemsBox: [] as boolean[],
-    initialTableData: [] as ICompany[],
-    companiesData: [] as ICompany[],
-    isDelBtnDisabled: false,
-    companyData: {
-      idCompany: 0,
-      nickname: '',
-      name: '',
-      cnpj: '',
-      ie: '',
-      im: '',
-    } as ICompany,
-    isFilterBoxActive: false,
-    isFilterResultZeroRegister: false,
-    filterBox: {
-      idCompany: '',
-      nickname: '',
-      name: '',
-      cnpj: '',
-      ie: '',
-      im: '',
-    } as IFilterBoxCompany,
-    filterHelp: {
-      inputSearch: '',
-      idCompany: '',
-      nickname: '',
-      name: '',
-      cnpj: '',
-      ie: '',
-      im: '',
-    } as IFilterHelpCompany,
-    pagination: {
-      currentPage: 1,
-      totalPages: 1,
-      qtyPerPage: 10,
-      pagesArray: [],
-    } as IPagination,
-  })),
+  withState(
+    () =>
+      ({
+        inputSearchValue: '',
+        isTableHeaderBoxActive: false,
+        tableHeaders: [
+          {
+            id: 0,
+            isHeaderActive: true,
+            sort: 0,
+            icon: defaultTableHeaderIcon,
+            headerName: 'Id',
+            databaseField: 'idCompany',
+          },
+          {
+            id: 1,
+            isHeaderActive: true,
+            sort: 0,
+            icon: defaultTableHeaderIcon,
+            headerName: 'Nome Fantasia',
+            databaseField: 'nickname',
+          },
+          {
+            id: 2,
+            isHeaderActive: true,
+            sort: 0,
+            icon: defaultTableHeaderIcon,
+            headerName: 'Razão Social',
+            databaseField: 'name',
+          },
+          {
+            id: 3,
+            isHeaderActive: true,
+            sort: 0,
+            icon: defaultTableHeaderIcon,
+            headerName: 'CNPJ/CPF',
+            databaseField: 'cnpj',
+          },
+          {
+            id: 4,
+            isHeaderActive: false,
+            sort: 0,
+            icon: defaultTableHeaderIcon,
+            headerName: 'Inscr. Estadual',
+            databaseField: 'ie',
+          },
+          {
+            id: 5,
+            isHeaderActive: false,
+            sort: 0,
+            icon: defaultTableHeaderIcon,
+            headerName: 'Inscr. Municipal',
+            databaseField: 'im',
+          },
+        ] as ITableHeader<ICompany>[],
+        tableCheckbox: {
+          header: false,
+          body: [],
+        } as ITableCheckbox,
+        tableItemsBox: [] as boolean[],
+        initialTableData: [] as ICompany[],
+        companiesData: [] as ICompany[],
+        isDelBtnDisabled: false,
+        companyData: {
+          idCompany: 0,
+          nickname: '',
+          name: '',
+          cnpj: '',
+          ie: '',
+          im: '',
+        } as ICompany,
+        isFilterBoxActive: false,
+        isFilterResultZeroRegister: false,
+        filterBox: {
+          idCompany: '',
+          nickname: '',
+          name: '',
+          cnpj: '',
+          ie: '',
+          im: '',
+        } as IFilterBoxCompany,
+        filterHelp: {
+          inputSearch: '',
+          idCompany: '',
+          nickname: '',
+          name: '',
+          cnpj: '',
+          ie: '',
+          im: '',
+        } as IFilterHelpCompany,
+        pagination: {
+          currentPage: 1,
+          totalPages: 1,
+          qtyPerPage: 10,
+          pagesArray: [],
+        } as IPagination,
+      }) as ICompanyStore
+  ),
 
   withComputed(store => ({
     itemSelected: computed(() => {
@@ -170,9 +173,117 @@ export const CompanyStore = signalStore(
     const employeeStore = inject(EmployeeStore);
     const modalStore = inject(ModalStore);
 
+    const onSetCheckboxArrayToDefault = (dataLength: number): void => {
+      patchState(store, {
+        tableCheckbox: {
+          ...store.tableCheckbox(),
+          body: Array.from({ length: dataLength }, () => false),
+        },
+      });
+    };
+
+    const onSetTableItemBoxArrayToDefault = (dataLength: number): void => {
+      patchState(store, {
+        tableItemsBox: Array.from({ length: dataLength }, () => false),
+      });
+    };
+
+    const onSetIsFilterResultZeroRegister = (isFilterResultZeroRegister: boolean): void => {
+      patchState(store, {
+        isFilterResultZeroRegister: isFilterResultZeroRegister,
+      });
+    };
+
+    const onSetisDelBtnDisabled = (isDelBtnDisabled: boolean): void => {
+      patchState(store, {
+        isDelBtnDisabled: isDelBtnDisabled,
+      });
+    };
+
+    const onSetTableCheckboxToDefault = (): void => {
+      patchState(store, {
+        tableCheckbox: {
+          header: false,
+          body: store.tableCheckbox().body.map(() => false),
+        },
+      });
+    };
+
+    /**
+     * Clear filter help
+     */
+    const onSetFilterHelpToDefault = (): void => {
+      Object.keys(store.filterHelp()).forEach(key => {
+        patchState(store, {
+          filterHelp: {
+            ...store.filterHelp(),
+            [key]: '',
+          },
+        });
+      });
+    };
+
+    const onSetFilterBoxToDefault = (): void => {
+      Object.keys(store.filterBox()).forEach(key => {
+        patchState(store, {
+          filterBox: {
+            ...store.filterBox(),
+            [key]: '',
+          },
+        });
+      });
+    };
+
+    const onSetCompanyDataToDefault = (): void => {
+      Object.keys(store.companyData()).forEach(key => {
+        patchState(store, {
+          companyData: {
+            ...store.companyData(),
+            [key]: '',
+          },
+        });
+      });
+    };
+
+    const onSetInputSearchToDefault = (): void => {
+      patchState(store, {
+        inputSearchValue: '',
+      });
+    };
+
+    const onSetFilterItemToDefault = (key: string, filterMethod: FilterMethod): void => {
+      if (filterMethod == 'input-search') {
+        onFilterTableThroughSearchInput();
+      } else {
+        onSetFilterBoxValue(key, '');
+        onFilterThroughFilterBox();
+      }
+    };
+
+    const onSetCompaniesData = (companiesData: ICompany[]): void => {
+      patchState(store, {
+        companiesData: companiesData,
+      });
+    };
+
+    const onSetTableHeaderCheckbox = (isChecked: boolean): void => {
+      patchState(store, {
+        tableCheckbox: {
+          ...store.tableCheckbox(),
+          header: isChecked,
+        },
+      });
+    };
+
     const onSetInputSearchValue = (inputData: string): void => {
       patchState(store, {
         inputSearchValue: inputData,
+      });
+    };
+
+    const onSetCompanyData = (companyData: ICompany): void => {
+      patchState(store, {
+        companyData: companyData,
       });
     };
 
@@ -188,6 +299,15 @@ export const CompanyStore = signalStore(
       });
     };
 
+    const onSetFilterBoxValue = (key: string, value: string): void => {
+      patchState(store, {
+        filterBox: {
+          ...store.filterBox(),
+          [key]: value,
+        },
+      });
+    };
+
     const onShowHeader = (idx: number): void => {
       patchState(store, {
         tableHeaders: store.tableHeaders().map((header, index) => {
@@ -200,30 +320,10 @@ export const CompanyStore = signalStore(
       });
     };
 
-    const onFillNewCheckboxArray = (dataLength: number): void => {
-      patchState(store, {
-        tableCheckbox: {
-          ...store.tableCheckbox(),
-          body: Array.from({ length: dataLength }, () => false),
-        },
-      });
-    };
-
-    const onFillNewTableItemBoxArray = (dataLength: number): void => {
-      patchState(store, {
-        tableItemsBox: Array.from({ length: dataLength }, () => false),
-      });
-    };
-
-    const onClearTableCheckbox = (): void => {
-      patchState(store, {
-        tableCheckbox: {
-          header: false,
-          body: store.tableCheckbox().body.map(() => false),
-        },
-      });
-    };
-
+    /**
+     * Change the sort icon according to sort status calculated on onSetTableHeaderSortMethod.
+     * There are 3 sort states : 0 - Not sorted, 1 - Ascending, 2 - Descending.
+     */
     const onSetTableHeaderIcon = (): void => {
       patchState(store, {
         tableHeaders: store.tableHeaders().map(header => {
@@ -238,17 +338,12 @@ export const CompanyStore = signalStore(
       });
     };
 
-    const onClearSortFilterIcon = (): void => {
-      const sortedHeaders: ITableHeader[] = [];
-      store.tableHeaders().forEach(header => {
-        if (header.sort != 0) sortedHeaders.push(header);
-      });
-      if (sortedHeaders.length > 1) {
-        onClearData();
-      }
-    };
-
-    const onSetTableHeaderSortMethod = (idx: number) => {
+    /**
+     * Calculate the sorted order that will be used to sort companiesData and also change sort icon.
+     * There are 3 sort states : 0 - Not sorted, 1 - Ascending, 2 - Descending.
+     * @param idx The index of the clicked table column.
+     */
+    const onSetTableHeaderSortMethod = (idx: number): void => {
       patchState(store, {
         tableHeaders: store.tableHeaders().map((header, index) => {
           if (idx == index) {
@@ -259,50 +354,59 @@ export const CompanyStore = signalStore(
       });
     };
 
+    /**
+     * Sort the companiesData according to sort status defined on onSetTableHeaderSortMethod
+     * There are 3 sort states : 0 - Not sorted, 1 - Ascending, 2 - Descending.
+     * @param idx The index of the clicked table column.
+     */
     const onSortTable = (idx: number): void => {
       if (store.tableHeaders()[idx].sort == 0) {
-        patchState(store, {
-          companiesData: store.initialTableData(),
-        });
+        onSetCompaniesData(store.initialTableData());
       } else {
         const header = store.tableHeaders()[idx];
         const key = header.databaseField as keyof ICompany;
         const sortDirection = header.sort;
-        patchState(store, {
-          companiesData: [...store.companiesData()].sort((a, b) => {
-            const valueA = a[key];
-            const valueB = b[key];
-            let comparison = 0;
-            if (typeof valueA === 'number' && typeof valueB === 'number') {
-              comparison = valueA - valueB;
-            } else if (typeof valueA === 'string' && typeof valueB === 'string') {
-              comparison = valueA.localeCompare(valueB);
-            }
-            return sortDirection == 2 ? comparison * -1 : comparison;
-          }),
+        const sortedCompaniesData = store.companiesData().sort((a, b) => {
+          const valueA = a[key];
+          const valueB = b[key];
+          let comparison = 0;
+          if (typeof valueA === 'number' && typeof valueB === 'number') {
+            comparison = valueA - valueB;
+          } else if (typeof valueA === 'string' && typeof valueB === 'string') {
+            comparison = valueA.localeCompare(valueB);
+          }
+          return sortDirection == 2 ? comparison * -1 : comparison;
         });
+        onSetCompaniesData(sortedCompaniesData);
       }
     };
 
+    /**
+     * Sort the table when the <thead> icon is clicked.
+     * There are 3 sort states : 0 - Not sorted, 1 - Ascending, 2 - Descending.
+     * @param idx The index of the clicked table column.
+     */
     const onSortTableHeader = (idx: number) => {
-      onClearSortFilterIcon();
+      onSetFilterHelpToDefault();
       onSetTableHeaderSortMethod(idx);
       onSetTableHeaderIcon();
       onSortTable(idx);
+      onApplyFilterHelpThroughSortMethod(idx);
     };
 
-    const onHeaderCheckboxChecked = (isChecked: boolean): void => {
+    const onHeaderCheckboxChecked = (event: Event): void => {
+      const newValue = (event.target as HTMLInputElement).checked;
       patchState(store, {
         tableCheckbox: {
           ...store.tableCheckbox(),
-          header: isChecked,
-          body: store.tableCheckbox().body.map(() => isChecked),
+          header: newValue,
+          body: store.tableCheckbox().body.map(() => newValue),
         },
       });
       onCheckTableCheckboxStatus(store.tableCheckbox().body);
     };
 
-    const onBodyCheckboxChange = (index: number, event: Event) => {
+    const onBodyCheckboxCheckChange = (index: number, event: Event) => {
       const newValue = (event.target as HTMLInputElement).checked;
       patchState(store, {
         tableCheckbox: {
@@ -317,22 +421,8 @@ export const CompanyStore = signalStore(
 
     const onCheckTableCheckboxStatus = (array: boolean[]): void => {
       const bodyCheckboxListUpdated = array.filter(element => element == true);
-      patchState(store, {
-        isDelBtnDisabled: bodyCheckboxListUpdated.length != 1,
-        tableCheckbox: {
-          ...store.tableCheckbox(),
-          header: bodyCheckboxListUpdated.length > 0,
-        },
-      });
-    };
-
-    const onHeaderCheckboxDisabled = (): void => {
-      patchState(store, {
-        tableCheckbox: {
-          ...store.tableCheckbox(),
-          header: false,
-        },
-      });
+      onSetisDelBtnDisabled(bodyCheckboxListUpdated.length != 1);
+      onSetTableHeaderCheckbox(bodyCheckboxListUpdated.length > 0);
     };
 
     const onKeyPressOnNotFoundFilterRegister = (event: KeyboardEvent): void => {
@@ -350,54 +440,21 @@ export const CompanyStore = signalStore(
     };
 
     const onClearData = (companiesData: ICompany[] = store.initialTableData()): void => {
-      patchState(store, {
-        companiesData: companiesData,
-        isFilterResultZeroRegister: false,
-        isDelBtnDisabled: true,
-        inputSearchValue: '',
-        companyData: {
-          idCompany: 0,
-          nickname: '',
-          name: '',
-          cnpj: '',
-          ie: '',
-          im: '',
-        },
-        filterBox: {
-          idCompany: '',
-          nickname: '',
-          name: '',
-          cnpj: '',
-          ie: '',
-          im: '',
-        },
-        filterHelp: {
-          inputSearch: '',
-          idCompany: '',
-          nickname: '',
-          name: '',
-          cnpj: '',
-          ie: '',
-          im: '',
-        },
-        tableCheckbox: {
-          ...store.tableCheckbox(),
-          header: false,
-        },
-        pagination: {
-          ...store.pagination(),
-          currentPage: 1,
-          totalPages: 1,
-          pagesArray: [],
-        },
-      });
-      onClearSortFilter();
-      onFillNewCheckboxArray(companiesData.length);
-      onFillNewTableItemBoxArray(companiesData.length);
-      onGeneratePaginationPagesArray();
+      onSetCompaniesData(companiesData);
+      onSetIsFilterResultZeroRegister(false);
+      onSetisDelBtnDisabled(true);
+      onSetTableHeaderCheckbox(false);
+      onSetInputSearchToDefault();
+      onSetFilterBoxToDefault();
+      onSetFilterHelpToDefault();
+      onSetCompanyDataToDefault();
+      onSetSortStateToDefault();
+      onSetCheckboxArrayToDefault(companiesData.length);
+      onSetTableItemBoxArrayToDefault(companiesData.length);
+      onSetPaginationToDefault();
     };
 
-    const onClearSortFilter = (): void => {
+    const onSetSortStateToDefault = (): void => {
       patchState(store, {
         tableHeaders: store.tableHeaders().map(header => {
           return { ...header, sort: 0, icon: defaultTableHeaderIcon };
@@ -416,32 +473,13 @@ export const CompanyStore = signalStore(
         });
       });
       if (filterData.length == 0) {
-        patchState(store, {
-          companiesData: filterData,
-          isFilterResultZeroRegister: true,
-        });
+        onSetCompaniesData(filterData);
+        onSetIsFilterResultZeroRegister(false);
       } else {
-        patchState(store, {
-          companiesData: filterData,
-          inputSearchValue: '',
-          filterBox: {
-            idCompany: '',
-            nickname: '',
-            name: '',
-            cnpj: '',
-            ie: '',
-            im: '',
-          },
-          filterHelp: {
-            inputSearch: store.inputSearchValue(),
-            idCompany: '',
-            nickname: '',
-            name: '',
-            cnpj: '',
-            ie: '',
-            im: '',
-          },
-        });
+        onSetCompaniesData(filterData);
+        onSetInputSearchToDefault();
+        onSetFilterBoxToDefault();
+        onSetFilterHelpToDefault();
       }
     };
 
@@ -451,7 +489,7 @@ export const CompanyStore = signalStore(
       }
     };
 
-    const onApplyFilterHelp = (): void => {
+    const onApplyFilterHelpThroughFilterBox = (): void => {
       const keys = Object.keys(store.filterBox());
       keys.forEach(key => {
         patchState(store, {
@@ -461,6 +499,32 @@ export const CompanyStore = signalStore(
           },
         });
       });
+    };
+
+    const onSetFilterHelpItem = (key: keyof IFilterHelpCompany, value: string | number): void => {
+      patchState(store, {
+        filterHelp: {
+          ...store.filterHelp(),
+          [key]: value,
+        },
+      });
+    };
+
+    /**
+     * Insert filter help below search input, with a description that changes according to sort status.
+     * @param idx The index of the clicked table column.
+     */
+    const onApplyFilterHelpThroughSortMethod = (idx: number): void => {
+      const key = Object.keys(store.filterHelp())[idx + 1] as keyof IFilterHelpCompany;
+      let sortMethod = '';
+      if (store.tableHeaders()[idx].sort == 1) {
+        sortMethod = 'Ordem Crescente';
+      } else if (store.tableHeaders()[idx].sort == 2) {
+        sortMethod = 'Ordem Descrescente';
+      } else {
+        onClearData();
+      }
+      onSetFilterHelpItem(key, sortMethod);
     };
 
     const onFilterThroughFilterBox = (): void => {
@@ -490,57 +554,18 @@ export const CompanyStore = signalStore(
         );
       });
       if (filter.length == 0) {
-        patchState(store, {
-          companiesData: filter,
-          isFilterResultZeroRegister: true,
-          isFilterBoxActive: false,
-        });
+        onSetIsFilterResultZeroRegister(true);
       } else {
-        onApplyFilterHelp();
-        patchState(store, {
-          companiesData: filter,
-          isFilterBoxActive: false,
-          inputSearchValue: '',
-          filterHelp: {
-            ...store.filterHelp(),
-            inputSearch: '',
-          },
-          filterBox: {
-            idCompany: '',
-            nickname: '',
-            name: '',
-            cnpj: '',
-            ie: '',
-            im: '',
-          },
-        });
+        onApplyFilterHelpThroughFilterBox();
+        onSetFilterBoxToDefault();
+        onSetInputSearchToDefault();
+        onSetFilterHelpItem('inputSearch', '');
       }
+      onSetCompaniesData(filter);
+      onShowFilterBox(false);
     };
 
-    const onClearFilterItem = (key: string, filterMethod: FilterMethod): void => {
-      if (filterMethod == 'input-search') {
-        onFilterTableThroughSearchInput();
-      } else {
-        patchState(store, {
-          filterBox: {
-            ...store.filterHelp(),
-            [key]: '',
-          },
-        });
-        onFilterThroughFilterBox();
-      }
-    };
-
-    const onInputValueChange = (key: string, value: string): void => {
-      patchState(store, {
-        filterBox: {
-          ...store.filterBox(),
-          [key]: value,
-        },
-      });
-    };
-
-    const onTableFilterBasedOnSearchInput = (): void => {
+    const onClickOnSearchInputIcon = (): void => {
       if (store.inputSearchValue().length == 0) {
         onClearData();
       } else {
@@ -553,16 +578,11 @@ export const CompanyStore = signalStore(
       modalStore.onRedirectPage(`/companies/edit/${store.companyData().idCompany}`);
     };
 
-    const onSetCompanyData = (companyData: ICompany): void => {
-      patchState(store, {
-        companyData: companyData,
-      });
-    };
-
-    const onGeneratePaginationPagesArray = (): void => {
+    const onSetPaginationToDefault = (): void => {
       patchState(store, {
         pagination: {
           ...store.pagination(),
+          currentPage: 1,
           totalPages: Math.ceil(store.companiesData().length / store.pagination().qtyPerPage),
         },
       });
@@ -591,7 +611,7 @@ export const CompanyStore = signalStore(
       }
     };
 
-    const onSetNewCurrentPagePagination = (currentPage: number): void => {
+    const onSetCurrentPagePagination = (currentPage: number): void => {
       patchState(store, {
         pagination: {
           ...store.pagination(),
@@ -600,7 +620,7 @@ export const CompanyStore = signalStore(
       });
     };
 
-    const onSetInputNewValue = (property: string, newValue: string): void => {
+    const onSetFormInputNewValue = (property: string, newValue: string): void => {
       patchState(store, {
         companyData: {
           ...store.companyData(),
@@ -609,7 +629,7 @@ export const CompanyStore = signalStore(
       });
     };
 
-    const onCloseTableItemBox = (): void => {
+    const onCloseTableItemsBox = (): void => {
       patchState(store, {
         tableItemsBox: store.tableItemsBox().map(() => false),
       });
@@ -640,8 +660,8 @@ export const CompanyStore = signalStore(
           idCompany: 0,
         },
       });
-      addressStore.onSetInputNewValue('idAddress', 0);
-      employeeStore.onSetInputNewValue('idEmployee', 0);
+      addressStore.onSetFormInputNewValue('idAddress', 0);
+      employeeStore.onSetFormInputNewValue('idEmployee', 0);
       modalStore.onRedirectPage('/companies/new');
     };
 
@@ -770,21 +790,21 @@ export const CompanyStore = signalStore(
       onSetInputSearchValue,
       onShowHeader,
       onShowDataList,
-      onFillNewCheckboxArray,
-      onFillNewTableItemBoxArray,
+      onSetCheckboxArrayToDefault,
+      onSetTableItemBoxArrayToDefault,
       onHeaderCheckboxChecked,
-      onBodyCheckboxChange,
+      onBodyCheckboxCheckChange,
       onCheckTableCheckboxStatus,
-      onHeaderCheckboxDisabled,
       onKeyPressOnSearchInput,
       onClearData,
+      onFilterTableThroughSearchInput,
       onKeyPressOnNotFoundFilterRegister,
       onKeyPressOnFilterBox,
-      onTableFilterBasedOnSearchInput,
+      onClickOnSearchInputIcon,
       onFilterThroughFilterBox,
-      onClearFilterItem,
-      onInputValueChange,
-      onClearTableCheckbox,
+      onSetFilterItemToDefault,
+      onSetFilterBoxValue,
+      onSetTableCheckboxToDefault,
       onMaskNumericalField,
       onSetFinalData,
       onSaveRegister,
@@ -792,13 +812,13 @@ export const CompanyStore = signalStore(
       onSortTableHeader,
       onShowTableHeaderBox,
       onShowFilterBox,
-      onGeneratePaginationPagesArray,
-      onSetInputNewValue,
-      onSetNewCurrentPagePagination,
+      onSetPaginationToDefault,
+      onSetFormInputNewValue,
+      onSetCurrentPagePagination,
       onRedirectToEditPage,
       onSetCompanyData,
       onShowTableItemBox,
-      onCloseTableItemBox,
+      onCloseTableItemsBox,
       onCloneRegister,
     };
   })

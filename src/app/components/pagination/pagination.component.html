@@ -1,19 +1,18 @@
 <div class="flex items-center justify-between">
-  <div class="flex flex-1 justify-between sm:hidden">
-    <span
-      tabindex="0"
-      (keydown)="goBackPage()"
+  <div class="flex flex-1 gap-4 justify-between sm:hidden">
+    <app-button-label
       (click)="goBackPage()"
-      class="relative inline-flex items-center rounded-md border border-gray-300 bg-transparent px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-200"
-      >Anterior</span
-    >
-    <span
-      tabindex="0"
-      (keydown)="goForwardPage()"
+      [id]="'pagination-back'"
+      [iconRightName]="'keyboard_arrow_left'"
+      [label]="'Anterior'"
+      [isColorLogo]="false" />
+    <app-button-label
       (click)="goForwardPage()"
-      class="relative ml-3 inline-flex items-center rounded-md border border-gray-300 bg-transparent px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-200"
-      >Seguinte</span
-    >
+      [showLeftIcon]="false"
+      [showRightIcon]="true"
+      [iconRightName]="'keyboard_arrow_right'"
+      [label]="'Próxmo'"
+      [isColorLogo]="false"></app-button-label>
   </div>
   <div class="hidden sm:flex sm:flex-1 sm:items-center sm:justify-between">
     <div>

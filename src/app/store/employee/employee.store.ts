@@ -24,7 +24,7 @@ export const EmployeeStore = signalStore(
     const modalStore = inject(ModalStore);
     const employeeApi = inject(EmployeeApi);
 
-    const onSetInputNewValue = (property: keyof IEmployee, value: string | number): void => {
+    const onSetFormInputNewValue = (property: keyof IEmployee, value: string | number): void => {
       patchState(store, {
         employeeData: {
           ...store.employeeData(),
@@ -56,6 +56,7 @@ export const EmployeeStore = signalStore(
 
     const onGetEmployeeInfo = async (idCompany: number): Promise<void> => {
       try {
+        modalStore.onLoading(true);
         const employee = await employeeApi.onGetCompanyEmployee(idCompany);
         if (employee.data) {
           onSetEmployeeValue(employee.data);
@@ -69,9 +70,11 @@ export const EmployeeStore = signalStore(
           'Formulário de cadastro',
           'Erro ao trazer as informações do contato.'
         );
+      } finally {
+        modalStore.onLoading(false);
       }
     };
 
-    return { onSetInputNewValue, onClearData, onSetEmployeeValue, onGetEmployeeInfo };
+    return { onSetFormInputNewValue, onClearData, onSetEmployeeValue, onGetEmployeeInfo };
   })
 );

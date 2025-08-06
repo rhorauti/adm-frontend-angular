@@ -19,4 +19,5 @@ export type Icon =
   | 'keyboard_arrow_down'
   | 'library_add'
   | 'check'
+  | 'refresh'
   | 'cancel';

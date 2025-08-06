@@ -1,3 +1,11 @@
 .table-td {
-  @apply py-1.5 px-2 h-full whitespace-nowrap;
+  @apply py-1 sm:py-1.5 px-2 h-full whitespace-nowrap;
+}
+
+:host {
+  .dynamic-grid {
+    @media (min-width: 640px) {
+      grid-template-columns: var(--grid-layout);
+    }
+  }
 }
