@@ -1,4 +1,4 @@
 export const environment = {
   production: false,
-  apiUrl: 'http://192.168.15.4:3000/v1',
+  apiUrl: 'https://adm-backend-node.onrender.com/v1',
 };
