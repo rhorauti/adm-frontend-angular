@@ -11,7 +11,7 @@
       [id]="'input-signup-name'"
       [inputName]="'custom'"
       [iconName]="'perm_identity'"
-      (inputValueEmitter)="authStore.onSetUserProperty('name', $event)"
+      (inputValueEmitter)="authStore.onSetAuthProperty('name', $event)"
       (focusEmitter)="authStore.onSetErrorProperty('name', true)"
       [borderType]="authStore.helpAndBorderColor('name')()"
       [placeholder]="'Fulano da Silva'" />
@@ -28,7 +28,7 @@
     <app-input
       [id]="'input-signup-email'"
       [inputName]="'email'"
-      (inputValueEmitter)="authStore.onSetUserProperty('email', $event)"
+      (inputValueEmitter)="authStore.onSetAuthProperty('email', $event)"
       (focusEmitter)="authStore.onSetErrorProperty('email', true)"
       [borderType]="authStore.helpAndBorderColor('email')()" />
     <div>
@@ -46,7 +46,7 @@
       [inputName]="'password'"
       [borderType]="authStore.helpAndBorderColor('password')()"
       (focusEmitter)="authStore.onSetErrorProperty('password', true)"
-      (inputValueEmitter)="authStore.onSetUserProperty('password', $event)" />
+      (inputValueEmitter)="authStore.onSetAuthProperty('password', $event)" />
     <div>
       <app-help
         [isHelpTextActive]="authStore.user().password.length > 0"
@@ -74,7 +74,7 @@
       [inputName]="'password'"
       [borderType]="authStore.helpAndBorderColor('confirmPassword')()"
       (focusEmitter)="authStore.onSetErrorProperty('confirmPassword', true)"
-      (inputValueEmitter)="authStore.onSetUserProperty('confirmPassword', $event)" />
+      (inputValueEmitter)="authStore.onSetAuthProperty('confirmPassword', $event)" />
     <app-help
       [isHelpTextActive]="authStore.user().confirmPassword.length > 0"
       [text]="'As 2 senhas devem ser iguais'"
@@ -96,9 +96,3 @@
     >
   </p>
 </div>
-<!-- <app-loading></app-loading>
-<app-modal-info
-  [isModalActive]="modalStore.info().isActive"
-  [title]="modalStore.info().title"
-  [description]="modalStore.info().description"
-  (clickEmitter)="onCloseSignUpInfoModal()" /> -->

@@ -11,3 +11,9 @@
     align-items: center;
   }
 }
+
+@media screen and (min-width: 640px) {
+  .is-hidden-from-640px {
+    display: none !important;
+  }
+}

@@ -12,13 +12,13 @@
     <app-input
       [id]="'login-email'"
       [inputName]="'email'"
-      (inputValueEmitter)="authStore.onSetUserProperty('email', $event)" />
+      (inputValueEmitter)="authStore.onSetAuthProperty('email', $event)" />
     <label for="password" class="block text-sm font-medium leading-6">Senha</label>
     <app-input
       [id]="'login-password'"
       [inputName]="'password'"
       (keyboardEmitter)="onKeyBordEnter($event)"
-      (inputValueEmitter)="authStore.onSetUserProperty('password', $event)" />
+      (inputValueEmitter)="authStore.onSetAuthProperty('password', $event)" />
   </div>
   <div class="flex flex-col gap-4">
     <span

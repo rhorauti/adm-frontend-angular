@@ -71,9 +71,10 @@
               [ngClass]="{
                 'opacity-100': companyStore.tableItemsBox()[$index],
                 'opacity-0': !companyStore.tableItemsBox()[$index],
-                'sm:-top-8': $last,
+                'sm:-top-6': $last,
+                'top-1': $first,
               }"
-              class="absolute flex flex-col gap-1 left-[4.5rem] sm:left-[11rem] p-2 border border-gray-400 rounded-md bg-gray-100 text-xs transition-opacity duration-300 ease-in-out">
+              class="absolute flex flex-col gap-1 left-[4.5rem] sm:left-[11.5rem] p-2 border border-gray-400 rounded-md bg-gray-100 text-xs transition-opacity duration-300 ease-in-out">
               <button
                 (click)="companyStore.onCloneRegister(companyData)"
                 class="hover:bg-gray-200 hover:rounded-md px-2">

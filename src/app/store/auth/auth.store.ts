@@ -94,7 +94,7 @@ export const AuthStore = signalStore(
       });
     };
 
-    const onSetUserProperty = (property: string, value: string | number): void => {
+    const onSetAuthProperty = (property: string, value: string | number): void => {
       patchState(store, {
         user: {
           ...store.user(),
@@ -173,7 +173,7 @@ export const AuthStore = signalStore(
       onShowMenuBar,
       onGetToken,
       onClearAllData,
-      onSetUserProperty,
+      onSetAuthProperty,
       helpAndBorderColor,
       passwordHelpColor,
       onSetErrorProperty,

@@ -67,10 +67,10 @@ export class LoginComponent {
           password: this.authStore.user().password,
         });
         if (response.status) {
-          this.authStore.onSetUserProperty('id', response.data.id);
-          this.authStore.onSetUserProperty('name', response.data.name);
-          this.authStore.onSetUserProperty('email', response.data.email);
-          this.authStore.onSetUserProperty('token', response.data.token);
+          this.authStore.onSetAuthProperty('id', response.data.id);
+          this.authStore.onSetAuthProperty('name', response.data.name);
+          this.authStore.onSetAuthProperty('email', response.data.email);
+          this.authStore.onSetAuthProperty('token', response.data.token);
         }
         this.modalStore.onSetModalInfoType('success');
         this.modalStore.onShowInfoModal('Autenticação', response.message, this.onModalInfoActionOk);

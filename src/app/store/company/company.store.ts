@@ -387,11 +387,11 @@ export const CompanyStore = signalStore(
      * @param idx The index of the clicked table column.
      */
     const onSortTableHeader = (idx: number) => {
-      onSetFilterHelpToDefault();
+      // onSetFilterHelpToDefault();
       onSetTableHeaderSortMethod(idx);
       onSetTableHeaderIcon();
       onSortTable(idx);
-      onApplyFilterHelpThroughSortMethod(idx);
+      // onApplyFilterHelpThroughSortMethod(idx);
     };
 
     const onHeaderCheckboxChecked = (event: Event): void => {
@@ -465,21 +465,19 @@ export const CompanyStore = signalStore(
     const onFilterTableThroughSearchInput = (): void => {
       const filterData = store.initialTableData().filter(company => {
         return ['idCompany', 'nickname', 'name'].some(key => {
-          const filterResult = company[key as keyof ICompany];
-          return String(filterResult)
+          const propertyValue = company[key as keyof ICompany];
+          return String(propertyValue)
             .toLowerCase()
             .trim()
             .includes(store.inputSearchValue().toLowerCase().trim());
         });
       });
+      onSetCompaniesData(filterData);
+      onSetPaginationToDefault();
       if (filterData.length == 0) {
-        onSetCompaniesData(filterData);
-        onSetIsFilterResultZeroRegister(false);
+        onSetIsFilterResultZeroRegister(true);
       } else {
-        onSetCompaniesData(filterData);
-        onSetInputSearchToDefault();
-        onSetFilterBoxToDefault();
-        onSetFilterHelpToDefault();
+        onSetFilterHelpItem('inputSearch', store.inputSearchValue());
       }
     };
 
@@ -514,18 +512,18 @@ export const CompanyStore = signalStore(
      * Insert filter help below search input, with a description that changes according to sort status.
      * @param idx The index of the clicked table column.
      */
-    const onApplyFilterHelpThroughSortMethod = (idx: number): void => {
-      const key = Object.keys(store.filterHelp())[idx + 1] as keyof IFilterHelpCompany;
-      let sortMethod = '';
-      if (store.tableHeaders()[idx].sort == 1) {
-        sortMethod = 'Ordem Crescente';
-      } else if (store.tableHeaders()[idx].sort == 2) {
-        sortMethod = 'Ordem Descrescente';
-      } else {
-        onClearData();
-      }
-      onSetFilterHelpItem(key, sortMethod);
-    };
+    // const onApplyFilterHelpThroughSortMethod = (idx: number): void => {
+    //   const key = Object.keys(store.filterHelp())[idx + 1] as keyof IFilterHelpCompany;
+    //   let sortMethod = '';
+    //   if (store.tableHeaders()[idx].sort == 1) {
+    //     sortMethod = 'Ordem Crescente';
+    //   } else if (store.tableHeaders()[idx].sort == 2) {
+    //     sortMethod = 'Ordem Descrescente';
+    //   } else {
+    //     onClearData();
+    //   }
+    //   onSetFilterHelpItem(key, sortMethod);
+    // };
 
     const onFilterThroughFilterBox = (): void => {
       const filter = store.initialTableData().filter(company => {
@@ -562,16 +560,17 @@ export const CompanyStore = signalStore(
         onSetFilterHelpItem('inputSearch', '');
       }
       onSetCompaniesData(filter);
+      onSetPaginationToDefault();
       onShowFilterBox(false);
     };
 
-    const onClickOnSearchInputIcon = (): void => {
-      if (store.inputSearchValue().length == 0) {
-        onClearData();
-      } else {
-        onFilterTableThroughSearchInput();
-      }
-    };
+    // const onClickOnSearchInputIcon = (): void => {
+    //   if (store.inputSearchValue().length == 0) {
+    //     onClearData();
+    //   } else {
+    //     onFilterTableThroughSearchInput();
+    //   }
+    // };
 
     const onRedirectToEditPage = (companyData: ICompany): void => {
       onSetCompanyData(companyData);
@@ -800,7 +799,6 @@ export const CompanyStore = signalStore(
       onFilterTableThroughSearchInput,
       onKeyPressOnNotFoundFilterRegister,
       onKeyPressOnFilterBox,
-      onClickOnSearchInputIcon,
       onFilterThroughFilterBox,
       onSetFilterItemToDefault,
       onSetFilterBoxValue,

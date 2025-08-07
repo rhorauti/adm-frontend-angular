@@ -32,10 +32,9 @@
               [iconName]="'view_column'"
               (click)="companyStore.onShowTableHeaderBox(true)" />
           </app-tooltip>
-          <app-button-icon
-            [iconClass]="'block sm:hidden'"
-            [iconName]="'refresh'"
-            (click)="companyStore.onShowDataList()" />
+          <div class="is-hidden-from-640px">
+            <app-button-icon [iconName]="'refresh'" (click)="companyStore.onShowDataList()" />
+          </div>
         </div>
       </div>
       @if (companyStore.isAtLeastOneFilterHelpNotEmpty()) {
@@ -43,19 +42,7 @@
           @if (companyStore.filterHelp().inputSearch.length > 0) {
             <div class="flex items-center gap-2">
               <p>Pesquisa: {{ companyStore.filterHelp().inputSearch }}</p>
-              <app-button-close
-                (click)="
-                  companyStore.onSetFilterItemToDefault('inputSearch', 'input-search')
-                "></app-button-close>
-            </div>
-          }
-          @if (companyStore.filterHelp().inputSearch.length > 0) {
-            <div class="flex items-center gap-2">
-              <p>Pesquisa: {{ companyStore.filterHelp().inputSearch }}</p>
-              <app-button-close
-                (click)="
-                  companyStore.onSetFilterItemToDefault('inputSearch', 'input-search')
-                "></app-button-close>
+              <app-button-close (click)="companyStore.onClearData()"></app-button-close>
             </div>
           }
           @if (companyStore.filterHelp().idCompany.length > 0) {

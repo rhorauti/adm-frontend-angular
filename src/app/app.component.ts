@@ -7,6 +7,7 @@ import { ModalAskComponent } from '@components/modal/modal-ask/modal-ask.compone
 import { ModalInfoComponent } from '@components/modal/modal-info/modal-info.component';
 import { LoadingComponent } from '@components/loading/loading.component';
 import { ModalStore } from '@store/modal/modal.store';
+import { AuthStore } from '@store/auth/auth.store';
 
 @Component({
   selector: 'app-root',
@@ -25,4 +26,5 @@ import { ModalStore } from '@store/modal/modal.store';
 export class AppComponent {
   readonly router = inject(Router);
   readonly modalStore = inject(ModalStore);
+  readonly authStore = inject(AuthStore);
 }
