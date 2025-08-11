@@ -1,5 +1,5 @@
 <div class="flex flex-col gap-5">
-  <app-breadcrumb [items]="['Cadastro', 'Empresas']" />
+  <app-breadcrumb [items]="['Cadastro', 'Manutenção']" />
   @if (companyStore.companiesData().length > 0) {
     <div class="flex flex-col gap-5">
       <div class="top-button-layout gap-6 sm:gap-3 overflow-x-auto">
@@ -7,7 +7,7 @@
           <app-input
             [inputValue]="companyStore.inputSearchValue()"
             [id]="'input-filter'"
-            [placeholder]="'Id, Nome Fantasia, Razão Social'"
+            [placeholder]="'Id, Funcionário, Atividade'"
             [inputName]="'search'"
             (clickEmitter)="companyStore.onFilter('input-search')"
             (keyboardEmitter)="companyStore.onKeyPressOnSearchInput($event)"
@@ -21,7 +21,7 @@
         </div>
         <div class="flex gap-3">
           <app-button-icon
-            (click)="modalStore.onRedirectPage('/companies/new')"
+            (click)="modalStore.onRedirectPage('/maintenance/new')"
             [iconName]="'add'" />
           <app-button-delete
             (click)="onShowModalToDelete()"

@@ -36,11 +36,11 @@
             (keydown)="onPageNumberClick(page)"
             (click)="onPageNumberClick(page)"
             [ngClass]="
-              currentPage == $index + 1
+              currentPage == page
                 ? 'is-active'
                 : 'text-gray-900 border-t border-b border-l border-gray-400 hover:bg-gray-200 cursor-pointer'
             "
-            class="relative inline-flex items-center px-4 py-2 text-sm"
+            class="inline-flex items-center px-4 py-2 text-sm"
             >{{ page }}</span
           >
         }

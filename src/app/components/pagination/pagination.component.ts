@@ -15,6 +15,7 @@ export class PaginationComponent {
   @Input() totalRegister = 1;
   @Input() currentPage = 1;
   @Input() qtyPerPage = 10;
+  @Input() breakpointPage = 7;
   @Input() totalPages = 1;
   @Output() currentPageEmitter = new EventEmitter<number>();
 

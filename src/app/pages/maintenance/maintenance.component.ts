@@ -19,7 +19,7 @@ import { AuthStore } from '@store/auth/auth.store';
 import { loadStorage } from '@core/utils/misc';
 
 @Component({
-  selector: 'app-company',
+  selector: 'app-maintenance',
   imports: [
     CommonModule,
     TableHeaderBoxComponent,
@@ -35,10 +35,10 @@ import { loadStorage } from '@core/utils/misc';
     ToogleButtonComponent,
     ButtonCloseComponent,
   ],
-  templateUrl: './company.component.html',
-  styleUrl: './company.component.scss',
+  templateUrl: './maintenance.component.html',
+  styleUrl: './maintenance.component.scss',
 })
-export class CompanyComponent implements OnInit {
+export class MaintenanceComponent implements OnInit {
   readonly companyStore = inject(CompanyStore);
   readonly authStore = inject(AuthStore);
   readonly modalStore = inject(ModalStore);

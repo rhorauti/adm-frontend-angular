@@ -6,6 +6,8 @@ import { NewPasswordComponent } from './pages/auth/new-password/new-password.com
 import { RedirectComponent } from './pages/auth/redirect/redirect.component';
 import { CompanyComponent } from '@pages/company/company.component';
 import { CompanyFormComponent } from '@pages/company-form/company-form.component';
+import { MaintenanceComponent } from '@pages/maintenance/maintenance.component';
+import { MaintenanceFormComponent } from '@pages/maintenance-form/maintenance-form.component';
 
 export const routes: Routes = [
   {
@@ -39,6 +41,18 @@ export const routes: Routes = [
   {
     path: 'companies/edit/:id',
     component: CompanyFormComponent,
+  },
+  {
+    path: 'maintenance',
+    component: MaintenanceComponent,
+  },
+  {
+    path: 'maintenance/new',
+    component: MaintenanceFormComponent,
+  },
+  {
+    path: 'maintenance/edit/:id',
+    component: MaintenanceFormComponent,
   },
   {
     path: '**',

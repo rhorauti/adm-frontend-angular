@@ -19,7 +19,7 @@
                   @for (sublink of link.sublinks; track $index) {
                     <a
                       [routerLink]="sublink.routerLink"
-                      class="hover:text-white text-black hover:bg-gray-800 rounded-md px-4 py-1 first:mt-2 last:mb-2">
+                      class="hover:text-white whitespace-nowrap text-black hover:bg-gray-800 rounded-md px-4 py-1 first:mt-2 last:mb-2">
                       {{ sublink.name }}
                     </a>
                   }

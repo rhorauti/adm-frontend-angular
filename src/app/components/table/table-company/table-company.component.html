@@ -15,18 +15,17 @@
     </div>
     @for (header of companyStore.tableHeaders(); track $index) {
       @if (header.isHeaderActive) {
-        <div
-          class="table-td relative flex font-semibold items-center gap-1 overflow-hidden text-ellipsis">
+        <div class="table-td relative flex font-semibold items-center gap-1 overflow-x-auto">
           <p>{{ header.headerName }}</p>
           <div class="relative flex items-center">
             <mat-icon
-              (click)="companyStore.onSortTableHeader($index)"
+              (click)="companyStore.onFilter('sort', $index)"
               class="text-logo hover:bg-gray-200 hover:rounded-md text-sm font-bold cursor-pointer"
               >{{ header.icon }}</mat-icon
             >
             @if (header.sort != 0) {
               <div class="absolute left-[1.2rem] -top-[0.1rem]">
-                <app-button-close (click)="companyStore.onClearData()" />
+                <app-button-close (click)="companyStore.onSetSortFilterToDefault()" />
               </div>
             }
           </div>
@@ -74,7 +73,7 @@
                 'sm:-top-6': $last,
                 'top-1': $first,
               }"
-              class="absolute flex flex-col gap-1 left-[4.5rem] sm:left-[11.5rem] p-2 border border-gray-400 rounded-md bg-gray-100 text-xs transition-opacity duration-300 ease-in-out">
+              class="absolute flex flex-col gap-1 translate-x-[4.7rem] p-2 border border-gray-400 rounded-md bg-gray-100 text-xs transition-opacity duration-300 ease-in-out">
               <button
                 (click)="companyStore.onCloneRegister(companyData)"
                 class="hover:bg-gray-200 hover:rounded-md px-2">

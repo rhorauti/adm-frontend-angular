@@ -31,7 +31,7 @@ export class MenuComponent {
   public links: ILink[] = [
     {
       idLink: 0,
-      name: 'Cadastros',
+      name: 'Compras e Vendas',
       isColapsed: false,
       sublinks: [
         {
@@ -41,25 +41,15 @@ export class MenuComponent {
         },
         {
           idSublink: 1,
-          name: 'Fornecedores',
-          routerLink: '/companies',
-        },
-        {
-          idSublink: 2,
-          name: 'MyCompany',
-          routerLink: '/companies',
-        },
-        {
-          idSublink: 3,
           name: 'Produtos',
           routerLink: '/products',
         },
         {
-          idSublink: 4,
+          idSublink: 2,
           name: 'Endereços',
           routerLink: '/addresses',
         },
-        { idSublink: 5, name: 'Funcionários', routerLink: '/employees' },
+        { idSublink: 3, name: 'Funcionários', routerLink: '/employees' },
       ],
     },
     {
@@ -77,33 +67,29 @@ export class MenuComponent {
     },
     {
       idLink: 1,
-      name: 'Suprimentos',
+      name: 'Manutenção',
       isColapsed: false,
       sublinks: [
         {
           idSublink: 0,
-          name: 'Estoque',
-
-          routerLink: 'stock',
+          name: 'Atividades',
+          routerLink: '/maintenance',
         },
-      ],
-    },
-    {
-      idLink: 1,
-      name: 'Financeiro',
-      isColapsed: false,
-      sublinks: [
         {
           idSublink: 0,
-          name: 'Estoque',
-
-          routerLink: 'stock',
+          name: 'Relatório diário',
+          routerLink: '/maintenance',
+        },
+        {
+          idSublink: 0,
+          name: 'Relatório Mensal',
+          routerLink: '/maintenance',
         },
       ],
     },
     {
       idLink: 2,
-      name: 'Relatórios',
+      name: 'Financeiro',
       isColapsed: false,
       sublinks: [
         {
