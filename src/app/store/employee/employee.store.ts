@@ -17,6 +17,7 @@ export const EmployeeStore = signalStore(
       email: '',
       deskphone: '',
       cellphone: '',
+      photoUrl: '',
     } as IEmployee,
   })),
 
@@ -50,6 +51,7 @@ export const EmployeeStore = signalStore(
           email: '',
           deskphone: '',
           cellphone: '',
+          photoUrl: '',
         },
       });
     };
@@ -65,7 +67,7 @@ export const EmployeeStore = signalStore(
         }
       } catch (e: unknown) {
         const error = e as HttpErrorResponse;
-        console.log('Erro ao trazer as informações de contato' + error.message);
+        console.log('Erro ao trazer as informações de contato' + error.error.message);
         modalStore.onShowInfoModal(
           'Formulário de cadastro',
           'Erro ao trazer as informações do contato.'

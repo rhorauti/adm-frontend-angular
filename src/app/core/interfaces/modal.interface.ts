@@ -15,3 +15,5 @@ export interface IModalCheck {
   isActive: boolean;
   isActionOk: boolean;
 }
+
+export type ActionCallback = (() => void | Promise<void>) | null | undefined;

@@ -10,6 +10,7 @@ export interface IEmployee {
   email?: string;
   deskphone?: string;
   cellphone?: string;
+  photoUrl?: string;
 }
 
 export interface IResponseEmployee extends IBaseResponse {

@@ -1,0 +1,179 @@
+<!-- <div class="flex flex-col gap-5">
+  <app-breadcrumb [items]="['Cadastro', 'Empresas']" />
+  @if (departmentStore.departmentsData().length > 0) {
+    <div class="flex flex-col gap-5">
+      <div class="top-button-layout gap-6 sm:gap-3 overflow-x-auto">
+        <div class="flex gap-3">
+          <app-input
+            [inputValue]="departmentStore.inputSearchValue()"
+            [id]="'input-filter'"
+            [placeholder]="'Id, Nome Fantasia, Razão Social'"
+            [inputName]="'search'"
+            (clickEmitter)="departmentStore.onFilter('input-search')"
+            (keyboardEmitter)="departmentStore.onKeyPressOnSearchInput($event)"
+            (inputValueEmitter)="departmentStore.onSetInputSearchValue($event)" />
+          <app-tooltip [description]="'Filtro'" [position]="'right'">
+            <app-button-icon
+              content
+              (click)="departmentStore.onShowFilterBox(true)"
+              [iconName]="'filter_list'" />
+          </app-tooltip>
+        </div>
+        <div class="flex gap-3">
+          <app-button-icon
+            (click)="modalStore.onRedirectPage('/companies/new')"
+            [iconName]="'add'" />
+          <app-button-delete
+            (click)="onShowModalToDelete()"
+            [isDisabled]="departmentStore.isDelBtnDisabled()" />
+          <app-tooltip [position]="'left'" [description]="'Colunas visíveis'">
+            <app-button-icon
+              content
+              [iconName]="'view_column'"
+              (click)="departmentStore.onShowTableHeaderBox(true)" />
+          </app-tooltip>
+          <div class="is-hidden-from-640px">
+            <app-button-icon
+              [iconName]="'refresh'"
+              (click)="departmentStore.onGetDepartmentList()" />
+          </div>
+        </div>
+      </div>
+      @if (departmentStore.isAtLeastOneFilterHelpNotEmpty()) {
+        <div class="flex flex-wrap items-center gap-3 text-sm">
+          @if (departmentStore.filterHelp().inputSearch.length > 0) {
+            <div class="flex items-center gap-2">
+              <p>Pesquisa: {{ departmentStore.filterHelp().inputSearch }}</p>
+              <app-button-close
+                (click)="
+                  departmentStore.onSetFilterHelpItemToDefault('inputSearch', 'input-search')
+                "></app-button-close>
+            </div>
+          } @else {
+            @for (tableHeader of departmentStore.tableHeaders(); track $index) {
+              @if (departmentStore.filterHelp()[tableHeader.databaseField].length > 0) {
+                <div class="flex items-center gap-2">
+                  <p>
+                    {{ tableHeader.headerName }} :
+                    {{ departmentStore.filterHelp()[tableHeader.databaseField] }}
+                  </p>
+                  <app-button-close
+                    (click)="
+                      departmentStore.onSetFilterHelpItemToDefault(
+                        tableHeader.databaseField,
+                        'filter-box'
+                      )
+                    "></app-button-close>
+                </div>
+              }
+            }
+          }
+          <button
+            (click)="departmentStore.onClearData()"
+            class="text-logo font-semibold cursor-pointer hover:text-logo-hover hover:underline">
+            Limpar
+          </button>
+        </div>
+      }
+      <app-table-company />
+      <app-pagination
+        [currentPage]="departmentStore.pagination().currentPage"
+        [totalRegister]="departmentStore.departmentsData().length"
+        [pagesArray]="departmentStore.pagination().pagesArray"
+        [qtyPerPage]="departmentStore.pagination().qtyPerPage"
+        [totalPages]="departmentStore.pagination().totalPages"
+        [breakpointPage]="departmentStore.pagination().breakpointPage"
+        (currentPageEmitter)="departmentStore.onSetCurrentPagePagination($event)" />
+    </div>
+  } @else {
+    <div class="flex flex-col items-center gap-4 w-full mt-10">
+      <mat-icon class="text-logo text-6xl">{{
+        departmentStore.isFilterResultZeroRegister() ? 'search_off' : 'library_add'
+      }}</mat-icon>
+      <p class="font-semibold">Nenhum registro encontrado</p>
+      @if (!departmentStore.isFilterResultZeroRegister()) {
+        <app-button-label
+          (click)="modalStore.onRedirectPage('/companies/new')"
+          [showLeftIcon]="true"
+          [iconRightName]="'add'"
+          [label]="'Adicionar uma nova empresa'" />
+      } @else {
+        @if (departmentStore.inputSearchValue().length > 0) {
+          <p>
+            Palavra(s) Pesquisada(s) :
+            <span class="font-semibold">{{ departmentStore.inputSearchValue() }}</span>
+          </p>
+        } @else {
+          <p>Campo(s) pesquisado(s) :</p>
+          @for (tableHeader of departmentStore.tableHeaders(); track $index) {
+            @if (departmentStore.filterBox()[tableHeader.databaseField].length > 0) {
+              <p>
+                {{ tableHeader.headerName }} :
+                <span class="font-semibold">{{
+                  departmentStore.filterBox()[tableHeader.databaseField]
+                }}</span>
+              </p>
+            }
+          }
+        }
+        <app-button-label
+          (keyboardEmitter)="departmentStore.onKeyPressOnNotFoundFilterRegister($event)"
+          (click)="departmentStore.onClearData()"
+          [label]="'Voltar'" />
+      }
+    </div>
+  }
+</div>
+
+<app-side-bar
+  [isSideBarActive]="departmentStore.isFilterBoxActive()"
+  [isTwoThirdWidth]="false"
+  [titleIconName]="'filter_list'"
+  [title]="'Filtro'"
+  [btnLabel]="'Aplicar'"
+  [isPrimaryBtnDisabled]="!departmentStore.isAtLeastOneFilterBoxNotEmpty()"
+  (primaryBtnClickEmitter)="departmentStore.onFilter('filter-box')"
+  (isCloseBtnClickEmitter)="departmentStore.onShowFilterBox(false)">
+  <div body class="flex flex-col gap-4">
+    @for (tableHeader of departmentStore.tableHeaders(); track $index) {
+      <div class="flex flex-col gap-2">
+        <p class="font-medium">{{ tableHeader.headerName }}</p>
+        <app-input
+          [id]="'filter-company-id'"
+          [inputName]="'custom'"
+          [inputValue]="departmentStore.filterBox()[tableHeader.databaseField]"
+          [type]="'search'"
+          (inputValueEmitter)="
+            departmentStore.onSetFilterBoxValue(tableHeader.databaseField, $event)
+          "
+          (keyboardEmitter)="departmentStore.onKeyPressOnFilterBox($event)" />
+      </div>
+    }
+  </div>
+</app-side-bar>
+
+<app-side-bar
+  [isSideBarActive]="departmentStore.isTableHeaderBoxActive()"
+  [isTwoThirdWidth]="false"
+  [isFooterActive]="false"
+  [title]="'Colunas Visíveis'"
+  (isCloseBtnClickEmitter)="departmentStore.onShowTableHeaderBox(false)">
+  <div body class="flex flex-col gap-6">
+    <p>Selecione abaixo as colunas que deseja estarem visíveis na tabela</p>
+    <div class="flex flex-col gap-2">
+      @for (header of departmentStore.tableHeaders(); track $index) {
+        @if (!$first) {
+          <div class="flex gap-4">
+            <app-toogle-button
+              [isChecked]="header.isHeaderActive"
+              [toggleId]="$index"
+              (isCheckedEmitter)="
+                departmentStore.onSetHeaderDisplay($index, tableHeadersLocalStorageId)
+              " />
+            <p>{{ header.headerName }}</p>
+          </div>
+        }
+      }
+    </div>
+  </div>
+</app-side-bar> -->

@@ -1,48 +1,32 @@
-import { IAddress } from './address.interface';
-import { IEmployee } from './employee.interface';
 import { IPagination } from './pagination.interface';
 import { IBaseResponse } from './response.interface';
 import { ITableCheckbox, ITableHeader } from './table.interface';
 
-export interface ICompany {
-  idCompany: number;
-  nickname: string;
+export interface IDepartment {
+  idDepartment: number;
   name: string;
-  cnpj?: string;
-  ie?: string;
-  im?: string;
 }
 
-export interface ICompanyRequest {
-  company: ICompany;
-  address: IAddress;
-  employee: IEmployee;
+export interface IResponseDepartment extends IBaseResponse {
+  data?: IDepartment;
 }
 
-export interface IFilterBoxCompany {
-  idCompany: string;
-  nickname: string;
+export interface IResponseDepartmentList extends IBaseResponse {
+  data?: IDepartment[];
+}
+
+export interface IFilterBoxDepartment {
+  idDepartment: string;
   name: string;
-  cnpj: string;
-  ie: string;
-  im: string;
 }
 
-export interface IFilterHelpCompany {
+export interface IFilterHelpDepartment {
   inputSearch: string;
-  idCompany: string;
-  nickname: string;
+  idDepartment: string;
   name: string;
-  cnpj: string;
-  ie: string;
-  im: string;
 }
 
-export interface IResponseCompany extends IBaseResponse {
-  data: ICompany[];
-}
-
-export interface ICompanyStore {
+export interface IDepartmentStore {
   /**
    * An input search value used to filter the table.
    */
@@ -54,7 +38,7 @@ export interface ICompanyStore {
   /**
    * Table´s headers object
    */
-  tableHeaders: ITableHeader<ICompany>[];
+  tableHeaders: ITableHeader<IDepartment>[];
   /**
    * Table´s header and body checkbox object.
    */
@@ -66,11 +50,11 @@ export interface ICompanyStore {
   /**
    * An initial companiesData that retrieve data from database.
    */
-  initialTableData: ICompany[];
+  initialTableData: IDepartment[];
   /**
    * A array of objects used to display data in the table.
    */
-  companiesData: ICompany[];
+  departmentsData: IDepartment[];
   /**
    * A flag used to toggle the delete button´s disabled property.
    */
@@ -78,7 +62,7 @@ export interface ICompanyStore {
   /**
    * An object used to retrieve information from forms.
    */
-  companyData: ICompany;
+  departmentData: IDepartment;
   /**
    * A flag used to toggle the table´s data filter box.
    */
@@ -90,11 +74,11 @@ export interface ICompanyStore {
   /**
    * An object used to retrieve information from filter sidebar form.
    */
-  filterBox: IFilterBoxCompany;
+  filterBox: IFilterBoxDepartment;
   /**
    * An object used to display help information about what was searched in the filter side bar form.
    */
-  filterHelp: IFilterHelpCompany;
+  filterHelp: IFilterHelpDepartment;
   /**
    * An object used to display the table´s pagination information.
    */

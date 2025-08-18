@@ -23,9 +23,9 @@
           <app-input
             [id]="'company-form-nickname'"
             [inputName]="'custom'"
-            [inputValue]="companyStore.companyData().nickname"
+            [inputValue]="companyData.nickname"
             [type]="'search'"
-            (inputValueEmitter)="companyStore.onSetFormInputNewValue('nickname', $event)" />
+            (inputValueEmitter)="companyData.nickname = $event" />
         </div>
         <div class="flex flex-col gap-1 grow">
           <label class="font-medium text-sm" for="company-form-name"
@@ -34,9 +34,9 @@
           <app-input
             [id]="'company-form-name'"
             [inputName]="'custom'"
-            [inputValue]="companyStore.companyData().name"
+            [inputValue]="companyData.name"
             [type]="'search'"
-            (inputValueEmitter)="companyStore.onSetFormInputNewValue('name', $event)" />
+            (inputValueEmitter)="companyData.name = $event" />
         </div>
       </div>
       <div class="flex flex-col md:flex-row gap-4">
@@ -47,27 +47,27 @@
           <app-input
             [id]="'company-form-cnpj'"
             [inputName]="'cnpj'"
-            [inputValue]="companyStore.companyData().cnpj || ''"
+            [inputValue]="companyData.cnpj || ''"
             [type]="'search'"
-            (inputValueEmitter)="companyStore.onSetFormInputNewValue('cnpj', $event)" />
+            (inputValueEmitter)="companyData.cnpj = $event" />
         </div>
         <div class="flex flex-col gap-1 grow">
           <label class="font-medium text-sm" for="company-form-ie">Inscrição Estadual</label>
           <app-input
             [id]="'company-form-ie'"
             [inputName]="'custom'"
-            [inputValue]="companyStore.companyData().ie || ''"
+            [inputValue]="companyData.ie || ''"
             [type]="'search'"
-            (inputValueEmitter)="companyStore.onSetFormInputNewValue('ie', $event)" />
+            (inputValueEmitter)="companyData.ie = $event" />
         </div>
         <div class="flex flex-col gap-1 grow">
           <label class="font-medium text-sm" for="company-form-im">Inscrição Municipal</label>
           <app-input
             [id]="'company-form-im'"
             [inputName]="'custom'"
-            [inputValue]="companyStore.companyData().im || ''"
+            [inputValue]="companyData.im || ''"
             [type]="'search'"
-            (inputValueEmitter)="companyStore.onSetFormInputNewValue('im', $event)" />
+            (inputValueEmitter)="companyData.im = $event" />
         </div>
       </div>
     </div>
@@ -219,6 +219,6 @@
     <app-button-label
       [iconRightName]="'save'"
       [label]="'Salvar'"
-      (click)="companyStore.onSaveRegister(onBackToCompaniesPage)"></app-button-label>
+      (click)="onSaveRegister(onBackToCompaniesPage)"></app-button-label>
   </footer>
 </div>

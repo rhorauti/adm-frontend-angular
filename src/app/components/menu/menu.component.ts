@@ -31,25 +31,51 @@ export class MenuComponent {
   public links: ILink[] = [
     {
       idLink: 0,
-      name: 'Compras e Vendas',
+      name: 'Cadastros',
       isColapsed: false,
       sublinks: [
         {
           idSublink: 0,
-          name: 'Clientes',
+          name: 'Empresas',
+
           routerLink: '/companies',
         },
         {
           idSublink: 1,
           name: 'Produtos',
+
           routerLink: '/products',
         },
         {
           idSublink: 2,
-          name: 'Endereços',
-          routerLink: '/addresses',
+          name: 'Funcionários',
+
+          routerLink: '/employees',
         },
-        { idSublink: 3, name: 'Funcionários', routerLink: '/employees' },
+        {
+          idSublink: 3,
+          name: 'Departamentos',
+
+          routerLink: '/departments',
+        },
+        {
+          idSublink: 4,
+          name: 'Cargos',
+
+          routerLink: '/employee-positions',
+        },
+      ],
+    },
+    {
+      idLink: 0,
+      name: 'Suprimentos',
+      isColapsed: false,
+      sublinks: [
+        {
+          idSublink: 0,
+          name: 'Estoque',
+          routerLink: '/stock',
+        },
       ],
     },
     {
@@ -59,7 +85,7 @@ export class MenuComponent {
       sublinks: [
         {
           idSublink: 0,
-          name: 'Estoque',
+          name: 'Planejamento',
 
           routerLink: 'stock',
         },
@@ -73,17 +99,17 @@ export class MenuComponent {
         {
           idSublink: 0,
           name: 'Atividades',
-          routerLink: '/maintenance',
+          routerLink: '/maintenance/tasks',
         },
         {
           idSublink: 0,
           name: 'Relatório diário',
-          routerLink: '/maintenance',
+          routerLink: '/maintenance/daily-report',
         },
         {
           idSublink: 0,
           name: 'Relatório Mensal',
-          routerLink: '/maintenance',
+          routerLink: '/maintenance/monthly-report',
         },
       ],
     },
