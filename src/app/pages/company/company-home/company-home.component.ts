@@ -17,8 +17,6 @@ import { ICompany } from '@core/interfaces/company.interface';
 import { AuthStore } from '@store/auth/auth.store';
 import { loadStorage } from '@core/utils/misc';
 import { BaseRegisterStore } from '@store/base/base.register.store';
-import { AddressStore } from '@store/address/address.store';
-import { EmployeeStore } from '@store/employee/employee.store';
 import { ActionCallback } from '@core/interfaces/modal.interface';
 import { HttpErrorResponse } from '@angular/common/http';
 import { CompanyApi } from '@core/http/company/company.api';
@@ -45,8 +43,6 @@ import { CompanyApi } from '@core/http/company/company.api';
 })
 export class CompanyHomeComponent implements OnInit {
   readonly companyApi = inject(CompanyApi);
-  readonly addressStore = inject(AddressStore);
-  readonly employeeStore = inject(EmployeeStore);
   readonly baseRegisterStore = inject(BaseRegisterStore);
   readonly authStore = inject(AuthStore);
   readonly modalStore = inject(ModalStore);
@@ -61,13 +57,20 @@ export class CompanyHomeComponent implements OnInit {
     }
   }
 
+  onRedirectToEditPage = (companyData: ICompany): void => {
+    this.baseRegisterStore.onSetSlicePropsToNewValue('data', companyData);
+    this.modalStore.onRedirectPage(
+      `/companies/edit/${(this.baseRegisterStore.data() as ICompany).idCompany}`
+    );
+  };
+
   onCloneRegister = async (companyData: ICompany): Promise<void> => {
     this.baseRegisterStore.onSetSlicePropsToNewValue('data', companyData);
-    await this.addressStore.onGetAddressInfo(companyData.idCompany);
-    await this.employeeStore.onGetEmployeeInfo(companyData.idCompany);
+    // await this.addressStore.onGetAddressInfo(companyData.idCompany);
+    // await this.employeeStore.onGetEmployeeInfo(companyData.idCompany);
     this.baseRegisterStore.onSetSlicePropsToNewValue('data', { idCompany: 0 });
-    this.addressStore.onSetFormInputNewValue('idAddress', 0);
-    this.employeeStore.onSetFormInputNewValue('idEmployee', 0);
+    // this.addressStore.onSetSlicePropsToNewValue('addressData', { idAddress: 0 });
+    // this.employeeStore.onSetFormInputNewValue('idEmployee', 0);
     this.modalStore.onRedirectPage('/companies/new');
   };
 
@@ -75,6 +78,7 @@ export class CompanyHomeComponent implements OnInit {
     try {
       this.modalStore.onLoading(true);
       const response = await this.companyApi.getCompaniesList();
+      this.baseRegisterStore.onSetSlicePropsToNewValue('initialData', response.data);
       this.baseRegisterStore.onSetSlicePropsToNewValue('dataList', response.data);
       this.baseRegisterStore.onClearData(response.data);
     } catch (e: unknown) {

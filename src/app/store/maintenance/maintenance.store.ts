@@ -7,8 +7,8 @@ import { IFilterBoxCompany, IFilterHelpCompany } from '@core/interfaces/filter.i
 import { ModalStore } from '@store/modal/modal.store';
 import { CompanyApi } from '@core/http/company/company.api';
 import { HttpErrorResponse } from '@angular/common/http';
-import { AddressStore } from '@store/address/address.store';
-import { EmployeeStore } from '@store/employee/employee.store';
+import { AddressState } from '@store/address/address.store';
+import { EmployeeState } from '@store/employee/employee.store';
 import { IAddress } from '@core/interfaces/address.interface';
 import { IEmployee } from '@core/interfaces/employee.interface';
 import { saveStorage } from '@core/utils/misc';
@@ -171,8 +171,8 @@ export const CompanyStore = signalStore(
 
   withMethods(store => {
     const companyApi = inject(CompanyApi);
-    const addressStore = inject(AddressStore);
-    const employeeStore = inject(EmployeeStore);
+    const addressStore = inject(AddressState);
+    const employeeStore = inject(EmployeeState);
     const modalStore = inject(ModalStore);
 
     const onSetCheckboxArrayToDefault = (dataLength: number): void => {

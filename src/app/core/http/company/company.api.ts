@@ -1,7 +1,11 @@
 import { inject, Injectable } from '@angular/core';
 import { HttpRequestService } from '../http-request.service';
 import { environment } from '@environments/environment';
-import { ICompanyRequest, IResponseCompany } from '@core/interfaces/company.interface';
+import {
+  ICompanyDetailedDataResponse,
+  ICompanyRequest,
+  ICompanyResponse,
+} from '@core/interfaces/company.interface';
 import { IBaseResponse } from '@core/interfaces/response.interface';
 
 @Injectable({
@@ -12,10 +16,24 @@ export class CompanyApi {
 
   /**
    * Retrieve companies data list from database
-   * @returns {Promise<IResponseCompany>} Promise of type IResponseCompany that contains companies data.
+   * @returns {Promise<ICompanyResponse>} Promise of type IResponseCompany that contains companies data.
    */
-  async getCompaniesList(): Promise<IResponseCompany> {
+  async getCompaniesList(): Promise<ICompanyResponse> {
     return await this.httpRequestService.sendHttpRequest(`${environment.apiUrl}/companies`, 'GET');
+  }
+
+  async getCompanyCompleteInfo(idCompany: number): Promise<ICompanyDetailedDataResponse> {
+    return await this.httpRequestService.sendHttpRequest(
+      `${environment.apiUrl}/companies/detail/${idCompany}`,
+      'GET'
+    );
+  }
+
+  async getCompanyInfo(idCompany: number): Promise<ICompanyResponse> {
+    return await this.httpRequestService.sendHttpRequest(
+      `${environment.apiUrl}/companies/${idCompany}`,
+      'GET'
+    );
   }
 
   /**
@@ -23,7 +41,7 @@ export class CompanyApi {
    * Adiciona um novo registro no banco de dados.
    * @returns Promise com o status e mensagem.
    */
-  async saveCompany(companyData: ICompanyRequest): Promise<IResponseCompany> {
+  async saveCompany(companyData: ICompanyRequest): Promise<ICompanyResponse> {
     return await this.httpRequestService.sendHttpRequest(
       `${environment.apiUrl}/companies`,
       'POST',

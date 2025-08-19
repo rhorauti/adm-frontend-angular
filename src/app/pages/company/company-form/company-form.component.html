@@ -23,9 +23,9 @@
           <app-input
             [id]="'company-form-nickname'"
             [inputName]="'custom'"
-            [inputValue]="companyData.nickname"
+            [inputValue]="companyDataRequest.company.nickname"
             [type]="'search'"
-            (inputValueEmitter)="companyData.nickname = $event" />
+            (inputValueEmitter)="companyDataRequest.company.nickname = $event" />
         </div>
         <div class="flex flex-col gap-1 grow">
           <label class="font-medium text-sm" for="company-form-name"
@@ -34,9 +34,9 @@
           <app-input
             [id]="'company-form-name'"
             [inputName]="'custom'"
-            [inputValue]="companyData.name"
+            [inputValue]="companyDataRequest.company.name"
             [type]="'search'"
-            (inputValueEmitter)="companyData.name = $event" />
+            (inputValueEmitter)="companyDataRequest.company.name = $event" />
         </div>
       </div>
       <div class="flex flex-col md:flex-row gap-4">
@@ -47,27 +47,27 @@
           <app-input
             [id]="'company-form-cnpj'"
             [inputName]="'cnpj'"
-            [inputValue]="companyData.cnpj || ''"
+            [inputValue]="companyDataRequest.company.cnpj || ''"
             [type]="'search'"
-            (inputValueEmitter)="companyData.cnpj = $event" />
+            (inputValueEmitter)="companyDataRequest.company.cnpj = $event" />
         </div>
         <div class="flex flex-col gap-1 grow">
           <label class="font-medium text-sm" for="company-form-ie">Inscrição Estadual</label>
           <app-input
             [id]="'company-form-ie'"
             [inputName]="'custom'"
-            [inputValue]="companyData.ie || ''"
+            [inputValue]="companyDataRequest.company.ie || ''"
             [type]="'search'"
-            (inputValueEmitter)="companyData.ie = $event" />
+            (inputValueEmitter)="companyDataRequest.company.ie = $event" />
         </div>
         <div class="flex flex-col gap-1 grow">
           <label class="font-medium text-sm" for="company-form-im">Inscrição Municipal</label>
           <app-input
             [id]="'company-form-im'"
             [inputName]="'custom'"
-            [inputValue]="companyData.im || ''"
+            [inputValue]="companyDataRequest.company.im || ''"
             [type]="'search'"
-            (inputValueEmitter)="companyData.im = $event" />
+            (inputValueEmitter)="companyDataRequest.company.im = $event" />
         </div>
       </div>
     </div>
@@ -84,36 +84,36 @@
           <app-input
             [id]="'company-form-cep'"
             [inputName]="'postalCode'"
-            [inputValue]="addressStore.addressData().postalCode"
-            (changeEmitter)="addressStore.onSetAddressViaCEPValues()"
-            (inputValueEmitter)="addressStore.onSetFormInputNewValue('postalCode', $event)" />
+            [inputValue]="companyDataRequest.address.postalCode"
+            (changeEmitter)="onSetAddressViaCEPValues()"
+            (inputValueEmitter)="companyDataRequest.address.postalCode = $event" />
         </div>
         <div class="flex flex-col gap-1 grow">
           <label class="font-medium text-sm" for="company-form-nickname">Logradouro</label>
           <app-input
             [id]="'company-form-address'"
             [inputName]="'custom'"
-            [inputValue]="addressStore.addressData().address"
+            [inputValue]="companyDataRequest.address.address"
             [type]="'search'"
-            (inputValueEmitter)="addressStore.onSetFormInputNewValue('address', $event)" />
+            (inputValueEmitter)="companyDataRequest.address.address = $event" />
         </div>
         <div class="flex flex-col gap-1">
           <label class="font-medium text-sm" for="company-form-name">Número</label>
           <app-input
             [id]="'company-form-number'"
             [inputName]="'custom'"
-            [inputValue]="addressStore.addressData().number || ''"
+            [inputValue]="companyDataRequest.address.number || ''"
             [type]="'search'"
-            (inputValueEmitter)="addressStore.onSetFormInputNewValue('number', $event)" />
+            (inputValueEmitter)="companyDataRequest.address.number = $event" />
         </div>
         <div class="flex flex-col gap-1 grow">
           <label class="font-medium text-sm" for="company-form-cnpj">Complemento</label>
           <app-input
             [id]="'company-form-complement'"
             [inputName]="'custom'"
-            [inputValue]="addressStore.addressData().complement || ''"
+            [inputValue]="companyDataRequest.address.complement || ''"
             [type]="'search'"
-            (inputValueEmitter)="addressStore.onSetFormInputNewValue('complement', $event)" />
+            (inputValueEmitter)="companyDataRequest.address.complement = $event" />
         </div>
       </div>
       <div class="flex flex-col md:flex-row gap-4">
@@ -122,25 +122,25 @@
           <app-input
             [id]="'company-form-district'"
             [inputName]="'custom'"
-            [inputValue]="addressStore.addressData().district || ''"
+            [inputValue]="companyDataRequest.address.district || ''"
             [type]="'search'"
-            (inputValueEmitter)="addressStore.onSetFormInputNewValue('district', $event)" />
+            (inputValueEmitter)="companyDataRequest.address.district = $event" />
         </div>
         <div class="flex flex-col gap-1 grow">
           <label class="font-medium text-sm" for="company-form-im">Cidade</label>
           <app-input
             [id]="'company-form-city'"
             [inputName]="'custom'"
-            [inputValue]="addressStore.addressData().city || ''"
+            [inputValue]="companyDataRequest.address.city || ''"
             [type]="'search'"
-            (inputValueEmitter)="addressStore.onSetFormInputNewValue('city', $event)" />
+            (inputValueEmitter)="companyDataRequest.address.city = $event" />
         </div>
         <div class="flex flex-col gap-1">
           <label class="font-medium text-sm" for="company-form-im">UF</label>
           <app-select
             [selectType]="'state'"
-            [selectValue]="addressStore.addressData().state || 'Selecione um item'"
-            (selectValueEmitter)="addressStore.onSetFormInputNewValue('state', $event)" />
+            [selectValue]="companyDataRequest.address.state || 'Selecione um item'"
+            (selectValueEmitter)="companyDataRequest.address.state = $event" />
         </div>
       </div>
     </div>
@@ -157,27 +157,27 @@
           <app-input
             [id]="'company-form-employee-name'"
             [inputName]="'custom'"
-            [inputValue]="employeeStore.employeeData().name"
+            [inputValue]="companyDataRequest.employee.name"
             [type]="'search'"
-            (inputValueEmitter)="employeeStore.onSetFormInputNewValue('name', $event)" />
+            (inputValueEmitter)="companyDataRequest.employee.name = $event" />
         </div>
         <div class="flex flex-col gap-1 grow">
           <label class="font-medium text-sm" for="company-form-cnpj">Depto</label>
           <app-input
             [id]="'company-form-employee-department'"
             [inputName]="'custom'"
-            [inputValue]="employeeStore.employeeData().department || ''"
+            [inputValue]="companyDataRequest.employee.department || ''"
             [type]="'search'"
-            (inputValueEmitter)="employeeStore.onSetFormInputNewValue('department', $event)" />
+            (inputValueEmitter)="companyDataRequest.employee.department = $event" />
         </div>
         <div class="flex flex-col gap-1 grow">
           <label class="font-medium text-sm" for="company-form-cnpj">Cargo</label>
           <app-input
             [id]="'company-form-employee-position'"
             [inputName]="'custom'"
-            [inputValue]="employeeStore.employeeData().position || ''"
+            [inputValue]="companyDataRequest.employee.position || ''"
             [type]="'search'"
-            (inputValueEmitter)="employeeStore.onSetFormInputNewValue('position', $event)" />
+            (inputValueEmitter)="companyDataRequest.employee.position = $event" />
         </div>
       </div>
       <div class="flex flex-col md:flex-row gap-4">
@@ -186,25 +186,25 @@
           <app-input
             [id]="'company-form-employee-email'"
             [inputName]="'custom'"
-            [inputValue]="employeeStore.employeeData().email || ''"
+            [inputValue]="companyDataRequest.employee.email || ''"
             [type]="'search'"
-            (inputValueEmitter)="employeeStore.onSetFormInputNewValue('email', $event)" />
+            (inputValueEmitter)="companyDataRequest.employee.email = $event" />
         </div>
         <div class="flex flex-col gap-1 grow">
           <label class="font-medium text-sm" for="company-form-im">Telefone fixo</label>
           <app-input
             [id]="'company-form-employee-deskphone'"
             [inputName]="'phone'"
-            [inputValue]="employeeStore.employeeData().deskphone || ''"
-            (inputValueEmitter)="employeeStore.onSetFormInputNewValue('deskphone', $event)" />
+            [inputValue]="companyDataRequest.employee.deskphone || ''"
+            (inputValueEmitter)="companyDataRequest.employee.deskphone = $event" />
         </div>
         <div class="flex flex-col gap-1 grow">
           <label class="font-medium text-sm" for="company-form-im">Celular</label>
           <app-input
             [id]="'company-form-employee-mobile'"
             [inputName]="'phone'"
-            [inputValue]="employeeStore.employeeData().cellphone || ''"
-            (inputValueEmitter)="employeeStore.onSetFormInputNewValue('cellphone', $event)" />
+            [inputValue]="companyDataRequest.employee.cellphone || ''"
+            (inputValueEmitter)="companyDataRequest.employee.cellphone = $event" />
         </div>
       </div>
     </div>

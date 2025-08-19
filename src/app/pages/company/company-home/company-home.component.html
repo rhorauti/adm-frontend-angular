@@ -56,11 +56,7 @@
               <p>Pesquisa: {{ baseRegisterStore.filterHelp().inputSearch }}</p>
               <app-button-close
                 (click)="
-                  baseRegisterStore.onSetInputSearchFilterItemToDefault([
-                    'idCompany',
-                    'nickname',
-                    'name',
-                  ])
+                  baseRegisterStore.onSetInputSearchFilterItemToDefault()
                 "></app-button-close>
             </div>
           } @else {
@@ -89,6 +85,7 @@
       <app-table-company
         (refreshBtnClickEmitter)="onShowDataList()"
         (deleteBtnClickEmitter)="onShowModalToDelete()"
+        (rowClickEmitter)="onRedirectToEditPage($event)"
         (cloneBtnClickEmitter)="onCloneRegister($event)" />
       <app-pagination
         [currentPage]="baseRegisterStore.pagination().currentPage"

@@ -2,12 +2,17 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { inject } from '@angular/core';
 import { EmployeeApi } from '@core/http/employee/employee.api';
 import { IEmployee } from '@core/interfaces/employee.interface';
+import { MaybeMergeValue } from '@core/types/base.type';
 import { patchState, signalStore, withMethods, withState } from '@ngrx/signals';
 import { ModalStore } from '@store/modal/modal.store';
 
+interface EmployeeState {
+  employeeData: IEmployee;
+}
+
 export const EmployeeStore = signalStore(
   { providedIn: 'root' },
-  withState(() => ({
+  withState<EmployeeState>(() => ({
     employeeData: {
       isDefault: false,
       idEmployee: 0,
@@ -18,26 +23,31 @@ export const EmployeeStore = signalStore(
       deskphone: '',
       cellphone: '',
       photoUrl: '',
-    } as IEmployee,
+    },
   })),
 
   withMethods(store => {
     const modalStore = inject(ModalStore);
     const employeeApi = inject(EmployeeApi);
 
-    const onSetFormInputNewValue = (property: keyof IEmployee, value: string | number): void => {
-      patchState(store, {
-        employeeData: {
-          ...store.employeeData(),
-          [property]: value,
-        },
-      });
-    };
+    const isPlainObject = (v: unknown): v is Record<string, unknown> =>
+      v !== null && typeof v == 'object' && !Array.isArray(v);
 
-    const onSetEmployeeValue = (employee: IEmployee): void => {
-      patchState(store, {
-        employeeData: { ...employee },
-      });
+    const onSetSlicePropsToNewValue = <K extends keyof EmployeeState>(
+      sliceKey: K,
+      value: MaybeMergeValue<EmployeeState, K>
+    ): void => {
+      const current = store[sliceKey]();
+
+      const next: EmployeeState[K] =
+        isPlainObject(current) && isPlainObject(value)
+          ? ({
+              ...current,
+              ...(value as Record<string, unknown>),
+            } as EmployeeState[K])
+          : (value as EmployeeState[K]);
+
+      patchState(store, { [sliceKey]: next } as Partial<EmployeeState>);
     };
 
     const onClearData = (): void => {
@@ -61,7 +71,7 @@ export const EmployeeStore = signalStore(
         modalStore.onLoading(true);
         const employee = await employeeApi.onGetCompanyEmployee(idCompany);
         if (employee.data) {
-          onSetEmployeeValue(employee.data);
+          onSetSlicePropsToNewValue('employeeData', employee.data);
         } else {
           return;
         }
@@ -77,6 +87,6 @@ export const EmployeeStore = signalStore(
       }
     };
 
-    return { onSetFormInputNewValue, onClearData, onSetEmployeeValue, onGetEmployeeInfo };
+    return { onSetSlicePropsToNewValue, onClearData, onGetEmployeeInfo };
   })
 );

@@ -3,12 +3,17 @@ import { computed, inject } from '@angular/core';
 import { AddressApi } from '@core/http/address/address.api';
 import { ThirdPartApi } from '@core/http/third-part/third-part.api';
 import { IAddress } from '@core/interfaces/address.interface';
+import { MaybeMergeValue } from '@core/types/base.type';
 import { patchState, signalStore, withComputed, withMethods, withState } from '@ngrx/signals';
 import { ModalStore } from '@store/modal/modal.store';
 
+interface AddressState {
+  addressData: IAddress;
+}
+
 export const AddressStore = signalStore(
   { providedIn: 'root' },
-  withState(() => ({
+  withState<AddressState>(() => ({
     addressData: {
       idAddress: 0,
       postalCode: '',
@@ -18,7 +23,7 @@ export const AddressStore = signalStore(
       district: '',
       city: '',
       state: '',
-    } as IAddress,
+    },
   })),
 
   withComputed(store => {
@@ -34,19 +39,24 @@ export const AddressStore = signalStore(
     const modalStore = inject(ModalStore);
     const addressApi = inject(AddressApi);
 
-    const onSetFormInputNewValue = (property: keyof IAddress, value: string | number): void => {
-      patchState(store, {
-        addressData: {
-          ...store.addressData(),
-          [property]: value,
-        },
-      });
-    };
+    const isPlainObject = (v: unknown): v is Record<string, unknown> =>
+      v !== null && typeof v == 'object' && !Array.isArray(v);
 
-    const onSetAddressValue = (address: IAddress): void => {
-      patchState(store, {
-        addressData: address,
-      });
+    const onSetSlicePropsToNewValue = <K extends keyof AddressState>(
+      sliceKey: K,
+      value: MaybeMergeValue<AddressState, K>
+    ): void => {
+      const current = store[sliceKey]();
+
+      const next: AddressState[K] =
+        isPlainObject(current) && isPlainObject(value)
+          ? ({
+              ...current,
+              ...(value as Record<string, unknown>),
+            } as AddressState[K])
+          : (value as AddressState[K]);
+
+      patchState(store, { [sliceKey]: next } as Partial<AddressState>);
     };
 
     const onSetAddressViaCEPValues = async (): Promise<void> => {
@@ -87,7 +97,7 @@ export const AddressStore = signalStore(
         modalStore.onLoading(true);
         const address = await addressApi.onGetCompanyAddress(idCompany);
         if (address.data) {
-          onSetAddressValue(address.data);
+          onSetSlicePropsToNewValue('addressData', address.data);
         } else {
           return;
         }
@@ -104,10 +114,9 @@ export const AddressStore = signalStore(
     };
 
     return {
-      onSetFormInputNewValue,
+      onSetSlicePropsToNewValue,
       onClearData,
       onSetAddressViaCEPValues,
-      onSetAddressValue,
       onGetAddressInfo,
     };
   })

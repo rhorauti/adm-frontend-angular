@@ -40,12 +40,11 @@ export class TableCompanyComponent implements OnInit, OnDestroy {
   private document = inject(DOCUMENT);
   readonly baseRegisterStore = inject(BaseRegisterStore);
   readonly modalStore = inject(ModalStore);
-  companiesData: ICompany[] = [];
+  companiesData = computed(() => this.baseRegisterStore.dataList() as ICompany[]);
 
   ngOnInit() {
     this.baseRegisterStore.onCheckTableCheckboxStatus(this.baseRegisterStore.tableCheckbox().body);
     this.document.addEventListener('mousedown', this.onTableItemClick);
-    this.companiesData = this.baseRegisterStore.dataList() as ICompany[];
   }
 
   ngOnDestroy(): void {
@@ -116,19 +115,11 @@ export class TableCompanyComponent implements OnInit, OnDestroy {
     );
   };
 
-  // onShowModalAskToDelete(event: MouseEvent | KeyboardEvent, companyData: ICompany): void {
-  //   event.stopPropagation();
-  //   this.baseRegisterStore.onSetSlicePropsToNewValue('data', companyData);
-  //   this.modalStore.onShowAskModal(
-  //     'Excluir Registro',
-  //     `Deseja excluir o registro <b>${(this.baseRegisterStore.data() as ICompany).name || ''}</b>?`,
-  //     this.onCloseAskModalActionOk
-  //   );
-  // }
+  @Output() rowClickEmitter = new EventEmitter();
 
-  // onCloseAskModalActionOk = (): void => {
-  //   this.baseRegisterStore.onDeleteRegister((this.baseRegisterStore.data() as ICompany).idCompany);
-  // };
+  onRowClick(companyData: ICompany): void {
+    this.rowClickEmitter.emit(companyData);
+  }
 
   @Output() refreshBtnClickEmitter = new EventEmitter();
 
