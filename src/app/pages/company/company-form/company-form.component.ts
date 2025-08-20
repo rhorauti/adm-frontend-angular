@@ -41,7 +41,7 @@ export class CompanyFormComponent implements OnInit, OnDestroy {
   subscription: Subscription | undefined = undefined;
   idCompany = 0;
 
-  companyDataRequest = {
+  companyDetailedData = {
     company: {
       idCompany: 0,
       nickname: '',
@@ -73,7 +73,7 @@ export class CompanyFormComponent implements OnInit, OnDestroy {
     } as IEmployee,
   } as ICompanyDetails;
 
-  companyName = this.companyDataRequest.company.name;
+  companyName = this.companyDetailedData.company.name;
 
   ngOnInit(): void {
     this.subscription = this.activatedRoute.paramMap.subscribe(params => {
@@ -87,7 +87,10 @@ export class CompanyFormComponent implements OnInit, OnDestroy {
   onGetCompanyDetails = async (): Promise<void> => {
     try {
       this.modalStore.onLoading(true);
-      await this.companyApi.getCompanyCompleteInfo(this.idCompany);
+      const companyDetail = await this.companyApi.getCompanyCompleteInfo(this.idCompany);
+      console.log('companyDetail', companyDetail);
+      this.companyDetailedData = companyDetail.data;
+      console.log('this.companyDetailedData', this.companyDetailedData);
     } catch (e: unknown) {
       const error = e as HttpErrorResponse;
       this.modalStore.onShowInfoModal('Cadastro de empresa', error.error.message);
@@ -110,14 +113,14 @@ export class CompanyFormComponent implements OnInit, OnDestroy {
 
   onSetAddressViaCEPValues = async (): Promise<void> => {
     const response = await this.thirdPartApi.getAddressFromCep(
-      this.companyDataRequest.address.postalCode
+      this.companyDetailedData.address.postalCode
     );
     if (response) {
-      this.companyDataRequest.address.address = response.logradouro;
-      this.companyDataRequest.address.complement = response.complemento;
-      this.companyDataRequest.address.district = response.bairro;
-      this.companyDataRequest.address.city = response.localidade;
-      this.companyDataRequest.address.state = response.uf;
+      this.companyDetailedData.address.address = response.logradouro;
+      this.companyDetailedData.address.complement = response.complemento;
+      this.companyDetailedData.address.district = response.bairro;
+      this.companyDetailedData.address.city = response.localidade;
+      this.companyDetailedData.address.state = response.uf;
     } else {
       return;
     }
@@ -156,40 +159,40 @@ export class CompanyFormComponent implements OnInit, OnDestroy {
   };
 
   onSetFinalData = (): void => {
-    this.finalData.company.idCompany = this.companyDataRequest.company.idCompany;
-    this.finalData.company.nickname = this.companyDataRequest.company.nickname;
-    this.finalData.company.name = this.companyDataRequest.company.name;
+    this.finalData.company.idCompany = this.companyDetailedData.company.idCompany;
+    this.finalData.company.nickname = this.companyDetailedData.company.nickname.trim();
+    this.finalData.company.name = this.companyDetailedData.company.name.trim();
     this.finalData.company.cnpj = this.baseRegisterStore.onMaskNumericalField(
-      this.companyDataRequest.company?.cnpj || ''
+      (this.companyDetailedData.company?.cnpj || '').trim()
     );
     this.finalData.company.ie = this.baseRegisterStore.onMaskNumericalField(
-      this.companyDataRequest.company.ie || ''
+      (this.companyDetailedData.company.ie || '').trim()
     );
     this.finalData.company.im = this.baseRegisterStore.onMaskNumericalField(
-      this.companyDataRequest.company.im || ''
+      (this.companyDetailedData.company.im || '').trim()
     );
-    this.finalData.address.idAddress = this.companyDataRequest.address.idAddress;
+    this.finalData.address.idAddress = this.companyDetailedData.address.idAddress;
     this.finalData.address.postalCode = this.baseRegisterStore.onMaskNumericalField(
-      this.companyDataRequest.address.postalCode
+      this.companyDetailedData.address.postalCode.trim()
     );
-    this.finalData.address.address = this.companyDataRequest.address.address;
-    this.finalData.address.number = this.companyDataRequest.address.number;
-    this.finalData.address.complement = this.companyDataRequest.address.complement;
-    this.finalData.address.district = this.companyDataRequest.address.district;
-    this.finalData.address.city = this.companyDataRequest.address.city;
-    this.finalData.address.state = this.companyDataRequest.address.state;
-    this.finalData.employee.isDefault = this.companyDataRequest.employee.isDefault;
-    this.finalData.employee.idEmployee = this.companyDataRequest.employee.idEmployee;
-    this.finalData.employee.name = this.companyDataRequest.employee.name;
-    this.finalData.employee.department = this.companyDataRequest.employee.department;
-    this.finalData.employee.position = this.companyDataRequest.employee.position;
-    this.finalData.employee.photoUrl = this.companyDataRequest.employee.photoUrl;
-    this.finalData.employee.email = this.companyDataRequest.employee.email;
+    this.finalData.address.address = this.companyDetailedData.address.address.trim();
+    this.finalData.address.number = this.companyDetailedData.address.number?.trim();
+    this.finalData.address.complement = this.companyDetailedData.address.complement?.trim();
+    this.finalData.address.district = this.companyDetailedData.address.district?.trim();
+    this.finalData.address.city = this.companyDetailedData.address.city?.trim();
+    this.finalData.address.state = this.companyDetailedData.address.state?.trim();
+    this.finalData.employee.isDefault = this.companyDetailedData.employee.isDefault;
+    this.finalData.employee.idEmployee = this.companyDetailedData.employee.idEmployee;
+    this.finalData.employee.name = this.companyDetailedData.employee.name?.trim();
+    this.finalData.employee.department = this.companyDetailedData.employee.department?.trim();
+    this.finalData.employee.position = this.companyDetailedData.employee.position?.trim();
+    this.finalData.employee.photoUrl = this.companyDetailedData.employee.photoUrl?.trim();
+    this.finalData.employee.email = this.companyDetailedData.employee.email?.trim();
     this.finalData.employee.deskphone = this.baseRegisterStore.onMaskNumericalField(
-      this.companyDataRequest.employee.deskphone || ''
+      (this.companyDetailedData.employee.deskphone || '')?.trim()
     );
     this.finalData.employee.cellphone = this.baseRegisterStore.onMaskNumericalField(
-      this.companyDataRequest.employee.cellphone || ''
+      (this.companyDetailedData.employee.cellphone || '')?.trim()
     );
   };
 

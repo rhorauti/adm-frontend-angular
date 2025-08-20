@@ -22,5 +22,5 @@ export interface ICompanyResponse extends IBaseResponse {
 }
 
 export interface ICompanyDetailedDataResponse extends IBaseResponse {
-  data: ICompanyRequest[];
+  data: ICompanyRequest;
 }

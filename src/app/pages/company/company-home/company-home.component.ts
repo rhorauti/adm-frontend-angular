@@ -66,11 +66,7 @@ export class CompanyHomeComponent implements OnInit {
 
   onCloneRegister = async (companyData: ICompany): Promise<void> => {
     this.baseRegisterStore.onSetSlicePropsToNewValue('data', companyData);
-    // await this.addressStore.onGetAddressInfo(companyData.idCompany);
-    // await this.employeeStore.onGetEmployeeInfo(companyData.idCompany);
     this.baseRegisterStore.onSetSlicePropsToNewValue('data', { idCompany: 0 });
-    // this.addressStore.onSetSlicePropsToNewValue('addressData', { idAddress: 0 });
-    // this.employeeStore.onSetFormInputNewValue('idEmployee', 0);
     this.modalStore.onRedirectPage('/companies/new');
   };
 
