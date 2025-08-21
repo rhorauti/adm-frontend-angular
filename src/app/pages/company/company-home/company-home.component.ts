@@ -120,8 +120,8 @@ export class CompanyHomeComponent implements OnInit {
   };
 
   onCloneRegister = async (data: ICompany): Promise<void> => {
+    this.baseRegisterStore.onSetSlicePropsToNewValue('isCopiedData', true);
     this.baseRegisterStore.onSetSlicePropsToNewValue('data', data);
-    this.baseRegisterStore.onSetSlicePropsToNewValue('data', { idCompany: 0 });
     this.modalStore.onRedirectPage(`/${this.currentView}/new`);
   };
 

@@ -4,7 +4,6 @@ import {
   AfterViewInit,
   ChangeDetectorRef,
   Component,
-  computed,
   ElementRef,
   inject,
   OnDestroy,
@@ -56,17 +55,8 @@ export class CompanyFormComponent implements OnInit, OnDestroy, AfterViewInit {
   currentView = 'companies';
   currentViewTranslated = 'Empresas'.slice(0, -1);
   subscription: Subscription | undefined = undefined;
+  breadcrumbList: string[] = [];
   id = 0;
-
-  formTitle = computed(() => {
-    if (this.id == 0) {
-      return 'Novo Registro';
-    } else {
-      return this.name;
-    }
-  });
-
-  readonly breadcrumbList = ['Cadastro', this.currentViewTranslated, `${this.formTitle()}`];
 
   detailedData = {
     company: {
@@ -100,16 +90,31 @@ export class CompanyFormComponent implements OnInit, OnDestroy, AfterViewInit {
     } as IEmployee,
   } as ICompanyDetails;
 
-  name = this.detailedData.company.name;
-
-  ngOnInit(): void {
+  async ngOnInit(): Promise<void> {
     this.subscription = this.activatedRoute.paramMap.subscribe(params => {
       this.id = Number(params.get('id')) || 0;
     });
     if (this.id != 0) {
-      this.onGetDataDetails();
+      await this.onGetDataDetails();
+    } else {
+      if (this.baseRegisterStore.isCopiedData()) {
+        this.id = (this.baseRegisterStore.data() as ICompany).idCompany;
+        await this.onGetDataDetails();
+        this.id = 0;
+        this.baseRegisterStore.onSetSlicePropsToNewValue('isCopiedData', false);
+      }
     }
+    this.defineTitle();
+    this.breadcrumbList = ['Cadastro', this.currentViewTranslated, `${this.defineTitle()}`];
   }
+
+  defineTitle = (): string => {
+    if (this.id == 0) {
+      return 'Novo Registro';
+    } else {
+      return this.detailedData.company.name;
+    }
+  };
 
   ngAfterViewInit(): void {
     this.onDefineInputId();
@@ -192,39 +197,39 @@ export class CompanyFormComponent implements OnInit, OnDestroy, AfterViewInit {
 
   onSetFinalData = (): void => {
     this.finalData.company.idCompany = this.detailedData.company.idCompany;
-    this.finalData.company.nickname = this.detailedData.company.nickname.trim();
-    this.finalData.company.name = this.detailedData.company.name.trim();
+    this.finalData.company.nickname = (this.detailedData.company.nickname ?? '').trim();
+    this.finalData.company.name = (this.detailedData.company.name ?? '').trim();
     this.finalData.company.cnpj = this.baseRegisterStore.onMaskNumericalField(
-      (this.detailedData.company?.cnpj || '').trim()
+      (this.detailedData.company?.cnpj ?? '').trim()
     );
     this.finalData.company.ie = this.baseRegisterStore.onMaskNumericalField(
-      (this.detailedData.company.ie || '').trim()
+      (this.detailedData.company.ie ?? '').trim()
     );
     this.finalData.company.im = this.baseRegisterStore.onMaskNumericalField(
-      (this.detailedData.company.im || '').trim()
+      (this.detailedData.company.im ?? '').trim()
     );
     this.finalData.address.idAddress = this.detailedData.address.idAddress;
     this.finalData.address.postalCode = this.baseRegisterStore.onMaskNumericalField(
-      this.detailedData.address.postalCode.trim()
+      (this.detailedData.address.postalCode ?? '').trim()
     );
-    this.finalData.address.address = this.detailedData.address.address.trim();
-    this.finalData.address.number = this.detailedData.address.number?.trim();
-    this.finalData.address.complement = this.detailedData.address.complement?.trim();
-    this.finalData.address.district = this.detailedData.address.district?.trim();
-    this.finalData.address.city = this.detailedData.address.city?.trim();
-    this.finalData.address.state = this.detailedData.address.state?.trim();
+    this.finalData.address.address = (this.detailedData.address.address ?? '').trim();
+    this.finalData.address.number = (this.detailedData.address.number ?? '').trim();
+    this.finalData.address.complement = (this.detailedData.address.complement ?? '').trim();
+    this.finalData.address.district = (this.detailedData.address.district ?? '').trim();
+    this.finalData.address.city = (this.detailedData.address.city ?? '').trim();
+    this.finalData.address.state = (this.detailedData.address.state ?? '').trim();
     this.finalData.employee.isDefault = this.detailedData.employee.isDefault;
-    this.finalData.employee.idEmployee = this.detailedData.employee.idEmployee;
-    this.finalData.employee.name = this.detailedData.employee.name?.trim();
-    this.finalData.employee.department = this.detailedData.employee.department?.trim();
-    this.finalData.employee.position = this.detailedData.employee.position?.trim();
-    this.finalData.employee.photoUrl = this.detailedData.employee.photoUrl?.trim();
-    this.finalData.employee.email = this.detailedData.employee.email?.trim();
+    this.finalData.employee.idEmployee = (this.detailedData.employee ?? '').idEmployee;
+    this.finalData.employee.name = (this.detailedData.employee.name ?? '').trim();
+    this.finalData.employee.department = (this.detailedData.employee.department ?? '').trim();
+    this.finalData.employee.position = (this.detailedData.employee.position ?? '').trim();
+    this.finalData.employee.photoUrl = (this.detailedData.employee.photoUrl ?? '').trim();
+    this.finalData.employee.email = (this.detailedData.employee.email ?? '').trim();
     this.finalData.employee.deskphone = this.baseRegisterStore.onMaskNumericalField(
-      (this.detailedData.employee.deskphone || '')?.trim()
+      (this.detailedData.employee.deskphone ?? '')?.trim()
     );
     this.finalData.employee.cellphone = this.baseRegisterStore.onMaskNumericalField(
-      (this.detailedData.employee.cellphone || '')?.trim()
+      (this.detailedData.employee.cellphone ?? '')?.trim()
     );
   };
 

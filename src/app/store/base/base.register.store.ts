@@ -15,6 +15,7 @@ export const BaseRegisterStore = signalStore(
   { providedIn: 'root' },
 
   withState<IBaseRegisterStore<DataType>>(() => ({
+    isCopiedData: false,
     inputSearchValue: '',
     isTableHeaderBoxActive: false,
     tableHeaders: [] as ITableHeader<DataType>[],

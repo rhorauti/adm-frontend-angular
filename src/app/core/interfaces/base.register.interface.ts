@@ -5,6 +5,10 @@ export type FilterHelp<T> = { inputSearch: string } & Record<keyof T, string>;
 
 export interface IBaseRegisterStore<T> {
   /**
+   * A flag used to indicate that the data is a copy to insert new data.
+   */
+  isCopiedData: boolean;
+  /**
    * An input search value used to filter the table.
    */
   inputSearchValue: string;
