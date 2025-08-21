@@ -1,6 +1,6 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { TableCompanyComponent } from '@components/table/table-company/table-company.component';
+import { TableComponent } from '@components/table/table.component';
 import { BreadcrumbComponent } from '@components/breadcrumb/breadcrumb.component';
 import { TableHeaderBoxComponent } from '@components/side-bar/side-bar.component';
 import { PaginationComponent } from '@components/pagination/pagination.component';
@@ -16,10 +16,12 @@ import { ModalStore } from '@store/modal/modal.store';
 import { ICompany } from '@core/interfaces/company.interface';
 import { AuthStore } from '@store/auth/auth.store';
 import { loadStorage } from '@core/utils/misc';
-import { BaseRegisterStore } from '@store/base/base.register.store';
+import { BaseRegisterStore, defaultTableHeaderIcon } from '@store/base/base.register.store';
 import { ActionCallback } from '@core/interfaces/modal.interface';
 import { HttpErrorResponse } from '@angular/common/http';
 import { CompanyApi } from '@core/http/company/company.api';
+import { KeyOfData } from '@core/types/base.type';
+import { ITableHeader } from '@core/interfaces/table.interface';
 
 @Component({
   selector: 'app-company-home',
@@ -27,7 +29,7 @@ import { CompanyApi } from '@core/http/company/company.api';
     CommonModule,
     TableHeaderBoxComponent,
     InputComponent,
-    TableCompanyComponent,
+    TableComponent,
     PaginationComponent,
     BreadcrumbComponent,
     MatIconModule,
@@ -47,73 +49,126 @@ export class CompanyHomeComponent implements OnInit {
   readonly authStore = inject(AuthStore);
   readonly modalStore = inject(ModalStore);
 
-  tableHeadersLocalStorageId = 'table_headers_company' + this.authStore.user().id;
+  readonly currentView = 'companies';
+  readonly breadcrumbList = ['Cadastro', 'Empresas'];
+  readonly inputSearchFilterList: KeyOfData[] = ['idCompany', 'nickname', 'name'];
+  readonly inputSearchPlaceholder = 'Id, Nome Fantasia, Razão Social';
+  readonly initialTableHeaders = [
+    {
+      id: 0,
+      isHeaderActive: true,
+      sortDirection: 0,
+      icon: defaultTableHeaderIcon,
+      headerName: 'Id',
+      databaseField: 'idCompany',
+    },
+    {
+      id: 1,
+      isHeaderActive: true,
+      sortDirection: 0,
+      icon: defaultTableHeaderIcon,
+      headerName: 'Nome Fantasia',
+      databaseField: 'nickname',
+    },
+    {
+      id: 2,
+      isHeaderActive: true,
+      sortDirection: 0,
+      icon: defaultTableHeaderIcon,
+      headerName: 'Razão Social',
+      databaseField: 'name',
+    },
+    {
+      id: 3,
+      isHeaderActive: true,
+      sortDirection: 0,
+      icon: defaultTableHeaderIcon,
+      headerName: 'CNPJ/CPF',
+      databaseField: 'cnpj',
+    },
+    {
+      id: 4,
+      isHeaderActive: false,
+      sortDirection: 0,
+      icon: defaultTableHeaderIcon,
+      headerName: 'Inscr.Estadual',
+      databaseField: 'ie',
+    },
+    {
+      id: 5,
+      isHeaderActive: false,
+      sortDirection: 0,
+      icon: defaultTableHeaderIcon,
+      headerName: 'Inscr.Municipal',
+      databaseField: 'im',
+    },
+  ] as ITableHeader<ICompany>[];
+  tableHeadersLocalStorageId = `table_headers_${this.currentView} + ${this.authStore.user().id}`;
 
   async ngOnInit() {
     this.onShowDataList();
-    const tableHeaders = loadStorage(this.tableHeadersLocalStorageId);
-    if (tableHeaders) {
-      this.baseRegisterStore.onSetSlicePropsToNewValue('tableHeaders', tableHeaders);
-    }
+    const tableHeaders = await loadStorage(this.tableHeadersLocalStorageId);
+    const headers = tableHeaders ? tableHeaders : this.initialTableHeaders;
+    this.baseRegisterStore.onSetSlicePropsToNewValue('tableHeaders', headers);
   }
 
-  onRedirectToEditPage = (companyData: ICompany): void => {
-    this.baseRegisterStore.onSetSlicePropsToNewValue('data', companyData);
+  onRedirectToEditPage = (data: ICompany): void => {
+    this.baseRegisterStore.onSetSlicePropsToNewValue('data', data);
     this.modalStore.onRedirectPage(
-      `/companies/edit/${(this.baseRegisterStore.data() as ICompany).idCompany}`
+      `/${this.currentView}/edit/${(this.baseRegisterStore.data() as ICompany).idCompany}`
     );
   };
 
-  onCloneRegister = async (companyData: ICompany): Promise<void> => {
-    this.baseRegisterStore.onSetSlicePropsToNewValue('data', companyData);
+  onCloneRegister = async (data: ICompany): Promise<void> => {
+    this.baseRegisterStore.onSetSlicePropsToNewValue('data', data);
     this.baseRegisterStore.onSetSlicePropsToNewValue('data', { idCompany: 0 });
-    this.modalStore.onRedirectPage('/companies/new');
+    this.modalStore.onRedirectPage(`/${this.currentView}/new`);
   };
 
   onShowDataList = async (): Promise<void> => {
     try {
       this.modalStore.onLoading(true);
-      const response = await this.companyApi.getCompaniesList();
+      const response = await this.companyApi.onGetDataList();
       this.baseRegisterStore.onSetSlicePropsToNewValue('initialData', response.data);
       this.baseRegisterStore.onSetSlicePropsToNewValue('dataList', response.data);
       this.baseRegisterStore.onClearData(response.data);
     } catch (e: unknown) {
       const error = e as HttpErrorResponse;
-      this.modalStore.onShowInfoModal('Listar empresas', error.error?.message);
+      this.modalStore.onShowInfoModal('Listar registros', error.error?.message);
     } finally {
       this.modalStore.onLoading(false);
     }
   };
 
-  onDeleteRegister = async (idCompany: number, onActionOk?: ActionCallback): Promise<void> => {
+  onDeleteRegister = async (id: number, onActionOk?: ActionCallback): Promise<void> => {
     try {
       this.modalStore.onLoading(true);
-      const response = await this.companyApi.deleteCompany(idCompany);
+      const response = await this.companyApi.onDelete(id);
       if (response.status) {
         this.onShowDataList();
         this.modalStore.onSetModalInfoType('success');
-        this.modalStore.onShowInfoModal('Excluir empresa', response.message, onActionOk);
+        this.modalStore.onShowInfoModal('Excluir registro', response.message, onActionOk);
       } else {
-        this.modalStore.onShowInfoModal('Excluir empresa', response.error?.message || '');
+        this.modalStore.onShowInfoModal('Excluir registro', response.error?.message || '');
       }
     } catch (e: unknown) {
       const error = e as HttpErrorResponse;
-      this.modalStore.onShowInfoModal('Excluir empresa', error.error.message);
+      this.modalStore.onShowInfoModal('Excluir registro', error.error.message);
     } finally {
       this.modalStore.onLoading(false);
     }
   };
 
-  async onDeleteCompany(): Promise<void> {
-    const itemToDelete = this.baseRegisterStore.itemSelected() as ICompany;
-    await this.onDeleteRegister(itemToDelete?.idCompany);
+  async onDelete(data: ICompany): Promise<void> {
+    await this.onDeleteRegister(data.idCompany);
   }
 
-  onShowModalToDelete(): void {
+  onShowModalToDelete(data?: ICompany): void {
+    const selectedData = data ? data : (this.baseRegisterStore.itemSelected() as ICompany) || '';
     this.modalStore.onShowAskModal(
       'Cadastro de empresas',
-      `Deseja excluir o registro <b>${(this.baseRegisterStore.itemSelected() as ICompany)?.name || ''}</b>?`,
-      () => this.onDeleteCompany()
+      `Deseja excluir o registro <b>${selectedData.name}</b>?`,
+      () => this.onDelete(selectedData)
     );
   }
 }

@@ -9,7 +9,7 @@ import {
 } from '@core/interfaces/base.register.interface';
 import { DataType, MaybeMergeValue, StoreType, KeyOfData } from '@core/types/base.type';
 
-const defaultTableHeaderIcon = 'unfold_more';
+export const defaultTableHeaderIcon = 'unfold_more';
 
 export const BaseRegisterStore = signalStore(
   { providedIn: 'root' },
@@ -115,12 +115,6 @@ export const BaseRegisterStore = signalStore(
       });
     };
 
-    // const onSetTableHeaders = (tableHeaders: ITableHeader<ICompany>[]): void => {
-    //   patchState(store, {
-    //     tableHeaders: tableHeaders,
-    //   });
-    // };
-
     const onSetHeaderDisplay = (idx: number, tableHeadersLocalStorageId: string): void => {
       patchState(store, {
         tableHeaders: store.tableHeaders().map((header, index) => {
@@ -141,9 +135,9 @@ export const BaseRegisterStore = signalStore(
     const onSetTableHeaderIcon = (): void => {
       patchState(store, {
         tableHeaders: store.tableHeaders().map(header => {
-          if (header.sort == 0) {
+          if (header.sortDirection == 0) {
             return { ...header, icon: defaultTableHeaderIcon };
-          } else if (header.sort == 1) {
+          } else if (header.sortDirection == 1) {
             return { ...header, icon: 'expand_more' };
           } else {
             return { ...header, icon: 'expand_less' };
@@ -161,11 +155,12 @@ export const BaseRegisterStore = signalStore(
       patchState(store, {
         tableHeaders: store.tableHeaders().map((header, index) => {
           if (idx == index) {
-            return { ...header, sort: (header.sort + 1) % 3 };
+            return { ...header, sortDirection: (header.sortDirection + 1) % 3 };
           }
-          return { ...header, sort: 0 };
+          return { ...header, sortDirection: 0 };
         }),
       });
+      console.log('onSetTableHeaderSortMethod', store.tableHeaders());
     };
 
     const onSetTableDataSortDirectionToDefault = <T extends keyof DataType>(): void => {
@@ -304,11 +299,6 @@ export const BaseRegisterStore = signalStore(
       }
       onSetSlicePropsToNewValue('isFilterBoxActive', false);
       onSetPaginationToDefault();
-      console.log('dataList', store.dataList());
-      console.log('isFilterResultZeroRegister', store.isFilterResultZeroRegister());
-      console.log('inputSearchValue', store.inputSearchValue());
-      console.log('filterBox', store.filterBox());
-      console.log('isFilterBoxActive', store.isFilterBoxActive());
     };
 
     const onClickOnFilterBtnThroughSort = (idx: number): void => {
@@ -317,6 +307,7 @@ export const BaseRegisterStore = signalStore(
       const filterData = onFilterThroughSort(idx || 0);
       onSetSlicePropsToNewValue('dataList', filterData);
       onSetPaginationToDefault();
+      console.log('tableHeaders', store.tableHeaders());
     };
 
     const onFilterThroughSearchInput = <K extends keyof DataType>(
@@ -359,8 +350,8 @@ export const BaseRegisterStore = signalStore(
       const keyId = Object.keys(store.dataList()[0])[0] as K;
       const header = store.tableHeaders()[idx];
       const key = header.databaseField as K;
-      const sortDirection = header.sort;
-      if (store.tableHeaders()[idx].sort == 0) {
+      const sortDirection = header.sortDirection;
+      if (store.tableHeaders()[idx].sortDirection == 0) {
         return [
           ...store.dataList().sort((a, b) => {
             const valueA = a[keyId];

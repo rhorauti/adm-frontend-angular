@@ -3,7 +3,7 @@ import { HttpRequestService } from '../http-request.service';
 import { environment } from '@environments/environment';
 import {
   ICompanyDetailedDataResponse,
-  ICompanyRequest,
+  ICompanyDetail,
   ICompanyResponse,
 } from '@core/interfaces/company.interface';
 import { IBaseResponse } from '@core/interfaces/response.interface';
@@ -13,51 +13,40 @@ import { IBaseResponse } from '@core/interfaces/response.interface';
 })
 export class CompanyApi {
   private httpRequestService = inject(HttpRequestService);
+  private baseApiName = 'companies';
 
-  /**
-   * Retrieve companies data list from database
-   * @returns {Promise<ICompanyResponse>} Promise of type IResponseCompany that contains companies data.
-   */
-  async getCompaniesList(): Promise<ICompanyResponse> {
-    return await this.httpRequestService.sendHttpRequest(`${environment.apiUrl}/companies`, 'GET');
-  }
-
-  async getCompanyCompleteInfo(idCompany: number): Promise<ICompanyDetailedDataResponse> {
+  async onGetDataList(): Promise<ICompanyResponse> {
     return await this.httpRequestService.sendHttpRequest(
-      `${environment.apiUrl}/companies/detail/${idCompany}`,
+      `${environment.apiUrl}/${this.baseApiName}`,
       'GET'
     );
   }
 
-  async getCompanyInfo(idCompany: number): Promise<ICompanyResponse> {
+  async onGetDataDetailedInfo(id: number): Promise<ICompanyDetailedDataResponse> {
     return await this.httpRequestService.sendHttpRequest(
-      `${environment.apiUrl}/companies/${idCompany}`,
+      `${environment.apiUrl}/${this.baseApiName}/detail/${id}`,
       'GET'
     );
   }
 
-  /**
-   * addNewCompany
-   * Adiciona um novo registro no banco de dados.
-   * @returns Promise com o status e mensagem.
-   */
-  async saveCompany(companyData: ICompanyRequest): Promise<ICompanyResponse> {
+  async onGetDataInfo(id: number): Promise<ICompanyResponse> {
     return await this.httpRequestService.sendHttpRequest(
-      `${environment.apiUrl}/companies`,
+      `${environment.apiUrl}/${this.baseApiName}/${id}`,
+      'GET'
+    );
+  }
+
+  async onSave(data: ICompanyDetail): Promise<ICompanyResponse> {
+    return await this.httpRequestService.sendHttpRequest(
+      `${environment.apiUrl}/${this.baseApiName}`,
       'POST',
-      companyData
+      data
     );
   }
 
-  /**
-   * deleteCompany
-   * Delete one or more companies at once.
-   * @param companiesData array of companies
-   * @returns Promise with success or failure status and message.
-   */
-  async deleteCompany(idCompany: number): Promise<IBaseResponse> {
+  async onDelete(id: number): Promise<IBaseResponse> {
     return await this.httpRequestService.sendHttpRequest(
-      `${environment.apiUrl}/companies/${idCompany}`,
+      `${environment.apiUrl}/${this.baseApiName}/${id}`,
       'DELETE'
     );
   }

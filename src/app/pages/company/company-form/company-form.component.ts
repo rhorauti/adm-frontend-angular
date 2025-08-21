@@ -1,6 +1,17 @@
 import { CommonModule } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
-import { Component, computed, inject, OnDestroy, OnInit } from '@angular/core';
+import {
+  AfterViewInit,
+  ChangeDetectorRef,
+  Component,
+  computed,
+  ElementRef,
+  inject,
+  OnDestroy,
+  OnInit,
+  QueryList,
+  ViewChildren,
+} from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { BreadcrumbComponent } from '@components/breadcrumb/breadcrumb.component';
@@ -10,7 +21,7 @@ import { SelectComponent } from '@components/select/select.component';
 import { CompanyApi } from '@core/http/company/company.api';
 import { ThirdPartApi } from '@core/http/third-part/third-part.api';
 import { IAddress } from '@core/interfaces/address.interface';
-import { ICompany, ICompanyRequest as ICompanyDetails } from '@core/interfaces/company.interface';
+import { ICompany, ICompanyDetail as ICompanyDetails } from '@core/interfaces/company.interface';
 import { IEmployee } from '@core/interfaces/employee.interface';
 import { ActionCallback } from '@core/interfaces/modal.interface';
 import { BaseRegisterStore } from '@store/base/base.register.store';
@@ -30,7 +41,9 @@ import { Subscription } from 'rxjs';
   templateUrl: './company-form.component.html',
   styleUrl: './company-form.component.scss',
 })
-export class CompanyFormComponent implements OnInit, OnDestroy {
+export class CompanyFormComponent implements OnInit, OnDestroy, AfterViewInit {
+  @ViewChildren(InputComponent) inputs!: QueryList<InputComponent>;
+  @ViewChildren('labelForm') private labels!: QueryList<ElementRef>;
   readonly companyApi = inject(CompanyApi);
   readonly baseRegisterStore = inject(BaseRegisterStore);
   private activatedRoute = inject(ActivatedRoute);
@@ -38,10 +51,24 @@ export class CompanyFormComponent implements OnInit, OnDestroy {
   readonly modalStore = inject(ModalStore);
   readonly thirdPartApi = inject(ThirdPartApi);
 
-  subscription: Subscription | undefined = undefined;
-  idCompany = 0;
+  private cdr = inject(ChangeDetectorRef);
 
-  companyDetailedData = {
+  currentView = 'companies';
+  currentViewTranslated = 'Empresas'.slice(0, -1);
+  subscription: Subscription | undefined = undefined;
+  id = 0;
+
+  formTitle = computed(() => {
+    if (this.id == 0) {
+      return 'Novo Registro';
+    } else {
+      return this.name;
+    }
+  });
+
+  readonly breadcrumbList = ['Cadastro', this.currentViewTranslated, `${this.formTitle()}`];
+
+  detailedData = {
     company: {
       idCompany: 0,
       nickname: '',
@@ -73,54 +100,59 @@ export class CompanyFormComponent implements OnInit, OnDestroy {
     } as IEmployee,
   } as ICompanyDetails;
 
-  companyName = this.companyDetailedData.company.name;
+  name = this.detailedData.company.name;
 
   ngOnInit(): void {
     this.subscription = this.activatedRoute.paramMap.subscribe(params => {
-      this.idCompany = Number(params.get('id')) || 0;
+      this.id = Number(params.get('id')) || 0;
     });
-    if (this.idCompany != 0) {
-      this.onGetCompanyDetails();
+    if (this.id != 0) {
+      this.onGetDataDetails();
     }
   }
 
-  onGetCompanyDetails = async (): Promise<void> => {
+  ngAfterViewInit(): void {
+    this.onDefineInputId();
+    this.cdr.detectChanges();
+  }
+
+  onDefineInputId = () => {
+    this.inputs.forEach((input, index) => {
+      input.id = `${this.currentView}-form-${index}`;
+      this.labels.get(index)?.nativeElement.setAttribute('for', input.id);
+    });
+  };
+
+  onGetDataDetails = async (): Promise<void> => {
     try {
       this.modalStore.onLoading(true);
-      const companyDetail = await this.companyApi.getCompanyCompleteInfo(this.idCompany);
-      console.log('companyDetail', companyDetail);
-      this.companyDetailedData = companyDetail.data;
-      console.log('this.companyDetailedData', this.companyDetailedData);
+      const detaildDataResponse = await this.companyApi.onGetDataDetailedInfo(this.id);
+      this.detailedData = detaildDataResponse.data;
     } catch (e: unknown) {
       const error = e as HttpErrorResponse;
-      this.modalStore.onShowInfoModal('Cadastro de empresa', error.error.message);
+      this.modalStore.onShowInfoModal(
+        `Cadastro de ${this.currentViewTranslated}`,
+        error.error.message
+      );
     } finally {
       this.modalStore.onLoading(false);
     }
   };
 
-  formTitle = computed(() => {
-    if (this.idCompany == 0) {
-      return 'Nova Empresa';
-    } else {
-      return this.companyName;
-    }
-  });
-
-  onBackToCompaniesPage = (): void => {
-    this.modalStore.onRedirectPage('/companies');
+  onBackToPreviousPage = (): void => {
+    this.modalStore.onRedirectPage(`/${this.currentView}`);
   };
 
   onSetAddressViaCEPValues = async (): Promise<void> => {
     const response = await this.thirdPartApi.getAddressFromCep(
-      this.companyDetailedData.address.postalCode
+      this.detailedData.address.postalCode
     );
     if (response) {
-      this.companyDetailedData.address.address = response.logradouro;
-      this.companyDetailedData.address.complement = response.complemento;
-      this.companyDetailedData.address.district = response.bairro;
-      this.companyDetailedData.address.city = response.localidade;
-      this.companyDetailedData.address.state = response.uf;
+      this.detailedData.address.address = response.logradouro;
+      this.detailedData.address.complement = response.complemento;
+      this.detailedData.address.district = response.bairro;
+      this.detailedData.address.city = response.localidade;
+      this.detailedData.address.state = response.uf;
     } else {
       return;
     }
@@ -159,40 +191,40 @@ export class CompanyFormComponent implements OnInit, OnDestroy {
   };
 
   onSetFinalData = (): void => {
-    this.finalData.company.idCompany = this.companyDetailedData.company.idCompany;
-    this.finalData.company.nickname = this.companyDetailedData.company.nickname.trim();
-    this.finalData.company.name = this.companyDetailedData.company.name.trim();
+    this.finalData.company.idCompany = this.detailedData.company.idCompany;
+    this.finalData.company.nickname = this.detailedData.company.nickname.trim();
+    this.finalData.company.name = this.detailedData.company.name.trim();
     this.finalData.company.cnpj = this.baseRegisterStore.onMaskNumericalField(
-      (this.companyDetailedData.company?.cnpj || '').trim()
+      (this.detailedData.company?.cnpj || '').trim()
     );
     this.finalData.company.ie = this.baseRegisterStore.onMaskNumericalField(
-      (this.companyDetailedData.company.ie || '').trim()
+      (this.detailedData.company.ie || '').trim()
     );
     this.finalData.company.im = this.baseRegisterStore.onMaskNumericalField(
-      (this.companyDetailedData.company.im || '').trim()
+      (this.detailedData.company.im || '').trim()
     );
-    this.finalData.address.idAddress = this.companyDetailedData.address.idAddress;
+    this.finalData.address.idAddress = this.detailedData.address.idAddress;
     this.finalData.address.postalCode = this.baseRegisterStore.onMaskNumericalField(
-      this.companyDetailedData.address.postalCode.trim()
+      this.detailedData.address.postalCode.trim()
     );
-    this.finalData.address.address = this.companyDetailedData.address.address.trim();
-    this.finalData.address.number = this.companyDetailedData.address.number?.trim();
-    this.finalData.address.complement = this.companyDetailedData.address.complement?.trim();
-    this.finalData.address.district = this.companyDetailedData.address.district?.trim();
-    this.finalData.address.city = this.companyDetailedData.address.city?.trim();
-    this.finalData.address.state = this.companyDetailedData.address.state?.trim();
-    this.finalData.employee.isDefault = this.companyDetailedData.employee.isDefault;
-    this.finalData.employee.idEmployee = this.companyDetailedData.employee.idEmployee;
-    this.finalData.employee.name = this.companyDetailedData.employee.name?.trim();
-    this.finalData.employee.department = this.companyDetailedData.employee.department?.trim();
-    this.finalData.employee.position = this.companyDetailedData.employee.position?.trim();
-    this.finalData.employee.photoUrl = this.companyDetailedData.employee.photoUrl?.trim();
-    this.finalData.employee.email = this.companyDetailedData.employee.email?.trim();
+    this.finalData.address.address = this.detailedData.address.address.trim();
+    this.finalData.address.number = this.detailedData.address.number?.trim();
+    this.finalData.address.complement = this.detailedData.address.complement?.trim();
+    this.finalData.address.district = this.detailedData.address.district?.trim();
+    this.finalData.address.city = this.detailedData.address.city?.trim();
+    this.finalData.address.state = this.detailedData.address.state?.trim();
+    this.finalData.employee.isDefault = this.detailedData.employee.isDefault;
+    this.finalData.employee.idEmployee = this.detailedData.employee.idEmployee;
+    this.finalData.employee.name = this.detailedData.employee.name?.trim();
+    this.finalData.employee.department = this.detailedData.employee.department?.trim();
+    this.finalData.employee.position = this.detailedData.employee.position?.trim();
+    this.finalData.employee.photoUrl = this.detailedData.employee.photoUrl?.trim();
+    this.finalData.employee.email = this.detailedData.employee.email?.trim();
     this.finalData.employee.deskphone = this.baseRegisterStore.onMaskNumericalField(
-      (this.companyDetailedData.employee.deskphone || '')?.trim()
+      (this.detailedData.employee.deskphone || '')?.trim()
     );
     this.finalData.employee.cellphone = this.baseRegisterStore.onMaskNumericalField(
-      (this.companyDetailedData.employee.cellphone || '')?.trim()
+      (this.detailedData.employee.cellphone || '')?.trim()
     );
   };
 
@@ -200,16 +232,26 @@ export class CompanyFormComponent implements OnInit, OnDestroy {
     try {
       this.modalStore.onLoading(true);
       this.onSetFinalData();
-      const response = await this.companyApi.saveCompany(this.finalData);
+      const response = await this.companyApi.onSave(this.finalData);
       if (response.status) {
         this.modalStore.onSetModalInfoType('success');
-        this.modalStore.onShowInfoModal('Cadastro de empresa', response.message, onActionOk);
+        this.modalStore.onShowInfoModal(
+          `Cadastro de ${this.currentViewTranslated}`,
+          response.message,
+          onActionOk
+        );
       } else {
-        this.modalStore.onShowInfoModal('Cadastro de empresa', response.error?.message || '');
+        this.modalStore.onShowInfoModal(
+          `Cadastro de ${this.currentViewTranslated}`,
+          response.error?.message || ''
+        );
       }
     } catch (e: unknown) {
       const error = e as HttpErrorResponse;
-      this.modalStore.onShowInfoModal('Cadastro de empresa', error.error.message);
+      this.modalStore.onShowInfoModal(
+        `Cadastro de ${this.currentViewTranslated}`,
+        error.error.message
+      );
     } finally {
       this.modalStore.onLoading(false);
     }

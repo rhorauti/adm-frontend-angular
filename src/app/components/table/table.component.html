@@ -4,28 +4,28 @@
       <input
         type="checkbox"
         name="table-checkbox"
-        (change)="companyStore.onHeaderCheckboxChecked($event)"
-        [(ngModel)]="companyStore.tableCheckbox().header" />
+        (change)="baseRegisterStore.onHeaderCheckboxChecked($event)"
+        [(ngModel)]="baseRegisterStore.tableCheckbox().header" />
       <mat-icon
-        (click)="companyStore.onShowDataList()"
+        (click)="onRefreshBtnClick()"
         content
         class="text-sm text-logo hover:bg-gray-200 hover:rounded-md cursor-pointer"
         >refresh</mat-icon
       >
     </div>
-    @for (header of companyStore.tableHeaders(); track $index) {
+    @for (header of baseRegisterStore.tableHeaders(); track $index) {
       @if (header.isHeaderActive) {
         <div class="table-td relative flex font-semibold items-center gap-1 overflow-x-auto">
           <p>{{ header.headerName }}</p>
           <div class="relative flex items-center">
             <mat-icon
-              (click)="companyStore.onFilter('sort', $index)"
+              (click)="baseRegisterStore.onClickOnFilterBtnThroughSort($index)"
               class="text-logo hover:bg-gray-200 hover:rounded-md text-sm font-bold cursor-pointer"
               >{{ header.icon }}</mat-icon
             >
-            @if (header.sort != 0) {
+            @if (header.sortDirection != 0) {
               <div class="absolute left-[1.2rem] -top-[0.1rem]">
-                <app-button-close (click)="companyStore.onSetSortFilterToDefault()" />
+                <app-button-close (click)="baseRegisterStore.onSetSortFilterToDefault()" />
               </div>
             }
           </div>
@@ -34,16 +34,11 @@
     }
   </div>
   <div class="flex flex-col sm:gap-0">
-    @for (
-      companyData of companyStore
-        .companiesData()
-        .slice(computedFirstRegister(), computedLastRegister());
-      track $index
-    ) {
+    @for (data of dataList().slice(computedFirstRegister(), computedLastRegister()); track $index) {
       <div
         tabindex="0"
-        (click)="companyStore.onRedirectToEditPage(companyData)"
-        (keydown)="companyStore.onRedirectToEditPage(companyData)"
+        (click)="onRowClick(data)"
+        (keydown)="onRowClick(data)"
         [style.--grid-layout]="gridTemplateColumns()"
         class="grid grid-cols-1 sm:gap-2 dynamic-grid mb-2 pb-2 sm:pb-0 sm:mb-0 border-b-[2.5px] border-solid border-gray-200 hover:bg-gray-200 cursor-pointer">
         <div
@@ -54,53 +49,53 @@
           <input
             type="checkbox"
             name="table-checkbox"
-            (change)="companyStore.onBodyCheckboxCheckChange($index, $event)"
-            [(ngModel)]="companyStore.tableCheckbox().body[$index]" />
+            (change)="baseRegisterStore.onBodyCheckboxCheckChange($index, $event)"
+            [(ngModel)]="baseRegisterStore.tableCheckbox().body[$index]" />
           <mat-icon
             #iconOptions
-            (keydown)="companyStore.onShowTableItemBox($event, $index)"
-            (click)="companyStore.onShowTableItemBox($event, $index)"
+            (keydown)="baseRegisterStore.onShowTableItemBox($event, $index)"
+            (click)="baseRegisterStore.onShowTableItemBox($event, $index)"
             class="border border-gray-800 rounded-full hover:text-white hover:bg-logo text-center text-sm cursor-pointer p-1 font-semibold"
             >more_horiz</mat-icon
           >
-          @if (companyStore.tableItemsBox()[$index]) {
+          @if (baseRegisterStore.tableItemsBox()[$index]) {
             <div
               #divBoxes
               tabindex="0"
               [ngClass]="{
-                'opacity-100': companyStore.tableItemsBox()[$index],
-                'opacity-0': !companyStore.tableItemsBox()[$index],
+                'opacity-100': baseRegisterStore.tableItemsBox()[$index],
+                'opacity-0': !baseRegisterStore.tableItemsBox()[$index],
                 'sm:-top-6': $last,
                 'top-1': $first,
               }"
               class="absolute flex flex-col gap-1 translate-x-[4.7rem] p-2 border border-gray-400 rounded-md bg-gray-100 text-xs transition-opacity duration-300 ease-in-out">
               <button
-                (click)="companyStore.onCloneRegister(companyData)"
+                (click)="onCloneBtnClick(data)"
                 class="hover:bg-gray-200 hover:rounded-md px-2">
                 Clonar
               </button>
               <button
-                (click)="onShowModalAskToDelete($event, companyData)"
+                (click)="onDeleteBtnClick(data)"
                 class="hover:bg-gray-200 hover:rounded-md px-2">
                 Excluir
               </button>
             </div>
           }
         </div>
-        @for (header of companyStore.tableHeaders(); track header.id) {
+        @for (header of baseRegisterStore.tableHeaders(); track header.id) {
           @if (header.isHeaderActive) {
             <div class="table-td overflow-hidden text-ellipsis">
-              @if (companyData[header.databaseField]) {
+              @if (data[header.databaseField]) {
                 <span class="block sm:hidden font-semibold">{{ header.headerName }}: </span>
               }
 
               <span>
                 @switch (header.databaseField) {
                   @case ('cnpj') {
-                    {{ companyData.cnpj || '' | mask: setMask('cnpj', $index) }}
+                    {{ formatCell(data, header.databaseField) }}
                   }
                   @default {
-                    {{ companyData[header.databaseField] }}
+                    {{ data[header.databaseField] }}
                   }
                 }
               </span>

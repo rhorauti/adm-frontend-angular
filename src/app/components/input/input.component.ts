@@ -26,7 +26,7 @@ type InputType = 'search' | 'text' | 'password' | 'number';
 })
 export class InputComponent implements OnInit, OnChanges {
   @Input({ required: true }) inputName!: InputName;
-  @Input({ required: true }) id!: string;
+  @Input() id?: string;
   @Input() inputValue = '';
   @Input() isDisabled = false;
   @Input() borderType: ValidationType = 'initial';

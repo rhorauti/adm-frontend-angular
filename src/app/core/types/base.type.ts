@@ -1,6 +1,6 @@
 import { IAddress } from '@core/interfaces/address.interface';
 import { IBaseRegisterStore } from '@core/interfaces/base.register.interface';
-import { ICompany, ICompanyRequest } from '@core/interfaces/company.interface';
+import { ICompany, ICompanyDetail } from '@core/interfaces/company.interface';
 import { IDepartment } from '@core/interfaces/department.interface';
 import { IEmployee } from '@core/interfaces/employee.interface';
 
@@ -9,7 +9,7 @@ export type StoreType = IBaseRegisterStore<DataType>;
 /**
  * Types of data used in register pages.
  */
-export type DataType = ICompany | ICompanyRequest | IAddress | IEmployee | IDepartment;
+export type DataType = ICompany | ICompanyDetail | IAddress | IEmployee | IDepartment;
 export type MergedDataType = ICompany & IAddress & IEmployee & IDepartment;
 
 /**

@@ -1,7 +1,7 @@
 export interface ITableHeader<T> {
   id: number;
   isHeaderActive: boolean;
-  sort: number;
+  sortDirection: number;
   icon: string;
   headerName: string;
   databaseField: keyof T;

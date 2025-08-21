@@ -1,3 +1,5 @@
+import { ICompany } from '@core/interfaces/company.interface';
+
 function safeEncryptU(str: string): string {
   try {
     // Converter caracteres especiais para formato seguro

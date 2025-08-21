@@ -1,18 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { TableDepartmentComponent } from './table-department.component';
+import { TextAreaComponent } from './text-area.component';
 
-describe('TableDepartmentComponent', () => {
-  let component: TableDepartmentComponent;
-  let fixture: ComponentFixture<TableDepartmentComponent>;
+describe('TextAreaComponent', () => {
+  let component: TextAreaComponent;
+  let fixture: ComponentFixture<TextAreaComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [TableDepartmentComponent]
+      imports: [TextAreaComponent]
     })
     .compileComponents();
 
-    fixture = TestBed.createComponent(TableDepartmentComponent);
+    fixture = TestBed.createComponent(TextAreaComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

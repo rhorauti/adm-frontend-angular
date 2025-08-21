@@ -1,13 +1,12 @@
 <div class="flex flex-col gap-4">
   <div class="flex items-center justify-between gap-4 overflow-auto">
-    <app-breadcrumb [items]="['Cadastro', 'Empresas', `${formTitle()}`]" />
+    <app-breadcrumb [items]="breadcrumbList" />
     <app-button-label
-      (click)="onBackToCompaniesPage()"
-      [id]="'company-form-back'"
+      (click)="onBackToPreviousPage()"
       [iconRightName]="'keyboard_arrow_left'"
       [label]="'Voltar'"
       [isColorLogo]="false"
-      (click)="onBackToCompaniesPage()" />
+      (click)="onBackToPreviousPage()" />
   </div>
 
   <!-- Dados cadastrais -->
@@ -17,57 +16,52 @@
     <div class="flex flex-col gap-2">
       <div class="flex flex-col md:flex-row gap-4">
         <div class="flex flex-col gap-1 grow">
-          <label class="font-medium text-sm" for="company-form-nickname"
+          <label #labelForm class="font-medium text-sm" for="default"
             >Nome Fantasia <span class="font-bold text-red-400">*</span></label
           >
           <app-input
-            [id]="'company-form-nickname'"
             [inputName]="'custom'"
-            [inputValue]="companyDetailedData.company.nickname"
+            [inputValue]="detailedData.company.nickname"
             [type]="'search'"
-            (inputValueEmitter)="companyDetailedData.company.nickname = $event" />
+            (inputValueEmitter)="detailedData.company.nickname = $event" />
         </div>
         <div class="flex flex-col gap-1 grow">
-          <label class="font-medium text-sm" for="company-form-name"
+          <label #labelForm class="font-medium text-sm" for="default"
             >Nome <span class="font-bold text-red-400">*</span></label
           >
           <app-input
-            [id]="'company-form-name'"
             [inputName]="'custom'"
-            [inputValue]="companyDetailedData.company.name"
+            [inputValue]="detailedData.company.name"
             [type]="'search'"
-            (inputValueEmitter)="companyDetailedData.company.name = $event" />
+            (inputValueEmitter)="detailedData.company.name = $event" />
         </div>
       </div>
       <div class="flex flex-col md:flex-row gap-4">
         <div class="flex flex-col gap-1 grow">
-          <label class="font-medium text-sm" for="company-form-cnpj"
+          <label #labelForm class="font-medium text-sm" for="default"
             >CNPJ ou CPF <span class="font-bold text-red-400">*</span></label
           >
           <app-input
-            [id]="'company-form-cnpj'"
             [inputName]="'cnpj'"
-            [inputValue]="companyDetailedData.company.cnpj || ''"
+            [inputValue]="detailedData.company.cnpj || ''"
             [type]="'search'"
-            (inputValueEmitter)="companyDetailedData.company.cnpj = $event" />
+            (inputValueEmitter)="detailedData.company.cnpj = $event" />
         </div>
         <div class="flex flex-col gap-1 grow">
-          <label class="font-medium text-sm" for="company-form-ie">Inscrição Estadual</label>
+          <label #labelForm class="font-medium text-sm" for="default">Inscrição Estadual</label>
           <app-input
-            [id]="'company-form-ie'"
             [inputName]="'custom'"
-            [inputValue]="companyDetailedData.company.ie || ''"
+            [inputValue]="detailedData.company.ie || ''"
             [type]="'search'"
-            (inputValueEmitter)="companyDetailedData.company.ie = $event" />
+            (inputValueEmitter)="detailedData.company.ie = $event" />
         </div>
         <div class="flex flex-col gap-1 grow">
-          <label class="font-medium text-sm" for="company-form-im">Inscrição Municipal</label>
+          <label #labelForm class="font-medium text-sm" for="default">Inscrição Municipal</label>
           <app-input
-            [id]="'company-form-im'"
             [inputName]="'custom'"
-            [inputValue]="companyDetailedData.company.im || ''"
+            [inputValue]="detailedData.company.im || ''"
             [type]="'search'"
-            (inputValueEmitter)="companyDetailedData.company.im = $event" />
+            (inputValueEmitter)="detailedData.company.im = $event" />
         </div>
       </div>
     </div>
@@ -80,67 +74,61 @@
     <div class="flex flex-col gap-2">
       <div class="flex flex-col md:flex-row gap-4">
         <div class="flex flex-col gap-1">
-          <label class="font-medium text-sm" for="company-form-nickname">CEP</label>
+          <label #labelForm class="font-medium text-sm" for="default">CEP</label>
           <app-input
-            [id]="'company-form-cep'"
             [inputName]="'postalCode'"
-            [inputValue]="companyDetailedData.address.postalCode"
+            [inputValue]="detailedData.address.postalCode"
             (changeEmitter)="onSetAddressViaCEPValues()"
-            (inputValueEmitter)="companyDetailedData.address.postalCode = $event" />
+            (inputValueEmitter)="detailedData.address.postalCode = $event" />
         </div>
         <div class="flex flex-col gap-1 grow">
-          <label class="font-medium text-sm" for="company-form-nickname">Logradouro</label>
+          <label #labelForm class="font-medium text-sm" for="default">Logradouro</label>
           <app-input
-            [id]="'company-form-address'"
             [inputName]="'custom'"
-            [inputValue]="companyDetailedData.address.address"
+            [inputValue]="detailedData.address.address"
             [type]="'search'"
-            (inputValueEmitter)="companyDetailedData.address.address = $event" />
+            (inputValueEmitter)="detailedData.address.address = $event" />
         </div>
         <div class="flex flex-col gap-1">
-          <label class="font-medium text-sm" for="company-form-name">Número</label>
+          <label #labelForm class="font-medium text-sm" for="default">Número</label>
           <app-input
-            [id]="'company-form-number'"
             [inputName]="'custom'"
-            [inputValue]="companyDetailedData.address.number || ''"
+            [inputValue]="detailedData.address.number || ''"
             [type]="'search'"
-            (inputValueEmitter)="companyDetailedData.address.number = $event" />
+            (inputValueEmitter)="detailedData.address.number = $event" />
         </div>
         <div class="flex flex-col gap-1 grow">
-          <label class="font-medium text-sm" for="company-form-cnpj">Complemento</label>
+          <label #labelForm class="font-medium text-sm" for="default">Complemento</label>
           <app-input
-            [id]="'company-form-complement'"
             [inputName]="'custom'"
-            [inputValue]="companyDetailedData.address.complement || ''"
+            [inputValue]="detailedData.address.complement || ''"
             [type]="'search'"
-            (inputValueEmitter)="companyDetailedData.address.complement = $event" />
+            (inputValueEmitter)="detailedData.address.complement = $event" />
         </div>
       </div>
       <div class="flex flex-col md:flex-row gap-4">
         <div class="flex flex-col gap-1 grow">
-          <label class="font-medium text-sm" for="company-form-ie">Bairro</label>
+          <label #labelForm class="font-medium text-sm" for="default">Bairro</label>
           <app-input
-            [id]="'company-form-district'"
             [inputName]="'custom'"
-            [inputValue]="companyDetailedData.address.district || ''"
+            [inputValue]="detailedData.address.district || ''"
             [type]="'search'"
-            (inputValueEmitter)="companyDetailedData.address.district = $event" />
+            (inputValueEmitter)="detailedData.address.district = $event" />
         </div>
         <div class="flex flex-col gap-1 grow">
-          <label class="font-medium text-sm" for="company-form-im">Cidade</label>
+          <label #labelForm class="font-medium text-sm" for="default">Cidade</label>
           <app-input
-            [id]="'company-form-city'"
             [inputName]="'custom'"
-            [inputValue]="companyDetailedData.address.city || ''"
+            [inputValue]="detailedData.address.city || ''"
             [type]="'search'"
-            (inputValueEmitter)="companyDetailedData.address.city = $event" />
+            (inputValueEmitter)="detailedData.address.city = $event" />
         </div>
         <div class="flex flex-col gap-1">
-          <label class="font-medium text-sm" for="company-form-im">UF</label>
+          <label class="font-medium text-sm" for="default">UF</label>
           <app-select
             [selectType]="'state'"
-            [selectValue]="companyDetailedData.address.state || 'Selecione um item'"
-            (selectValueEmitter)="companyDetailedData.address.state = $event" />
+            [selectValue]="detailedData.address.state || 'Selecione um item'"
+            (selectValueEmitter)="detailedData.address.state = $event" />
         </div>
       </div>
     </div>
@@ -153,58 +141,58 @@
     <div class="flex flex-col gap-2">
       <div class="flex flex-col md:flex-row gap-4">
         <div class="flex flex-col gap-1 grow">
-          <label class="font-medium text-sm" for="company-form-name">Nome</label>
+          <label #labelForm class="font-medium text-sm" for="default">Nome</label>
           <app-input
             [id]="'company-form-employee-name'"
             [inputName]="'custom'"
-            [inputValue]="companyDetailedData.employee.name"
+            [inputValue]="detailedData.employee.name"
             [type]="'search'"
-            (inputValueEmitter)="companyDetailedData.employee.name = $event" />
+            (inputValueEmitter)="detailedData.employee.name = $event" />
         </div>
         <div class="flex flex-col gap-1 grow">
-          <label class="font-medium text-sm" for="company-form-cnpj">Depto</label>
+          <label #labelForm class="font-medium text-sm" for="default">Depto</label>
           <app-input
             [id]="'company-form-employee-department'"
             [inputName]="'custom'"
-            [inputValue]="companyDetailedData.employee.department || ''"
+            [inputValue]="detailedData.employee.department || ''"
             [type]="'search'"
-            (inputValueEmitter)="companyDetailedData.employee.department = $event" />
+            (inputValueEmitter)="detailedData.employee.department = $event" />
         </div>
         <div class="flex flex-col gap-1 grow">
-          <label class="font-medium text-sm" for="company-form-cnpj">Cargo</label>
+          <label #labelForm class="font-medium text-sm" for="default">Cargo</label>
           <app-input
             [id]="'company-form-employee-position'"
             [inputName]="'custom'"
-            [inputValue]="companyDetailedData.employee.position || ''"
+            [inputValue]="detailedData.employee.position || ''"
             [type]="'search'"
-            (inputValueEmitter)="companyDetailedData.employee.position = $event" />
+            (inputValueEmitter)="detailedData.employee.position = $event" />
         </div>
       </div>
       <div class="flex flex-col md:flex-row gap-4">
         <div class="flex flex-col gap-1 grow">
-          <label class="font-medium text-sm" for="company-form-ie">E-mail</label>
+          <label #labelForm class="font-medium text-sm" for="default">E-mail</label>
           <app-input
             [id]="'company-form-employee-email'"
             [inputName]="'custom'"
-            [inputValue]="companyDetailedData.employee.email || ''"
+            [inputValue]="detailedData.employee.email || ''"
             [type]="'search'"
-            (inputValueEmitter)="companyDetailedData.employee.email = $event" />
+            (inputValueEmitter)="detailedData.employee.email = $event" />
         </div>
         <div class="flex flex-col gap-1 grow">
-          <label class="font-medium text-sm" for="company-form-im">Telefone fixo</label>
+          <label #labelForm class="font-medium text-sm" for="default">Telefone fixo</label>
           <app-input
             [id]="'company-form-employee-deskphone'"
             [inputName]="'phone'"
-            [inputValue]="companyDetailedData.employee.deskphone || ''"
-            (inputValueEmitter)="companyDetailedData.employee.deskphone = $event" />
+            [inputValue]="detailedData.employee.deskphone || ''"
+            (inputValueEmitter)="detailedData.employee.deskphone = $event" />
         </div>
         <div class="flex flex-col gap-1 grow">
-          <label class="font-medium text-sm" for="company-form-im">Celular</label>
+          <label #labelForm class="font-medium text-sm" for="default">Celular</label>
           <app-input
             [id]="'company-form-employee-mobile'"
             [inputName]="'phone'"
-            [inputValue]="companyDetailedData.employee.cellphone || ''"
-            (inputValueEmitter)="companyDetailedData.employee.cellphone = $event" />
+            [inputValue]="detailedData.employee.cellphone || ''"
+            (inputValueEmitter)="detailedData.employee.cellphone = $event" />
         </div>
       </div>
     </div>
@@ -212,13 +200,13 @@
 
   <footer class="flex gap-4 items-center justify-center md:justify-end">
     <app-button-label
-      (click)="onBackToCompaniesPage()"
+      (click)="onBackToPreviousPage()"
       [iconRightName]="'close'"
       [label]="'Cancelar'"
       [isColorLogo]="false"></app-button-label>
     <app-button-label
       [iconRightName]="'save'"
       [label]="'Salvar'"
-      (click)="onSaveRegister(onBackToCompaniesPage)"></app-button-label>
+      (click)="onSaveRegister(onBackToPreviousPage)"></app-button-label>
   </footer>
 </div>

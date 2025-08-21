@@ -1,5 +1,5 @@
 <div class="flex flex-col gap-5">
-  <app-breadcrumb [items]="['Cadastro', 'Empresas']" />
+  <app-breadcrumb [items]="breadcrumbList" />
   @if (baseRegisterStore.dataList().length > 0) {
     <div class="flex flex-col gap-5">
       <div class="top-button-layout gap-6 sm:gap-3 overflow-x-auto">
@@ -7,17 +7,13 @@
           <app-input
             [inputValue]="baseRegisterStore.inputSearchValue()"
             [id]="'input-filter'"
-            [placeholder]="'Id, Nome Fantasia, Razão Social'"
+            [placeholder]="inputSearchPlaceholder"
             [inputName]="'search'"
             (clickEmitter)="
-              baseRegisterStore.onSetInputSearchFilterItemToDefault([
-                'idCompany',
-                'nickname',
-                'name',
-              ])
+              baseRegisterStore.onSetInputSearchFilterItemToDefault(inputSearchFilterList)
             "
             (keyboardEmitter)="
-              baseRegisterStore.onKeyPressOnSearchInput($event, ['idCompany', 'nickname', 'name'])
+              baseRegisterStore.onKeyPressOnSearchInput($event, inputSearchFilterList)
             "
             (inputValueEmitter)="
               baseRegisterStore.onSetSlicePropsToNewValue('inputSearchValue', $event)
@@ -31,7 +27,7 @@
         </div>
         <div class="flex gap-3">
           <app-button-icon
-            (click)="modalStore.onRedirectPage('/companies/new')"
+            (click)="modalStore.onRedirectPage(`/${currentView}/new`)"
             [iconName]="'add'" />
           <app-button-delete
             (click)="onShowModalToDelete()"
@@ -82,9 +78,9 @@
           </button>
         </div>
       }
-      <app-table-company
+      <app-table
         (refreshBtnClickEmitter)="onShowDataList()"
-        (deleteBtnClickEmitter)="onShowModalToDelete()"
+        (deleteBtnClickEmitter)="onShowModalToDelete($event)"
         (rowClickEmitter)="onRedirectToEditPage($event)"
         (cloneBtnClickEmitter)="onCloneRegister($event)" />
       <app-pagination
@@ -104,10 +100,10 @@
       <p class="font-semibold">Nenhum registro encontrado</p>
       @if (!baseRegisterStore.isFilterResultZeroRegister()) {
         <app-button-label
-          (click)="modalStore.onRedirectPage('/companies/new')"
+          (click)="modalStore.onRedirectPage(`/${currentView}/new`)"
           [showLeftIcon]="true"
           [iconRightName]="'add'"
-          [label]="'Adicionar uma nova empresa'" />
+          [label]="'Adicionar um novo registro'" />
       } @else {
         @if (baseRegisterStore.inputSearchValue().length > 0) {
           <p>
@@ -152,7 +148,7 @@
       <div class="flex flex-col gap-2">
         <p class="font-medium">{{ tableHeader.headerName }}</p>
         <app-input
-          [id]="'filter-company-id'"
+          [id]="`filter-${ currentView }-${ tableHeader.databaseField }`"
           [inputName]="tableHeader.databaseField == 'cnpj' ? 'cnpj' : 'custom'"
           [inputValue]="baseRegisterStore.filterBox()[tableHeader.databaseField]"
           [type]="'search'"

@@ -8,7 +8,7 @@ import { RedirectComponent } from './pages/auth/redirect/redirect.component';
 import { CompanyHomeComponent } from '@pages/company/company-home/company-home.component';
 import { CompanyFormComponent } from '@pages/company/company-form/company-form.component';
 import { MaintenanceTaskFormComponent } from '@pages/maintenance/maintenance-task-form/maintenance-task-form.component';
-// import { DepartmentHomeComponent } from '@pages/department/department-home/department-home.component';
+import { DepartmentHomeComponent } from '@pages/department/department-home/department-home.component';
 import { DepartmentFormComponent } from '@pages/department/department-form/department-form.component';
 import { EmployeePositionHomeComponent } from '@pages/employee/employee-position-home/employee-position-home.component';
 import { EmployeePositionFormComponent } from '@pages/employee/employee-position-form/employee-position-form.component';
@@ -62,10 +62,10 @@ export const routes: Routes = [
     path: 'products/edit/:id',
     component: ProductFormComponent,
   },
-  // {
-  //   path: 'departments',
-  //   component: DepartmentHomeComponent,
-  // },
+  {
+    path: 'departments',
+    component: DepartmentHomeComponent,
+  },
   {
     path: 'departments/new',
     component: DepartmentFormComponent,

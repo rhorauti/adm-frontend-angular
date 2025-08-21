@@ -11,7 +11,7 @@ export interface ICompany {
   im?: string;
 }
 
-export interface ICompanyRequest {
+export interface ICompanyDetail {
   company: ICompany;
   address: IAddress;
   employee: IEmployee;
@@ -22,5 +22,5 @@ export interface ICompanyResponse extends IBaseResponse {
 }
 
 export interface ICompanyDetailedDataResponse extends IBaseResponse {
-  data: ICompanyRequest;
+  data: ICompanyDetail;
 }

@@ -8,10 +8,11 @@ import { IResponseAddress } from '@core/interfaces/address.interface';
 })
 export class AddressApi {
   private httpRequestService = inject(HttpRequestService);
+  private baseApiName = 'addresses';
 
   async onGetCompanyAddress(idCompany: number): Promise<IResponseAddress> {
     return await this.httpRequestService.sendHttpRequest(
-      `${environment.apiUrl}/addresses/${idCompany}`,
+      `${environment.apiUrl}/${this.baseApiName}/${idCompany}`,
       'GET'
     );
   }

@@ -18,29 +18,23 @@ import { ButtonCloseComponent } from '@components/button/button-close/button-clo
 import { RouterModule } from '@angular/router';
 import { ModalStore } from '@store/modal/modal.store';
 import { BaseRegisterStore } from '@store/base/base.register.store';
-import { ICompany } from '@core/interfaces/company.interface';
+import { DataType, KeyOfData } from '@core/types/base.type';
 
 @Component({
-  selector: 'app-table-company',
-  imports: [
-    CommonModule,
-    FormsModule,
-    NgxMaskPipe,
-    MatIconModule,
-    ButtonCloseComponent,
-    RouterModule,
-  ],
-  providers: [provideNgxMask()],
-  templateUrl: './table-company.component.html',
-  styleUrl: './table-company.component.scss',
+  selector: 'app-table',
+  imports: [CommonModule, FormsModule, MatIconModule, ButtonCloseComponent, RouterModule],
+  providers: [provideNgxMask(), NgxMaskPipe],
+  templateUrl: './table.component.html',
+  styleUrl: './table.component.scss',
 })
-export class TableCompanyComponent implements OnInit, OnDestroy {
+export class TableComponent implements OnInit, OnDestroy {
   @ViewChildren('divBoxes') private divBoxes!: QueryList<ElementRef>;
   @ViewChildren('iconOptions', { read: ElementRef }) private iconOptions!: QueryList<ElementRef>;
   private document = inject(DOCUMENT);
   readonly baseRegisterStore = inject(BaseRegisterStore);
   readonly modalStore = inject(ModalStore);
-  companiesData = computed(() => this.baseRegisterStore.dataList() as ICompany[]);
+  readonly mask = inject(NgxMaskPipe);
+  dataList = computed<DataType[]>(() => this.baseRegisterStore.dataList());
 
   ngOnInit() {
     this.baseRegisterStore.onCheckTableCheckboxStatus(this.baseRegisterStore.tableCheckbox().body);
@@ -96,29 +90,32 @@ export class TableCompanyComponent implements OnInit, OnDestroy {
     );
   });
 
-  setMask(type: string, idx?: number): string {
-    if (type == 'cnpj') {
-      if (((this.baseRegisterStore.dataList()[idx || 0] as ICompany)?.cnpj || '')?.length > 11) {
-        return '00.000.000/0000-00';
-      } else {
-        return '000.000.000-00';
+  getCnpj(row: DataType): string {
+    return (row as any)?.cnpj ?? (row as any)?.company?.cnpj ?? '';
+  }
+
+  setCnpjMask(cnpj: string): string {
+    return (cnpj?.length ?? 0) > 11 ? '00.000.000/0000-00' : '000.000.000-00';
+  }
+
+  formatCell(row: DataType, key: KeyOfData): string {
+    const value = (row as any)?.[key];
+
+    switch (key) {
+      case 'cnpj': {
+        const raw = this.getCnpj(row);
+        const expr = this.setCnpjMask(raw);
+        return this.mask.transform(raw, expr) ?? '';
       }
-    } else {
-      return '';
+      default:
+        return value ?? '';
     }
   }
 
-  onRedirectToEditPage = (companyData: ICompany): void => {
-    this.baseRegisterStore.onSetSlicePropsToNewValue('data', companyData);
-    this.modalStore.onRedirectPage(
-      `/companies/edit/${(this.baseRegisterStore.data() as ICompany).idCompany}`
-    );
-  };
-
   @Output() rowClickEmitter = new EventEmitter();
 
-  onRowClick(companyData: ICompany): void {
-    this.rowClickEmitter.emit(companyData);
+  onRowClick(data: DataType): void {
+    this.rowClickEmitter.emit(data);
   }
 
   @Output() refreshBtnClickEmitter = new EventEmitter();
@@ -129,13 +126,13 @@ export class TableCompanyComponent implements OnInit, OnDestroy {
 
   @Output() deleteBtnClickEmitter = new EventEmitter();
 
-  onDeleteBtnClick(): void {
-    this.deleteBtnClickEmitter.emit();
+  onDeleteBtnClick(data: DataType): void {
+    this.deleteBtnClickEmitter.emit(data);
   }
 
   @Output() cloneBtnClickEmitter = new EventEmitter();
 
-  onCloneBtnClick(companyData: ICompany): void {
-    this.cloneBtnClickEmitter.emit(companyData);
+  onCloneBtnClick(data: DataType): void {
+    this.cloneBtnClickEmitter.emit(data);
   }
 }

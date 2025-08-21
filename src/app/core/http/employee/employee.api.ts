@@ -8,10 +8,11 @@ import { environment } from '@environments/environment';
 })
 export class EmployeeApi {
   private httpRequestService = inject(HttpRequestService);
+  private baseApiName = 'employees';
 
   async onGetCompanyEmployee(idCompany: number): Promise<IResponseEmployee> {
     return await this.httpRequestService.sendHttpRequest(
-      `${environment.apiUrl}/employees/${idCompany}`,
+      `${environment.apiUrl}/${this.baseApiName}/${idCompany}`,
       'GET'
     );
   }

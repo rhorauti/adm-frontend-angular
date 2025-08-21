@@ -13,32 +13,33 @@ import { IBaseResponse } from '@core/interfaces/response.interface';
 })
 export class DepartmentApi {
   private httpRequestService = inject(HttpRequestService);
+  private baseApiName = 'departments';
 
-  async onGetDepartmentList(): Promise<IResponseDepartmentList> {
+  async onGetDataList(): Promise<IResponseDepartmentList> {
     return await this.httpRequestService.sendHttpRequest(
-      `${environment.apiUrl}/departments`,
+      `${environment.apiUrl}/${this.baseApiName}`,
       'GET'
     );
   }
 
-  async onGetDepartment(idEmployee: number): Promise<IResponseDepartment> {
+  async onGetDataInfo(idEmployee: number): Promise<IResponseDepartment> {
     return await this.httpRequestService.sendHttpRequest(
-      `${environment.apiUrl}/departments/${idEmployee}`,
+      `${environment.apiUrl}/${this.baseApiName}/${idEmployee}`,
       'GET'
     );
   }
 
-  async onSaveDepartment(departmentData: IDepartment): Promise<IResponseDepartment> {
+  async onSave(data: IDepartment): Promise<IResponseDepartment> {
     return await this.httpRequestService.sendHttpRequest(
-      `${environment.apiUrl}/departments`,
+      `${environment.apiUrl}/${this.baseApiName}`,
       'POST',
-      departmentData
+      data
     );
   }
 
-  async deleteDepartment(idDepartment: number): Promise<IBaseResponse> {
+  async onDelete(id: number): Promise<IBaseResponse> {
     return await this.httpRequestService.sendHttpRequest(
-      `${environment.apiUrl}/departments/${idDepartment}`,
+      `${environment.apiUrl}/${this.baseApiName}/${id}`,
       'DELETE'
     );
   }

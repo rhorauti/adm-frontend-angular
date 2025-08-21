@@ -5,6 +5,7 @@ import { ITableCheckbox, ITableHeader } from './table.interface';
 export interface IDepartment {
   idDepartment: number;
   name: string;
+  comment: string;
 }
 
 export interface IResponseDepartment extends IBaseResponse {

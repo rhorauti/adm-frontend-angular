@@ -29,7 +29,7 @@ export const CompanyStore = signalStore(
           {
             id: 0,
             isHeaderActive: true,
-            sort: 0,
+            sortDirection: 0,
             icon: defaultTableHeaderIcon,
             headerName: 'Id',
             databaseField: 'idCompany',
@@ -37,7 +37,7 @@ export const CompanyStore = signalStore(
           {
             id: 1,
             isHeaderActive: true,
-            sort: 0,
+            sortDirection: 0,
             icon: defaultTableHeaderIcon,
             headerName: 'Nome Fantasia',
             databaseField: 'nickname',
@@ -45,7 +45,7 @@ export const CompanyStore = signalStore(
           {
             id: 2,
             isHeaderActive: true,
-            sort: 0,
+            sortDirection: 0,
             icon: defaultTableHeaderIcon,
             headerName: 'Razão Social',
             databaseField: 'name',
@@ -53,7 +53,7 @@ export const CompanyStore = signalStore(
           {
             id: 3,
             isHeaderActive: true,
-            sort: 0,
+            sortDirection: 0,
             icon: defaultTableHeaderIcon,
             headerName: 'CNPJ/CPF',
             databaseField: 'cnpj',
@@ -61,7 +61,7 @@ export const CompanyStore = signalStore(
           {
             id: 4,
             isHeaderActive: false,
-            sort: 0,
+            sortDirection: 0,
             icon: defaultTableHeaderIcon,
             headerName: 'Inscr. Estadual',
             databaseField: 'ie',
@@ -69,7 +69,7 @@ export const CompanyStore = signalStore(
           {
             id: 5,
             isHeaderActive: false,
-            sort: 0,
+            sortDirection: 0,
             icon: defaultTableHeaderIcon,
             headerName: 'Inscr. Municipal',
             databaseField: 'im',
@@ -729,7 +729,7 @@ export const CompanyStore = signalStore(
     const onShowDataList = async (): Promise<void> => {
       try {
         modalStore.onLoading(true);
-        const response = await companyApi.getCompaniesList();
+        const response = await companyApi.onGetDataList();
         patchState(store, {
           initialTableData: response.data,
         });
@@ -810,7 +810,7 @@ export const CompanyStore = signalStore(
       try {
         modalStore.onLoading(true);
         onSetFinalData();
-        const response = await companyApi.saveCompany(finalData);
+        const response = await companyApi.onSave(finalData);
         if (response.status) {
           modalStore.onSetModalInfoType('success');
           modalStore.onShowInfoModal('Cadastro de empresa', response.message, onActionOk);
@@ -831,7 +831,7 @@ export const CompanyStore = signalStore(
     ): Promise<void> => {
       try {
         modalStore.onLoading(true);
-        const response = await companyApi.deleteCompany(idCompany);
+        const response = await companyApi.onDelete(idCompany);
         if (response.status) {
           onShowDataList();
           modalStore.onSetModalInfoType('success');
