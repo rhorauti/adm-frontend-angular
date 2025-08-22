@@ -1,4 +1,4 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { AfterViewInit, Component, inject, OnDestroy, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { TableComponent } from '@components/table/table.component';
 import { BreadcrumbComponent } from '@components/breadcrumb/breadcrumb.component';
@@ -88,16 +88,16 @@ export class DepartmentHomeComponent implements OnInit {
     this.baseRegisterStore.onSetSlicePropsToNewValue('tableHeaders', headers);
   }
 
-  onRedirectToEditPage = (departmentData: IDepartment): void => {
-    this.baseRegisterStore.onSetSlicePropsToNewValue('data', departmentData);
+  onRedirectToEditPage = (data: IDepartment): void => {
+    this.baseRegisterStore.onSetSlicePropsToNewValue('data', data);
     this.modalStore.onRedirectPage(
       `/${this.currentView}/edit/${(this.baseRegisterStore.data() as IDepartment).idDepartment}`
     );
   };
 
   onCloneRegister = async (data: IDepartment): Promise<void> => {
+    this.baseRegisterStore.onSetSlicePropsToNewValue('isCopiedData', true);
     this.baseRegisterStore.onSetSlicePropsToNewValue('data', data);
-    this.baseRegisterStore.onSetSlicePropsToNewValue('data', { idDepartment: 0 });
     this.modalStore.onRedirectPage(`/${this.currentView}/new`);
   };
 

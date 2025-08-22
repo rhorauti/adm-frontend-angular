@@ -4,7 +4,6 @@ import {
   AfterViewInit,
   ChangeDetectorRef,
   Component,
-  computed,
   ElementRef,
   inject,
   OnDestroy,
@@ -52,33 +51,41 @@ export class DepartmentFormComponent implements OnInit, OnDestroy, AfterViewInit
   currentView = 'departments';
   currentViewTranslated = 'Departamentos'.slice(0, -1);
   subscription: Subscription | undefined = undefined;
+  breadcrumbList: string[] = [];
   id = 0;
-
-  formTitle = computed(() => {
-    if (this.id == 0) {
-      return 'Novo Registro';
-    } else {
-      return this.name;
-    }
-  });
-
-  readonly breadcrumbList = ['Cadastro', this.currentViewTranslated, `${this.formTitle()}`];
 
   data = {
     idDepartment: 0,
     name: '',
+    comment: '',
   } as IDepartment;
 
-  name = this.data.name;
-
-  ngOnInit(): void {
+  async ngOnInit(): Promise<void> {
     this.subscription = this.activatedRoute.paramMap.subscribe(params => {
       this.id = Number(params.get('id')) || 0;
     });
     if (this.id != 0) {
-      this.onGetDataDetails();
+      await this.onGetDataDetails();
+    } else {
+      if (this.baseRegisterStore.isCopiedData()) {
+        this.id = (this.baseRegisterStore.data() as IDepartment).idDepartment;
+        await this.onGetDataDetails();
+        this.id = 0;
+        this.data.idDepartment = 0;
+        this.baseRegisterStore.onSetSlicePropsToNewValue('isCopiedData', false);
+      }
     }
+    this.defineTitle();
+    this.breadcrumbList = ['Cadastro', this.currentViewTranslated, `${this.defineTitle()}`];
   }
+
+  defineTitle = (): string => {
+    if (this.id == 0) {
+      return 'Novo Registro';
+    } else {
+      return this.data.name;
+    }
+  };
 
   ngAfterViewInit(): void {
     this.onDefineInputId();
@@ -95,12 +102,13 @@ export class DepartmentFormComponent implements OnInit, OnDestroy, AfterViewInit
   onGetDataDetails = async (): Promise<void> => {
     try {
       this.modalStore.onLoading(true);
-      const dataResponse = await this.departmentApi.onGetDataInfo(this.id);
-      this.data = dataResponse.data as IDepartment;
+      const response = await this.departmentApi.onGetDataInfo(this.id);
+      const data = response.data as IDepartment;
+      this.data = data;
     } catch (e: unknown) {
       const error = e as HttpErrorResponse;
       this.modalStore.onShowInfoModal(
-        `Cadastro de ${this.currentViewTranslated.slice(0, -1)}`,
+        `Cadastro de ${this.currentViewTranslated}`,
         error.error.message
       );
     } finally {

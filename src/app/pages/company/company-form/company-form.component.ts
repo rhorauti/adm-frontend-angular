@@ -101,6 +101,7 @@ export class CompanyFormComponent implements OnInit, OnDestroy, AfterViewInit {
         this.id = (this.baseRegisterStore.data() as ICompany).idCompany;
         await this.onGetDataDetails();
         this.id = 0;
+        this.detailedData.company.idCompany = 0;
         this.baseRegisterStore.onSetSlicePropsToNewValue('isCopiedData', false);
       }
     }

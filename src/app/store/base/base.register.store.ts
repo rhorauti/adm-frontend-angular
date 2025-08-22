@@ -161,7 +161,6 @@ export const BaseRegisterStore = signalStore(
           return { ...header, sortDirection: 0 };
         }),
       });
-      console.log('onSetTableHeaderSortMethod', store.tableHeaders());
     };
 
     const onSetTableDataSortDirectionToDefault = <T extends keyof DataType>(): void => {
@@ -308,7 +307,6 @@ export const BaseRegisterStore = signalStore(
       const filterData = onFilterThroughSort(idx || 0);
       onSetSlicePropsToNewValue('dataList', filterData);
       onSetPaginationToDefault();
-      console.log('tableHeaders', store.tableHeaders());
     };
 
     const onFilterThroughSearchInput = <K extends keyof DataType>(
