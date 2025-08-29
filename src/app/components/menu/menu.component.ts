@@ -31,7 +31,7 @@ export class MenuComponent {
   public links: ILink[] = [
     {
       idLink: 0,
-      name: 'Cadastros',
+      name: 'Suprimentos',
       isColapsed: false,
       sublinks: [
         {
@@ -48,93 +48,105 @@ export class MenuComponent {
         },
         {
           idSublink: 2,
-          name: 'Funcionários',
+          name: 'Pedidos de Compra',
 
-          routerLink: '/employees',
+          routerLink: '/purchasing-orders',
         },
+      ],
+    },
+    {
+      idLink: 1,
+      name: 'RH',
+      isColapsed: false,
+      sublinks: [
         {
-          idSublink: 3,
+          idSublink: 0,
           name: 'Departamentos',
 
           routerLink: '/departments',
         },
         {
-          idSublink: 4,
+          idSublink: 1,
           name: 'Cargos',
 
           routerLink: '/employee-positions',
         },
-      ],
-    },
-    {
-      idLink: 0,
-      name: 'Suprimentos',
-      isColapsed: false,
-      sublinks: [
         {
-          idSublink: 0,
-          name: 'Estoque',
-          routerLink: '/stock',
-        },
-      ],
-    },
-    {
-      idLink: 1,
-      name: 'Produção',
-      isColapsed: false,
-      sublinks: [
-        {
-          idSublink: 0,
-          name: 'Planejamento',
+          idSublink: 2,
+          name: 'Funcionários',
 
-          routerLink: 'stock',
-        },
-      ],
-    },
-    {
-      idLink: 1,
-      name: 'Manutenção',
-      isColapsed: false,
-      sublinks: [
-        {
-          idSublink: 0,
-          name: 'Atividades',
-          routerLink: '/maintenance/tasks',
-        },
-        {
-          idSublink: 0,
-          name: 'Relatório diário',
-          routerLink: '/maintenance/daily-report',
-        },
-        {
-          idSublink: 0,
-          name: 'Relatório Mensal',
-          routerLink: '/maintenance/monthly-report',
+          routerLink: '/employees',
         },
       ],
     },
     {
       idLink: 2,
-      name: 'Financeiro',
+      name: 'Produção',
       isColapsed: false,
       sublinks: [
         {
           idSublink: 0,
-          name: 'Clientes',
+          name: 'Linha de produção',
 
-          routerLink: 'customers',
+          routerLink: '/production-lines',
+        },
+        {
+          idSublink: 0,
+          name: 'Projetos',
+
+          routerLink: '/projects',
+        },
+      ],
+    },
+    {
+      idLink: 3,
+      name: 'Manutenção',
+      isColapsed: false,
+      sublinks: [
+        {
+          idSublink: 0,
+          name: 'Tipo de atividade',
+          routerLink: '/task-types/2',
         },
         {
           idSublink: 1,
-          name: 'Fornecedores',
+          name: 'Atividades',
+          routerLink: '/tasks',
+        },
+        {
+          idSublink: 2,
+          name: 'Relatório diário',
+          routerLink: '/daily-reports',
+        },
+        {
+          idSublink: 3,
+          name: 'Relatório Mensal',
+          routerLink: '/monthly-reports',
+        },
+      ],
+    },
+    {
+      idLink: 4,
+      name: 'PCP',
+      isColapsed: false,
+      sublinks: [
+        {
+          idSublink: 0,
+          name: 'Estoque',
 
-          routerLink: '/suppliers',
+          routerLink: '',
         },
         {
           idSublink: 1,
-          name: 'Sitio Nakano',
+          name: 'Planejamento de Produção',
 
-          routerLink: '/sitio-nakano',
+          routerLink: '',
+        },
+        {
+          idSublink: 2,
+          name: 'Planejamento de peças',
+
+          routerLink: '',
         },
       ],
     },

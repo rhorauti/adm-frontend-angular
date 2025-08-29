@@ -1,12 +1,12 @@
 import { inject, Injectable } from '@angular/core';
 import { HttpRequestService } from '../http-request.service';
 import { environment } from '@environments/environment';
+import { IBaseResponse } from '@core/interfaces/response.interface';
 import {
   IDepartment,
   IResponseDepartment,
   IResponseDepartmentList,
 } from '@core/interfaces/department.interface';
-import { IBaseResponse } from '@core/interfaces/response.interface';
 
 @Injectable({
   providedIn: 'root',
@@ -22,9 +22,9 @@ export class DepartmentApi {
     );
   }
 
-  async onGetDataInfo(idEmployee: number): Promise<IResponseDepartment> {
+  async onGetData(id: number): Promise<IResponseDepartment> {
     return await this.httpRequestService.sendHttpRequest(
-      `${environment.apiUrl}/${this.baseApiName}/${idEmployee}`,
+      `${environment.apiUrl}/${this.baseApiName}/${id}`,
       'GET'
     );
   }

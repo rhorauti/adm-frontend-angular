@@ -18,7 +18,7 @@ import { ButtonCloseComponent } from '@components/button/button-close/button-clo
 import { RouterModule } from '@angular/router';
 import { ModalStore } from '@store/modal/modal.store';
 import { BaseRegisterStore } from '@store/base/base.register.store';
-import { DataType, KeyOfData } from '@core/types/base.type';
+import { BaseType, KeyOfData } from '@core/types/base.type';
 
 @Component({
   selector: 'app-table',
@@ -34,7 +34,7 @@ export class TableComponent implements OnInit, OnDestroy {
   readonly baseRegisterStore = inject(BaseRegisterStore);
   readonly modalStore = inject(ModalStore);
   readonly mask = inject(NgxMaskPipe);
-  dataList = computed<DataType[]>(() => this.baseRegisterStore.dataList());
+  dataList = computed<BaseType[]>(() => this.baseRegisterStore.dataList());
 
   ngOnInit() {
     this.baseRegisterStore.onCheckTableCheckboxStatus(this.baseRegisterStore.tableCheckbox().body);
@@ -90,7 +90,7 @@ export class TableComponent implements OnInit, OnDestroy {
     );
   });
 
-  getCnpj(row: DataType): string {
+  getCnpj(row: BaseType): string {
     return (row as any)?.cnpj ?? (row as any)?.company?.cnpj ?? '';
   }
 
@@ -98,7 +98,7 @@ export class TableComponent implements OnInit, OnDestroy {
     return (cnpj?.length ?? 0) > 11 ? '00.000.000/0000-00' : '000.000.000-00';
   }
 
-  formatCell(row: DataType, key: KeyOfData): string {
+  formatCell(row: BaseType, key: KeyOfData): string {
     const value = (row as any)?.[key];
 
     switch (key) {
@@ -114,7 +114,7 @@ export class TableComponent implements OnInit, OnDestroy {
 
   @Output() rowClickEmitter = new EventEmitter();
 
-  onRowClick(data: DataType): void {
+  onRowClick(data: BaseType): void {
     this.rowClickEmitter.emit(data);
   }
 
@@ -126,13 +126,13 @@ export class TableComponent implements OnInit, OnDestroy {
 
   @Output() deleteBtnClickEmitter = new EventEmitter();
 
-  onDeleteBtnClick(data: DataType): void {
+  onDeleteBtnClick(data: BaseType): void {
     this.deleteBtnClickEmitter.emit(data);
   }
 
   @Output() cloneBtnClickEmitter = new EventEmitter();
 
-  onCloneBtnClick(data: DataType): void {
+  onCloneBtnClick(data: BaseType): void {
     this.cloneBtnClickEmitter.emit(data);
   }
 }

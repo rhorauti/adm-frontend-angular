@@ -4,8 +4,8 @@ import { environment } from '@environments/environment';
 import { IBaseResponse } from '@core/interfaces/response.interface';
 import {
   IEmployeePosition,
-  IResponseEmployeePosition,
-  IResponseEmployeePositionList,
+  IEmployeePositionListResponse,
+  IEmployeePositionResponse,
 } from '@core/interfaces/employee.interface';
 
 @Injectable({
@@ -15,21 +15,21 @@ export class EmployeePositionApi {
   private httpRequestService = inject(HttpRequestService);
   private baseApiName = 'employee-positions';
 
-  async onGetDataList(): Promise<IResponseEmployeePositionList> {
+  async onGetDataList(): Promise<IEmployeePositionListResponse> {
     return await this.httpRequestService.sendHttpRequest(
       `${environment.apiUrl}/${this.baseApiName}`,
       'GET'
     );
   }
 
-  async onGetDataInfo(idEmployee: number): Promise<IResponseEmployeePosition> {
+  async onGetData(id: number): Promise<IEmployeePositionResponse> {
     return await this.httpRequestService.sendHttpRequest(
-      `${environment.apiUrl}/${this.baseApiName}/${idEmployee}`,
+      `${environment.apiUrl}/${this.baseApiName}/${id}`,
       'GET'
     );
   }
 
-  async onSave(data: IEmployeePosition): Promise<IResponseEmployeePosition> {
+  async onSave(data: IEmployeePosition): Promise<IEmployeePositionResponse> {
     return await this.httpRequestService.sendHttpRequest(
       `${environment.apiUrl}/${this.baseApiName}`,
       'POST',

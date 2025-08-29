@@ -4,10 +4,8 @@ import { SignupComponent } from './pages/auth/signup/signup.component';
 import { ResetPasswordComponent } from './pages/auth/reset-password/reset-password.component';
 import { NewPasswordComponent } from './pages/auth/new-password/new-password.component';
 import { RedirectComponent } from './pages/auth/redirect/redirect.component';
-// import { MaintenanceTaskHomeComponent } from '@pages/maintenance/maintenance-task-home/maintenance-task-home.component';
 import { CompanyHomeComponent } from '@pages/company/company-home/company-home.component';
 import { CompanyFormComponent } from '@pages/company/company-form/company-form.component';
-import { MaintenanceTaskFormComponent } from '@pages/maintenance/maintenance-task-form/maintenance-task-form.component';
 import { DepartmentHomeComponent } from '@pages/department/department-home/department-home.component';
 import { DepartmentFormComponent } from '@pages/department/department-form/department-form.component';
 import { EmployeePositionHomeComponent } from '@pages/employee/employee-position-home/employee-position-home.component';
@@ -16,6 +14,8 @@ import { EmployeeHomeComponent } from '@pages/employee/employee-home/employee-ho
 import { EmployeeFormComponent } from '@pages/employee/employee-form/employee-form.component';
 import { ProductHomeComponent } from '@pages/product/product-home/product-home.component';
 import { ProductFormComponent } from '@pages/product/product-form/product-form.component';
+import { TaskTypeHomeComponent } from '@pages/task/task-type-home/task-type-home.component';
+import { TaskTypeFormComponent } from '@pages/task/task-type-form/task-type-form.component';
 
 export const routes: Routes = [
   {
@@ -98,17 +98,17 @@ export const routes: Routes = [
     path: 'employee-positions/edit/:id',
     component: EmployeePositionFormComponent,
   },
-  // {
-  //   path: 'maintenance/tasks',
-  //   component: MaintenanceTaskHomeComponent,
-  // },
   {
-    path: 'maintenance/tasks/new',
-    component: MaintenanceTaskFormComponent,
+    path: 'task-types/:idDepartment',
+    component: TaskTypeHomeComponent,
   },
   {
-    path: 'maintenance/tasks/edit/:id',
-    component: MaintenanceTaskFormComponent,
+    path: 'task-types/:idDepartment/new',
+    component: TaskTypeFormComponent,
+  },
+  {
+    path: 'task-types/:idDepartment/edit/:idTask',
+    component: TaskTypeFormComponent,
   },
   {
     path: '**',

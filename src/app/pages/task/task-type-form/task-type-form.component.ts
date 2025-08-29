@@ -17,16 +17,16 @@ import { BreadcrumbComponent } from '@components/breadcrumb/breadcrumb.component
 import { ButtonLabelComponent } from '@components/button/button-label/button-label.component';
 import { InputComponent } from '@components/input/input.component';
 import { TextAreaComponent } from '@components/text-area/text-area.component';
-import { EmployeePositionApi } from '@core/http/employee/employee-position.api';
-import { IEmployeePosition } from '@core/interfaces/employee.interface';
+import { TaskTypeApi } from '@core/http/task-type/task-type.api';
 import { ActionCallback } from '@core/interfaces/modal.interface';
+import { ITaskType } from '@core/interfaces/task.interface';
 import { BaseApiName } from '@core/types/base.type';
 import { BaseRegisterStore } from '@store/base/base.register.store';
 import { ModalStore } from '@store/modal/modal.store';
 import { Subscription } from 'rxjs';
 
 @Component({
-  selector: 'app-employee-position-form',
+  selector: 'app-task-type-form',
   imports: [
     BreadcrumbComponent,
     CommonModule,
@@ -35,13 +35,13 @@ import { Subscription } from 'rxjs';
     InputComponent,
     TextAreaComponent,
   ],
-  templateUrl: './employee-position-form.component.html',
-  styleUrl: './employee-position-form.component.scss',
+  templateUrl: './task-type-form.component.html',
+  styleUrl: './task-type-form.component.scss',
 })
-export class EmployeePositionFormComponent implements OnInit, OnDestroy, AfterViewInit {
+export class TaskTypeFormComponent implements OnInit, OnDestroy, AfterViewInit {
   @ViewChildren(InputComponent) inputs!: QueryList<InputComponent>;
   @ViewChildren('labelForm') private labels!: QueryList<ElementRef>;
-  readonly employeePositionApi = inject(EmployeePositionApi);
+  readonly taskApi = inject(TaskTypeApi);
   readonly baseRegisterStore = inject(BaseRegisterStore);
   private activatedRoute = inject(ActivatedRoute);
   readonly router = inject(Router);
@@ -49,27 +49,32 @@ export class EmployeePositionFormComponent implements OnInit, OnDestroy, AfterVi
 
   private cdr = inject(ChangeDetectorRef);
 
-  currentView: BaseApiName = 'employee-positions';
-  currentViewTranslated = 'Cargos'.slice(0, -1);
+  currentView: BaseApiName = 'task-types';
+  currentViewTranslated = 'Tipos de atividades';
+  currentViewTranslatedSingular = this.currentViewTranslated.slice(0, -1);
   subscription: Subscription | undefined = undefined;
   breadcrumbList: string[] = [];
   id = 0;
-
   data = {
-    idEmployeePosition: 0,
+    idTaskType: 0,
     name: '',
     comment: '',
-  } as IEmployeePosition;
+    department: {
+      idDepartment: 0,
+      name: '',
+      comment: '',
+    },
+  } as ITaskType;
 
   async ngOnInit(): Promise<void> {
     this.subscription = this.activatedRoute.paramMap.subscribe(params => {
-      this.id = Number(params.get('id')) || 0;
+      this.id = Number(params.get('idTaskType')) || 0;
     });
-    this.data = this.baseRegisterStore.data() as IEmployeePosition;
+    this.data = this.baseRegisterStore.data() as ITaskType;
     if (this.baseRegisterStore.isCopiedData()) {
-      this.data = this.baseRegisterStore.data() as IEmployeePosition;
+      this.data = this.baseRegisterStore.data() as ITaskType;
       this.id = 0;
-      this.data.idEmployeePosition = 0;
+      this.data.idTaskType = 0;
       this.baseRegisterStore.onSetSlicePropsToNewValue('isCopiedData', false);
     }
     this.defineTitle();
@@ -97,30 +102,30 @@ export class EmployeePositionFormComponent implements OnInit, OnDestroy, AfterVi
   };
 
   onBackToPreviousPage = (): void => {
-    this.modalStore.onRedirectPage(`/${this.currentView}`);
+    this.modalStore.onRedirectPage(`/${this.currentView}/${this.id}`);
   };
 
   onSaveRegister = async (onActionOk?: ActionCallback): Promise<void> => {
     try {
       this.modalStore.onLoading(true);
-      const response = await this.employeePositionApi.onSave(this.data);
+      const response = await this.taskApi.onSave(this.currentView, this.data);
       if (response.status) {
         this.modalStore.onSetModalInfoType('success');
         this.modalStore.onShowInfoModal(
-          `Cadastro de ${this.currentViewTranslated}`,
+          `Cadastro de ${this.currentViewTranslatedSingular}`,
           response.message,
           onActionOk
         );
       } else {
         this.modalStore.onShowInfoModal(
-          `Cadastro de ${this.currentViewTranslated}`,
+          `Cadastro de ${this.currentViewTranslatedSingular}`,
           response.error?.message || ''
         );
       }
     } catch (e: unknown) {
       const error = e as HttpErrorResponse;
       this.modalStore.onShowInfoModal(
-        `Cadastro de ${this.currentViewTranslated}`,
+        `Cadastro de ${this.currentViewTranslatedSingular}`,
         error.error.message
       );
     } finally {

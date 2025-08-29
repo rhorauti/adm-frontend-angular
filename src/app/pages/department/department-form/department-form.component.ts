@@ -20,6 +20,7 @@ import { TextAreaComponent } from '@components/text-area/text-area.component';
 import { DepartmentApi } from '@core/http/department/department.api';
 import { IDepartment } from '@core/interfaces/department.interface';
 import { ActionCallback } from '@core/interfaces/modal.interface';
+import { BaseApiName } from '@core/types/base.type';
 import { BaseRegisterStore } from '@store/base/base.register.store';
 import { ModalStore } from '@store/modal/modal.store';
 import { Subscription } from 'rxjs';
@@ -48,7 +49,7 @@ export class DepartmentFormComponent implements OnInit, OnDestroy, AfterViewInit
 
   private cdr = inject(ChangeDetectorRef);
 
-  currentView = 'departments';
+  currentView: BaseApiName = 'departments';
   currentViewTranslated = 'Departamentos'.slice(0, -1);
   subscription: Subscription | undefined = undefined;
   breadcrumbList: string[] = [];
@@ -64,16 +65,12 @@ export class DepartmentFormComponent implements OnInit, OnDestroy, AfterViewInit
     this.subscription = this.activatedRoute.paramMap.subscribe(params => {
       this.id = Number(params.get('id')) || 0;
     });
-    if (this.id != 0) {
-      await this.onGetDataDetails();
-    } else {
-      if (this.baseRegisterStore.isCopiedData()) {
-        this.id = (this.baseRegisterStore.data() as IDepartment).idDepartment;
-        await this.onGetDataDetails();
-        this.id = 0;
-        this.data.idDepartment = 0;
-        this.baseRegisterStore.onSetSlicePropsToNewValue('isCopiedData', false);
-      }
+    this.data = this.baseRegisterStore.data() as IDepartment;
+    if (this.baseRegisterStore.isCopiedData()) {
+      this.data = this.baseRegisterStore.data() as IDepartment;
+      this.id = 0;
+      this.data.idDepartment = 0;
+      this.baseRegisterStore.onSetSlicePropsToNewValue('isCopiedData', false);
     }
     this.defineTitle();
     this.breadcrumbList = ['Cadastro', this.currentViewTranslated, `${this.defineTitle()}`];
@@ -97,23 +94,6 @@ export class DepartmentFormComponent implements OnInit, OnDestroy, AfterViewInit
       input.id = `${this.currentView}-form-${index}`;
       this.labels.get(index)?.nativeElement.setAttribute('for', input.id);
     });
-  };
-
-  onGetDataDetails = async (): Promise<void> => {
-    try {
-      this.modalStore.onLoading(true);
-      const response = await this.departmentApi.onGetDataInfo(this.id);
-      const data = response.data as IDepartment;
-      this.data = data;
-    } catch (e: unknown) {
-      const error = e as HttpErrorResponse;
-      this.modalStore.onShowInfoModal(
-        `Cadastro de ${this.currentViewTranslated}`,
-        error.error.message
-      );
-    } finally {
-      this.modalStore.onLoading(false);
-    }
   };
 
   onBackToPreviousPage = (): void => {

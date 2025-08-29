@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, inject, OnDestroy, OnInit } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { TableComponent } from '@components/table/table.component';
 import { BreadcrumbComponent } from '@components/breadcrumb/breadcrumb.component';
@@ -50,6 +50,8 @@ export class DepartmentHomeComponent implements OnInit {
   readonly modalStore = inject(ModalStore);
 
   readonly currentView = 'departments';
+  readonly currentViewTranslated = 'departamentos';
+  readonly keyId = 'idDepartment';
   readonly breadcrumbList = ['Cadastro', 'Departamentos'];
   readonly inputSearchFilterList: KeyOfData[] = ['idDepartment', 'name'];
   readonly inputSearchPlaceholder = 'Id ou Departamento';
@@ -91,7 +93,7 @@ export class DepartmentHomeComponent implements OnInit {
   onRedirectToEditPage = (data: IDepartment): void => {
     this.baseRegisterStore.onSetSlicePropsToNewValue('data', data);
     this.modalStore.onRedirectPage(
-      `/${this.currentView}/edit/${(this.baseRegisterStore.data() as IDepartment).idDepartment}`
+      `/${this.currentView}/edit/${(this.baseRegisterStore.data() as IDepartment)[this.keyId]}`
     );
   };
 
@@ -137,13 +139,13 @@ export class DepartmentHomeComponent implements OnInit {
   };
 
   async onDelete(data: IDepartment): Promise<void> {
-    await this.onDeleteRegister(data.idDepartment);
+    await this.onDeleteRegister(data[this.keyId]);
   }
 
   onShowModalToDelete(data?: IDepartment): void {
     const selectedData = data ? data : (this.baseRegisterStore.itemSelected() as IDepartment) || '';
     this.modalStore.onShowAskModal(
-      'Cadastro de departamentos',
+      `Cadastro de ${this.currentViewTranslated}`,
       `Deseja excluir o registro <b>${selectedData.name}</b>?`,
       () => this.onDelete(selectedData)
     );

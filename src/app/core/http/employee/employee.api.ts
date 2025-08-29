@@ -10,7 +10,7 @@ export class EmployeeApi {
   private httpRequestService = inject(HttpRequestService);
   private baseApiName = 'employees';
 
-  async onGetCompanyEmployee(idCompany: number): Promise<IResponseEmployee> {
+  async onGetCompaniesEmployee(idCompany: number): Promise<IResponseEmployee> {
     return await this.httpRequestService.sendHttpRequest(
       `${environment.apiUrl}/${this.baseApiName}/${idCompany}`,
       'GET'

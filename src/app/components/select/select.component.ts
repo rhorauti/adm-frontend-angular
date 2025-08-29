@@ -12,7 +12,7 @@ type SelectType = 'state' | 'addressType';
   styleUrl: './select.component.scss',
 })
 export class SelectComponent implements OnInit {
-  public optionList: string[] = [];
+  @Input() optionList: string[] = [];
   @Input() selectValue = 'Selecione um item';
   @Input() selectType: SelectType = 'state';
   @Output() selectValueEmitter = new EventEmitter<string>();

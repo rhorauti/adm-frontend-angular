@@ -13,18 +13,23 @@ import { ToogleButtonComponent } from '@components/toogle-button/toogle-button.c
 import { InputComponent } from '@components/input/input.component';
 import { ButtonCloseComponent } from '@components/button/button-close/button-close.component';
 import { ModalStore } from '@store/modal/modal.store';
-import { ICompany } from '@core/interfaces/company.interface';
 import { AuthStore } from '@store/auth/auth.store';
 import { loadStorage } from '@core/utils/misc';
 import { BaseRegisterStore, defaultTableHeaderIcon } from '@store/base/base.register.store';
 import { ActionCallback } from '@core/interfaces/modal.interface';
 import { HttpErrorResponse } from '@angular/common/http';
-import { CompanyApi } from '@core/http/company/company.api';
-import { KeyOfData } from '@core/types/base.type';
+import { BaseApiName, KeyOfData } from '@core/types/base.type';
 import { ITableHeader } from '@core/interfaces/table.interface';
+import { ITaskType } from '@core/interfaces/task.interface';
+import { ActivatedRoute } from '@angular/router';
+import { Subscription } from 'rxjs';
+import { IDepartment } from '@core/interfaces/department.interface';
+import { DataTransferService } from 'app/services/data-transfer/data-transfer.service';
+import { TaskTypeApi } from '@core/http/task-type/task-type.api';
+import { DepartmentApi } from '@core/http/department/department.api';
 
 @Component({
-  selector: 'app-company-home',
+  selector: 'app-task-type-home',
   imports: [
     CommonModule,
     TableHeaderBoxComponent,
@@ -40,21 +45,37 @@ import { ITableHeader } from '@core/interfaces/table.interface';
     ToogleButtonComponent,
     ButtonCloseComponent,
   ],
-  templateUrl: './company-home.component.html',
-  styleUrl: './company-home.component.scss',
+  templateUrl: './task-type-home.component.html',
+  styleUrl: './task-type-home.component.scss',
 })
-export class CompanyHomeComponent implements OnInit {
-  readonly companyApi = inject(CompanyApi);
+export class TaskTypeHomeComponent implements OnInit {
+  readonly taskTypeApi = inject(TaskTypeApi);
+  readonly departmentApi = inject(DepartmentApi);
   readonly baseRegisterStore = inject(BaseRegisterStore);
+  readonly dataTransferService = inject(DataTransferService<IDepartment>);
+  private activatedRoute = inject(ActivatedRoute);
+  subscription: Subscription | undefined = undefined;
+
+  data = {
+    idTaskType: 0,
+    name: '',
+    comment: '',
+    department: {
+      idDepartment: 0,
+      name: '',
+      comment: '',
+    },
+  } as ITaskType;
+
   readonly authStore = inject(AuthStore);
   readonly modalStore = inject(ModalStore);
 
-  readonly currentView = 'companies';
-  readonly currentViewTranslated = 'empresas';
-  readonly keyId = 'idCompany';
-  readonly breadcrumbList = ['Cadastro', 'Empresas'];
-  readonly inputSearchFilterList: KeyOfData[] = ['idCompany', 'nickname', 'name'];
-  readonly inputSearchPlaceholder = 'Id, Nome Fantasia, Razão Social';
+  readonly currentView = 'task-types';
+  relatedView: BaseApiName = 'departments';
+  currentViewTranslated = 'Departmentos';
+  readonly breadcrumbList = ['Cadastro', 'Tipos de atividades'];
+  readonly inputSearchFilterList: KeyOfData[] = ['idTaskType', 'name', 'comment'];
+  readonly inputSearchPlaceholder = 'Id ou Tipo';
   readonly initialTableHeaders = [
     {
       id: 0,
@@ -62,78 +83,77 @@ export class CompanyHomeComponent implements OnInit {
       sortDirection: 0,
       icon: defaultTableHeaderIcon,
       headerName: 'Id',
-      databaseField: 'idCompany',
+      databaseField: 'idTaskType',
     },
     {
       id: 1,
       isHeaderActive: true,
       sortDirection: 0,
       icon: defaultTableHeaderIcon,
-      headerName: 'Nome Fantasia',
-      databaseField: 'nickname',
+      headerName: 'Nome da atividade',
+      databaseField: 'name',
     },
     {
       id: 2,
       isHeaderActive: true,
       sortDirection: 0,
       icon: defaultTableHeaderIcon,
-      headerName: 'Razão Social',
-      databaseField: 'name',
+      headerName: 'Comentários',
+      databaseField: 'comment',
     },
-    {
-      id: 3,
-      isHeaderActive: true,
-      sortDirection: 0,
-      icon: defaultTableHeaderIcon,
-      headerName: 'CNPJ/CPF',
-      databaseField: 'cnpj',
-    },
-    {
-      id: 4,
-      isHeaderActive: false,
-      sortDirection: 0,
-      icon: defaultTableHeaderIcon,
-      headerName: 'Inscr.Estadual',
-      databaseField: 'ie',
-    },
-    {
-      id: 5,
-      isHeaderActive: false,
-      sortDirection: 0,
-      icon: defaultTableHeaderIcon,
-      headerName: 'Inscr.Municipal',
-      databaseField: 'im',
-    },
-  ] as ITableHeader<ICompany>[];
+  ] as ITableHeader<ITaskType>[];
   tableHeadersLocalStorageId = `table_headers_${this.currentView} + ${this.authStore.user().id}`;
+  idDepartment = 0;
 
   async ngOnInit() {
+    this.subscription = this.activatedRoute.paramMap.subscribe(params => {
+      this.idDepartment = Number(params.get('idDepartment')) || 0;
+    });
     this.onShowDataList();
     const tableHeaders = await loadStorage(this.tableHeadersLocalStorageId);
     const headers = tableHeaders ? tableHeaders : this.initialTableHeaders;
     this.baseRegisterStore.onSetSlicePropsToNewValue('tableHeaders', headers);
   }
 
-  onRedirectToEditPage = (data: ICompany): void => {
+  onGetDepartmentData = async (): Promise<void> => {
+    try {
+      this.modalStore.onLoading(true);
+      const response = await this.departmentApi.onGetData(this.idDepartment);
+      const data = response.data as IDepartment;
+      this.dataTransferService.data = data;
+      console.log('data', this.data);
+    } catch (e: unknown) {
+      const error = e as HttpErrorResponse;
+      this.modalStore.onShowInfoModal(
+        `Cadastro de ${this.currentViewTranslated}`,
+        error.error.message
+      );
+    } finally {
+      this.modalStore.onLoading(false);
+    }
+  };
+
+  onRedirectToEditPage = (data: ITaskType): void => {
     this.baseRegisterStore.onSetSlicePropsToNewValue('data', data);
     this.modalStore.onRedirectPage(
-      `/${this.currentView}/edit/${(this.baseRegisterStore.data() as ICompany)[this.keyId]}`
+      `/${this.currentView}/${this.idDepartment}/edit/${(this.baseRegisterStore.data() as ITaskType).idTaskType}`
     );
   };
 
-  onCloneRegister = async (data: ICompany): Promise<void> => {
+  onCloneRegister = async (data: ITaskType): Promise<void> => {
     this.baseRegisterStore.onSetSlicePropsToNewValue('isCopiedData', true);
     this.baseRegisterStore.onSetSlicePropsToNewValue('data', data);
-    this.modalStore.onRedirectPage(`/${this.currentView}/new`);
+    this.modalStore.onRedirectPage(`/${this.currentView}/${this.idDepartment}/new`);
   };
 
   onShowDataList = async (): Promise<void> => {
     try {
       this.modalStore.onLoading(true);
-      const response = await this.companyApi.onGetDataList();
-      this.baseRegisterStore.onSetSlicePropsToNewValue('initialData', response.data);
-      this.baseRegisterStore.onSetSlicePropsToNewValue('dataList', response.data);
-      this.baseRegisterStore.onClearData(response.data);
+      const response = await this.taskTypeApi.onGetDataList(this.currentView);
+      const data = response.data as ITaskType[];
+      this.baseRegisterStore.onSetSlicePropsToNewValue('initialData', data);
+      this.baseRegisterStore.onSetSlicePropsToNewValue('dataList', data);
+      this.baseRegisterStore.onClearData(data);
     } catch (e: unknown) {
       const error = e as HttpErrorResponse;
       this.modalStore.onShowInfoModal('Listar registros', error.error?.message);
@@ -145,7 +165,7 @@ export class CompanyHomeComponent implements OnInit {
   onDeleteRegister = async (id: number, onActionOk?: ActionCallback): Promise<void> => {
     try {
       this.modalStore.onLoading(true);
-      const response = await this.companyApi.onDelete(id);
+      const response = await this.taskTypeApi.onDelete(this.currentView, id);
       if (response.status) {
         this.onShowDataList();
         this.modalStore.onSetModalInfoType('success');
@@ -161,14 +181,14 @@ export class CompanyHomeComponent implements OnInit {
     }
   };
 
-  async onDelete(data: ICompany): Promise<void> {
-    await this.onDeleteRegister(data[this.keyId]);
+  async onDelete(data: ITaskType): Promise<void> {
+    await this.onDeleteRegister(data.idTaskType);
   }
 
-  onShowModalToDelete(data?: ICompany): void {
-    const selectedData = data ? data : (this.baseRegisterStore.itemSelected() as ICompany) || '';
+  onShowModalToDelete(data?: ITaskType): void {
+    const selectedData = data ? data : (this.baseRegisterStore.itemSelected() as ITaskType) || '';
     this.modalStore.onShowAskModal(
-      `Cadastro de ${this.currentViewTranslated}`,
+      'Cadastro de departamentos',
       `Deseja excluir o registro <b>${selectedData.name}</b>?`,
       () => this.onDelete(selectedData)
     );

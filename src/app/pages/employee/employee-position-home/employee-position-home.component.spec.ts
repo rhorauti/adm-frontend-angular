@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { EmployeePositionHomeComponent } from '../../../../../app/pages/employee-position/employee-position.component';
+import { EmployeePositionHomeComponent } from './employee-position-home.component';
 
 describe('EmployeePositionHomeComponent', () => {
   let component: EmployeePositionHomeComponent;
@@ -8,9 +8,8 @@ describe('EmployeePositionHomeComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [EmployeePositionHomeComponent]
-    })
-    .compileComponents();
+      imports: [EmployeePositionHomeComponent],
+    }).compileComponents();
 
     fixture = TestBed.createComponent(EmployeePositionHomeComponent);
     component = fixture.componentInstance;

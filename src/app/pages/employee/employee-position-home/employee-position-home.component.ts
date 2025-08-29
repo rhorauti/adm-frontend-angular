@@ -20,8 +20,8 @@ import { ActionCallback } from '@core/interfaces/modal.interface';
 import { HttpErrorResponse } from '@angular/common/http';
 import { KeyOfData } from '@core/types/base.type';
 import { ITableHeader } from '@core/interfaces/table.interface';
-import { EmployeePositionApi } from '@core/http/employee/employee-position.api';
 import { IEmployeePosition } from '@core/interfaces/employee.interface';
+import { EmployeePositionApi } from '@core/http/employee/employee-position.api';
 
 @Component({
   selector: 'app-employee-position-home',
@@ -50,6 +50,8 @@ export class EmployeePositionHomeComponent implements OnInit {
   readonly modalStore = inject(ModalStore);
 
   readonly currentView = 'employee-positions';
+  readonly currentViewTranslated = 'cargos';
+  readonly keyId = 'idEmployeePosition';
   readonly breadcrumbList = ['Cadastro', 'Cargos'];
   readonly inputSearchFilterList: KeyOfData[] = ['idEmployeePosition', 'name'];
   readonly inputSearchPlaceholder = 'Id ou Cargo';
@@ -91,7 +93,7 @@ export class EmployeePositionHomeComponent implements OnInit {
   onRedirectToEditPage = (data: IEmployeePosition): void => {
     this.baseRegisterStore.onSetSlicePropsToNewValue('data', data);
     this.modalStore.onRedirectPage(
-      `/${this.currentView}/edit/${(this.baseRegisterStore.data() as IEmployeePosition).idEmployeePosition}`
+      `/${this.currentView}/edit/${(this.baseRegisterStore.data() as IEmployeePosition)[this.keyId]}`
     );
   };
 
@@ -105,10 +107,10 @@ export class EmployeePositionHomeComponent implements OnInit {
     try {
       this.modalStore.onLoading(true);
       const response = await this.employeePositionApi.onGetDataList();
-      const employeePosition = response.data as IEmployeePosition[];
-      this.baseRegisterStore.onSetSlicePropsToNewValue('initialData', employeePosition);
-      this.baseRegisterStore.onSetSlicePropsToNewValue('dataList', employeePosition);
-      this.baseRegisterStore.onClearData(employeePosition);
+      const data = response.data as IEmployeePosition[];
+      this.baseRegisterStore.onSetSlicePropsToNewValue('initialData', data);
+      this.baseRegisterStore.onSetSlicePropsToNewValue('dataList', data);
+      this.baseRegisterStore.onClearData(data);
     } catch (e: unknown) {
       const error = e as HttpErrorResponse;
       this.modalStore.onShowInfoModal('Listar registros', error.error?.message);
@@ -137,7 +139,7 @@ export class EmployeePositionHomeComponent implements OnInit {
   };
 
   async onDelete(data: IEmployeePosition): Promise<void> {
-    await this.onDeleteRegister(data.idEmployeePosition);
+    await this.onDeleteRegister(data[this.keyId]);
   }
 
   onShowModalToDelete(data?: IEmployeePosition): void {
@@ -145,7 +147,7 @@ export class EmployeePositionHomeComponent implements OnInit {
       ? data
       : (this.baseRegisterStore.itemSelected() as IEmployeePosition) || '';
     this.modalStore.onShowAskModal(
-      'Cadastro de departamentos',
+      `Cadastro de ${this.currentViewTranslated}`,
       `Deseja excluir o registro <b>${selectedData.name}</b>?`,
       () => this.onDelete(selectedData)
     );

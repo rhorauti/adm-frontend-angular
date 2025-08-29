@@ -7,31 +7,31 @@ import {
   IBaseRegisterStore as IBaseRegisterStore,
   FilterHelp,
 } from '@core/interfaces/base.register.interface';
-import { DataType, MaybeMergeValue, StoreType, KeyOfData } from '@core/types/base.type';
+import { BaseType, MaybeMergeValue, StoreType, KeyOfData } from '@core/types/base.type';
 
 export const defaultTableHeaderIcon = 'unfold_more';
 
 export const BaseRegisterStore = signalStore(
   { providedIn: 'root' },
 
-  withState<IBaseRegisterStore<DataType>>(() => ({
+  withState<IBaseRegisterStore<BaseType>>(() => ({
     isCopiedData: false,
     inputSearchValue: '',
     isTableHeaderBoxActive: false,
-    tableHeaders: [] as ITableHeader<DataType>[],
+    tableHeaders: [] as ITableHeader<BaseType>[],
     tableCheckbox: {
       header: false,
       body: [] as boolean[],
     },
     tableItemsBox: [] as boolean[],
-    initialData: [] as DataType[],
+    initialData: [] as BaseType[],
     isDelBtnDisabled: false,
-    dataList: [] as DataType[],
-    data: {} as DataType,
+    dataList: [] as BaseType[],
+    data: {} as BaseType,
     isFilterBoxActive: false,
     isFilterResultZeroRegister: false,
-    filterBox: {} as unknown as DataType,
-    filterHelp: { inputSearch: '' } as FilterHelp<DataType>,
+    filterBox: {} as unknown as BaseType,
+    filterHelp: { inputSearch: '' } as FilterHelp<BaseType>,
     pagination: {
       currentPage: 1,
       totalPages: 1,
@@ -163,7 +163,7 @@ export const BaseRegisterStore = signalStore(
       });
     };
 
-    const onSetTableDataSortDirectionToDefault = <T extends keyof DataType>(): void => {
+    const onSetTableDataSortDirectionToDefault = <T extends keyof BaseType>(): void => {
       const keyId = Object.keys(store.data())[0] as T;
       if (!keyId) return;
       onSetSlicePropsToNewValue('dataList', [
@@ -215,7 +215,7 @@ export const BaseRegisterStore = signalStore(
       }
     };
 
-    const onClearData = (data: DataType[] = store.initialData()): void => {
+    const onClearData = (data: BaseType[] = store.initialData()): void => {
       onSetSliceObjectToDefault('filterBox');
       onSetSliceObjectToDefault('filterHelp');
       onSetSliceObjectToDefault('data');
@@ -309,9 +309,9 @@ export const BaseRegisterStore = signalStore(
       onSetPaginationToDefault();
     };
 
-    const onFilterThroughSearchInput = <K extends keyof DataType>(
+    const onFilterThroughSearchInput = <K extends keyof BaseType>(
       fieldList?: KeyOfData[]
-    ): DataType[] => {
+    ): BaseType[] => {
       const fields = fieldList ?? store.tableHeaders().map(h => h.databaseField as KeyOfData);
       return store.initialData().filter(company => {
         return fields.some(key => {
@@ -324,13 +324,13 @@ export const BaseRegisterStore = signalStore(
       });
     };
 
-    const onFilterThroughFilterBox = <K extends keyof DataType>(): DataType[] => {
+    const onFilterThroughFilterBox = <K extends keyof BaseType>(): BaseType[] => {
       return store.initialData().filter(data => {
         const stringObj = Object.fromEntries(
           Object.entries(data).map(([key, value]) => [key, String(value || '')])
         ) as Record<string, string>;
         return Object.keys(stringObj).every(key => {
-          const filterVal = store.filterBox()[key as keyof DataType];
+          const filterVal = store.filterBox()[key as keyof BaseType];
           if (filterVal == null || String(filterVal).trim() === '') return true;
           return stringObj[key]
             .toLowerCase()
@@ -345,7 +345,7 @@ export const BaseRegisterStore = signalStore(
      * There are 3 sort states : 0 - Not sorted, 1 - Ascending, 2 - Descending.
      * @param idx The index of the clicked table column.
      */
-    const onFilterThroughSort = <K extends keyof DataType>(idx: number): DataType[] => {
+    const onFilterThroughSort = <K extends keyof BaseType>(idx: number): BaseType[] => {
       const keyId = Object.keys(store.dataList()[0])[0] as K;
       const header = store.tableHeaders()[idx];
       const key = header.databaseField as K;
@@ -393,7 +393,7 @@ export const BaseRegisterStore = signalStore(
       }
     };
 
-    const onApplyFilterHelpThroughFilterBox = <K extends keyof DataType>(): void => {
+    const onApplyFilterHelpThroughFilterBox = <K extends keyof BaseType>(): void => {
       const keys = Object.keys(store.filterBox());
       keys.forEach(key => {
         patchState(store, {
