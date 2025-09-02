@@ -99,15 +99,15 @@ export const routes: Routes = [
     component: EmployeePositionFormComponent,
   },
   {
-    path: 'task-types/:idDepartment',
+    path: ':department/task-types',
     component: TaskTypeHomeComponent,
   },
   {
-    path: 'task-types/:idDepartment/new',
+    path: ':department/task-types/new',
     component: TaskTypeFormComponent,
   },
   {
-    path: 'task-types/:idDepartment/edit/:idTask',
+    path: ':department/task-types/edit/:idTask',
     component: TaskTypeFormComponent,
   },
   {

@@ -133,7 +133,11 @@ export class CompanyFormComponent implements OnInit, OnDestroy, AfterViewInit {
     try {
       this.modalStore.onLoading(true);
       const detaildDataResponse = await this.companyApi.onGetDataDetailedInfo(this.id);
-      this.detailedData = detaildDataResponse.data;
+      if (detaildDataResponse.data) {
+        this.detailedData = detaildDataResponse.data;
+      } else {
+        return;
+      }
     } catch (e: unknown) {
       const error = e as HttpErrorResponse;
       this.modalStore.onShowInfoModal(

@@ -107,10 +107,14 @@ export class EmployeePositionHomeComponent implements OnInit {
     try {
       this.modalStore.onLoading(true);
       const response = await this.employeePositionApi.onGetDataList();
-      const data = response.data as IEmployeePosition[];
-      this.baseRegisterStore.onSetSlicePropsToNewValue('initialData', data);
-      this.baseRegisterStore.onSetSlicePropsToNewValue('dataList', data);
-      this.baseRegisterStore.onClearData(data);
+      if (response.data) {
+        const data = response.data as IEmployeePosition[];
+        this.baseRegisterStore.onSetSlicePropsToNewValue('initialData', data);
+        this.baseRegisterStore.onSetSlicePropsToNewValue('dataList', data);
+        this.baseRegisterStore.onClearData(data);
+      } else {
+        return;
+      }
     } catch (e: unknown) {
       const error = e as HttpErrorResponse;
       this.modalStore.onShowInfoModal('Listar registros', error.error?.message);

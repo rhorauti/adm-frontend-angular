@@ -131,9 +131,13 @@ export class CompanyHomeComponent implements OnInit {
     try {
       this.modalStore.onLoading(true);
       const response = await this.companyApi.onGetDataList();
-      this.baseRegisterStore.onSetSlicePropsToNewValue('initialData', response.data);
-      this.baseRegisterStore.onSetSlicePropsToNewValue('dataList', response.data);
-      this.baseRegisterStore.onClearData(response.data);
+      if (response.data) {
+        this.baseRegisterStore.onSetSlicePropsToNewValue('initialData', response.data);
+        this.baseRegisterStore.onSetSlicePropsToNewValue('dataList', response.data);
+        this.baseRegisterStore.onClearData(response.data);
+      } else {
+        return;
+      }
     } catch (e: unknown) {
       const error = e as HttpErrorResponse;
       this.modalStore.onShowInfoModal('Listar registros', error.error?.message);

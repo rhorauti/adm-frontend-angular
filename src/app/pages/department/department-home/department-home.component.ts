@@ -107,10 +107,14 @@ export class DepartmentHomeComponent implements OnInit {
     try {
       this.modalStore.onLoading(true);
       const response = await this.departmentApi.onGetDataList();
-      const dept = response.data as IDepartment[];
-      this.baseRegisterStore.onSetSlicePropsToNewValue('initialData', dept);
-      this.baseRegisterStore.onSetSlicePropsToNewValue('dataList', dept);
-      this.baseRegisterStore.onClearData(dept);
+      if (response.data) {
+        const dept = response.data as IDepartment[];
+        this.baseRegisterStore.onSetSlicePropsToNewValue('initialData', dept);
+        this.baseRegisterStore.onSetSlicePropsToNewValue('dataList', dept);
+        this.baseRegisterStore.onClearData(dept);
+      } else {
+        return;
+      }
     } catch (e: unknown) {
       const error = e as HttpErrorResponse;
       this.modalStore.onShowInfoModal('Listar registros', error.error?.message);

@@ -22,16 +22,16 @@ export class TaskTypeApi {
     );
   }
 
-  async onGetDataInfo(department: string, idTask: number): Promise<IResponseTaskType> {
+  async onGetDataById(department: string, idTask: number): Promise<IResponseTaskType> {
     return await this.httpRequestService.sendHttpRequest(
       `${environment.apiUrl}/${department}/${this.baseApiName}/${idTask}`,
       'GET'
     );
   }
 
-  async onSave(department: string, data: ITaskType): Promise<IResponseTaskType> {
+  async onSave(data: ITaskType): Promise<IResponseTaskType> {
     return await this.httpRequestService.sendHttpRequest(
-      `${environment.apiUrl}/${department}/${this.baseApiName}`,
+      `${environment.apiUrl}/${data.department.name}/${this.baseApiName}`,
       'POST',
       data
     );

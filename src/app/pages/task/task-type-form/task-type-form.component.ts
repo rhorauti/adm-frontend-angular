@@ -17,10 +17,13 @@ import { BreadcrumbComponent } from '@components/breadcrumb/breadcrumb.component
 import { ButtonLabelComponent } from '@components/button/button-label/button-label.component';
 import { InputComponent } from '@components/input/input.component';
 import { TextAreaComponent } from '@components/text-area/text-area.component';
+import { DepartmentApi } from '@core/http/department/department.api';
 import { TaskTypeApi } from '@core/http/task-type/task-type.api';
+import { IDepartment } from '@core/interfaces/department.interface';
 import { ActionCallback } from '@core/interfaces/modal.interface';
 import { ITaskType } from '@core/interfaces/task.interface';
 import { BaseApiName } from '@core/types/base.type';
+import { translateDeptName } from '@core/utils/misc';
 import { BaseRegisterStore } from '@store/base/base.register.store';
 import { ModalStore } from '@store/modal/modal.store';
 import { Subscription } from 'rxjs';
@@ -42,6 +45,7 @@ export class TaskTypeFormComponent implements OnInit, OnDestroy, AfterViewInit {
   @ViewChildren(InputComponent) inputs!: QueryList<InputComponent>;
   @ViewChildren('labelForm') private labels!: QueryList<ElementRef>;
   readonly taskApi = inject(TaskTypeApi);
+  readonly departmentApi = inject(DepartmentApi);
   readonly baseRegisterStore = inject(BaseRegisterStore);
   private activatedRoute = inject(ActivatedRoute);
   readonly router = inject(Router);
@@ -54,6 +58,7 @@ export class TaskTypeFormComponent implements OnInit, OnDestroy, AfterViewInit {
   currentViewTranslatedSingular = this.currentViewTranslated.slice(0, -1);
   subscription: Subscription | undefined = undefined;
   breadcrumbList: string[] = [];
+  deptName = '';
   id = 0;
   data = {
     idTaskType: 0,
@@ -69,6 +74,7 @@ export class TaskTypeFormComponent implements OnInit, OnDestroy, AfterViewInit {
   async ngOnInit(): Promise<void> {
     this.subscription = this.activatedRoute.paramMap.subscribe(params => {
       this.id = Number(params.get('idTaskType')) || 0;
+      this.deptName = params.get('department') || '';
     });
     this.data = this.baseRegisterStore.data() as ITaskType;
     if (this.baseRegisterStore.isCopiedData()) {
@@ -102,13 +108,18 @@ export class TaskTypeFormComponent implements OnInit, OnDestroy, AfterViewInit {
   };
 
   onBackToPreviousPage = (): void => {
-    this.modalStore.onRedirectPage(`/${this.currentView}/${this.id}`);
+    this.modalStore.onRedirectPage(`/${this.deptName}/${this.currentView}`);
   };
 
   onSaveRegister = async (onActionOk?: ActionCallback): Promise<void> => {
     try {
       this.modalStore.onLoading(true);
-      const response = await this.taskApi.onSave(this.currentView, this.data);
+      const deptNameTranslated = translateDeptName(this.deptName);
+      const dept = await this.departmentApi.onGetDataByField('name', deptNameTranslated);
+      const deptData = dept.data as IDepartment;
+      this.data.department = deptData;
+      console.log('dataLocal', this.data);
+      const response = await this.taskApi.onSave(this.data);
       if (response.status) {
         this.modalStore.onSetModalInfoType('success');
         this.modalStore.onShowInfoModal(
@@ -124,6 +135,7 @@ export class TaskTypeFormComponent implements OnInit, OnDestroy, AfterViewInit {
       }
     } catch (e: unknown) {
       const error = e as HttpErrorResponse;
+      console.log('custom error', e);
       this.modalStore.onShowInfoModal(
         `Cadastro de ${this.currentViewTranslatedSingular}`,
         error.error.message

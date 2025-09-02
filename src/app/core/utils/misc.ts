@@ -1,5 +1,3 @@
-import { ICompany } from '@core/interfaces/company.interface';
-
 function safeEncryptU(str: string): string {
   try {
     // Converter caracteres especiais para formato seguro
@@ -139,3 +137,63 @@ export function formatTelephoneNumber(number: string): string {
     return `(${telNumber.substring(0, 2)}) ${telNumber.substring(2, 7)}-${telNumber.substring(7)}`;
   }
 }
+
+export const translateDeptName = (deptName: string): string => {
+  switch (deptName.toLowerCase().trim()) {
+    case 'maintenance': {
+      return 'Manutenção';
+    }
+    case 'purchasing': {
+      return 'Compras';
+    }
+    case 'pc': {
+      return 'PCP';
+    }
+    case 'sales': {
+      return 'Vendas';
+    }
+    case 'project': {
+      return 'Projetos';
+    }
+    case 'finance': {
+      return 'Financeiro';
+    }
+    case 'quality': {
+      return 'Qualidade';
+    }
+    case 'hr': {
+      return 'RH';
+    }
+  }
+  return '';
+};
+
+export const setDeptNameTranslationToDefaultName = (deptName: string): string => {
+  switch (deptName.toLowerCase().trim()) {
+    case 'manutenção': {
+      return 'maintenance';
+    }
+    case 'compras': {
+      return 'purchasing';
+    }
+    case 'pcp': {
+      return 'pc';
+    }
+    case 'vendas': {
+      return 'sales';
+    }
+    case 'projetos': {
+      return 'project';
+    }
+    case 'financeiro': {
+      return 'finance';
+    }
+    case 'qualidade': {
+      return 'quality';
+    }
+    case 'rh': {
+      return 'hr';
+    }
+  }
+  return '';
+};

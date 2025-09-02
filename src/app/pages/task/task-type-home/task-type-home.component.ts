@@ -14,7 +14,7 @@ import { InputComponent } from '@components/input/input.component';
 import { ButtonCloseComponent } from '@components/button/button-close/button-close.component';
 import { ModalStore } from '@store/modal/modal.store';
 import { AuthStore } from '@store/auth/auth.store';
-import { loadStorage } from '@core/utils/misc';
+import { loadStorage, translateDeptName } from '@core/utils/misc';
 import { BaseRegisterStore, defaultTableHeaderIcon } from '@store/base/base.register.store';
 import { ActionCallback } from '@core/interfaces/modal.interface';
 import { HttpErrorResponse } from '@angular/common/http';
@@ -23,10 +23,9 @@ import { ITableHeader } from '@core/interfaces/table.interface';
 import { ITaskType } from '@core/interfaces/task.interface';
 import { ActivatedRoute } from '@angular/router';
 import { Subscription } from 'rxjs';
-import { IDepartment } from '@core/interfaces/department.interface';
-import { DataTransferService } from 'app/services/data-transfer/data-transfer.service';
 import { TaskTypeApi } from '@core/http/task-type/task-type.api';
 import { DepartmentApi } from '@core/http/department/department.api';
+import { IDepartment } from '@core/interfaces/department.interface';
 
 @Component({
   selector: 'app-task-type-home',
@@ -52,27 +51,14 @@ export class TaskTypeHomeComponent implements OnInit {
   readonly taskTypeApi = inject(TaskTypeApi);
   readonly departmentApi = inject(DepartmentApi);
   readonly baseRegisterStore = inject(BaseRegisterStore);
-  readonly dataTransferService = inject(DataTransferService<IDepartment>);
   private activatedRoute = inject(ActivatedRoute);
   subscription: Subscription | undefined = undefined;
-
-  data = {
-    idTaskType: 0,
-    name: '',
-    comment: '',
-    department: {
-      idDepartment: 0,
-      name: '',
-      comment: '',
-    },
-  } as ITaskType;
 
   readonly authStore = inject(AuthStore);
   readonly modalStore = inject(ModalStore);
 
   readonly currentView = 'task-types';
   relatedView: BaseApiName = 'departments';
-  currentViewTranslated = 'Departmentos';
   readonly breadcrumbList = ['Cadastro', 'Tipos de atividades'];
   readonly inputSearchFilterList: KeyOfData[] = ['idTaskType', 'name', 'comment'];
   readonly inputSearchPlaceholder = 'Id ou Tipo';
@@ -103,11 +89,11 @@ export class TaskTypeHomeComponent implements OnInit {
     },
   ] as ITableHeader<ITaskType>[];
   tableHeadersLocalStorageId = `table_headers_${this.currentView} + ${this.authStore.user().id}`;
-  idDepartment = 0;
+  deptName = '';
 
   async ngOnInit() {
     this.subscription = this.activatedRoute.paramMap.subscribe(params => {
-      this.idDepartment = Number(params.get('idDepartment')) || 0;
+      this.deptName = params.get('department') || '';
     });
     this.onShowDataList();
     const tableHeaders = await loadStorage(this.tableHeadersLocalStorageId);
@@ -115,45 +101,31 @@ export class TaskTypeHomeComponent implements OnInit {
     this.baseRegisterStore.onSetSlicePropsToNewValue('tableHeaders', headers);
   }
 
-  onGetDepartmentData = async (): Promise<void> => {
-    try {
-      this.modalStore.onLoading(true);
-      const response = await this.departmentApi.onGetData(this.idDepartment);
-      const data = response.data as IDepartment;
-      this.dataTransferService.data = data;
-      console.log('data', this.data);
-    } catch (e: unknown) {
-      const error = e as HttpErrorResponse;
-      this.modalStore.onShowInfoModal(
-        `Cadastro de ${this.currentViewTranslated}`,
-        error.error.message
-      );
-    } finally {
-      this.modalStore.onLoading(false);
-    }
-  };
-
   onRedirectToEditPage = (data: ITaskType): void => {
     this.baseRegisterStore.onSetSlicePropsToNewValue('data', data);
     this.modalStore.onRedirectPage(
-      `/${this.currentView}/${this.idDepartment}/edit/${(this.baseRegisterStore.data() as ITaskType).idTaskType}`
+      `/${this.deptName}/${this.currentView}/edit/${(this.baseRegisterStore.data() as ITaskType).idTaskType}`
     );
   };
 
   onCloneRegister = async (data: ITaskType): Promise<void> => {
     this.baseRegisterStore.onSetSlicePropsToNewValue('isCopiedData', true);
     this.baseRegisterStore.onSetSlicePropsToNewValue('data', data);
-    this.modalStore.onRedirectPage(`/${this.currentView}/${this.idDepartment}/new`);
+    this.modalStore.onRedirectPage(`/${this.deptName}/${this.currentView}/new`);
   };
 
   onShowDataList = async (): Promise<void> => {
     try {
       this.modalStore.onLoading(true);
-      const response = await this.taskTypeApi.onGetDataList(this.currentView);
-      const data = response.data as ITaskType[];
-      this.baseRegisterStore.onSetSlicePropsToNewValue('initialData', data);
-      this.baseRegisterStore.onSetSlicePropsToNewValue('dataList', data);
-      this.baseRegisterStore.onClearData(data);
+      const response = await this.taskTypeApi.onGetDataList(this.deptName);
+      if (response.data) {
+        const dataList = response.data as ITaskType[];
+        this.baseRegisterStore.onSetSlicePropsToNewValue('initialData', dataList);
+        this.baseRegisterStore.onSetSlicePropsToNewValue('dataList', dataList);
+        this.baseRegisterStore.onClearData(dataList);
+      } else {
+        return;
+      }
     } catch (e: unknown) {
       const error = e as HttpErrorResponse;
       this.modalStore.onShowInfoModal('Listar registros', error.error?.message);
@@ -165,7 +137,7 @@ export class TaskTypeHomeComponent implements OnInit {
   onDeleteRegister = async (id: number, onActionOk?: ActionCallback): Promise<void> => {
     try {
       this.modalStore.onLoading(true);
-      const response = await this.taskTypeApi.onDelete(this.currentView, id);
+      const response = await this.taskTypeApi.onDelete(this.deptName, id);
       if (response.status) {
         this.onShowDataList();
         this.modalStore.onSetModalInfoType('success');

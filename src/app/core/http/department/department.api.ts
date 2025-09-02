@@ -22,9 +22,19 @@ export class DepartmentApi {
     );
   }
 
-  async onGetData(id: number): Promise<IResponseDepartment> {
+  async onGetDataById(id: number): Promise<IResponseDepartment> {
     return await this.httpRequestService.sendHttpRequest(
       `${environment.apiUrl}/${this.baseApiName}/${id}`,
+      'GET'
+    );
+  }
+
+  async onGetDataByField<K extends keyof IDepartment>(
+    key: K,
+    value: IDepartment[K]
+  ): Promise<IResponseDepartment> {
+    return await this.httpRequestService.sendHttpRequest(
+      `${environment.apiUrl}/${this.baseApiName}?${key}=${value}`,
       'GET'
     );
   }
