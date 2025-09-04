@@ -128,7 +128,7 @@
           <app-select
             [selectType]="'state'"
             [selectValue]="detailedData.address.state || 'Selecione um item'"
-            (selectValueEmitter)="detailedData.address.state = $event" />
+            (selectValueEmitter)="detailedData.address.state = $event.toString()" />
         </div>
       </div>
     </div>
@@ -154,18 +154,18 @@
           <app-input
             [id]="'company-form-employee-department'"
             [inputName]="'custom'"
-            [inputValue]="detailedData.employee.department || ''"
+            [inputValue]="(detailedData.employee.idDepartment || '').toString()"
             [type]="'search'"
-            (inputValueEmitter)="detailedData.employee.department = $event" />
+            (inputValueEmitter)="detailedData.employee.idDepartment = +$event" />
         </div>
         <div class="flex flex-col gap-1 grow">
           <label #labelForm class="font-medium text-sm" for="default">Cargo</label>
           <app-input
             [id]="'company-form-employee-position'"
             [inputName]="'custom'"
-            [inputValue]="detailedData.employee.position || ''"
+            [inputValue]="detailedData.employee.employeePosition?.name || ''"
             [type]="'search'"
-            (inputValueEmitter)="detailedData.employee.position = $event" />
+            (inputValueEmitter)="setEmployeePositionValue($event)" />
         </div>
       </div>
       <div class="flex flex-col md:flex-row gap-4">

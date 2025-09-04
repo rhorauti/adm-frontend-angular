@@ -9,6 +9,10 @@ export interface IBaseRegisterStore<T> {
    */
   isCopiedData: boolean;
   /**
+   * A flag used to indicate that the data is a edit data.
+   */
+  isEditData: boolean;
+  /**
    * An input search value used to filter the table.
    */
   inputSearchValue: string;

@@ -16,6 +16,8 @@ import { ProductHomeComponent } from '@pages/product/product-home/product-home.c
 import { ProductFormComponent } from '@pages/product/product-form/product-form.component';
 import { TaskTypeHomeComponent } from '@pages/task/task-type-home/task-type-home.component';
 import { TaskTypeFormComponent } from '@pages/task/task-type-form/task-type-form.component';
+import { ProductionLineHomeComponent } from '@pages/production/production-line-home/production-line-home.component';
+import { ProductionLineFormComponent } from '@pages/production/production-line-form/production-line-form.component';
 
 export const routes: Routes = [
   {
@@ -97,6 +99,18 @@ export const routes: Routes = [
   {
     path: 'employee-positions/edit/:id',
     component: EmployeePositionFormComponent,
+  },
+  {
+    path: 'production-lines',
+    component: ProductionLineHomeComponent,
+  },
+  {
+    path: 'production-lines/new',
+    component: ProductionLineFormComponent,
+  },
+  {
+    path: 'production-lines/edit/:id',
+    component: ProductionLineFormComponent,
   },
   {
     path: ':department/task-types',

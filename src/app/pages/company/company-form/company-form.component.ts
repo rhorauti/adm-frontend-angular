@@ -21,7 +21,12 @@ import { CompanyApi } from '@core/http/company/company.api';
 import { ThirdPartApi } from '@core/http/third-part/third-part.api';
 import { IAddress } from '@core/interfaces/address.interface';
 import { ICompany, ICompanyDetail as ICompanyDetails } from '@core/interfaces/company.interface';
-import { IEmployee } from '@core/interfaces/employee.interface';
+import { IDepartment } from '@core/interfaces/department.interface';
+import {
+  IEmployee,
+  IEmployeePayload,
+  IEmployeePosition,
+} from '@core/interfaces/employee.interface';
 import { ActionCallback } from '@core/interfaces/modal.interface';
 import { BaseRegisterStore } from '@store/base/base.register.store';
 import { ModalStore } from '@store/modal/modal.store';
@@ -58,6 +63,23 @@ export class CompanyFormComponent implements OnInit, OnDestroy, AfterViewInit {
   breadcrumbList: string[] = [];
   id = 0;
 
+  departmentList: IDepartment[] = [];
+  departmentOptionList: string[] = [];
+  employeePositionList: IEmployeePosition[] = [];
+  employeePositionOptionList: string[] = [];
+
+  departmentData = {
+    idDepartment: 0,
+    name: '',
+    comment: '',
+  } as IDepartment;
+
+  employeePositionData = {
+    idEmployeePosition: 0,
+    name: '',
+    comment: '',
+  } as IEmployeePosition;
+
   detailedData = {
     company: {
       idCompany: 0,
@@ -79,14 +101,15 @@ export class CompanyFormComponent implements OnInit, OnDestroy, AfterViewInit {
     } as IAddress,
     employee: {
       idEmployee: 0,
+      isDefault: false,
       name: '',
       cpf: '',
-      department: '',
-      position: '',
+      idDepartment: 0,
       email: '',
       deskphone: '',
       cellphone: '',
       photoUrl: '',
+      idCompany: 0,
     } as IEmployee,
   } as ICompanyDetails;
 
@@ -149,6 +172,18 @@ export class CompanyFormComponent implements OnInit, OnDestroy, AfterViewInit {
     }
   };
 
+  setDepartmentValue = (deptName: string): void => {
+    const dept = this.departmentList.find(dept => (dept.name = deptName)) as IDepartment;
+    this.departmentData = dept;
+  };
+
+  setEmployeePositionValue = (positionName: string): void => {
+    const position = this.employeePositionList.find(
+      position => (position.name = positionName)
+    ) as IEmployeePosition;
+    this.employeePositionData = position;
+  };
+
   onBackToPreviousPage = (): void => {
     this.modalStore.onRedirectPage(`/${this.currentView}`);
   };
@@ -189,16 +224,21 @@ export class CompanyFormComponent implements OnInit, OnDestroy, AfterViewInit {
     } as IAddress,
     employee: {
       idEmployee: 0,
+      isDefault: false,
       name: '',
       cpf: '',
-      department: '',
-      position: '',
+      idDepartment: 0,
       email: '',
       deskphone: '',
       cellphone: '',
-      photoUrl: '',
-    } as IEmployee,
-  };
+      imgPreviewUrl: null,
+      employeePosition: {
+        idEmployeePosition: 0,
+        name: '',
+        comment: '',
+      } as IEmployeePosition,
+    } as IEmployeePayload,
+  } as ICompanyDetails;
 
   onSetFinalData = (): void => {
     this.finalData.company.idCompany = this.detailedData.company.idCompany;
@@ -226,9 +266,10 @@ export class CompanyFormComponent implements OnInit, OnDestroy, AfterViewInit {
     this.finalData.employee.isDefault = this.detailedData.employee.isDefault;
     this.finalData.employee.idEmployee = (this.detailedData.employee ?? '').idEmployee;
     this.finalData.employee.name = (this.detailedData.employee.name ?? '').trim();
-    this.finalData.employee.department = (this.detailedData.employee.department ?? '').trim();
-    this.finalData.employee.position = (this.detailedData.employee.position ?? '').trim();
-    this.finalData.employee.photoUrl = (this.detailedData.employee.photoUrl ?? '').trim();
+    this.finalData.employee.idDepartment = this.detailedData.employee.idDepartment ?? 0;
+    this.finalData.employee.idCompany = this.detailedData.employee.idCompany ?? 0;
+    this.finalData.employee.employeePosition = this.employeePositionData;
+    // this.finalData.employee.imgPreviewUrl = this.imgPreviewUrl;
     this.finalData.employee.email = (this.detailedData.employee.email ?? '').trim();
     this.finalData.employee.deskphone = this.baseRegisterStore.onMaskNumericalField(
       (this.detailedData.employee.deskphone ?? '')?.trim()

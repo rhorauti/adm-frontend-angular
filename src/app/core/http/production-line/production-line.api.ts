@@ -2,30 +2,34 @@ import { inject, Injectable } from '@angular/core';
 import { HttpRequestService } from '../http-request.service';
 import { environment } from '@environments/environment';
 import { IBaseResponse } from '@core/interfaces/response.interface';
-import { IEmployeePosition, IEmployeePositionResponse } from '@core/interfaces/employee.interface';
+import {
+  IProductionLine,
+  IResponseProductionLine,
+  IResponseProductionLineList,
+} from '@core/interfaces/production-line.interface';
 
 @Injectable({
   providedIn: 'root',
 })
-export class EmployeePositionApi {
+export class ProductionLineApi {
   private httpRequestService = inject(HttpRequestService);
-  private baseApiName = 'employee-positions';
+  private baseApiName = 'production-lines';
 
-  async onGetDataList(): Promise<IEmployeePositionResponse> {
+  async onGetDataList(): Promise<IResponseProductionLineList> {
     return await this.httpRequestService.sendHttpRequest(
       `${environment.apiUrl}/${this.baseApiName}`,
       'GET'
     );
   }
 
-  async onGetData(id: number): Promise<IEmployeePositionResponse> {
+  async onGetData(id: number): Promise<IResponseProductionLine> {
     return await this.httpRequestService.sendHttpRequest(
       `${environment.apiUrl}/${this.baseApiName}/${id}`,
       'GET'
     );
   }
 
-  async onSave(data: IEmployeePosition): Promise<IEmployeePositionResponse> {
+  async onSave(data: IProductionLine): Promise<IResponseProductionLine> {
     return await this.httpRequestService.sendHttpRequest(
       `${environment.apiUrl}/${this.baseApiName}`,
       'POST',

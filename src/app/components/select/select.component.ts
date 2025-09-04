@@ -2,8 +2,9 @@ import { CommonModule } from '@angular/common';
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
+import { BaseType } from '@core/types/base.type';
 
-type SelectType = 'state' | 'addressType';
+type SelectType = 'state' | 'addressType' | 'custom';
 
 @Component({
   selector: 'app-select',
@@ -14,8 +15,8 @@ type SelectType = 'state' | 'addressType';
 export class SelectComponent implements OnInit {
   @Input() optionList: string[] = [];
   @Input() selectValue = 'Selecione um item';
-  @Input() selectType: SelectType = 'state';
-  @Output() selectValueEmitter = new EventEmitter<string>();
+  @Input() selectType: SelectType = 'custom';
+  @Output() selectValueEmitter = new EventEmitter<string | number | boolean>();
 
   ngOnInit(): void {
     switch (this.selectType) {

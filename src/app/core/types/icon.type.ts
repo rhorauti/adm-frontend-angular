@@ -20,4 +20,5 @@ export type Icon =
   | 'library_add'
   | 'check'
   | 'refresh'
+  | 'cloud_upload'
   | 'cancel';

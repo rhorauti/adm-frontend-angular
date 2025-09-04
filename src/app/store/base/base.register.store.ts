@@ -16,6 +16,7 @@ export const BaseRegisterStore = signalStore(
 
   withState<IBaseRegisterStore<BaseType>>(() => ({
     isCopiedData: false,
+    isEditData: false,
     inputSearchValue: '',
     isTableHeaderBoxActive: false,
     tableHeaders: [] as ITableHeader<BaseType>[],
@@ -95,7 +96,7 @@ export const BaseRegisterStore = signalStore(
 
     const onSetSliceObjectToDefault = <K extends keyof StoreType>(
       sliceKey: K,
-      defaultValue: string | number = ''
+      defaultValue: string | number | boolean = ''
     ): void => {
       const current = store[sliceKey]();
       if (!isPlainObject(current)) return;

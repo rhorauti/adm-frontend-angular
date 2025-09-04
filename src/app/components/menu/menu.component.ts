@@ -40,18 +40,6 @@ export class MenuComponent {
 
           routerLink: '/companies',
         },
-        {
-          idSublink: 1,
-          name: 'Produtos',
-
-          routerLink: '/products',
-        },
-        {
-          idSublink: 2,
-          name: 'Pedidos de Compra',
-
-          routerLink: '/purchasing-orders',
-        },
       ],
     },
     {
@@ -90,12 +78,6 @@ export class MenuComponent {
 
           routerLink: '/production-lines',
         },
-        {
-          idSublink: 0,
-          name: 'Projetos',
-
-          routerLink: '/projects',
-        },
       ],
     },
     {
@@ -125,31 +107,19 @@ export class MenuComponent {
         },
       ],
     },
-    {
-      idLink: 4,
-      name: 'PCP',
-      isColapsed: false,
-      sublinks: [
-        {
-          idSublink: 0,
-          name: 'Estoque',
+    // {
+    //   idLink: 4,
+    //   name: 'PCP',
+    //   isColapsed: false,
+    //   sublinks: [
+    //     {
+    //       idSublink: 0,
+    //       name: 'Estoque',
 
-          routerLink: '',
-        },
-        {
-          idSublink: 1,
-          name: 'Planejamento de Produção',
-
-          routerLink: '',
-        },
-        {
-          idSublink: 2,
-          name: 'Planejamento de peças',
-
-          routerLink: '',
-        },
-      ],
-    },
+    //       routerLink: '',
+    //     },
+    //   ],
+    // },
   ];
 
   toogleLink(idx: number): void {

@@ -29,9 +29,9 @@ export class TaskTypeApi {
     );
   }
 
-  async onSave(data: ITaskType): Promise<IResponseTaskType> {
+  async onSave(department: string, data: ITaskType): Promise<IResponseTaskType> {
     return await this.httpRequestService.sendHttpRequest(
-      `${environment.apiUrl}/${data.department.name}/${this.baseApiName}`,
+      `${environment.apiUrl}/${department}/${this.baseApiName}`,
       'POST',
       data
     );

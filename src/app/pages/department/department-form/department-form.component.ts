@@ -65,8 +65,10 @@ export class DepartmentFormComponent implements OnInit, OnDestroy, AfterViewInit
     this.subscription = this.activatedRoute.paramMap.subscribe(params => {
       this.id = Number(params.get('id')) || 0;
     });
-    this.data = this.baseRegisterStore.data() as IDepartment;
-    if (this.baseRegisterStore.isCopiedData()) {
+    if (this.baseRegisterStore.isEditData()) {
+      this.data = this.baseRegisterStore.data() as IDepartment;
+      this.baseRegisterStore.onSetSlicePropsToNewValue('isEditData', false);
+    } else if (this.baseRegisterStore.isCopiedData()) {
       this.data = this.baseRegisterStore.data() as IDepartment;
       this.id = 0;
       this.data.idDepartment = 0;
@@ -99,10 +101,17 @@ export class DepartmentFormComponent implements OnInit, OnDestroy, AfterViewInit
   onBackToPreviousPage = (): void => {
     this.modalStore.onRedirectPage(`/${this.currentView}`);
   };
+  fieldValidation = (): void => {
+    const message = 'O campo Departamento não pode estar vazio.';
+    if (this.data && this.data.name.length == 0) {
+      throw Error(message);
+    }
+  };
 
   onSaveRegister = async (onActionOk?: ActionCallback): Promise<void> => {
     try {
       this.modalStore.onLoading(true);
+      this.fieldValidation();
       const response = await this.departmentApi.onSave(this.data);
       if (response.status) {
         this.modalStore.onSetModalInfoType('success');
@@ -118,11 +127,18 @@ export class DepartmentFormComponent implements OnInit, OnDestroy, AfterViewInit
         );
       }
     } catch (e: unknown) {
-      const error = e as HttpErrorResponse;
-      this.modalStore.onShowInfoModal(
-        `Cadastro de ${this.currentViewTranslated}`,
-        error.error.message
-      );
+      if (e instanceof HttpErrorResponse) {
+        const error = e as HttpErrorResponse;
+        this.modalStore.onShowInfoModal(
+          `Cadastro de ${this.currentViewTranslated}`,
+          error.error.message
+        );
+      } else {
+        this.modalStore.onShowInfoModal(
+          `Cadastro de ${this.currentViewTranslated}`,
+          (e as Error).message
+        );
+      }
     } finally {
       this.modalStore.onLoading(false);
     }

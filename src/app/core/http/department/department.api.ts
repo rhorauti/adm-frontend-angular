@@ -2,11 +2,7 @@ import { inject, Injectable } from '@angular/core';
 import { HttpRequestService } from '../http-request.service';
 import { environment } from '@environments/environment';
 import { IBaseResponse } from '@core/interfaces/response.interface';
-import {
-  IDepartment,
-  IResponseDepartment,
-  IResponseDepartmentList,
-} from '@core/interfaces/department.interface';
+import { IDepartment, IResponseDepartment } from '@core/interfaces/department.interface';
 
 @Injectable({
   providedIn: 'root',
@@ -15,7 +11,7 @@ export class DepartmentApi {
   private httpRequestService = inject(HttpRequestService);
   private baseApiName = 'departments';
 
-  async onGetDataList(): Promise<IResponseDepartmentList> {
+  async onGetDataList(): Promise<IResponseDepartment> {
     return await this.httpRequestService.sendHttpRequest(
       `${environment.apiUrl}/${this.baseApiName}`,
       'GET'

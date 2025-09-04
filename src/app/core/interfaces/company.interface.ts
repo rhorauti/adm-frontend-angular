@@ -1,5 +1,5 @@
 import { IAddress } from './address.interface';
-import { IEmployee } from './employee.interface';
+import { IEmployee, IEmployeePayload } from './employee.interface';
 import { IBaseResponse } from './response.interface';
 
 export interface ICompany {
@@ -14,7 +14,7 @@ export interface ICompany {
 export interface ICompanyDetail {
   company: ICompany;
   address: IAddress;
-  employee: IEmployee;
+  employee: IEmployee | IEmployeePayload;
 }
 
 export interface ICompanyResponse extends IBaseResponse {

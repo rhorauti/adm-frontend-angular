@@ -14,7 +14,7 @@ import { InputComponent } from '@components/input/input.component';
 import { ButtonCloseComponent } from '@components/button/button-close/button-close.component';
 import { ModalStore } from '@store/modal/modal.store';
 import { AuthStore } from '@store/auth/auth.store';
-import { loadStorage, translateDeptName } from '@core/utils/misc';
+import { loadStorage } from '@core/utils/misc';
 import { BaseRegisterStore, defaultTableHeaderIcon } from '@store/base/base.register.store';
 import { ActionCallback } from '@core/interfaces/modal.interface';
 import { HttpErrorResponse } from '@angular/common/http';
@@ -25,7 +25,6 @@ import { ActivatedRoute } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { TaskTypeApi } from '@core/http/task-type/task-type.api';
 import { DepartmentApi } from '@core/http/department/department.api';
-import { IDepartment } from '@core/interfaces/department.interface';
 
 @Component({
   selector: 'app-task-type-home',
@@ -61,7 +60,7 @@ export class TaskTypeHomeComponent implements OnInit {
   relatedView: BaseApiName = 'departments';
   readonly breadcrumbList = ['Cadastro', 'Tipos de atividades'];
   readonly inputSearchFilterList: KeyOfData[] = ['idTaskType', 'name', 'comment'];
-  readonly inputSearchPlaceholder = 'Id ou Tipo';
+  readonly inputSearchPlaceholder = 'Id ou Nome, Comentários';
   readonly initialTableHeaders = [
     {
       id: 0,
@@ -103,6 +102,7 @@ export class TaskTypeHomeComponent implements OnInit {
 
   onRedirectToEditPage = (data: ITaskType): void => {
     this.baseRegisterStore.onSetSlicePropsToNewValue('data', data);
+    this.baseRegisterStore.onSetSlicePropsToNewValue('isEditData', true);
     this.modalStore.onRedirectPage(
       `/${this.deptName}/${this.currentView}/edit/${(this.baseRegisterStore.data() as ITaskType).idTaskType}`
     );

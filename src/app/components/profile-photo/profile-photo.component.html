@@ -1,0 +1,28 @@
+<div class="relative">
+  <div
+    [ngClass]="divClass"
+    class="relative flex flex-col justify-center items-center border border-gray-400 rounded-md aspect-square overflow-hidden">
+    <input
+      #inputFile
+      type="file"
+      id="file-input"
+      accept="image/*"
+      class="hidden overflow-hidden"
+      (change)="uploadFile($event)" />
+    @if (imgPreviewUrl) {
+      <img [src]="imgPreviewUrl" alt="Profile Image" class="w-full h-full object-cover" />
+    }
+    @if (!imgPreviewUrl) {
+      <label
+        for="file-input"
+        class="text-logo absolute flex flex-col justify-center items-center w-full h-full top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
+        ><mat-icon class="text-[2.5rem]">cloud_upload</mat-icon><span>Upload</span></label
+      >
+    }
+  </div>
+  @if (imgPreviewUrl && isForm) {
+    <div class="absolute top-2 right-2">
+      <app-button-close (click)="clearPhoto()"></app-button-close>
+    </div>
+  }
+</div>

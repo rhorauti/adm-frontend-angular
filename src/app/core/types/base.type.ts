@@ -3,6 +3,7 @@ import { IBaseRegisterStore } from '@core/interfaces/base.register.interface';
 import { ICompany, ICompanyDetail } from '@core/interfaces/company.interface';
 import { IDepartment } from '@core/interfaces/department.interface';
 import { IEmployee, IEmployeePosition } from '@core/interfaces/employee.interface';
+import { IProductionLine } from '@core/interfaces/production-line.interface';
 import { ITaskType } from '@core/interfaces/task.interface';
 
 export type StoreType = IBaseRegisterStore<BaseType>;
@@ -17,6 +18,7 @@ export type BaseType =
   | IEmployee
   | IEmployeePosition
   | ITaskType
+  | IProductionLine
   | IDepartment;
 
 type UnionToIntersection<U> = (U extends unknown ? (arg: U) => void : never) extends (
@@ -33,6 +35,7 @@ export type BaseApiName =
   | 'departments'
   | 'employees'
   | 'employee-positions'
+  | 'production-lines'
   | 'task-types';
 
 /**

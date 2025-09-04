@@ -73,11 +73,13 @@ export class TaskTypeFormComponent implements OnInit, OnDestroy, AfterViewInit {
 
   async ngOnInit(): Promise<void> {
     this.subscription = this.activatedRoute.paramMap.subscribe(params => {
-      this.id = Number(params.get('idTaskType')) || 0;
+      this.id = Number(params.get('id')) || 0;
       this.deptName = params.get('department') || '';
     });
-    this.data = this.baseRegisterStore.data() as ITaskType;
-    if (this.baseRegisterStore.isCopiedData()) {
+    if (this.baseRegisterStore.isEditData()) {
+      this.data = this.baseRegisterStore.data() as ITaskType;
+      this.baseRegisterStore.onSetSlicePropsToNewValue('isEditData', false);
+    } else if (this.baseRegisterStore.isCopiedData()) {
       this.data = this.baseRegisterStore.data() as ITaskType;
       this.id = 0;
       this.data.idTaskType = 0;
@@ -111,15 +113,23 @@ export class TaskTypeFormComponent implements OnInit, OnDestroy, AfterViewInit {
     this.modalStore.onRedirectPage(`/${this.deptName}/${this.currentView}`);
   };
 
+  fieldValidation = (): void => {
+    const message = 'O campo Nome do Cargo não pode estar vazio.';
+    if (this.data.name.length == 0) {
+      this.modalStore.onShowInfoModal(`Cadastro de ${this.currentViewTranslatedSingular}`, message);
+      throw Error(message);
+    }
+  };
+
   onSaveRegister = async (onActionOk?: ActionCallback): Promise<void> => {
     try {
       this.modalStore.onLoading(true);
+      this.fieldValidation();
       const deptNameTranslated = translateDeptName(this.deptName);
       const dept = await this.departmentApi.onGetDataByField('name', deptNameTranslated);
       const deptData = dept.data as IDepartment;
       this.data.department = deptData;
-      console.log('dataLocal', this.data);
-      const response = await this.taskApi.onSave(this.data);
+      const response = await this.taskApi.onSave(this.deptName, this.data);
       if (response.status) {
         this.modalStore.onSetModalInfoType('success');
         this.modalStore.onShowInfoModal(
@@ -134,12 +144,18 @@ export class TaskTypeFormComponent implements OnInit, OnDestroy, AfterViewInit {
         );
       }
     } catch (e: unknown) {
-      const error = e as HttpErrorResponse;
-      console.log('custom error', e);
-      this.modalStore.onShowInfoModal(
-        `Cadastro de ${this.currentViewTranslatedSingular}`,
-        error.error.message
-      );
+      if (e instanceof HttpErrorResponse) {
+        const error = e as HttpErrorResponse;
+        this.modalStore.onShowInfoModal(
+          `Cadastro de ${this.currentViewTranslated}`,
+          error.error.message
+        );
+      } else {
+        this.modalStore.onShowInfoModal(
+          `Cadastro de ${this.currentViewTranslated}`,
+          (e as Error).message
+        );
+      }
     } finally {
       this.modalStore.onLoading(false);
     }

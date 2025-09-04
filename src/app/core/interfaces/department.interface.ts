@@ -7,9 +7,5 @@ export interface IDepartment {
 }
 
 export interface IResponseDepartment extends IBaseResponse {
-  data?: IDepartment;
-}
-
-export interface IResponseDepartmentList extends IBaseResponse {
-  data?: IDepartment[];
+  data?: IDepartment | IDepartment[];
 }

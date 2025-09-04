@@ -54,7 +54,7 @@ export class EmployeePositionHomeComponent implements OnInit {
   readonly keyId = 'idEmployeePosition';
   readonly breadcrumbList = ['Cadastro', 'Cargos'];
   readonly inputSearchFilterList: KeyOfData[] = ['idEmployeePosition', 'name'];
-  readonly inputSearchPlaceholder = 'Id ou Cargo';
+  readonly inputSearchPlaceholder = 'Id, Cargo, Comentários';
   readonly initialTableHeaders = [
     {
       id: 0,
@@ -92,6 +92,7 @@ export class EmployeePositionHomeComponent implements OnInit {
 
   onRedirectToEditPage = (data: IEmployeePosition): void => {
     this.baseRegisterStore.onSetSlicePropsToNewValue('data', data);
+    this.baseRegisterStore.onSetSlicePropsToNewValue('isEditData', true);
     this.modalStore.onRedirectPage(
       `/${this.currentView}/edit/${(this.baseRegisterStore.data() as IEmployeePosition)[this.keyId]}`
     );

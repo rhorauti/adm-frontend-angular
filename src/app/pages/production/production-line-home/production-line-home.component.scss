@@ -1,0 +1,19 @@
+.top-button-layout {
+  display: flex;
+  justify-content: space-between;
+}
+
+@media screen and (max-width: 440px) {
+  .top-button-layout {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+  }
+}
+
+@media screen and (min-width: 640px) {
+  .is-hidden-from-640px {
+    display: none !important;
+  }
+}
