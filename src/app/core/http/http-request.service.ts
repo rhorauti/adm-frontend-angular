@@ -21,10 +21,15 @@ export class HttpRequestService {
    * @param authToken token de autenticação
    * @returns Retorna uma promise genérica
    */
-  async sendHttpRequest(path: string, method = 'GET', data?: any): Promise<any> {
+  async sendHttpRequest(
+    path: string,
+    method = 'GET',
+    data?: any,
+    contentType = 'application/json'
+  ): Promise<any> {
     const headers = new HttpHeaders({
       Authorization: `Bearer ${this.authStore.token()}`,
-      'Content-Type': 'application/json',
+      'Content-Type': contentType,
     });
     switch (method) {
       case 'GET': {

@@ -2,7 +2,7 @@ import { IDepartment } from './department.interface';
 import { IBaseResponse } from './response.interface';
 
 export interface ITaskType {
-  idTaskType: number;
+  idTaskType: number | null;
   name: string;
   comment: string;
   department: IDepartment;

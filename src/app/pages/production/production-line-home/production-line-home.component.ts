@@ -152,7 +152,7 @@ export class ProductionLineHomeComponent implements OnInit {
   };
 
   async onDelete(data: IProductionLine): Promise<void> {
-    await this.onDeleteRegister(data[this.keyId]);
+    await this.onDeleteRegister(data[this.keyId] as number);
   }
 
   onShowModalToDelete(data?: IProductionLine): void {

@@ -82,7 +82,7 @@
             </div>
           }
         </div>
-        @for (header of baseRegisterStore.tableHeaders(); track header.id) {
+        @for (header of baseRegisterStore.tableHeaders(); track $index) {
           @if (header.isHeaderActive) {
             <div class="table-td overflow-hidden text-ellipsis">
               @if (data[header.databaseField]) {

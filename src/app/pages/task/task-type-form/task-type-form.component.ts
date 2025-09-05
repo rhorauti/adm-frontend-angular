@@ -59,13 +59,13 @@ export class TaskTypeFormComponent implements OnInit, OnDestroy, AfterViewInit {
   subscription: Subscription | undefined = undefined;
   breadcrumbList: string[] = [];
   deptName = '';
-  id = 0;
+  id: number | null = null;
   data = {
-    idTaskType: 0,
+    idTaskType: null,
     name: '',
     comment: '',
     department: {
-      idDepartment: 0,
+      idDepartment: null,
       name: '',
       comment: '',
     },

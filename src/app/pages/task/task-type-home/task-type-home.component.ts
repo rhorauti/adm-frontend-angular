@@ -154,7 +154,7 @@ export class TaskTypeHomeComponent implements OnInit {
   };
 
   async onDelete(data: ITaskType): Promise<void> {
-    await this.onDeleteRegister(data.idTaskType);
+    await this.onDeleteRegister(data.idTaskType as number);
   }
 
   onShowModalToDelete(data?: ITaskType): void {

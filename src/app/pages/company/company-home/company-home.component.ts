@@ -166,7 +166,7 @@ export class CompanyHomeComponent implements OnInit {
   };
 
   async onDelete(data: ICompany): Promise<void> {
-    await this.onDeleteRegister(data[this.keyId]);
+    await this.onDeleteRegister(data[this.keyId] as number);
   }
 
   onShowModalToDelete(data?: ICompany): void {

@@ -1,7 +1,7 @@
 import { IBaseResponse } from './response.interface';
 
 export interface IDepartment {
-  idDepartment: number;
+  idDepartment: number | null;
   name: string;
   comment: string;
 }

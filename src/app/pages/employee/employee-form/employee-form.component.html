@@ -31,13 +31,13 @@
             <app-select
               [selectType]="'custom'"
               [optionList]="departmentOptionList"
-              [selectValue]="departmentData.name"
+              [selectValue]="departmentData.name || 'Selecione um item'"
               (selectValueEmitter)="setDepartmentValue($event.toString())" />
           </div>
         </div>
         <app-profile-photo
           [imgPreviewUrl]="employeeData.photoUrl ?? ''"
-          (fileUrlEmitter)="(imgPreviewUrl)" />
+          (fileUrlEmitter)="imgPreview = $event" />
       </div>
       <div class="flex flex-col gap-1 grow">
         <label #labelForm class="font-medium text-sm" for="default">Cargo</label>
@@ -58,7 +58,7 @@
       <div class="flex flex-col gap-1 grow">
         <label #labelForm class="font-medium text-sm" for="default">Telefone fixo</label>
         <app-input
-          [inputName]="'custom'"
+          [inputName]="'phone'"
           [inputValue]="employeeData.deskphone ?? ''"
           [type]="'search'"
           (inputValueEmitter)="employeeData.deskphone = $event" />
@@ -66,7 +66,7 @@
       <div class="flex flex-col gap-1 grow">
         <label #labelForm class="font-medium text-sm" for="default">Celular</label>
         <app-input
-          [inputName]="'custom'"
+          [inputName]="'phone'"
           [inputValue]="employeeData.cellphone ?? ''"
           [type]="'search'"
           (inputValueEmitter)="employeeData.cellphone = $event" />

@@ -151,21 +151,19 @@
         </div>
         <div class="flex flex-col gap-1 grow">
           <label #labelForm class="font-medium text-sm" for="default">Depto</label>
-          <app-input
-            [id]="'company-form-employee-department'"
-            [inputName]="'custom'"
-            [inputValue]="(detailedData.employee.idDepartment || '').toString()"
-            [type]="'search'"
-            (inputValueEmitter)="detailedData.employee.idDepartment = +$event" />
+          <app-select
+            [selectType]="'custom'"
+            [optionList]="departmentOptionList"
+            [selectValue]="departmentData.name || 'Selecione um item'"
+            (selectValueEmitter)="setDepartmentValue($event.toString())" />
         </div>
         <div class="flex flex-col gap-1 grow">
           <label #labelForm class="font-medium text-sm" for="default">Cargo</label>
-          <app-input
-            [id]="'company-form-employee-position'"
-            [inputName]="'custom'"
-            [inputValue]="detailedData.employee.employeePosition?.name || ''"
-            [type]="'search'"
-            (inputValueEmitter)="setEmployeePositionValue($event)" />
+          <app-select
+            [selectType]="'custom'"
+            [optionList]="employeePositionOptionList"
+            [selectValue]="employeePositionData[0].name"
+            (selectValueEmitter)="setEmployeePositionValue($event.toString())" />
         </div>
       </div>
       <div class="flex flex-col md:flex-row gap-4">

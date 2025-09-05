@@ -21,11 +21,7 @@ import { DepartmentApi } from '@core/http/department/department.api';
 import { EmployeePositionApi } from '@core/http/employee/employee-position.api';
 import { EmployeeApi } from '@core/http/employee/employee.api';
 import { IDepartment } from '@core/interfaces/department.interface';
-import {
-  IEmployee,
-  IEmployeePayload,
-  IEmployeePosition,
-} from '@core/interfaces/employee.interface';
+import { IEmployee, IEmployeePosition } from '@core/interfaces/employee.interface';
 import { ActionCallback } from '@core/interfaces/modal.interface';
 import { BaseApiName } from '@core/types/base.type';
 import { BaseRegisterStore } from '@store/base/base.register.store';
@@ -49,6 +45,7 @@ import { ProfilePhotoComponent } from '@components/profile-photo/profile-photo.c
 })
 export class EmployeeFormComponent implements OnInit, OnDestroy, AfterViewInit {
   @ViewChildren(InputComponent) inputs!: QueryList<InputComponent>;
+  @ViewChildren(SelectComponent) select!: QueryList<SelectComponent>;
   @ViewChildren('labelForm') private labels!: QueryList<ElementRef>;
   readonly employeeApi = inject(EmployeeApi);
   readonly departmentApi = inject(DepartmentApi);
@@ -64,28 +61,28 @@ export class EmployeeFormComponent implements OnInit, OnDestroy, AfterViewInit {
   currentViewTranslated = 'Funcionários'.slice(0, -1);
   subscription: Subscription | undefined = undefined;
   breadcrumbList: string[] = [];
-  id = 0;
+  id: number | null = null;
   departmentList: IDepartment[] = [];
   departmentOptionList: string[] = [];
   employeePositionList: IEmployeePosition[] = [];
   employeePositionOptionList: string[] = [];
 
   departmentData = {
-    idDepartment: 0,
+    idDepartment: null,
     name: '',
     comment: '',
   } as IDepartment;
 
   employeePositionData = {
-    idEmployeePosition: 0,
+    idEmployeePosition: null,
     name: '',
     comment: '',
   } as IEmployeePosition;
 
-  imgPreviewUrl: File | null = null;
+  imgPreview: File | null = null;
 
   employeeData = {
-    idEmployee: 0,
+    idEmployee: null,
     isDefault: false,
     name: '',
     email: '',
@@ -169,21 +166,44 @@ export class EmployeeFormComponent implements OnInit, OnDestroy, AfterViewInit {
 
   onDefineInputId = () => {
     this.inputs.forEach((input, index) => {
-      input.id = `${this.currentView}-form-${index}`;
+      input.id = `${this.currentView}-form-input-${index}`;
       this.labels.get(index)?.nativeElement.setAttribute('for', input.id);
     });
   };
 
+  onDefineSelectId = () => {
+    this.select.forEach((select, index) => {
+      select.id = `${this.currentView}-form-select-${index}`;
+      this.labels.get(index)?.nativeElement.setAttribute('for', select.id);
+    });
+  };
+
   setDepartmentValue = (deptName: string): void => {
-    const dept = this.departmentList.find(dept => (dept.name = deptName)) as IDepartment;
-    this.departmentData = dept;
+    const dept = this.departmentList.find(dept => dept.name == deptName) as IDepartment;
+    if (dept) {
+      this.departmentData = dept;
+    } else {
+      this.departmentData = {
+        idDepartment: 0,
+        name: '',
+        comment: '',
+      };
+    }
   };
 
   setEmployeePositionValue = (positionName: string): void => {
     const position = this.employeePositionList.find(
-      position => (position.name = positionName)
+      position => position.name == positionName
     ) as IEmployeePosition;
-    this.employeePositionData = position;
+    if (position) {
+      this.employeePositionData = position;
+    } else {
+      this.employeePositionData = {
+        idEmployeePosition: 0,
+        name: '',
+        comment: '',
+      };
+    }
   };
 
   onBackToPreviousPage = (): void => {
@@ -198,69 +218,75 @@ export class EmployeeFormComponent implements OnInit, OnDestroy, AfterViewInit {
     throw Error(message);
   };
 
-  finalData = {
-    idEmployee: 0,
-    isDefault: false,
-    name: '',
-    email: '',
-    imgPreviewUrl: null,
-    cellphone: '',
-    deskphone: '',
-    cpf: '',
-    idCompany: 0,
-    idDepartment: 0,
-    employeePosition: {},
-  } as IEmployeePayload;
-
-  setFinalData = (): void => {
-    this.finalData.idEmployee = this.employeeData.idEmployee;
-    this.finalData.isDefault = this.employeeData.isDefault;
-    this.finalData.name = this.employeeData.name;
-    this.finalData.email = this.employeeData.email;
-    this.finalData.imgPreviewUrl = this.imgPreviewUrl;
-    this.finalData.cellphone = this.employeeData.cellphone;
-    this.finalData.deskphone = this.employeeData.deskphone;
-    this.finalData.cpf = this.employeeData.cpf;
-    this.finalData.idCompany = this.employeeData.idCompany;
-    this.finalData.idDepartment = this.departmentData.idDepartment;
-    this.finalData.employeePosition = this.employeePositionData;
+  setFinalData = (): FormData => {
+    const formData = new FormData();
+    if (this.imgPreview) {
+      formData.append('imgPreview', this.imgPreview, this.imgPreview.name);
+    }
+    if (this.employeeData.idEmployee) {
+      formData.append('idEmployee', this.employeeData.idEmployee.toString());
+    }
+    formData.append('isDefault', this.employeeData.isDefault.toString());
+    formData.append('name', this.employeeData.name);
+    formData.append('email', this.employeeData.email ?? '');
+    formData.append('cellphone', this.employeeData.cellphone ?? '');
+    formData.append('deskphone', this.employeeData.deskphone ?? '');
+    formData.append('cpf', this.employeeData.cpf ?? '');
+    formData.append('idCompany', (this.employeeData.idCompany ?? 0).toString());
+    if (this.departmentData.idDepartment) {
+      formData.append('idDepartment', this.departmentData.idDepartment.toString());
+    }
+    formData.append('employeePosition', JSON.stringify(this.employeePositionData));
+    return formData;
   };
 
   onSaveRegister = async (onActionOk?: ActionCallback): Promise<void> => {
-    try {
-      this.setFinalData();
-      this.modalStore.onLoading(true);
-      this.fieldValidation();
-      const response = await this.employeeApi.onSave(this.finalData);
-      if (response.status) {
-        this.modalStore.onSetModalInfoType('success');
-        this.modalStore.onShowInfoModal(
-          `Cadastro de ${this.currentViewTranslated}`,
-          response.message,
-          onActionOk
-        );
-      } else {
-        this.modalStore.onShowInfoModal(
-          `Cadastro de ${this.currentViewTranslated}`,
-          response.error?.message || ''
-        );
-      }
-    } catch (e: unknown) {
-      if (e instanceof HttpErrorResponse) {
-        const error = e as HttpErrorResponse;
-        this.modalStore.onShowInfoModal(
-          `Cadastro de ${this.currentViewTranslated}`,
-          error.error.message
-        );
-      } else {
-        this.modalStore.onShowInfoModal(
-          `Cadastro de ${this.currentViewTranslated}`,
-          (e as Error).message
-        );
-      }
-    } finally {
-      this.modalStore.onLoading(false);
-    }
+    const finalData = this.setFinalData();
+    console.log(finalData.getAll('idEmployee'));
+    console.log(finalData.getAll('isDefault'));
+    console.log(finalData.getAll('name'));
+    console.log(finalData.getAll('email'));
+    console.log(finalData.getAll('cellphone'));
+    console.log(finalData.getAll('deskphone'));
+    console.log(finalData.getAll('cpf'));
+    console.log(finalData.getAll('idCompany'));
+    console.log(finalData.getAll('idDepartment'));
+    console.log(finalData.getAll('employeePosition'));
+    console.log(finalData.getAll('imgPreview'));
+    // try {
+    //   this.setFinalData();
+    //   this.modalStore.onLoading(true);
+    //   this.fieldValidation();
+    //   const response = await this.employeeApi.onSave(this.finalData);
+    //   if (response.status) {
+    //     this.modalStore.onSetModalInfoType('success');
+    //     this.modalStore.onShowInfoModal(
+    //       `Cadastro de ${this.currentViewTranslated}`,
+    //       response.message,
+    //       onActionOk
+    //     );
+    //   } else {
+    //     this.modalStore.onShowInfoModal(
+    //       `Cadastro de ${this.currentViewTranslated}`,
+    //       response.error?.message || ''
+    //     );
+    //   }
+    // } catch (e: unknown) {
+    //   if (e instanceof HttpErrorResponse) {
+    //     const error = e as HttpErrorResponse;
+    //     this.modalStore.onShowInfoModal(
+    //       `Cadastro de ${this.currentViewTranslated}`,
+    //       error.error.message
+    //     );
+    //   } else {
+    //     this.modalStore.onShowInfoModal(
+    //       `Cadastro de ${this.currentViewTranslated}`,
+    //       (e as Error).message
+    //     );
+    //   }
+    // } finally {
+    //   this.modalStore.onLoading(false);
+    // }
   };
 
   ngOnDestroy() {

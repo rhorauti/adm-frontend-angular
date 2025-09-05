@@ -144,7 +144,7 @@ export class EmployeePositionHomeComponent implements OnInit {
   };
 
   async onDelete(data: IEmployeePosition): Promise<void> {
-    await this.onDeleteRegister(data[this.keyId]);
+    await this.onDeleteRegister(data[this.keyId] as number);
   }
 
   onShowModalToDelete(data?: IEmployeePosition): void {

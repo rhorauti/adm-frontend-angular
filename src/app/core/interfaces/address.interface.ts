@@ -1,7 +1,7 @@
 import { IBaseResponse } from './response.interface';
 
 export interface IAddress {
-  idAddress: number;
+  idAddress: number | null;
   postalCode: string;
   address: string;
   number?: string;

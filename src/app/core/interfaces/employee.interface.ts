@@ -1,7 +1,7 @@
 import { IBaseResponse } from './response.interface';
 
 export interface IEmployee {
-  idEmployee: number;
+  idEmployee: number | null;
   isDefault: boolean;
   name: string;
   cpf?: string;
@@ -11,12 +11,12 @@ export interface IEmployee {
   photoUrl?: string;
   idDepartment?: number;
   idCompany?: number;
-  employeePosition?: IEmployeePosition;
+  employeePosition?: IEmployeePosition[];
 }
 
-export type IEmployeePayload = Omit<IEmployee, 'photoUrl'> & {
-  imgPreviewUrl?: File | null;
-  employeePosition?: IEmployeePosition;
+export type IEmployeePayload = Omit<IEmployee, 'photoUrl' | 'employeePosition'> & {
+  imgPreview?: FormData | null;
+  employeePosition?: IEmployeePosition[];
 };
 
 export interface IResponseEmployee extends IBaseResponse {
@@ -24,11 +24,11 @@ export interface IResponseEmployee extends IBaseResponse {
 }
 
 export interface IEmployeePosition {
-  idEmployeePosition: number;
+  idEmployeePosition: number | null;
   name: string;
   comment: string;
 }
 
 export interface IEmployeePositionResponse extends IBaseResponse {
-  data?: IEmployeePosition | IEmployeePosition[];
+  data?: IEmployeePosition[];
 }

@@ -3,7 +3,7 @@ import { IEmployee, IEmployeePayload } from './employee.interface';
 import { IBaseResponse } from './response.interface';
 
 export interface ICompany {
-  idCompany: number;
+  idCompany: number | null;
   nickname: string;
   name: string;
   cnpj?: string;
