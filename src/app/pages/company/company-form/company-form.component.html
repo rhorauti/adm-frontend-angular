@@ -162,7 +162,7 @@
           <app-select
             [selectType]="'custom'"
             [optionList]="employeePositionOptionList"
-            [selectValue]="employeePositionData[0].name"
+            [selectValue]="employeePositionData.name"
             (selectValueEmitter)="setEmployeePositionValue($event.toString())" />
         </div>
       </div>

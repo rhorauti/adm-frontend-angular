@@ -1,3 +1,4 @@
+import { IDepartment } from './department.interface';
 import { IBaseResponse } from './response.interface';
 
 export interface IEmployee {
@@ -9,14 +10,14 @@ export interface IEmployee {
   deskphone?: string;
   cellphone?: string;
   photoUrl?: string;
-  idDepartment?: number;
+  department?: IDepartment;
   idCompany?: number;
-  employeePosition?: IEmployeePosition[];
+  employeePosition?: IEmployeePosition;
 }
 
 export type IEmployeePayload = Omit<IEmployee, 'photoUrl' | 'employeePosition'> & {
   imgPreview?: FormData | null;
-  employeePosition?: IEmployeePosition[];
+  employeePosition?: IEmployeePosition;
 };
 
 export interface IResponseEmployee extends IBaseResponse {
