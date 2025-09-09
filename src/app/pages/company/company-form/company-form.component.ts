@@ -111,6 +111,8 @@ export class CompanyFormComponent implements OnInit, OnDestroy, AfterViewInit {
       email: '',
       deskphone: '',
       cellphone: '',
+      position: '',
+      department: '',
     } as IEmployee,
   } as ICompanyDetails;
 
@@ -118,8 +120,8 @@ export class CompanyFormComponent implements OnInit, OnDestroy, AfterViewInit {
     this.subscription = this.activatedRoute.paramMap.subscribe(params => {
       this.id = Number(params.get('id')) || 0;
     });
-    this.onGetDepartmentList();
-    this.onGetEmployeePositionList();
+    await this.onGetDepartmentList();
+    await this.onGetEmployeePositionList();
     if (this.id != 0) {
       await this.onGetDataDetails();
     } else {
@@ -166,15 +168,12 @@ export class CompanyFormComponent implements OnInit, OnDestroy, AfterViewInit {
         if (detaildDataResponse.data) {
           this.detailedData = detaildDataResponse.data;
           const dept = this.departmentList.find(
-            dept => dept.idDepartment == this.detailedData.employee.department?.idDepartment
-          ) as IDepartment;
-          this.departmentData = dept;
-          const position = this.employeePositionList.find(
-            position =>
-              position.idEmployeePosition ==
-              this.detailedData.employee?.employeePosition?.idEmployeePosition
-          ) as IEmployeePosition;
-          this.employeePositionData = position;
+            d => d.name === (this.detailedData.employee as IEmployeePayload).department?.name
+          );
+          this.departmentData = dept ?? { idDepartment: null, name: '', comment: '' };
+          const posName = (this.detailedData.employee as IEmployeePayload).employeePosition?.name;
+          const pos = this.employeePositionList.find(p => p.name === posName);
+          this.employeePositionData = pos ?? { idEmployeePosition: null, name: '', comment: '' };
         } else {
           return;
         }
@@ -235,7 +234,7 @@ export class CompanyFormComponent implements OnInit, OnDestroy, AfterViewInit {
       this.departmentData = dept;
     } else {
       this.departmentData = {
-        idDepartment: 0,
+        idDepartment: null,
         name: '',
         comment: '',
       };
@@ -250,7 +249,7 @@ export class CompanyFormComponent implements OnInit, OnDestroy, AfterViewInit {
       this.employeePositionData = position;
     } else {
       this.employeePositionData = {
-        idEmployeePosition: 0,
+        idEmployeePosition: null,
         name: '',
         comment: '',
       };
@@ -303,8 +302,8 @@ export class CompanyFormComponent implements OnInit, OnDestroy, AfterViewInit {
       email: '',
       deskphone: '',
       cellphone: '',
-      department: {} as IDepartment,
-      employeePosition: {} as IEmployeePosition,
+      department: null,
+      employeePosition: null,
     } as IEmployeePayload,
   } as ICompanyDetails;
 
@@ -335,7 +334,7 @@ export class CompanyFormComponent implements OnInit, OnDestroy, AfterViewInit {
     this.finalData.employee.isDefault = this.detailedData.employee.isDefault;
     this.finalData.employee.name = (this.detailedData.employee.name ?? '').trim();
     this.finalData.employee.department = this.departmentData ?? 0;
-    this.finalData.employee.employeePosition = this.employeePositionData;
+    (this.finalData.employee as IEmployeePayload).employeePosition = this.employeePositionData;
     this.finalData.employee.email = (this.detailedData.employee.email ?? '').trim();
     this.finalData.employee.deskphone = this.baseRegisterStore.onMaskNumericalField(
       (this.detailedData.employee.deskphone ?? '')?.trim()

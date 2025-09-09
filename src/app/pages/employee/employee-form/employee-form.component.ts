@@ -21,7 +21,11 @@ import { DepartmentApi } from '@core/http/department/department.api';
 import { EmployeePositionApi } from '@core/http/employee/employee-position.api';
 import { EmployeeApi } from '@core/http/employee/employee.api';
 import { IDepartment } from '@core/interfaces/department.interface';
-import { IEmployee, IEmployeePosition } from '@core/interfaces/employee.interface';
+import {
+  IEmployee,
+  IEmployeePayload,
+  IEmployeePosition,
+} from '@core/interfaces/employee.interface';
 import { ActionCallback } from '@core/interfaces/modal.interface';
 import { BaseApiName } from '@core/types/base.type';
 import { BaseRegisterStore } from '@store/base/base.register.store';
@@ -90,20 +94,27 @@ export class EmployeeFormComponent implements OnInit, OnDestroy, AfterViewInit {
     cellphone: '',
     deskphone: '',
     cpf: '',
-    idCompany: 0,
   } as IEmployee;
 
   async ngOnInit(): Promise<void> {
     this.subscription = this.activatedRoute.paramMap.subscribe(params => {
       this.id = Number(params.get('id')) || 0;
     });
-    this.onGetDepartmentList();
-    this.onGetEmployeePositionList();
+    await this.onGetDepartmentList();
+    await this.onGetEmployeePositionList();
+    this.employeeData = this.baseRegisterStore.data() as IEmployee;
+    const dept = this.departmentList.find(
+      d => d.name === (this.employeeData as IEmployee).department
+    );
+    this.departmentData = dept ?? { idDepartment: null, name: '', comment: '' };
+    const posName = (this.employeeData as IEmployee).position;
+    const pos = this.employeePositionList.find(p => p.name === posName);
+    this.employeePositionData = pos ?? { idEmployeePosition: null, name: '', comment: '' };
+    console.log('this.departmentData', this.departmentData);
+    console.log('this.employeePositionData', this.employeePositionData);
     if (this.baseRegisterStore.isEditData()) {
-      this.employeeData = this.baseRegisterStore.data() as IEmployee;
       this.baseRegisterStore.onSetSlicePropsToNewValue('isEditData', false);
     } else if (this.baseRegisterStore.isCopiedData()) {
-      this.employeeData = this.baseRegisterStore.data() as IEmployee;
       this.id = 0;
       this.employeeData.idEmployee = 0;
       this.baseRegisterStore.onSetSlicePropsToNewValue('isCopiedData', false);
@@ -232,11 +243,19 @@ export class EmployeeFormComponent implements OnInit, OnDestroy, AfterViewInit {
     formData.append('cellphone', this.employeeData.cellphone ?? '');
     formData.append('deskphone', this.employeeData.deskphone ?? '');
     formData.append('cpf', this.employeeData.cpf ?? '');
-    formData.append('idCompany', (this.employeeData.idCompany ?? 0).toString());
-    if (this.departmentData.idDepartment) {
-      formData.append('idDepartment', this.departmentData.idDepartment.toString());
+    formData.append('company', JSON.stringify(this.employeeData.company));
+    if (this.departmentData) {
+      formData.append(
+        'department',
+        JSON.stringify(this.departmentData ?? { idDepartment: null, name: '', comment: '' })
+      );
     }
-    formData.append('employeePosition', JSON.stringify(this.employeePositionData));
+    formData.append(
+      'employeePosition',
+      JSON.stringify(
+        this.employeePositionData ?? { idEmployeePosition: null, name: '', comment: '' }
+      )
+    );
     return formData;
   };
 
@@ -250,7 +269,7 @@ export class EmployeeFormComponent implements OnInit, OnDestroy, AfterViewInit {
     console.log(finalData.getAll('deskphone'));
     console.log(finalData.getAll('cpf'));
     console.log(finalData.getAll('idCompany'));
-    console.log(finalData.getAll('idDepartment'));
+    console.log(finalData.getAll('department'));
     console.log(finalData.getAll('employeePosition'));
     console.log(finalData.getAll('imgPreview'));
     // try {

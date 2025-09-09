@@ -10,15 +10,28 @@ export interface IEmployee {
   deskphone?: string;
   cellphone?: string;
   photoUrl?: string;
-  department?: IDepartment;
-  idCompany?: number;
-  employeePosition?: IEmployeePosition;
+  company?: string;
+  department?: string | null;
+  position?: string | null;
 }
 
-export type IEmployeePayload = Omit<IEmployee, 'photoUrl' | 'employeePosition'> & {
-  imgPreview?: FormData | null;
-  employeePosition?: IEmployeePosition;
-};
+export interface IEmployeePayload {
+  idEmployee: number | null;
+  isDefault: boolean;
+  name: string;
+  cpf?: string;
+  email?: string;
+  deskphone?: string;
+  cellphone?: string;
+  photoUrl?: string;
+  department?: IDepartment | null;
+  employeePosition?: IEmployeePosition | null;
+}
+
+// export type IEmployeePayload = Omit<IEmployee, 'photoUrl' | 'employeePosition'> & {
+//   imgPreview?: FormData | null;
+//   employeePosition?: IEmployeePosition;
+// };
 
 export interface IResponseEmployee extends IBaseResponse {
   data?: IEmployee | IEmployee[];
