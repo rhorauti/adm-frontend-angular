@@ -63,7 +63,7 @@ export class MenuComponent {
           idSublink: 2,
           name: 'Funcionários',
 
-          routerLink: '/employees',
+          routerLink: '/1/employees',
         },
       ],
     },

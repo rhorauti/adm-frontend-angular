@@ -77,15 +77,15 @@ export const routes: Routes = [
     component: DepartmentFormComponent,
   },
   {
-    path: 'employees',
+    path: ':idCompany/employees',
     component: EmployeeHomeComponent,
   },
   {
-    path: 'employees/new',
+    path: ':idCompany/employees/new',
     component: EmployeeFormComponent,
   },
   {
-    path: 'employees/edit/:id',
+    path: ':idCompany/employees/edit/:idEmployee',
     component: EmployeeFormComponent,
   },
   {

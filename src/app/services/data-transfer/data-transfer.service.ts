@@ -21,8 +21,6 @@ export class DataTransferService<T> {
   pushItemToArray = (item: T extends (infer E)[] ? E : never): void => {
     if (Array.isArray(this.data)) {
       this.data.push(item as unknown);
-    } else {
-      console.log('Data is not an array');
     }
   };
 

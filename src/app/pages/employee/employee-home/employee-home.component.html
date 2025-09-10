@@ -27,7 +27,7 @@
         </div>
         <div class="flex gap-3">
           <app-button-icon
-            (click)="modalStore.onRedirectPage(`/${currentView}/new`)"
+            (click)="modalStore.onRedirectPage(`/${idCompany}/${currentView}/new`)"
             [iconName]="'add'" />
           <app-button-delete
             (click)="onShowModalToDelete()"
@@ -100,7 +100,7 @@
       <p class="font-semibold">Nenhum registro encontrado</p>
       @if (!baseRegisterStore.isFilterResultZeroRegister()) {
         <app-button-label
-          (click)="modalStore.onRedirectPage(`/${currentView}/new`)"
+          (click)="modalStore.onRedirectPage(`/${idCompany}/${currentView}/new`)"
           [showLeftIcon]="true"
           [iconRightName]="'add'"
           [label]="'Adicionar um novo registro'" />

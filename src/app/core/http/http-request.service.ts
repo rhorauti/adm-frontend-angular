@@ -27,10 +27,13 @@ export class HttpRequestService {
     data?: any,
     contentType = 'application/json'
   ): Promise<any> {
-    const headers = new HttpHeaders({
+    const isFormData = typeof FormData !== 'undefined' && data instanceof FormData;
+    let headers = new HttpHeaders({
       Authorization: `Bearer ${this.authStore.token()}`,
-      'Content-Type': contentType,
     });
+    if (!isFormData) {
+      headers = headers.set('Content-Type', contentType);
+    }
     switch (method) {
       case 'GET': {
         return await lastValueFrom(this.httpClient.get(path, { headers }));

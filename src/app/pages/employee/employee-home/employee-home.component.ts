@@ -1,4 +1,4 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject, OnDestroy, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { TableComponent } from '@components/table/table.component';
 import { BreadcrumbComponent } from '@components/breadcrumb/breadcrumb.component';
@@ -22,6 +22,8 @@ import { KeyOfData } from '@core/types/base.type';
 import { ITableHeader } from '@core/interfaces/table.interface';
 import { EmployeeApi } from '@core/http/employee/employee.api';
 import { IEmployee } from '@core/interfaces/employee.interface';
+import { ActivatedRoute } from '@angular/router';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-employee-home',
@@ -43,9 +45,10 @@ import { IEmployee } from '@core/interfaces/employee.interface';
   templateUrl: './employee-home.component.html',
   styleUrl: './employee-home.component.scss',
 })
-export class EmployeeHomeComponent implements OnInit {
+export class EmployeeHomeComponent implements OnInit, OnDestroy {
   readonly employeeApi = inject(EmployeeApi);
   readonly baseRegisterStore = inject(BaseRegisterStore);
+  private activatedRoute = inject(ActivatedRoute);
   readonly authStore = inject(AuthStore);
   readonly modalStore = inject(ModalStore);
 
@@ -122,8 +125,13 @@ export class EmployeeHomeComponent implements OnInit {
     },
   ] as ITableHeader<IEmployee>[];
   tableHeadersLocalStorageId = `table_headers_${this.currentView} + ${this.authStore.user().id}`;
+  idCompany = 0;
+  subscription: Subscription | undefined = undefined;
 
   async ngOnInit() {
+    this.activatedRoute.paramMap.subscribe(params => {
+      this.idCompany = Number(params.get('idCompany')) || 0;
+    });
     this.onShowDataList();
     const tableHeaders = await loadStorage(this.tableHeadersLocalStorageId);
     const headers = tableHeaders ? tableHeaders : this.initialTableHeaders;
@@ -134,20 +142,20 @@ export class EmployeeHomeComponent implements OnInit {
     this.baseRegisterStore.onSetSlicePropsToNewValue('data', data);
     this.baseRegisterStore.onSetSlicePropsToNewValue('isEditData', true);
     this.modalStore.onRedirectPage(
-      `/${this.currentView}/edit/${(this.baseRegisterStore.data() as IEmployee)[this.keyId]}`
+      `/${this.idCompany}/${this.currentView}/edit/${(this.baseRegisterStore.data() as IEmployee)[this.keyId]}`
     );
   };
 
   onCloneRegister = async (data: IEmployee): Promise<void> => {
     this.baseRegisterStore.onSetSlicePropsToNewValue('isCopiedData', true);
     this.baseRegisterStore.onSetSlicePropsToNewValue('data', data);
-    this.modalStore.onRedirectPage(`/${this.currentView}/new`);
+    this.modalStore.onRedirectPage(`/${this.idCompany}/${this.currentView}/new`);
   };
 
   onShowDataList = async (): Promise<void> => {
     try {
       this.modalStore.onLoading(true);
-      const response = await this.employeeApi.onGetDataList();
+      const response = await this.employeeApi.onGetDataList(this.idCompany);
       if (response.data) {
         const data = response.data as IEmployee[];
         this.baseRegisterStore.onSetSlicePropsToNewValue('initialData', data);
@@ -164,10 +172,10 @@ export class EmployeeHomeComponent implements OnInit {
     }
   };
 
-  onDeleteRegister = async (id: number, onActionOk?: ActionCallback): Promise<void> => {
+  onDeleteRegister = async (idEmployee: number, onActionOk?: ActionCallback): Promise<void> => {
     try {
       this.modalStore.onLoading(true);
-      const response = await this.employeeApi.onDelete(id);
+      const response = await this.employeeApi.onDelete(this.idCompany, idEmployee);
       if (response.status) {
         this.onShowDataList();
         this.modalStore.onSetModalInfoType('success');
@@ -194,5 +202,9 @@ export class EmployeeHomeComponent implements OnInit {
       `Deseja excluir o registro <b>${selectedData.name}</b>?`,
       () => this.onDelete(selectedData)
     );
+  }
+
+  ngOnDestroy() {
+    this.subscription?.unsubscribe();
   }
 }

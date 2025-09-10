@@ -21,11 +21,7 @@ import { DepartmentApi } from '@core/http/department/department.api';
 import { EmployeePositionApi } from '@core/http/employee/employee-position.api';
 import { EmployeeApi } from '@core/http/employee/employee.api';
 import { IDepartment } from '@core/interfaces/department.interface';
-import {
-  IEmployee,
-  IEmployeePayload,
-  IEmployeePosition,
-} from '@core/interfaces/employee.interface';
+import { IEmployee, IEmployeePosition } from '@core/interfaces/employee.interface';
 import { ActionCallback } from '@core/interfaces/modal.interface';
 import { BaseApiName } from '@core/types/base.type';
 import { BaseRegisterStore } from '@store/base/base.register.store';
@@ -65,7 +61,8 @@ export class EmployeeFormComponent implements OnInit, OnDestroy, AfterViewInit {
   currentViewTranslated = 'Funcionários'.slice(0, -1);
   subscription: Subscription | undefined = undefined;
   breadcrumbList: string[] = [];
-  id: number | null = null;
+  idEmployee = 0;
+  idCompany = 0;
   departmentList: IDepartment[] = [];
   departmentOptionList: string[] = [];
   employeePositionList: IEmployeePosition[] = [];
@@ -98,7 +95,8 @@ export class EmployeeFormComponent implements OnInit, OnDestroy, AfterViewInit {
 
   async ngOnInit(): Promise<void> {
     this.subscription = this.activatedRoute.paramMap.subscribe(params => {
-      this.id = Number(params.get('id')) || 0;
+      this.idEmployee = Number(params.get('idEmployee')) || 0;
+      this.idCompany = Number(params.get('idCompany')) || 0;
     });
     await this.onGetDepartmentList();
     await this.onGetEmployeePositionList();
@@ -110,12 +108,10 @@ export class EmployeeFormComponent implements OnInit, OnDestroy, AfterViewInit {
     const posName = (this.employeeData as IEmployee).position;
     const pos = this.employeePositionList.find(p => p.name === posName);
     this.employeePositionData = pos ?? { idEmployeePosition: null, name: '', comment: '' };
-    console.log('this.departmentData', this.departmentData);
-    console.log('this.employeePositionData', this.employeePositionData);
     if (this.baseRegisterStore.isEditData()) {
       this.baseRegisterStore.onSetSlicePropsToNewValue('isEditData', false);
     } else if (this.baseRegisterStore.isCopiedData()) {
-      this.id = 0;
+      this.idEmployee = 0;
       this.employeeData.idEmployee = 0;
       this.baseRegisterStore.onSetSlicePropsToNewValue('isCopiedData', false);
     }
@@ -163,7 +159,7 @@ export class EmployeeFormComponent implements OnInit, OnDestroy, AfterViewInit {
   };
 
   defineTitle = (): string => {
-    if (this.id == 0) {
+    if (this.idEmployee == 0) {
       return 'Novo Registro';
     } else {
       return this.employeeData.name;
@@ -218,21 +214,21 @@ export class EmployeeFormComponent implements OnInit, OnDestroy, AfterViewInit {
   };
 
   onBackToPreviousPage = (): void => {
-    this.modalStore.onRedirectPage(`/${this.currentView}`);
+    this.modalStore.onRedirectPage(`/${this.idCompany}/${this.currentView}`);
   };
 
-  fieldValidation = (): void => {
-    let message = '';
-    if (this.employeeData && this.employeeData.name.length == 0) {
-      message = 'O campo Nome do Cargo não pode estar vazio.';
-    }
-    throw Error(message);
-  };
+  // fieldValidation = (): void => {
+  //   let message = '';
+  //   if (this.employeeData && this.employeeData.name.length == 0) {
+  //     message = 'O campo Nome do Cargo não pode estar vazio.';
+  //   }
+  //   throw Error(message);
+  // };
 
   setFinalData = (): FormData => {
     const formData = new FormData();
     if (this.imgPreview) {
-      formData.append('imgPreview', this.imgPreview, this.imgPreview.name);
+      formData.append('file', this.imgPreview, this.imgPreview.name);
     }
     if (this.employeeData.idEmployee) {
       formData.append('idEmployee', this.employeeData.idEmployee.toString());
@@ -243,7 +239,6 @@ export class EmployeeFormComponent implements OnInit, OnDestroy, AfterViewInit {
     formData.append('cellphone', this.employeeData.cellphone ?? '');
     formData.append('deskphone', this.employeeData.deskphone ?? '');
     formData.append('cpf', this.employeeData.cpf ?? '');
-    formData.append('company', JSON.stringify(this.employeeData.company));
     if (this.departmentData) {
       formData.append(
         'department',
@@ -260,52 +255,39 @@ export class EmployeeFormComponent implements OnInit, OnDestroy, AfterViewInit {
   };
 
   onSaveRegister = async (onActionOk?: ActionCallback): Promise<void> => {
-    const finalData = this.setFinalData();
-    console.log(finalData.getAll('idEmployee'));
-    console.log(finalData.getAll('isDefault'));
-    console.log(finalData.getAll('name'));
-    console.log(finalData.getAll('email'));
-    console.log(finalData.getAll('cellphone'));
-    console.log(finalData.getAll('deskphone'));
-    console.log(finalData.getAll('cpf'));
-    console.log(finalData.getAll('idCompany'));
-    console.log(finalData.getAll('department'));
-    console.log(finalData.getAll('employeePosition'));
-    console.log(finalData.getAll('imgPreview'));
-    // try {
-    //   this.setFinalData();
-    //   this.modalStore.onLoading(true);
-    //   this.fieldValidation();
-    //   const response = await this.employeeApi.onSave(this.finalData);
-    //   if (response.status) {
-    //     this.modalStore.onSetModalInfoType('success');
-    //     this.modalStore.onShowInfoModal(
-    //       `Cadastro de ${this.currentViewTranslated}`,
-    //       response.message,
-    //       onActionOk
-    //     );
-    //   } else {
-    //     this.modalStore.onShowInfoModal(
-    //       `Cadastro de ${this.currentViewTranslated}`,
-    //       response.error?.message || ''
-    //     );
-    //   }
-    // } catch (e: unknown) {
-    //   if (e instanceof HttpErrorResponse) {
-    //     const error = e as HttpErrorResponse;
-    //     this.modalStore.onShowInfoModal(
-    //       `Cadastro de ${this.currentViewTranslated}`,
-    //       error.error.message
-    //     );
-    //   } else {
-    //     this.modalStore.onShowInfoModal(
-    //       `Cadastro de ${this.currentViewTranslated}`,
-    //       (e as Error).message
-    //     );
-    //   }
-    // } finally {
-    //   this.modalStore.onLoading(false);
-    // }
+    try {
+      const finalData = this.setFinalData();
+      this.modalStore.onLoading(true);
+      const response = await this.employeeApi.onSave(this.idCompany, finalData);
+      if (response.status) {
+        this.modalStore.onSetModalInfoType('success');
+        this.modalStore.onShowInfoModal(
+          `Cadastro de ${this.currentViewTranslated}`,
+          response.message,
+          onActionOk
+        );
+      } else {
+        this.modalStore.onShowInfoModal(
+          `Cadastro de ${this.currentViewTranslated}`,
+          response.error?.message || ''
+        );
+      }
+    } catch (e: unknown) {
+      if (e instanceof HttpErrorResponse) {
+        const error = e as HttpErrorResponse;
+        this.modalStore.onShowInfoModal(
+          `Cadastro de ${this.currentViewTranslated}`,
+          error.error.message
+        );
+      } else {
+        this.modalStore.onShowInfoModal(
+          `Cadastro de ${this.currentViewTranslated}`,
+          (e as Error).message
+        );
+      }
+    } finally {
+      this.modalStore.onLoading(false);
+    }
   };
 
   ngOnDestroy() {

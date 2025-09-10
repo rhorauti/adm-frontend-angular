@@ -1,6 +1,6 @@
 import { inject, Injectable } from '@angular/core';
 import { HttpRequestService } from '../http-request.service';
-import { IEmployee, IResponseEmployee } from '@core/interfaces/employee.interface';
+import { IResponseEmployee } from '@core/interfaces/employee.interface';
 import { environment } from '@environments/environment';
 
 @Injectable({
@@ -10,31 +10,31 @@ export class EmployeeApi {
   private httpRequestService = inject(HttpRequestService);
   private baseApiName = 'employees';
 
-  async onGetData(idCompany: number): Promise<IResponseEmployee> {
+  async onGetData(idCompany: number, idEmployee: number): Promise<IResponseEmployee> {
     return await this.httpRequestService.sendHttpRequest(
-      `${environment.apiUrl}/${this.baseApiName}/${idCompany}`,
+      `${environment.apiUrl}/${idCompany}/${this.baseApiName}/${idEmployee}`,
       'GET'
     );
   }
 
-  async onGetDataList(): Promise<IResponseEmployee> {
+  async onGetDataList(idCompany: number): Promise<IResponseEmployee> {
     return await this.httpRequestService.sendHttpRequest(
-      `${environment.apiUrl}/${this.baseApiName}`,
+      `${environment.apiUrl}/${idCompany}/${this.baseApiName}`,
       'GET'
     );
   }
 
-  async onSave(data: IEmployee): Promise<IResponseEmployee> {
+  async onSave(idCompany: number, data: FormData): Promise<IResponseEmployee> {
     return await this.httpRequestService.sendHttpRequest(
-      `${environment.apiUrl}/${this.baseApiName}`,
+      `${environment.apiUrl}/${idCompany}/${this.baseApiName}`,
       'POST',
       data
     );
   }
 
-  async onDelete(id: number): Promise<IResponseEmployee> {
+  async onDelete(idCompany: number, idEmployee: number): Promise<IResponseEmployee> {
     return await this.httpRequestService.sendHttpRequest(
-      `${environment.apiUrl}/${this.baseApiName}/${id}`,
+      `${environment.apiUrl}/${idCompany}/${this.baseApiName}/${idEmployee}`,
       'DELETE'
     );
   }
