@@ -56,7 +56,13 @@ export class EmployeeHomeComponent implements OnInit, OnDestroy {
   readonly currentViewTranslated = 'Funcionários';
   readonly keyId = 'idEmployee';
   readonly breadcrumbList = ['Cadastro', 'Funcionários'];
-  readonly inputSearchFilterList: KeyOfData[] = ['idEmployee', 'name', 'email'];
+  readonly inputSearchFilterList: KeyOfData[] = [
+    'idEmployee',
+    'department',
+    'name',
+    'email',
+    'position',
+  ];
   readonly inputSearchPlaceholder = 'Id, Nome, Email';
   readonly initialTableHeaders = [
     {
@@ -72,8 +78,8 @@ export class EmployeeHomeComponent implements OnInit, OnDestroy {
       isHeaderActive: true,
       sortDirection: 0,
       icon: defaultTableHeaderIcon,
-      headerName: 'Foto',
-      databaseField: 'photoUrl',
+      headerName: 'Departmento',
+      databaseField: 'department',
     },
     {
       id: 2,
@@ -88,19 +94,11 @@ export class EmployeeHomeComponent implements OnInit, OnDestroy {
       isHeaderActive: true,
       sortDirection: 0,
       icon: defaultTableHeaderIcon,
-      headerName: 'Departmento',
-      databaseField: 'department',
-    },
-    {
-      id: 4,
-      isHeaderActive: true,
-      sortDirection: 0,
-      icon: defaultTableHeaderIcon,
       headerName: 'Cargo',
       databaseField: 'position',
     },
     {
-      id: 5,
+      id: 4,
       isHeaderActive: true,
       sortDirection: 0,
       icon: defaultTableHeaderIcon,
@@ -108,7 +106,7 @@ export class EmployeeHomeComponent implements OnInit, OnDestroy {
       databaseField: 'email',
     },
     {
-      id: 6,
+      id: 5,
       isHeaderActive: true,
       sortDirection: 0,
       icon: defaultTableHeaderIcon,
@@ -116,7 +114,7 @@ export class EmployeeHomeComponent implements OnInit, OnDestroy {
       databaseField: 'deskphone',
     },
     {
-      id: 7,
+      id: 6,
       isHeaderActive: true,
       sortDirection: 0,
       icon: defaultTableHeaderIcon,

@@ -81,6 +81,7 @@ export class EmployeeFormComponent implements OnInit, OnDestroy, AfterViewInit {
   } as IEmployeePosition;
 
   imgPreview: File | null = null;
+  isRemovedPhoto = false;
 
   employeeData = {
     idEmployee: null,
@@ -100,7 +101,15 @@ export class EmployeeFormComponent implements OnInit, OnDestroy, AfterViewInit {
     });
     await this.onGetDepartmentList();
     await this.onGetEmployeePositionList();
-    this.employeeData = this.baseRegisterStore.data() as IEmployee;
+    if (this.baseRegisterStore.isEditData()) {
+      this.employeeData = this.baseRegisterStore.data() as IEmployee;
+      this.baseRegisterStore.onSetSlicePropsToNewValue('isEditData', false);
+    } else if (this.baseRegisterStore.isCopiedData()) {
+      this.employeeData = this.baseRegisterStore.data() as IEmployee;
+      this.idEmployee = 0;
+      this.employeeData.idEmployee = 0;
+      this.baseRegisterStore.onSetSlicePropsToNewValue('isCopiedData', false);
+    }
     const dept = this.departmentList.find(
       d => d.name === (this.employeeData as IEmployee).department
     );
@@ -108,13 +117,6 @@ export class EmployeeFormComponent implements OnInit, OnDestroy, AfterViewInit {
     const posName = (this.employeeData as IEmployee).position;
     const pos = this.employeePositionList.find(p => p.name === posName);
     this.employeePositionData = pos ?? { idEmployeePosition: null, name: '', comment: '' };
-    if (this.baseRegisterStore.isEditData()) {
-      this.baseRegisterStore.onSetSlicePropsToNewValue('isEditData', false);
-    } else if (this.baseRegisterStore.isCopiedData()) {
-      this.idEmployee = 0;
-      this.employeeData.idEmployee = 0;
-      this.baseRegisterStore.onSetSlicePropsToNewValue('isCopiedData', false);
-    }
     this.defineTitle();
     this.breadcrumbList = ['Cadastro', this.currentViewTranslated, `${this.defineTitle()}`];
   }
@@ -213,6 +215,16 @@ export class EmployeeFormComponent implements OnInit, OnDestroy, AfterViewInit {
     }
   };
 
+  onPhotoRemoved = (file: File | null): void => {
+    if (file == null) {
+      this.isRemovedPhoto = true;
+      this.imgPreview = null;
+    } else {
+      this.imgPreview = file;
+      this.isRemovedPhoto = false;
+    }
+  };
+
   onBackToPreviousPage = (): void => {
     this.modalStore.onRedirectPage(`/${this.idCompany}/${this.currentView}`);
   };
@@ -230,27 +242,26 @@ export class EmployeeFormComponent implements OnInit, OnDestroy, AfterViewInit {
     if (this.imgPreview) {
       formData.append('file', this.imgPreview, this.imgPreview.name);
     }
-    if (this.employeeData.idEmployee) {
-      formData.append('idEmployee', this.employeeData.idEmployee.toString());
-    }
-    formData.append('isDefault', this.employeeData.isDefault.toString());
-    formData.append('name', this.employeeData.name);
-    formData.append('email', this.employeeData.email ?? '');
-    formData.append('cellphone', this.employeeData.cellphone ?? '');
-    formData.append('deskphone', this.employeeData.deskphone ?? '');
-    formData.append('cpf', this.employeeData.cpf ?? '');
-    if (this.departmentData) {
-      formData.append(
-        'department',
-        JSON.stringify(this.departmentData ?? { idDepartment: null, name: '', comment: '' })
-      );
-    }
     formData.append(
-      'employeePosition',
-      JSON.stringify(
-        this.employeePositionData ?? { idEmployeePosition: null, name: '', comment: '' }
-      )
+      'data',
+      JSON.stringify({
+        idEmployee: this.employeeData.idEmployee,
+        isDefault: this.employeeData.isDefault,
+        name: this.employeeData.name,
+        email: this.employeeData.email ?? '',
+        cellphone: this.employeeData.cellphone ?? '',
+        deskphone: this.employeeData.deskphone ?? '',
+        cpf: this.employeeData.cpf ?? '',
+        isRemovedPhoto: this.isRemovedPhoto,
+        department: this.departmentData ?? { idDepartment: null, name: '', comment: '' },
+        employeePosition: this.employeePositionData ?? {
+          idEmployeePosition: null,
+          name: '',
+          comment: '',
+        },
+      })
     );
+    console.log(formData.getAll('file'));
     return formData;
   };
 

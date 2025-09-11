@@ -88,17 +88,23 @@
               @if (data[header.databaseField]) {
                 <span class="block sm:hidden font-semibold">{{ header.headerName }}: </span>
               }
-
-              <span>
-                @switch (header.databaseField) {
-                  @case ('cnpj') {
-                    {{ formatCell(data, header.databaseField) }}
+              @if (header.databaseField == 'photoUrl') {
+                <img
+                  [src]="formatCell(data, header.databaseField)"
+                  alt="Photo Image"
+                  class="w-5 aspect-square" />
+              } @else {
+                <span>
+                  @switch (header.databaseField) {
+                    @case ('cnpj') {
+                      {{ formatCell(data, header.databaseField) }}
+                    }
+                    @default {
+                      {{ data[header.databaseField] }}
+                    }
                   }
-                  @default {
-                    {{ data[header.databaseField] }}
-                  }
-                }
-              </span>
+                </span>
+              }
             </div>
           }
         }

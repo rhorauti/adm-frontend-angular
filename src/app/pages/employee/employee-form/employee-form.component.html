@@ -37,7 +37,7 @@
         </div>
         <app-profile-photo
           [imgPreviewUrl]="employeeData.photoUrl ?? ''"
-          (fileUrlEmitter)="imgPreview = $event" />
+          (fileUrlEmitter)="onPhotoRemoved($event)" />
       </div>
       <div class="flex flex-col gap-1 grow">
         <label #labelForm class="font-medium text-sm" for="default">Cargo</label>

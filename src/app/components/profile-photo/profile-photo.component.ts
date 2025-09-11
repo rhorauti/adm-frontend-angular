@@ -17,7 +17,7 @@ export class ProfilePhotoComponent implements OnDestroy {
   readonly modalStore = inject(ModalStore);
   fileUrl: string | null = null;
 
-  @Output() fileUrlEmitter = new EventEmitter<File>();
+  @Output() fileUrlEmitter = new EventEmitter<File | null>();
 
   uploadFile = (event: Event): void => {
     const files = (event.target as HTMLInputElement).files;
@@ -40,6 +40,7 @@ export class ProfilePhotoComponent implements OnDestroy {
   clearPhoto = (): void => {
     this.fileUrl = null;
     this.imgPreviewUrl = null;
+    this.fileUrlEmitter.emit(null);
   };
 
   ngOnDestroy(): void {
