@@ -12,10 +12,11 @@ type InputName =
   | 'postalCode'
   | 'email'
   | 'password'
+  | 'date'
   | 'qty'
   | 'search'
   | 'custom';
-type InputType = 'search' | 'text' | 'password' | 'number';
+type InputType = 'search' | 'text' | 'password' | 'number' | 'date' | 'datetime' | 'datetime-local';
 
 @Component({
   selector: 'app-input',

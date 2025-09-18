@@ -10,7 +10,7 @@ import { FormsModule } from '@angular/forms';
 })
 export class ToogleButtonComponent {
   @Input() isChecked = false;
-  @Input({ required: true }) toggleId!: number;
+  @Input({ required: true }) toggleId!: string;
   @Output() isCheckedEmitter = new EventEmitter<boolean>();
 
   onChecked(checkedEvent: Event): void {

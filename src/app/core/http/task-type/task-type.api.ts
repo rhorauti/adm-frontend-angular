@@ -2,11 +2,7 @@ import { inject, Injectable } from '@angular/core';
 import { HttpRequestService } from '../http-request.service';
 import { environment } from '@environments/environment';
 import { IBaseResponse } from '@core/interfaces/response.interface';
-import {
-  IResponseTaskType,
-  IResponseTypeTaskList,
-  ITaskType,
-} from '@core/interfaces/task.interface';
+import { IResponseTaskType, ITaskType } from '@core/interfaces/task.interface';
 
 @Injectable({
   providedIn: 'root',
@@ -15,7 +11,7 @@ export class TaskTypeApi {
   private httpRequestService = inject(HttpRequestService);
   private baseApiName = 'task-types';
 
-  async onGetDataList(department: string): Promise<IResponseTypeTaskList> {
+  async onGetDataList(department: string): Promise<IResponseTaskType> {
     return await this.httpRequestService.sendHttpRequest(
       `${environment.apiUrl}/${department}/${this.baseApiName}`,
       'GET'

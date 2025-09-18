@@ -1,18 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { ProfilePhotoComponent } from './profile-photo.component';
+import { UnitFormComponent } from './unit-form.component';
 
-describe('ProfilePhotoComponent', () => {
-  let component: ProfilePhotoComponent;
-  let fixture: ComponentFixture<ProfilePhotoComponent>;
+describe('UnitFormComponent', () => {
+  let component: UnitFormComponent;
+  let fixture: ComponentFixture<UnitFormComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [ProfilePhotoComponent]
+      imports: [UnitFormComponent]
     })
     .compileComponents();
 
-    fixture = TestBed.createComponent(ProfilePhotoComponent);
+    fixture = TestBed.createComponent(UnitFormComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

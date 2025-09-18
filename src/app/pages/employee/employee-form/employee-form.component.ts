@@ -27,7 +27,7 @@ import { BaseApiName } from '@core/types/base.type';
 import { BaseRegisterStore } from '@store/base/base.register.store';
 import { ModalStore } from '@store/modal/modal.store';
 import { Subscription } from 'rxjs';
-import { ProfilePhotoComponent } from '@components/profile-photo/profile-photo.component';
+import { PhotoBoxSingleComponent } from '@components/photo-box/photo-box-single/photo-box-single.component';
 
 @Component({
   selector: 'app-employee-form',
@@ -38,7 +38,7 @@ import { ProfilePhotoComponent } from '@components/profile-photo/profile-photo.c
     FormsModule,
     InputComponent,
     SelectComponent,
-    ProfilePhotoComponent,
+    PhotoBoxSingleComponent,
   ],
   templateUrl: './employee-form.component.html',
   styleUrl: './employee-form.component.scss',
@@ -108,6 +108,7 @@ export class EmployeeFormComponent implements OnInit, OnDestroy, AfterViewInit {
       this.employeeData = this.baseRegisterStore.data() as IEmployee;
       this.idEmployee = 0;
       this.employeeData.idEmployee = 0;
+      this.employeeData.photoUrl = '';
       this.baseRegisterStore.onSetSlicePropsToNewValue('isCopiedData', false);
     }
     const dept = this.departmentList.find(
@@ -229,13 +230,18 @@ export class EmployeeFormComponent implements OnInit, OnDestroy, AfterViewInit {
     this.modalStore.onRedirectPage(`/${this.idCompany}/${this.currentView}`);
   };
 
-  // fieldValidation = (): void => {
-  //   let message = '';
-  //   if (this.employeeData && this.employeeData.name.length == 0) {
-  //     message = 'O campo Nome do Cargo não pode estar vazio.';
-  //   }
-  //   throw Error(message);
-  // };
+  fieldValidation = (): void => {
+    let message = '';
+    if (this.employeeData && this.employeeData.name.length == 0) {
+      message = 'O campo Nome não pode estar vazio.';
+    }
+    if (this.employeeData && this.departmentData.name?.length == 0) {
+      message = 'O campo Departamento não pode estar vazio.';
+    }
+    if (message.length > 0) {
+      throw Error(message);
+    }
+  };
 
   setFinalData = (): FormData => {
     const formData = new FormData();
@@ -261,13 +267,13 @@ export class EmployeeFormComponent implements OnInit, OnDestroy, AfterViewInit {
         },
       })
     );
-    console.log(formData.getAll('file'));
     return formData;
   };
 
   onSaveRegister = async (onActionOk?: ActionCallback): Promise<void> => {
     try {
       const finalData = this.setFinalData();
+      this.fieldValidation();
       this.modalStore.onLoading(true);
       const response = await this.employeeApi.onSave(this.idCompany, finalData);
       if (response.status) {

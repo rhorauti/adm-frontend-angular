@@ -18,6 +18,12 @@ import { TaskTypeHomeComponent } from '@pages/task/task-type-home/task-type-home
 import { TaskTypeFormComponent } from '@pages/task/task-type-form/task-type-form.component';
 import { ProductionLineHomeComponent } from '@pages/production/production-line-home/production-line-home.component';
 import { ProductionLineFormComponent } from '@pages/production/production-line-form/production-line-form.component';
+import { TaskHomeComponent } from '@pages/task/task-home/task-home.component';
+import { TaskFormComponent } from '@pages/task/task-form/task-form.component';
+import { ProductTypeHomeComponent } from '@pages/product/product-type-home/product-type-home.component';
+import { ProductTypeFormComponent } from '@pages/product/product-type-form/product-type-form.component';
+import { UnitHomeComponent } from '@pages/unit/unit-home/unit-home.component';
+import { UnitFormComponent } from '@pages/unit/unit-form/unit-form.component';
 
 export const routes: Routes = [
   {
@@ -113,6 +119,42 @@ export const routes: Routes = [
     component: ProductionLineFormComponent,
   },
   {
+    path: 'products',
+    component: ProductHomeComponent,
+  },
+  {
+    path: 'products/new',
+    component: ProductFormComponent,
+  },
+  {
+    path: 'products/edit/:id',
+    component: ProductFormComponent,
+  },
+  {
+    path: 'product-types',
+    component: ProductTypeHomeComponent,
+  },
+  {
+    path: 'product-types/new',
+    component: ProductTypeFormComponent,
+  },
+  {
+    path: 'product-types/edit/:id',
+    component: ProductTypeFormComponent,
+  },
+  {
+    path: 'units',
+    component: UnitHomeComponent,
+  },
+  {
+    path: 'units/new',
+    component: UnitFormComponent,
+  },
+  {
+    path: 'units/edit/:id',
+    component: UnitFormComponent,
+  },
+  {
     path: ':department/task-types',
     component: TaskTypeHomeComponent,
   },
@@ -123,6 +165,18 @@ export const routes: Routes = [
   {
     path: ':department/task-types/edit/:idTask',
     component: TaskTypeFormComponent,
+  },
+  {
+    path: ':department/tasks',
+    component: TaskHomeComponent,
+  },
+  {
+    path: ':department/tasks/new',
+    component: TaskFormComponent,
+  },
+  {
+    path: ':department/tasks/edit/:idTask',
+    component: TaskFormComponent,
   },
   {
     path: '**',

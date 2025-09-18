@@ -1,0 +1,43 @@
+<div class="flex flex-col gap-4">
+  <div class="flex items-center justify-between gap-4 overflow-auto">
+    <app-breadcrumb [items]="breadcrumbList" />
+    <app-button-label
+      (click)="onBackToPreviousPage()"
+      [iconRightName]="'keyboard_arrow_left'"
+      [label]="'Voltar'"
+      [isColorLogo]="false"
+      (click)="onBackToPreviousPage()" />
+  </div>
+
+  <div class="flex flex-col gap-4">
+    <h1 class="text-lg font-semibold bg-gray-200 p-1 rounded-md">Dados cadastrais</h1>
+    <div class="flex flex-col gap-4">
+      <div class="flex flex-col gap-1">
+        <label #labelForm class="font-medium text-sm" for="default"
+          >Tipo de produto <span class="font-bold text-red-400">*</span></label
+        >
+        <app-input
+          [inputName]="'custom'"
+          [inputValue]="data.name"
+          [type]="'search'"
+          (inputValueEmitter)="data.name = $event" />
+      </div>
+      <div class="flex flex-col gap-1">
+        <label #labelForm class="font-medium text-sm" for="default">Comentários</label>
+        <app-text-area [inputValue]="data.comment" (inputValueEmitter)="data.comment = $event" />
+      </div>
+    </div>
+  </div>
+
+  <footer class="flex gap-4 items-center justify-center md:justify-end">
+    <app-button-label
+      (click)="onBackToPreviousPage()"
+      [iconRightName]="'close'"
+      [label]="'Cancelar'"
+      [isColorLogo]="false"></app-button-label>
+    <app-button-label
+      [iconRightName]="'save'"
+      [label]="'Salvar'"
+      (click)="onSaveRegister(onBackToPreviousPage)"></app-button-label>
+  </footer>
+</div>

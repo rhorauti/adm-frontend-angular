@@ -16,10 +16,15 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { BreadcrumbComponent } from '@components/breadcrumb/breadcrumb.component';
 import { ButtonLabelComponent } from '@components/button/button-label/button-label.component';
 import { InputComponent } from '@components/input/input.component';
+import { ListBoxComponent } from '@components/list-box/list-box.component';
 import { TextAreaComponent } from '@components/text-area/text-area.component';
+import { ToogleButtonComponent } from '@components/toogle-button/toogle-button.component';
 import { ProductionLineApi } from '@core/http/production-line/production-line.api';
 import { ActionCallback } from '@core/interfaces/modal.interface';
-import { IProductionLine } from '@core/interfaces/production-line.interface';
+import {
+  IProductionLine,
+  IResponseProductionLine,
+} from '@core/interfaces/production-line.interface';
 import { BaseApiName } from '@core/types/base.type';
 import { BaseRegisterStore } from '@store/base/base.register.store';
 import { ModalStore } from '@store/modal/modal.store';
@@ -34,6 +39,8 @@ import { Subscription } from 'rxjs';
     FormsModule,
     InputComponent,
     TextAreaComponent,
+    ListBoxComponent,
+    ToogleButtonComponent,
   ],
   templateUrl: './production-line-form.component.html',
   styleUrl: './production-line-form.component.scss',
@@ -54,11 +61,22 @@ export class ProductionLineFormComponent implements OnInit, OnDestroy, AfterView
   subscription: Subscription | undefined = undefined;
   breadcrumbList: string[] = [];
   id = 0;
+  showToolingList = true;
+  selectedListBoxItems = [];
+  listBoxDataList: string[] = [
+    'exemple 1',
+    'exemple 2',
+    'exemple 3',
+    'exemple 4',
+    'exemple 5',
+    'exemple 6',
+  ];
 
-  data = {
+  productionLineData = {
     idProductionLine: 0,
     lineCode: '',
     lineName: '',
+    toolingList: [],
     comment: '',
   } as IProductionLine;
 
@@ -67,12 +85,12 @@ export class ProductionLineFormComponent implements OnInit, OnDestroy, AfterView
       this.id = Number(params.get('id')) || 0;
     });
     if (this.baseRegisterStore.isEditData()) {
-      this.data = this.baseRegisterStore.data() as IProductionLine;
+      this.productionLineData = this.baseRegisterStore.data() as IProductionLine;
       this.baseRegisterStore.onSetSlicePropsToNewValue('isEditData', false);
     } else if (this.baseRegisterStore.isCopiedData()) {
-      this.data = this.baseRegisterStore.data() as IProductionLine;
+      this.productionLineData = this.baseRegisterStore.data() as IProductionLine;
       this.id = 0;
-      this.data.idProductionLine = 0;
+      this.productionLineData.idProductionLine = 0;
       this.baseRegisterStore.onSetSlicePropsToNewValue('isCopiedData', false);
     }
     this.defineTitle();
@@ -83,7 +101,7 @@ export class ProductionLineFormComponent implements OnInit, OnDestroy, AfterView
     if (this.id == 0) {
       return 'Novo Registro';
     } else {
-      return this.data.lineCode;
+      return this.productionLineData.lineCode;
     }
   };
 
@@ -104,8 +122,8 @@ export class ProductionLineFormComponent implements OnInit, OnDestroy, AfterView
   };
 
   fieldValidation = (): void => {
-    const message = 'O campo Nome do Cargo não pode estar vazio.';
-    if (this.data && this.data.lineCode.length == 0) {
+    const message = 'O campo Código da Linha não pode estar vazio.';
+    if (this.productionLineData && this.productionLineData.lineCode.length == 0) {
       throw Error(message);
     }
   };
@@ -114,7 +132,7 @@ export class ProductionLineFormComponent implements OnInit, OnDestroy, AfterView
     try {
       this.modalStore.onLoading(true);
       this.fieldValidation();
-      const response = await this.productionLineApi.onSave(this.data);
+      const response = await this.productionLineApi.onSave(this.productionLineData);
       if (response.status) {
         this.modalStore.onSetModalInfoType('success');
         this.modalStore.onShowInfoModal(

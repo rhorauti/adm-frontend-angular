@@ -14,6 +14,19 @@
     <div class="flex flex-col gap-3">
       <div class="flex flex-col-reverse md:flex-row items-center gap-6">
         <div class="flex flex-col gap-3 grow w-full">
+          @if (employeeData.idEmployee != null && employeeData.idEmployee > 0) {
+            <div class="flex flex-col gap-1">
+              <label #labelForm class="font-medium text-sm" for="default"
+                >Id <span class="font-bold text-red-400">*</span></label
+              >
+              <app-input
+                [inputName]="'custom'"
+                [inputValue]="
+                  employeeData.idEmployee == null ? '' : employeeData.idEmployee.toString()
+                "
+                [type]="'search'" />
+            </div>
+          }
           <div class="flex flex-col gap-1">
             <label #labelForm class="font-medium text-sm" for="default"
               >Nome <span class="font-bold text-red-400">*</span></label
@@ -35,41 +48,45 @@
               (selectValueEmitter)="setDepartmentValue($event.toString())" />
           </div>
         </div>
-        <app-profile-photo
+        <app-photo-box-single
           [imgPreviewUrl]="employeeData.photoUrl ?? ''"
           (fileUrlEmitter)="onPhotoRemoved($event)" />
       </div>
-      <div class="flex flex-col gap-1 grow">
-        <label #labelForm class="font-medium text-sm" for="default">Cargo</label>
-        <app-select
-          [selectType]="'custom'"
-          [optionList]="employeePositionOptionList"
-          [selectValue]="employeePositionData.name"
-          (selectValueEmitter)="setEmployeePositionValue($event.toString())" />
+      <div class="flex flex-col md:flex-row gap-4">
+        <div class="flex flex-col gap-1 grow">
+          <label #labelForm class="font-medium text-sm" for="default">Cargo</label>
+          <app-select
+            [selectType]="'custom'"
+            [optionList]="employeePositionOptionList"
+            [selectValue]="employeePositionData.name"
+            (selectValueEmitter)="setEmployeePositionValue($event.toString())" />
+        </div>
+        <div class="flex flex-col gap-1 grow">
+          <label #labelForm class="font-medium text-sm" for="default">E-mail</label>
+          <app-input
+            [inputName]="'custom'"
+            [inputValue]="employeeData.email ?? ''"
+            [type]="'search'"
+            (inputValueEmitter)="employeeData.email = $event" />
+        </div>
       </div>
-      <div class="flex flex-col gap-1 grow">
-        <label #labelForm class="font-medium text-sm" for="default">E-mail</label>
-        <app-input
-          [inputName]="'custom'"
-          [inputValue]="employeeData.email ?? ''"
-          [type]="'search'"
-          (inputValueEmitter)="employeeData.email = $event" />
-      </div>
-      <div class="flex flex-col gap-1 grow">
-        <label #labelForm class="font-medium text-sm" for="default">Telefone fixo</label>
-        <app-input
-          [inputName]="'phone'"
-          [inputValue]="employeeData.deskphone ?? ''"
-          [type]="'search'"
-          (inputValueEmitter)="employeeData.deskphone = $event" />
-      </div>
-      <div class="flex flex-col gap-1 grow">
-        <label #labelForm class="font-medium text-sm" for="default">Celular</label>
-        <app-input
-          [inputName]="'phone'"
-          [inputValue]="employeeData.cellphone ?? ''"
-          [type]="'search'"
-          (inputValueEmitter)="employeeData.cellphone = $event" />
+      <div class="flex flex-col md:flex-row gap-4">
+        <div class="flex flex-col gap-1 grow">
+          <label #labelForm class="font-medium text-sm" for="default">Telefone fixo</label>
+          <app-input
+            [inputName]="'phone'"
+            [inputValue]="employeeData.deskphone ?? ''"
+            [type]="'search'"
+            (inputValueEmitter)="employeeData.deskphone = $event" />
+        </div>
+        <div class="flex flex-col gap-1 grow">
+          <label #labelForm class="font-medium text-sm" for="default">Celular</label>
+          <app-input
+            [inputName]="'phone'"
+            [inputValue]="employeeData.cellphone ?? ''"
+            [type]="'search'"
+            (inputValueEmitter)="employeeData.cellphone = $event" />
+        </div>
       </div>
     </div>
   </div>

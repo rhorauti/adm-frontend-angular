@@ -19,6 +19,7 @@ import { RouterModule } from '@angular/router';
 import { ModalStore } from '@store/modal/modal.store';
 import { BaseRegisterStore } from '@store/base/base.register.store';
 import { BaseType, KeyOfData } from '@core/types/base.type';
+import { IProduct } from '@core/interfaces/product.interface';
 
 @Component({
   selector: 'app-table',
@@ -110,6 +111,24 @@ export class TableComponent implements OnInit, OnDestroy {
       default:
         return value ?? '';
     }
+  }
+
+  originList = ['Produto nacional', 'Fabricado interno', 'Produto importado'];
+
+  onSetOrigin(data: BaseType): string {
+    const productData = data as IProduct;
+    switch (productData.origin) {
+      case 1: {
+        return this.originList[0];
+      }
+      case 2: {
+        return this.originList[1];
+      }
+      case 3: {
+        return this.originList[2];
+      }
+    }
+    return '';
   }
 
   @Output() rowClickEmitter = new EventEmitter();

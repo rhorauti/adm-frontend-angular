@@ -12,29 +12,44 @@
   <div class="flex flex-col gap-4">
     <h1 class="text-lg font-semibold bg-gray-200 p-1 rounded-md">Dados cadastrais</h1>
     <div class="flex flex-col gap-4">
-      <div class="flex flex-col gap-1 grow">
+      <div class="flex flex-col gap-1">
         <label #labelForm class="font-medium text-sm" for="default"
           >Código da Linha <span class="font-bold text-red-400">*</span></label
         >
         <app-input
           [inputName]="'custom'"
-          [inputValue]="data.lineCode"
+          [inputValue]="productionLineData.lineCode"
           [type]="'search'"
-          (inputValueEmitter)="data.lineCode = $event" />
+          (inputValueEmitter)="productionLineData.lineCode = $event" />
       </div>
-      <div class="flex flex-col gap-1 grow">
+      <div class="flex flex-col gap-1">
         <label #labelForm class="font-medium text-sm" for="default">Nome do Linha</label>
         <app-input
           [inputName]="'custom'"
-          [inputValue]="data.lineName ?? ''"
+          [inputValue]="productionLineData.lineName ?? ''"
           [type]="'search'"
-          (inputValueEmitter)="data.lineName = $event" />
+          (inputValueEmitter)="productionLineData.lineName = $event" />
       </div>
-      <div class="flex flex-col gap-1 grow">
+      <div class="flex flex-col gap-2">
+        <div class="flex gap-4">
+          <app-toogle-button
+            [isChecked]="showToolingList"
+            (isCheckedEmitter)="showToolingList = $event"
+            [toggleId]="'production-line-toogle-1'"></app-toogle-button>
+          <label for="">Atrelar ferramentas?</label>
+        </div>
+        @if (showToolingList) {
+          <app-list-box
+            [dataList]="listBoxDataList"
+            [selectedDataList]="productionLineData.toolingList ?? []"
+            (dataListEmitter)="productionLineData.toolingList = $event"></app-list-box>
+        }
+      </div>
+      <div class="flex flex-col gap-1">
         <label #labelForm class="font-medium text-sm" for="default">Comentários</label>
         <app-text-area
-          [inputValue]="data.comment ?? ''"
-          (inputValueEmitter)="data.comment = $event" />
+          [inputValue]="productionLineData.comment ?? ''"
+          (inputValueEmitter)="productionLineData.comment = $event" />
       </div>
     </div>
   </div>

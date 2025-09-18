@@ -1,0 +1,40 @@
+<div class="flex items-center justify-center gap-4 overflow-auto">
+  <div class="flex flex-col gap-1 w-full">
+    <p class="font-medium text-sm">Lista de itens</p>
+    <div
+      class="border border-gray-400 rounded-md px-3 py-2 h-36 overflow-auto scrollbar-thin resize-y">
+      @for (data of dataList; track $index) {
+        <p
+          tabindex="0"
+          (click)="onActivateRow($index, $event)"
+          (keydown)="onActivateRow($index, $event)"
+          #listItems
+          class="hover-bg-color">
+          {{ data }}
+        </p>
+      }
+    </div>
+  </div>
+  <div class="flex grow-0 flex-col gap-4">
+    <app-button-icon
+      (click)="onSelectItems()"
+      [iconName]="'keyboard_arrow_right'"></app-button-icon>
+    <app-button-icon (click)="onRemoveItems()" [iconName]="'keyboard_arrow_left'"></app-button-icon>
+  </div>
+  <div class="flex flex-col gap-1 w-full">
+    <p class="font-medium text-sm">Itens selecionados</p>
+    <div
+      class="border border-gray-400 rounded-md px-3 py-2 h-36 overflow-auto scrollbar-thin resize-y">
+      @for (data of dataList; track $index) {
+        <p
+          tabindex="0"
+          (click)="onActivateRow($index, $event)"
+          (keydown)="onActivateRow($index, $event)"
+          #listItemsSelected
+          class="hover-bg-color">
+          {{ data }}
+        </p>
+      }
+    </div>
+  </div>
+</div>

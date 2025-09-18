@@ -5,14 +5,14 @@ import { ButtonCloseComponent } from '@components/button/button-close/button-clo
 import { ModalStore } from '@store/modal/modal.store';
 
 @Component({
-  selector: 'app-profile-photo',
+  selector: 'app-photo-box-single',
   imports: [MatIconModule, CommonModule, ButtonCloseComponent],
-  templateUrl: './profile-photo.component.html',
-  styleUrl: './profile-photo.component.scss',
+  templateUrl: './photo-box-single.component.html',
+  styleUrl: './photo-box-single.component.scss',
 })
-export class ProfilePhotoComponent implements OnDestroy {
+export class PhotoBoxSingleComponent implements OnDestroy {
   @Input() divClass = 'w-32';
-  @Input() imgPreviewUrl: string | null = null;
+  @Input() imgPreviewUrl: string | string[] | null = null;
   @Input() isForm = true;
   readonly modalStore = inject(ModalStore);
   fileUrl: string | null = null;

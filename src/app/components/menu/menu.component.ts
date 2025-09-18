@@ -40,6 +40,24 @@ export class MenuComponent {
 
           routerLink: '/companies',
         },
+        {
+          idSublink: 1,
+          name: 'Produtos',
+
+          routerLink: '/products',
+        },
+        {
+          idSublink: 2,
+          name: 'Tipos de produtos',
+
+          routerLink: '/product-types',
+        },
+        {
+          idSublink: 3,
+          name: 'Unidades de medida',
+
+          routerLink: '/units',
+        },
       ],
     },
     {
@@ -94,16 +112,6 @@ export class MenuComponent {
           idSublink: 1,
           name: 'Atividades',
           routerLink: '/maintenance/tasks',
-        },
-        {
-          idSublink: 2,
-          name: 'Relatório diário',
-          routerLink: '/maintenance/daily-reports',
-        },
-        {
-          idSublink: 3,
-          name: 'Relatório Mensal',
-          routerLink: '/maintenance/monthly-reports',
         },
       ],
     },

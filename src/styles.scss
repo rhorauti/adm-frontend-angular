@@ -27,6 +27,10 @@ body {
   line-height: normal !important;
 }
 
+.hover-bg-color {
+  @apply hover:bg-gray-200 transition-all duration-200 ease-in-out;
+}
+
 @layer utilities {
   .scrollbar-thin {
     scrollbar-width: thin;

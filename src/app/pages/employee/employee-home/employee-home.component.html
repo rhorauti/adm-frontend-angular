@@ -177,7 +177,7 @@
           <div class="flex gap-4">
             <app-toogle-button
               [isChecked]="header.isHeaderActive"
-              [toggleId]="$index"
+              [toggleId]="'employee-toogle'"
               (isCheckedEmitter)="
                 baseRegisterStore.onSetHeaderDisplay($index, tableHeadersLocalStorageId)
               " />

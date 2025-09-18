@@ -5,7 +5,6 @@ import { IBaseResponse } from '@core/interfaces/response.interface';
 import {
   IProductionLine,
   IResponseProductionLine,
-  IResponseProductionLineList,
 } from '@core/interfaces/production-line.interface';
 
 @Injectable({
@@ -15,7 +14,7 @@ export class ProductionLineApi {
   private httpRequestService = inject(HttpRequestService);
   private baseApiName = 'production-lines';
 
-  async onGetDataList(): Promise<IResponseProductionLineList> {
+  async onGetDataList(): Promise<IResponseProductionLine> {
     return await this.httpRequestService.sendHttpRequest(
       `${environment.apiUrl}/${this.baseApiName}`,
       'GET'

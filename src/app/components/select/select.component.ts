@@ -1,9 +1,10 @@
 import { CommonModule } from '@angular/common';
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, Input, OnChanges, OnInit, Output } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
 
-type SelectType = 'state' | 'addressType' | 'custom';
+type SelectType = 'state' | 'addressType' | 'status' | 'custom';
+type Status = 'Não iniciado' | 'Em andamento' | 'Pausado' | 'Finalizado';
 
 @Component({
   selector: 'app-select',
@@ -11,14 +12,17 @@ type SelectType = 'state' | 'addressType' | 'custom';
   templateUrl: './select.component.html',
   styleUrl: './select.component.scss',
 })
-export class SelectComponent implements OnInit {
+export class SelectComponent implements OnInit, OnChanges {
   @Input() optionList: string[] = [];
   @Input() selectValue = 'Selecione um item';
   @Input() id = '';
   @Input() selectType: SelectType = 'custom';
-  @Output() selectValueEmitter = new EventEmitter<string | number | boolean>();
+  @Output() selectValueEmitter = new EventEmitter<string>();
+  statusIcon = '';
+  iconClass = '';
 
   ngOnInit(): void {
+    this.changeStatusIcon();
     switch (this.selectType) {
       case 'state': {
         this.optionList = [
@@ -72,6 +76,37 @@ export class SelectComponent implements OnInit {
         break;
       }
     }
+  }
+
+  changeStatusIcon = (): void => {
+    if (this.selectType == 'status') {
+      switch (this.selectValue as Status) {
+        case 'Não iniciado': {
+          this.statusIcon = 'stop';
+          this.iconClass = 'text-gray-400';
+          break;
+        }
+        case 'Em andamento': {
+          this.statusIcon = 'play_circle_filled';
+          this.iconClass = 'text-yellow-400';
+          break;
+        }
+        case 'Pausado': {
+          this.statusIcon = 'pause_circle_filled';
+          this.iconClass = 'text-blue-400';
+          break;
+        }
+        case 'Finalizado': {
+          this.statusIcon = 'check_circle';
+          this.iconClass = 'text-green-400';
+          break;
+        }
+      }
+    }
+  };
+
+  ngOnChanges(): void {
+    this.changeStatusIcon();
   }
 
   outputSelectValue(event: Event): void {
