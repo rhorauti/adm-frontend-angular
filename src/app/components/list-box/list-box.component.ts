@@ -1,16 +1,12 @@
-import {
-  AfterViewInit,
-  Component,
-  ElementRef,
-  EventEmitter,
-  Input,
-  Output,
-  QueryList,
-  ViewChildren,
-} from '@angular/core';
+import { Component, EventEmitter, Input, OnChanges, Output } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
 import { ButtonIconComponent } from '@components/button/button-icon/button-icon.component';
+
+interface Item {
+  name: string;
+  isChecked: boolean;
+}
 
 @Component({
   selector: 'app-list-box',
@@ -18,86 +14,54 @@ import { ButtonIconComponent } from '@components/button/button-icon/button-icon.
   templateUrl: './list-box.component.html',
   styleUrl: './list-box.component.scss',
 })
-export class ListBoxComponent implements AfterViewInit {
-  @ViewChildren('listItems') private listItemsFromLeft!: QueryList<ElementRef<HTMLElement>>;
-  @ViewChildren('listItemsSelected') private listItemsFromRight!: QueryList<
-    ElementRef<HTMLElement>
-  >;
-
+export class ListBoxComponent implements OnChanges {
   @Input() dataList: string[] = [];
-
   @Input() selectedDataList: string[] = [];
-  activeRowClass = 'active-row';
+  leftItemsList: Item[] = [];
+  rightItemsList: Item[] = [];
 
-  ngAfterViewInit(): void {
-    this.listItemsFromRight.forEach(item => {
-      item.nativeElement.style.display = 'none';
-    });
-  }
-
-  onToggleActiveClass(element: HTMLElement): void {
-    if (element.classList.contains(this.activeRowClass)) {
-      element.classList.remove(this.activeRowClass);
-      element.classList.add('hover-bg-color');
-    } else {
-      element.classList.add(this.activeRowClass);
-      element.classList.remove('hover-bg-color');
+  ngOnChanges(): void {
+    const leftDistinctItems = this.dataList.filter(
+      data => !this.selectedDataList.some(selectedData => selectedData == data)
+    );
+    if (this.leftItemsList) {
+      this.leftItemsList = leftDistinctItems.map(item => {
+        return { name: item, isChecked: false };
+      });
     }
-  }
-
-  onActivateRow(index: number, event: MouseEvent | KeyboardEvent): void {
-    const targetElement = event.target as HTMLElement;
-    const isFromDataList = this.listItemsFromLeft.some(item => item.nativeElement == targetElement);
-    if (isFromDataList) {
-      const selectedElement = this.listItemsFromLeft.get(index)?.nativeElement;
-      if (selectedElement) this.onToggleActiveClass(selectedElement);
-    } else {
-      const selectedElement = this.listItemsFromRight.get(index)?.nativeElement;
-      if (selectedElement) this.onToggleActiveClass(selectedElement);
+    if (this.rightItemsList) {
+      this.rightItemsList = this.selectedDataList.map(item => ({ name: item, isChecked: false }));
     }
+    this.onSortItems(this.leftItemsList);
+    this.onSortItems(this.rightItemsList);
   }
 
-  onDeactivateItems(): void {
-    this.listItemsFromLeft.forEach(element => {
-      element.nativeElement.classList.remove(this.activeRowClass);
-    });
-    this.listItemsFromRight.forEach(element => {
-      element.nativeElement.classList.remove(this.activeRowClass);
-    });
-  }
+  onSortItems = (itemsList: Item[]): void => {
+    itemsList.sort((a, b) => a.name.localeCompare(b.name, 'pt-BR', { sensitivity: 'base' }));
+  };
 
   @Output() dataListEmitter = new EventEmitter<string[]>();
 
-  onSelectItems(): void {
-    this.listItemsFromLeft.forEach((element, index) => {
-      if (element.nativeElement.classList.contains(this.activeRowClass)) {
-        element.nativeElement.style.display = 'none';
-        this.listItemsFromRight.forEach((item, idx) => {
-          if (idx == index) item.nativeElement.style.display = 'block';
-        });
-        this.selectedDataList.push(this.dataList[index]);
-      }
-    });
-    this.onDeactivateItems();
-    this.dataListEmitter.emit(this.selectedDataList);
-    console.log('selectedData', this.selectedDataList);
+  onAddItems(): void {
+    const itemsToAdd = this.leftItemsList.filter(item => item.isChecked);
+    this.rightItemsList = [...this.rightItemsList, ...itemsToAdd];
+    this.leftItemsList = this.leftItemsList.filter(item => !item.isChecked);
+    this.rightItemsList.forEach(item => (item.isChecked = false));
+    this.onSortItems(this.leftItemsList);
+    this.onSortItems(this.rightItemsList);
+
+    this.dataListEmitter.emit(this.rightItemsList.map(item => item.name));
   }
 
   onRemoveItems(): void {
-    this.listItemsFromRight.forEach((element, index) => {
-      if (element.nativeElement.classList.contains(this.activeRowClass)) {
-        element.nativeElement.style.display = 'none';
-        this.listItemsFromLeft.forEach((item, idx) => {
-          if (idx == index) item.nativeElement.style.display = 'block';
-        });
-        const selectedIdx = this.selectedDataList.findIndex(
-          el => el == element.nativeElement.innerHTML.trim()
-        );
-        this.selectedDataList.splice(selectedIdx, 1);
-      }
-    });
-    this.onDeactivateItems();
-    this.dataListEmitter.emit(this.selectedDataList);
-    console.log('selectedData', this.selectedDataList);
+    const itemsToRemove = this.rightItemsList.filter(item => item.isChecked);
+    this.leftItemsList = [...this.leftItemsList, ...itemsToRemove];
+    this.rightItemsList = this.rightItemsList.filter(item => !item.isChecked);
+    this.leftItemsList.forEach(item => (item.isChecked = false));
+
+    this.onSortItems(this.leftItemsList);
+    this.onSortItems(this.rightItemsList);
+
+    this.dataListEmitter.emit(this.rightItemsList.map(item => item.name));
   }
 }

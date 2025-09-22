@@ -16,8 +16,9 @@ export class SelectComponent implements OnInit, OnChanges {
   @Input() optionList: string[] = [];
   @Input() selectValue = 'Selecione um item';
   @Input() id = '';
+  @Input() isDisabled = false;
   @Input() selectType: SelectType = 'custom';
-  @Output() selectValueEmitter = new EventEmitter<string>();
+  @Output() selectValueEmitter = new EventEmitter();
   statusIcon = '';
   iconClass = '';
 

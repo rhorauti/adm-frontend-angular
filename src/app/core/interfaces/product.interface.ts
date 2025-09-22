@@ -1,4 +1,5 @@
 import { IBaseResponse } from './response.interface';
+import { IUnit } from './unit.interface';
 
 export interface IProductType {
   idProductType: number | null;
@@ -30,8 +31,8 @@ export interface IProduct {
   qrcode?: string;
   photoUrl?: string;
   comment?: string;
-  idUnit: number;
-  idProductType: number;
+  unit: IUnit;
+  productType: IProductType;
 }
 
 export interface IResponseProductType extends IBaseResponse {

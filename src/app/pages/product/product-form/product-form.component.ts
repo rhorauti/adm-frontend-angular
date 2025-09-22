@@ -71,17 +71,17 @@ export class ProductFormComponent implements OnInit, OnDestroy, AfterViewInit {
   productTypeOptionList: string[] = [];
   currencyList = ['R$', 'USD'];
 
-  unitData = {
-    idUnit: null,
-    name: '',
-    comment: '',
-  } as IUnit;
+  // unitData = {
+  //   idUnit: null,
+  //   name: '',
+  //   comment: '',
+  // } as IUnit;
 
-  productTypeData = {
-    idProductType: null,
-    name: '',
-    comment: '',
-  } as IProductType;
+  // productTypeData = {
+  //   idProductType: null,
+  //   name: '',
+  //   comment: '',
+  // } as IProductType;
 
   imgPreview: File | null = null;
   isRemovedPhoto = false;
@@ -114,6 +114,16 @@ export class ProductFormComponent implements OnInit, OnDestroy, AfterViewInit {
     qrcode: '',
     photoUrl: '',
     comment: '',
+    unit: {
+      idUnit: null,
+      name: '',
+      comment: '',
+    },
+    productType: {
+      idProductType: null,
+      name: '',
+      comment: '',
+    },
   } as IProduct;
 
   async ngOnInit(): Promise<void> {
@@ -127,21 +137,19 @@ export class ProductFormComponent implements OnInit, OnDestroy, AfterViewInit {
       this.baseRegisterStore.onSetSlicePropsToNewValue('isEditData', false);
     } else if (this.baseRegisterStore.isCopiedData()) {
       this.productData = this.baseRegisterStore.data() as IProduct;
+      this.productData.idProduct = 0;
       this.idProduct = 0;
       this.productData.photoUrl = '';
       this.baseRegisterStore.onSetSlicePropsToNewValue('isCopiedData', false);
     }
-    this.unitData = this.unitList.find(d => d.idUnit == this.productData.idUnit) ?? {
+    this.productData.unit = this.unitList.find(d => d.idUnit == this.productData.unit.idUnit) ?? {
       idUnit: null,
       name: '',
       comment: '',
     };
-    this.productTypeData = this.productTypeList.find(
-      p => p.idProductType == this.productData.idProductType
+    this.productData.productType = this.productTypeList.find(
+      p => p.idProductType == this.productData.productType.idProductType
     ) ?? { idProductType: null, name: '', comment: '' };
-    console.log('data', this.productData);
-    console.log('productType', this.productTypeData);
-    console.log('unit', this.unitData);
     this.onSetOriginToString(this.productData.origin);
     this.defineTitle();
     this.breadcrumbList = ['Cadastro', this.currentViewTranslated, `${this.defineTitle()}`];
@@ -188,7 +196,6 @@ export class ProductFormComponent implements OnInit, OnDestroy, AfterViewInit {
       if (response.data) {
         const data = response.data as IUnit[];
         this.unitList = data;
-        console.log('unit', this.unitList);
         this.unitOptionList = data.map(unit => unit.name);
       } else {
         return;
@@ -208,7 +215,6 @@ export class ProductFormComponent implements OnInit, OnDestroy, AfterViewInit {
       if (response.data) {
         const data = response.data as IProductType[];
         this.productTypeList = data;
-        console.log('type', this.productTypeList);
         this.productTypeOptionList = data.map(position => position.name);
       } else {
         return;
@@ -249,29 +255,27 @@ export class ProductFormComponent implements OnInit, OnDestroy, AfterViewInit {
   };
 
   setUnitValue = (unitName: string): void => {
-    this.unitData = this.unitList.find(unit => unit.name == unitName.trim()) as IUnit;
-    if (!this.unitData) {
-      this.unitData = {
+    this.productData.unit = this.unitList.find(unit => unit.name == unitName.trim()) as IUnit;
+    if (!this.productData.unit) {
+      this.productData.unit = {
         idUnit: null,
         name: '',
         comment: '',
       };
     }
-    console.log('unit', this.unitData);
   };
 
   setProductTypeValue = (productTypeName: string): void => {
-    this.productTypeData = this.productTypeList.find(
+    this.productData.productType = this.productTypeList.find(
       type => type.name == productTypeName.trim()
     ) as IProductType;
-    if (!this.productTypeData) {
-      this.productTypeData = {
+    if (!this.productData.productType) {
+      this.productData.productType = {
         idProductType: null,
         name: '',
         comment: '',
       };
     }
-    console.log('tipo', this.productTypeData);
   };
 
   onPhotoRemoved = (file: File | null): void => {
@@ -326,8 +330,8 @@ export class ProductFormComponent implements OnInit, OnDestroy, AfterViewInit {
         height: this.productData.height ?? 0,
         depth: this.productData.depth ?? 0,
         weight: this.productData.weight ?? 0,
-        idUnit: this.unitData.idUnit ?? null,
-        idProductType: this.productTypeData.idProductType ?? null,
+        unit: this.productData.unit ?? null,
+        productType: this.productData.productType ?? null,
         comment: this.productData.comment ?? '',
         isRemovedPhoto: this.isRemovedPhoto,
       } as IProduct)
@@ -340,7 +344,6 @@ export class ProductFormComponent implements OnInit, OnDestroy, AfterViewInit {
       const finalData = this.setFinalData();
       this.fieldValidation();
       this.modalStore.onLoading(true);
-      console.log('final', finalData.getAll('data'));
       const response = await this.productApi.onSave(finalData);
       if (response.status) {
         this.modalStore.onSetModalInfoType('success');

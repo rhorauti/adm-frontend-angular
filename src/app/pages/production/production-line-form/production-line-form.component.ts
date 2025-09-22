@@ -19,12 +19,11 @@ import { InputComponent } from '@components/input/input.component';
 import { ListBoxComponent } from '@components/list-box/list-box.component';
 import { TextAreaComponent } from '@components/text-area/text-area.component';
 import { ToogleButtonComponent } from '@components/toogle-button/toogle-button.component';
+import { ProductApi } from '@core/http/product/product.api';
 import { ProductionLineApi } from '@core/http/production-line/production-line.api';
 import { ActionCallback } from '@core/interfaces/modal.interface';
-import {
-  IProductionLine,
-  IResponseProductionLine,
-} from '@core/interfaces/production-line.interface';
+import { IProduct } from '@core/interfaces/product.interface';
+import { IProductionLine } from '@core/interfaces/production-line.interface';
 import { BaseApiName } from '@core/types/base.type';
 import { BaseRegisterStore } from '@store/base/base.register.store';
 import { ModalStore } from '@store/modal/modal.store';
@@ -49,6 +48,7 @@ export class ProductionLineFormComponent implements OnInit, OnDestroy, AfterView
   @ViewChildren(InputComponent) inputs!: QueryList<InputComponent>;
   @ViewChildren('labelForm') private labels!: QueryList<ElementRef>;
   readonly productionLineApi = inject(ProductionLineApi);
+  readonly productApi = inject(ProductApi);
   readonly baseRegisterStore = inject(BaseRegisterStore);
   private activatedRoute = inject(ActivatedRoute);
   readonly router = inject(Router);
@@ -62,21 +62,15 @@ export class ProductionLineFormComponent implements OnInit, OnDestroy, AfterView
   breadcrumbList: string[] = [];
   id = 0;
   showToolingList = true;
-  selectedListBoxItems = [];
-  listBoxDataList: string[] = [
-    'exemple 1',
-    'exemple 2',
-    'exemple 3',
-    'exemple 4',
-    'exemple 5',
-    'exemple 6',
-  ];
+  listBoxStringList: string[] = [];
+  selectedListBoxStringList: string[] = [];
+  listBoxDataList: Partial<IProduct>[] = [];
 
   productionLineData = {
     idProductionLine: 0,
     lineCode: '',
     lineName: '',
-    toolingList: [],
+    toolingList: null,
     comment: '',
   } as IProductionLine;
 
@@ -84,6 +78,10 @@ export class ProductionLineFormComponent implements OnInit, OnDestroy, AfterView
     this.subscription = this.activatedRoute.paramMap.subscribe(params => {
       this.id = Number(params.get('id')) || 0;
     });
+    await this.onGetToolingList();
+    this.listBoxStringList = this.listBoxDataList.map(
+      data => data.internalPartNumber + ' - ' + data.name
+    );
     if (this.baseRegisterStore.isEditData()) {
       this.productionLineData = this.baseRegisterStore.data() as IProductionLine;
       this.baseRegisterStore.onSetSlicePropsToNewValue('isEditData', false);
@@ -93,9 +91,44 @@ export class ProductionLineFormComponent implements OnInit, OnDestroy, AfterView
       this.productionLineData.idProductionLine = 0;
       this.baseRegisterStore.onSetSlicePropsToNewValue('isCopiedData', false);
     }
+    if (this.productionLineData.toolingList && this.productionLineData.toolingList.length > 0) {
+      this.selectedListBoxStringList = this.productionLineData.toolingList.map(
+        data => data.internalPartNumber + ' - ' + data.name
+      );
+    }
     this.defineTitle();
     this.breadcrumbList = ['Cadastro', this.currentViewTranslated, `${this.defineTitle()}`];
   }
+
+  onSetSelectedToolingList = (toolingList: string[]): void => {
+    if (!this.showToolingList) {
+      this.productionLineData.toolingList = [];
+    } else {
+      const splittedList = toolingList.map(tooling => tooling.split('-').map(item => item.trim()));
+      const mappedList = splittedList.map(item => item[0]);
+      const selectedToolingList = this.listBoxDataList.filter(tooling =>
+        mappedList.some(pn => pn == tooling.internalPartNumber)
+      );
+      this.productionLineData.toolingList = selectedToolingList;
+    }
+  };
+
+  onGetToolingList = async (): Promise<void> => {
+    try {
+      this.modalStore.onLoading(true);
+      const response = await this.productApi.onGetDataListByProductType('name', 'Ativo');
+      if (response.data) {
+        this.listBoxDataList = response.data as Partial<IProduct>[];
+      } else {
+        return;
+      }
+    } catch (e: unknown) {
+      const error = e as HttpErrorResponse;
+      this.modalStore.onShowInfoModal('Listar tipos de atividades: ', error.error?.message);
+    } finally {
+      this.modalStore.onLoading(false);
+    }
+  };
 
   defineTitle = (): string => {
     if (this.id == 0) {

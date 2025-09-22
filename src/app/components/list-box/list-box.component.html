@@ -3,37 +3,45 @@
     <p class="font-medium text-sm">Lista de itens</p>
     <div
       class="border border-gray-400 rounded-md px-3 py-2 h-36 overflow-auto scrollbar-thin resize-y">
-      @for (data of dataList; track $index) {
-        <p
+      @for (item of leftItemsList; track $index) {
+        <div class="flex gap-3">
+          <input [(ngModel)]="item.isChecked" type="checkbox" [id]="`checkbox-left-${$index}`" />
+          <label [for]="`checkbox-left-${$index}`">{{ item.name }}</label>
+        </div>
+        <!-- <div
           tabindex="0"
           (click)="onActivateRow($index, $event)"
           (keydown)="onActivateRow($index, $event)"
           #listItems
-          class="hover-bg-color">
+          class="hover-bg-color cursor-pointer">
+          <input type="checkbox" [id]="`checkbox-left-${$index}`" />
+          <label [for]="`checkbox-left-${$index}`">{{ data }}</label>
           {{ data }}
-        </p>
+        </div> -->
       }
     </div>
   </div>
   <div class="flex grow-0 flex-col gap-4">
-    <app-button-icon
-      (click)="onSelectItems()"
-      [iconName]="'keyboard_arrow_right'"></app-button-icon>
+    <app-button-icon (click)="onAddItems()" [iconName]="'keyboard_arrow_right'"></app-button-icon>
     <app-button-icon (click)="onRemoveItems()" [iconName]="'keyboard_arrow_left'"></app-button-icon>
   </div>
   <div class="flex flex-col gap-1 w-full">
     <p class="font-medium text-sm">Itens selecionados</p>
     <div
       class="border border-gray-400 rounded-md px-3 py-2 h-36 overflow-auto scrollbar-thin resize-y">
-      @for (data of dataList; track $index) {
-        <p
+      @for (item of rightItemsList; track $index) {
+        <div>
+          <input [(ngModel)]="item.isChecked" type="checkbox" [id]="`checkbox-right-${$index}`" />
+          <label [for]="`checkbox-right-${$index}`" class="ml-2">{{ item.name }}</label>
+        </div>
+        <!-- <div
           tabindex="0"
           (click)="onActivateRow($index, $event)"
           (keydown)="onActivateRow($index, $event)"
           #listItemsSelected
-          class="hover-bg-color">
-          {{ data }}
-        </p>
+          class="hover-bg-color cursor-pointer">
+          <label for=""><input type="checkbox" name="" />{{ data }}</label>
+        </div> -->
       }
     </div>
   </div>

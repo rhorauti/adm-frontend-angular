@@ -138,13 +138,9 @@ export class ProductHomeComponent implements OnInit, OnDestroy {
     },
   ] as ITableHeader<IProduct>[];
   tableHeadersLocalStorageId = `table_headers_${this.currentView} + ${this.authStore.user().id}`;
-  idProduct = 0;
   subscription: Subscription | undefined = undefined;
 
   async ngOnInit() {
-    this.activatedRoute.paramMap.subscribe(params => {
-      this.idProduct = Number(params.get('idCompany')) || 0;
-    });
     this.onShowDataList();
     const tableHeaders = await loadStorage(this.tableHeadersLocalStorageId);
     const headers = tableHeaders ? tableHeaders : this.initialTableHeaders;
@@ -162,7 +158,7 @@ export class ProductHomeComponent implements OnInit, OnDestroy {
   onCloneRegister = async (data: IProduct): Promise<void> => {
     this.baseRegisterStore.onSetSlicePropsToNewValue('isCopiedData', true);
     this.baseRegisterStore.onSetSlicePropsToNewValue('data', data);
-    this.modalStore.onRedirectPage(`/${this.idProduct}/${this.currentView}/new`);
+    this.modalStore.onRedirectPage(`/${this.currentView}/new`);
   };
 
   onShowDataList = async (): Promise<void> => {
@@ -185,10 +181,10 @@ export class ProductHomeComponent implements OnInit, OnDestroy {
     }
   };
 
-  onDeleteRegister = async (onActionOk?: ActionCallback): Promise<void> => {
+  onDeleteRegister = async (id: number, onActionOk?: ActionCallback): Promise<void> => {
     try {
       this.modalStore.onLoading(true);
-      const response = await this.productApi.onDelete(this.idProduct);
+      const response = await this.productApi.onDelete(id);
       if (response.status) {
         this.onShowDataList();
         this.modalStore.onSetModalInfoType('success');
@@ -204,8 +200,8 @@ export class ProductHomeComponent implements OnInit, OnDestroy {
     }
   };
 
-  async onDelete(): Promise<void> {
-    await this.onDeleteRegister();
+  async onDelete(data: IProduct): Promise<void> {
+    await this.onDeleteRegister(data[this.keyId] as number);
   }
 
   onShowModalToDelete(data?: IProduct): void {
@@ -213,7 +209,7 @@ export class ProductHomeComponent implements OnInit, OnDestroy {
     this.modalStore.onShowAskModal(
       `Cadastro de ${this.currentViewTranslated}`,
       `Deseja excluir o registro <b>${selectedData.name}</b>?`,
-      () => this.onDelete()
+      () => this.onDelete(selectedData)
     );
   }
 

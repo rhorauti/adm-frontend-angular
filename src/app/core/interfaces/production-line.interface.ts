@@ -1,10 +1,11 @@
+import { IProduct } from './product.interface';
 import { IBaseResponse } from './response.interface';
 
 export interface IProductionLine {
   idProductionLine: number | null;
   lineCode: string;
   lineName?: string;
-  toolingList?: string[];
+  toolingList?: Partial<IProduct>[] | null;
   comment?: string;
 }
 

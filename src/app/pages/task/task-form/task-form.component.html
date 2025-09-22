@@ -34,16 +34,7 @@
             [selectValue]="employeeData.name || 'Selecione um item'"
             (selectValueEmitter)="setEmployeeValue($event.toString())" />
         </div>
-        <div class="flex flex-col gap-1 grow">
-          <label #labelForm class="font-medium text-sm" for="default"
-            >Linha de Produção <span class="font-bold text-red-400">*</span></label
-          >
-          <app-select
-            [selectType]="'custom'"
-            [optionList]="productionLineOptionList"
-            [selectValue]="productionLineData.lineCode || 'Selecione um item'"
-            (selectValueEmitter)="setProductionLineValue($event.toString())" />
-        </div>
+
         <div class="flex flex-col gap-1 grow">
           <label #labelForm class="font-medium text-sm" for="default"
             >Tipo da Atividade <span class="font-bold text-red-400">*</span></label
@@ -54,8 +45,6 @@
             [selectValue]="taskTypeData.name || 'Selecione um item'"
             (selectValueEmitter)="setTaskTypeValue($event.toString())" />
         </div>
-      </div>
-      <div class="flex flex-col md:flex-row gap-4">
         @if (taskTypeData.name == 'Ferramenta') {
           <div class="flex flex-col gap-1 grow">
             <label #labelForm class="font-medium text-sm" for="default"
@@ -63,11 +52,24 @@
             >
             <app-select
               [selectType]="'custom'"
-              [optionList]="taskTypeOptionList"
-              [selectValue]="taskTypeData.name || 'Selecione um item'"
-              (selectValueEmitter)="setTaskTypeValue($event.toString())" />
+              [optionList]="toolingOptionList"
+              [selectValue]="toolingData.name || 'Selecione um item'"
+              (selectValueEmitter)="onSetSelectedTooling($event)" />
           </div>
         }
+      </div>
+      <div class="flex flex-col md:flex-row gap-4">
+        <div class="flex flex-col gap-1 grow">
+          <label #labelForm class="font-medium text-sm" for="default"
+            >Linha de Produção <span class="font-bold text-red-400">*</span></label
+          >
+          <app-select
+            [selectType]="'custom'"
+            [optionList]="productionLineOptionList"
+            [isDisabled]="isProductionLineSelectDisabled"
+            [selectValue]="productionLineData.lineCode || 'Selecione um item'"
+            (selectValueEmitter)="setProductionLineValue($event.toString())" />
+        </div>
         <div class="flex flex-col gap-1 grow">
           <label #labelForm class="font-medium text-sm" for="default">Inicio</label>
           <app-input

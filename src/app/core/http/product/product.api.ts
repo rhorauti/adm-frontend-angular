@@ -2,7 +2,7 @@ import { inject, Injectable } from '@angular/core';
 import { HttpRequestService } from '../http-request.service';
 import { environment } from '@environments/environment';
 import { IBaseResponse } from '@core/interfaces/response.interface';
-import { IResponseProduct } from '@core/interfaces/product.interface';
+import { IProduct, IResponseProduct } from '@core/interfaces/product.interface';
 
 @Injectable({
   providedIn: 'root',
@@ -14,6 +14,16 @@ export class ProductApi {
   async onGetDataList(): Promise<IResponseProduct> {
     return await this.httpRequestService.sendHttpRequest(
       `${environment.apiUrl}/${this.baseApiName}`,
+      'GET'
+    );
+  }
+
+  async onGetDataListByProductType<K extends keyof IProduct>(
+    key: K,
+    value: IProduct[K]
+  ): Promise<IResponseProduct> {
+    return await this.httpRequestService.sendHttpRequest(
+      `${environment.apiUrl}/${this.baseApiName}?${key}=${value}`,
       'GET'
     );
   }

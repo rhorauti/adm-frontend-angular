@@ -40,9 +40,9 @@
         </div>
         @if (showToolingList) {
           <app-list-box
-            [dataList]="listBoxDataList"
-            [selectedDataList]="productionLineData.toolingList ?? []"
-            (dataListEmitter)="productionLineData.toolingList = $event"></app-list-box>
+            [dataList]="listBoxStringList"
+            [selectedDataList]="selectedListBoxStringList"
+            (dataListEmitter)="onSetSelectedToolingList($event)"></app-list-box>
         }
       </div>
       <div class="flex flex-col gap-1">

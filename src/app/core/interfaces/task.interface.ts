@@ -13,12 +13,7 @@ export interface ITask {
   startDate?: Date;
   finishDate?: Date;
   name: string;
-  employee: string;
-  taskType: string;
-  kpi?: string;
-  productionLine: string;
   status: string | null;
-  product?: string;
   photoUrls?: string[];
   comment?: string;
 }
