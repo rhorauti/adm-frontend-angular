@@ -12,15 +12,14 @@
   <div class="flex flex-col gap-4">
     <h1 class="text-lg font-semibold bg-gray-200 p-1 rounded-md">Dados cadastrais</h1>
     <div class="flex flex-col gap-4">
-      @if (taskData.idTask != null && taskData.idTask > 0) {
+      @if (taskFormData.idTask != null && taskFormData.idTask > 0) {
         <div class="flex flex-col gap-1 grow">
           <label #labelForm class="font-medium text-sm" for="default">Id da Atividade</label>
           <app-input
             [inputName]="'custom'"
             [isDisabled]="true"
-            [inputValue]="taskData.idTask == null ? '' : taskData.idTask.toString()"
-            [type]="'search'"
-            (inputValueEmitter)="taskData.name = $event" />
+            [inputValue]="taskFormData.idTask == 0 ? '' : taskFormData.idTask.toString()"
+            [type]="'search'" />
         </div>
       }
       <div class="flex flex-col md:flex-row gap-4">
@@ -31,7 +30,7 @@
           <app-select
             [selectType]="'custom'"
             [optionList]="employeeOptionList"
-            [selectValue]="employeeData.name || 'Selecione um item'"
+            [selectValue]="taskFormData.employee?.name || 'Selecione um item'"
             (selectValueEmitter)="setEmployeeValue($event.toString())" />
         </div>
 
@@ -42,10 +41,10 @@
           <app-select
             [selectType]="'custom'"
             [optionList]="taskTypeOptionList"
-            [selectValue]="taskTypeData.name || 'Selecione um item'"
+            [selectValue]="taskFormData.taskType?.name || ''"
             (selectValueEmitter)="setTaskTypeValue($event.toString())" />
         </div>
-        @if (taskTypeData.name == 'Ferramenta') {
+        @if (taskFormData.taskType?.name == 'Ferramenta') {
           <div class="flex flex-col gap-1 grow">
             <label #labelForm class="font-medium text-sm" for="default"
               >Ferramenta <span class="font-bold text-red-400">*</span></label
@@ -53,7 +52,7 @@
             <app-select
               [selectType]="'custom'"
               [optionList]="toolingOptionList"
-              [selectValue]="toolingData.name || 'Selecione um item'"
+              [selectValue]="taskFormData.product?.name || ''"
               (selectValueEmitter)="onSetSelectedTooling($event)" />
           </div>
         }
@@ -67,7 +66,7 @@
             [selectType]="'custom'"
             [optionList]="productionLineOptionList"
             [isDisabled]="isProductionLineSelectDisabled"
-            [selectValue]="productionLineData.lineCode || 'Selecione um item'"
+            [selectValue]="taskFormData.productionLine?.lineCode || ''"
             (selectValueEmitter)="setProductionLineValue($event.toString())" />
         </div>
         <div class="flex flex-col gap-1 grow">
@@ -75,18 +74,18 @@
           <app-input
             [inputName]="'custom'"
             [isDisabled]="true"
-            [inputValue]="taskData.startDate == null ? '' : taskData.startDate.toString()"
-            [type]="'datetime-local'"
-            (inputValueEmitter)="setStartDate($event)" />
+            [inputValue]="
+              taskFormData.startDate == null ? '' : taskFormData.startDate.toString()
+            " />
         </div>
         <div class="flex flex-col gap-1 grow">
           <label #labelForm class="font-medium text-sm" for="default">Fim</label>
           <app-input
             [inputName]="'custom'"
             [isDisabled]="true"
-            [inputValue]="taskData.finishDate == null ? '' : taskData.finishDate.toString()"
-            [type]="'datetime-local'"
-            (inputValueEmitter)="setFinishDate($event)" />
+            [inputValue]="
+              taskFormData.finishDate == null ? '' : taskFormData.finishDate.toString()
+            " />
         </div>
       </div>
       <div class="flex flex-col md:flex-row gap-4 grow">
@@ -96,27 +95,27 @@
           >
           <app-input
             [inputName]="'custom'"
-            [inputValue]="taskData.name"
+            [inputValue]="taskFormData.name || ''"
             [type]="'search'"
-            (inputValueEmitter)="taskData.name = $event" />
+            (inputValueEmitter)="taskFormData.name = $event" />
         </div>
         <div class="flex flex-col gap-1">
           <label #labelForm class="font-medium text-sm" for="default">Status</label>
           <app-select
             [selectType]="'status'"
             [optionList]="['Pausado', 'Em andamento', 'Finalizado']"
-            [selectValue]="taskData.status == null ? 'Não iniciado' : taskData.status"
-            (selectValueEmitter)="setTaskValue($event.toString())" />
+            [selectValue]="taskStatus"
+            (selectValueEmitter)="setStatusValue($event.toString())" />
         </div>
       </div>
       <app-photo-box-list
-        [imgPreviewUrlList]="imgPreviewList"
+        [imgPreviewUrlList]="taskFormData.imgPreviewList || []"
         (fileListEmitter)="onFileListChange($event)"></app-photo-box-list>
       <div class="flex flex-col gap-1 grow">
         <label #labelForm class="font-medium text-sm" for="default">Comentários</label>
         <app-text-area
-          [inputValue]="taskData.comment ?? ''"
-          (inputValueEmitter)="taskData.comment = $event" />
+          [inputValue]="taskFormData.comment ?? ''"
+          (inputValueEmitter)="taskFormData.comment = $event" />
       </div>
     </div>
   </div>

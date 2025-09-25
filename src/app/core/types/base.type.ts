@@ -62,3 +62,7 @@ export type MaybeMergeValue<S, K extends keyof S> = S[K] extends object
  * Type to be used to choose some fields for inputSearchFilter.
  */
 export type KeyOfData = Extract<keyof MergedDataType, string>;
+
+export type StringifyData<T> = {
+  [K in keyof T]: T[K] extends number | boolean | Date ? string : T[K];
+};

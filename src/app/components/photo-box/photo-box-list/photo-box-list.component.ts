@@ -14,9 +14,9 @@ export class PhotoBoxListComponent implements OnDestroy {
   readonly modalStore = inject(ModalStore);
   @Input() divClass = 'w-12';
   @Input() imgPreviewUrlList: string[] | null = null;
-  fileList: File[] | null = null;
+  fileList: File[] = [];
 
-  @Output() fileListEmitter = new EventEmitter<File[] | null>();
+  @Output() fileListEmitter = new EventEmitter<File[]>();
 
   uploadFiles = (event: Event): void => {
     const files = (event.target as HTMLInputElement).files;
@@ -30,7 +30,7 @@ export class PhotoBoxListComponent implements OnDestroy {
           'O arquivo selecionado não é uma imagem.'
         );
       } else {
-        this.fileList?.push(file);
+        this.fileList.push(file);
         const fileUrl = URL.createObjectURL(file);
         this.imgPreviewUrlList?.push(fileUrl);
         this.fileListEmitter.emit(this.fileList);

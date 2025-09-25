@@ -1,5 +1,4 @@
 import { CommonModule } from '@angular/common';
-import { HttpErrorResponse } from '@angular/common/http';
 import {
   AfterViewInit,
   ChangeDetectorRef,
@@ -19,34 +18,23 @@ import { InputComponent } from '@components/input/input.component';
 import { PhotoBoxListComponent } from '@components/photo-box/photo-box-list/photo-box-list.component';
 import { SelectComponent } from '@components/select/select.component';
 import { TextAreaComponent } from '@components/text-area/text-area.component';
-import { DepartmentApi } from '@core/http/department/department.api';
-import { EmployeeApi } from '@core/http/employee/employee.api';
-import { ProductApi } from '@core/http/product/product.api';
-import { ProductionLineApi } from '@core/http/production-line/production-line.api';
-import { TaskTypeApi as TaskApi, TaskTypeApi } from '@core/http/task-type/task-type.api';
-import { IDepartment } from '@core/interfaces/department.interface';
+import { onConvertTaskStatusToNumber, onStringfyTaskStatus } from '@core/enum/status.enum';
+import { TaskApi } from '@core/http/task/task.api';
 import { IEmployee } from '@core/interfaces/employee.interface';
 import { ActionCallback } from '@core/interfaces/modal.interface';
 import { IProduct } from '@core/interfaces/product.interface';
 import { IProductionLine } from '@core/interfaces/production-line.interface';
-import { ITask, ITaskType } from '@core/interfaces/task.interface';
+import {
+  ITask,
+  ITaskType,
+  PartialEmployee,
+  PartialProductionLine,
+  PartialTaskType,
+} from '@core/interfaces/task.interface';
 import { BaseApiName } from '@core/types/base.type';
-import { translateDeptName } from '@core/utils/misc';
 import { BaseRegisterStore } from '@store/base/base.register.store';
 import { ModalStore } from '@store/modal/modal.store';
 import { Subscription } from 'rxjs';
-
-type DataList =
-  | 'toolingDataList'
-  | 'productionLineDataList'
-  | 'taskTypeDataList'
-  | 'employeeDataList';
-
-type OptionDataList =
-  | 'toolingOptionList'
-  | 'productionLineOptionList'
-  | 'taskTypeOptionList'
-  | 'employeeOptionList';
 
 @Component({
   selector: 'app-task-form',
@@ -67,11 +55,6 @@ export class TaskFormComponent implements OnInit, OnDestroy, AfterViewInit {
   @ViewChildren(InputComponent) inputs!: QueryList<InputComponent>;
   @ViewChildren('labelForm') private labels!: QueryList<ElementRef>;
   readonly taskApi = inject(TaskApi);
-  readonly departmentApi = inject(DepartmentApi);
-  readonly taskTypetApi = inject(TaskTypeApi);
-  readonly employeeApi = inject(EmployeeApi);
-  readonly productionLineApi = inject(ProductionLineApi);
-  readonly productApi = inject(ProductApi);
   readonly baseRegisterStore = inject(BaseRegisterStore);
   private activatedRoute = inject(ActivatedRoute);
   readonly router = inject(Router);
@@ -84,218 +67,132 @@ export class TaskFormComponent implements OnInit, OnDestroy, AfterViewInit {
   currentViewTranslatedSingular = this.currentViewTranslated.slice(0, -1);
   subscription: Subscription | undefined = undefined;
   breadcrumbList: string[] = [];
-  deptName = '';
-  deptNameTranslated = '';
-  idTask: number | null = null;
+  paramsDeptName = '';
+  paramsIdTask: number | null = null;
+  taskStatus = '';
   idCompany = 1;
 
-  toolingDataList: IProduct[] = [];
   toolingOptionList: string[] = [];
-  toolingData = {
-    idProduct: null,
-    internalPartNumber: '',
-    name: '',
-  } as Partial<IProduct>;
+  taskTypeOptionList: string[] = [];
+  productionLineOptionList: string[] = [];
+  employeeOptionList: string[] = [];
 
   isProductionLineSelectDisabled = false;
-  productionLineDataList: IProductionLine[] = [];
-  productionLineOptionList: string[] = [];
-  productionLineData = {
-    idProductionLine: null,
-    lineCode: '',
-    lineName: '',
-    comment: '',
-  } as IProductionLine;
-
-  taskTypeDataList: ITaskType[] = [];
-  taskTypeOptionList: string[] = [];
-  taskTypeData = {
-    idTaskType: null,
-    name: '',
-    comment: '',
-  } as ITaskType;
-
-  employeeDataList: IEmployee[] = [];
-  employeeOptionList: string[] = [];
-  employeeData = {
-    idEmployee: null,
-    isDefault: false,
-    name: '',
-    email: '',
-    photoUrl: '',
-    cellphone: '',
-    deskphone: '',
-    cpf: '',
-  } as IEmployee;
-
-  imgPreviewList: string[] = [];
   fileList: File[] | null = [];
-
-  taskData = {
-    idTask: null,
-    startDate: new Date(),
-    finishDate: new Date(),
+  taskFormData: ITask = {
+    idTask: 0,
+    startDate: null,
+    finishDate: null,
     name: '',
-    status: null,
-    photoUrls: [],
+    status: 0,
     comment: '',
-  } as ITask;
+    imgPreviewList: [],
+    productList: [],
+    product: {
+      idProduct: 0,
+      internalPartNumber: '',
+      name: '',
+    },
+    productionLineList: [],
+    productionLine: {
+      idProductionLine: 0,
+      lineCode: '',
+      toolingList: [],
+    },
+    taskTypeList: [],
+    taskType: {
+      idTaskType: 0,
+      name: '',
+    },
+    employeeList: [],
+    employee: {
+      idEmployee: 0,
+      name: '',
+    },
+  };
 
   async ngOnInit(): Promise<void> {
     this.subscription = this.activatedRoute.paramMap.subscribe(params => {
-      this.idTask = Number(params.get('idTask')) || 0;
-      this.deptName = params.get('department') || '';
+      this.paramsIdTask = Number(params.get('idTask')) || 0;
+      this.paramsDeptName = params.get('department') || '';
     });
-    if (this.deptName) this.deptNameTranslated = translateDeptName(this.deptName);
-    this.onGetTaskTypeList();
-    this.onGetEmployeeList();
-    this.onGetProductionLineList();
-    await this.onGetToolingList();
-    this.toolingOptionList = this.toolingDataList.map(
-      data => data.internalPartNumber + ' - ' + data.name
+    const response = await this.taskApi.onGetDataById(
+      this.paramsDeptName,
+      this.paramsIdTask as number
     );
-    if (this.baseRegisterStore.isEditData()) {
-      this.taskData = this.baseRegisterStore.data() as ITask;
-      this.baseRegisterStore.onSetSlicePropsToNewValue('isEditData', false);
-    } else if (this.baseRegisterStore.isCopiedData()) {
-      this.taskData = this.baseRegisterStore.data() as ITask;
-      this.idTask = 0;
-      this.taskData.idTask = 0;
-      this.baseRegisterStore.onSetSlicePropsToNewValue('isCopiedData', false);
-    }
+    this.taskFormData = response.data as ITask;
+    this.onSetOptionsList();
+    this.taskStatus = onStringfyTaskStatus(this.taskFormData.status as number);
     this.defineTitle();
     this.breadcrumbList = ['Cadastro', this.currentViewTranslated, `${this.defineTitle()}`];
   }
 
-  onGetTaskTypeList = async (): Promise<void> => {
-    return this.onGetDataList<ITaskType>({
-      apiCall: () => this.taskTypetApi.onGetDataList(this.deptName),
-      dataListKey: 'taskTypeDataList',
-      optionListKey: 'taskTypeOptionList',
-      optionPropertyKey: 'name',
-      errorTitle: 'Listar tipos de atividades: ',
-    });
+  onSetOptionsList = (): void => {
+    this.toolingOptionList = this.taskFormData?.productList?.map(
+      tooling => tooling.internalPartNumber + ' - ' + tooling.name
+    ) as string[];
+    this.taskTypeOptionList = this.taskFormData?.taskTypeList?.map(
+      taskType => taskType.name
+    ) as string[];
+    this.productionLineOptionList = this.taskFormData?.productionLineList?.map(
+      pl => pl.lineCode
+    ) as string[];
+    this.employeeOptionList = this.taskFormData?.employeeList?.map(
+      employee => employee.name
+    ) as string[];
   };
-
-  onGetEmployeeList = async (): Promise<void> => {
-    return this.onGetDataList<IEmployee>({
-      apiCall: () => this.employeeApi.onGetDataList(this.idCompany),
-      dataListKey: 'employeeDataList',
-      optionListKey: 'employeeOptionList',
-      optionPropertyKey: 'name',
-      errorTitle: 'Listar funcionários: ',
-    });
-  };
-
-  onGetProductionLineList = async (): Promise<void> => {
-    return this.onGetDataList<IProductionLine>({
-      apiCall: () => this.productionLineApi.onGetDataList(),
-      dataListKey: 'productionLineDataList',
-      optionListKey: 'productionLineOptionList',
-      optionPropertyKey: 'lineCode',
-      errorTitle: 'Listar linhas de produção: ',
-    });
-  };
-
-  onGetToolingList = async (): Promise<void> => {
-    return this.onGetDataList<IProduct>({
-      apiCall: () => this.productApi.onGetDataListByProductType('name', 'Ativo'),
-      dataListKey: 'toolingDataList',
-      optionListKey: 'toolingOptionList',
-      optionPropertyKey: 'name',
-      errorTitle: 'Listar ferramentas: ',
-    });
-  };
-
-  private async onGetDataList<T>(config: {
-    apiCall: () => Promise<{ data?: T | T[] }>;
-    dataListKey: DataList;
-    optionListKey: OptionDataList;
-    optionPropertyKey: keyof T;
-    errorTitle: string;
-  }): Promise<void> {
-    try {
-      this.modalStore.onLoading(true);
-      const response = await config.apiCall();
-
-      if (response.data) {
-        const data = response.data;
-        (this as any)[config.dataListKey] = data;
-        (this as any)[config.optionListKey] = (data as T[]).map(
-          item => item[config.optionPropertyKey]
-        );
-      }
-    } catch (e: unknown) {
-      const error = e as HttpErrorResponse;
-      this.modalStore.onShowInfoModal(config.errorTitle, error.error?.message);
-    } finally {
-      this.modalStore.onLoading(false);
-    }
-  }
 
   onClearProductionLineData = (): void => {
-    this.productionLineData = {
+    this.taskFormData.productionLine = {
       idProductionLine: 0,
       lineCode: '',
-      lineName: '',
-      comment: '',
-    } as IProductionLine;
+    } as PartialProductionLine;
   };
 
   onClearTaskTypeData = (): void => {
-    this.taskTypeData = {
+    this.taskFormData.taskType = {
       idTaskType: 0,
       name: '',
-      comment: '',
-    } as ITaskType;
+    } as PartialTaskType;
   };
 
   onClearEmployeeData = (): void => {
-    this.employeeData = {
+    this.taskFormData.employee = {
       idEmployee: 0,
       name: '',
-      isDefault: false,
-      cellphone: '',
-      cpf: '',
-      deskphone: '',
-      email: '',
-      position: '',
-      photoUrl: '',
-      department: '',
-      comment: '',
-    } as IEmployee;
+    } as PartialEmployee;
   };
 
   setTaskTypeValue = (taskTypeName: string): void => {
     this.onClearProductionLineData();
     if (this.isProductionLineSelectDisabled) this.isProductionLineSelectDisabled = false;
-    const taskType = this.taskTypeDataList.find(
+    const taskType = this.taskFormData.taskTypeList?.find(
       taskType => taskType.name == taskTypeName
     ) as ITaskType;
     if (taskTypeName) {
-      this.taskTypeData = taskType;
+      this.taskFormData.taskType = taskType;
     } else {
       this.onClearTaskTypeData();
     }
   };
 
   setEmployeeValue = (employeeName: string): void => {
-    const employee = this.employeeDataList.find(
+    const employee = this.taskFormData.employeeList?.find(
       employee => employee.name == employeeName
     ) as IEmployee;
     if (employeeName) {
-      this.employeeData = employee;
+      this.taskFormData.employee = employee;
     } else {
       this.onClearEmployeeData();
     }
   };
 
   setProductionLineValue = (productionLineName: string): void => {
-    const taskType = this.productionLineDataList.find(
+    const productionLine = this.taskFormData.productionLineList?.find(
       productionLine => productionLine.lineCode == productionLineName
     ) as IProductionLine;
     if (productionLineName) {
-      this.productionLineData = taskType;
+      this.taskFormData.productionLine = productionLine;
     } else {
       this.onClearProductionLineData();
     }
@@ -306,42 +203,40 @@ export class TaskFormComponent implements OnInit, OnDestroy, AfterViewInit {
     if (!internalPartNumber) {
       return;
     }
-    const foundProductionLine = this.productionLineDataList.find(pl =>
-      pl.toolingList?.some(tool => tool.internalPartNumber == internalPartNumber)
+    const foundProductionLine = this.taskFormData.productionLineList?.find(pl =>
+      pl.toolingList?.some(tool => {
+        if (tool.internalPartNumber == internalPartNumber) {
+          (this.taskFormData.productionLine as PartialProductionLine).toolingList =
+            tool as Partial<IProduct>[];
+        }
+        return tool.internalPartNumber == internalPartNumber;
+      })
     );
     if (foundProductionLine) {
-      this.productionLineData = foundProductionLine as IProductionLine;
+      this.taskFormData.productionLine = foundProductionLine as IProductionLine;
       this.isProductionLineSelectDisabled = true;
     } else {
       this.onClearProductionLineData();
     }
   };
 
-  setStartDate = (date: string): void => {
-    this.taskData.startDate = new Date(date);
-  };
-
-  setFinishDate = (date: string): void => {
-    this.taskData.finishDate = new Date(date);
-  };
-
-  setTaskValue = (status: string): void => {
-    this.taskData.status = status;
+  setStatusValue = (status: string): void => {
+    const statusNumber = onConvertTaskStatusToNumber(status);
+    this.taskFormData.status = statusNumber;
   };
 
   defineTitle = (): string => {
-    if (this.idTask == 0) {
+    if (this.paramsIdTask == 0) {
       return 'Novo Registro';
     } else {
-      return this.taskData.name;
+      return this.taskFormData.name as string;
     }
   };
 
   isRemovedPhoto = false;
 
-  onFileListChange = (fileList: File[] | null): void => {
+  onFileListChange = (fileList: File[]): void => {
     this.fileList = fileList;
-    console.log('listfiles', this.fileList);
   };
 
   ngAfterViewInit(): void {
@@ -357,12 +252,12 @@ export class TaskFormComponent implements OnInit, OnDestroy, AfterViewInit {
   };
 
   onBackToPreviousPage = (): void => {
-    this.modalStore.onRedirectPage(`/${this.deptName}/${this.currentView}`);
+    this.modalStore.onRedirectPage(`/${this.paramsDeptName}/${this.currentView}`);
   };
 
   fieldValidation = (): void => {
     const message = 'O campo Nome do Cargo não pode estar vazio.';
-    if (this.taskData.name.length == 0) {
+    if (this.taskFormData.name?.length == 0) {
       this.modalStore.onShowInfoModal(`Cadastro de ${this.currentViewTranslatedSingular}`, message);
       throw Error(message);
     }
@@ -375,31 +270,13 @@ export class TaskFormComponent implements OnInit, OnDestroy, AfterViewInit {
         formData.append('files', file);
       }
     }
-    formData.append(
-      'data',
-      JSON.stringify({
-        idTask: this.taskData.idTask,
-        startDate: this.taskData.startDate,
-        finishDate: this.taskData.finishDate,
-        name: this.taskData.name,
-        status: this.taskData.status,
-        comment: this.taskData.comment,
-        employee: this.employeeData,
-        product: this.toolingData,
-        productionLine: this.productionLineData,
-        taskType: this.taskTypeData,
-      })
-    );
+    formData.append('data', JSON.stringify(this.taskFormData));
     return formData;
   };
 
   onSaveRegister = async (onActionOk?: ActionCallback): Promise<void> => {
     const finalData = this.setFinalData();
-    console.log('task', this.taskData);
-    console.log('employee', this.employeeData);
-    console.log('product', this.toolingData);
-    console.log('productionLine', this.productionLineData);
-    console.log('taskTypeData', this.taskTypeData);
+    console.log('data', finalData.getAll('data'));
     console.log('files', finalData.getAll('files'));
 
     // try {
