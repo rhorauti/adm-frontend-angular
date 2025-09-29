@@ -1,4 +1,5 @@
 import { CommonModule } from '@angular/common';
+import { HttpErrorResponse } from '@angular/common/http';
 import {
   AfterViewInit,
   ChangeDetectorRef,
@@ -13,16 +14,22 @@ import {
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { BreadcrumbComponent } from '@components/breadcrumb/breadcrumb.component';
+import { ButtonDeleteComponent } from '@components/button/button-delete/button-delete.component';
+import { ButtonIconComponent } from '@components/button/button-icon/button-icon.component';
 import { ButtonLabelComponent } from '@components/button/button-label/button-label.component';
 import { InputComponent } from '@components/input/input.component';
 import { PhotoBoxListComponent } from '@components/photo-box/photo-box-list/photo-box-list.component';
 import { SelectComponent } from '@components/select/select.component';
 import { TextAreaComponent } from '@components/text-area/text-area.component';
-import { onConvertTaskStatusToNumber, onStringfyTaskStatus } from '@core/enum/status.enum';
+import { ToogleButtonComponent } from '@components/toogle-button/toogle-button.component';
+import {
+  onConvertTaskStatusToNumber,
+  onStringfyTaskStatus as onConvertTaskStatusFromNumberToFriendlyName,
+  TASK_NUMBER_STATUS,
+} from '@core/enum/status.enum';
 import { TaskApi } from '@core/http/task/task.api';
 import { IEmployee } from '@core/interfaces/employee.interface';
 import { ActionCallback } from '@core/interfaces/modal.interface';
-import { IProduct } from '@core/interfaces/product.interface';
 import { IProductionLine } from '@core/interfaces/production-line.interface';
 import {
   ITask,
@@ -30,8 +37,10 @@ import {
   PartialEmployee,
   PartialProductionLine,
   PartialTaskType,
+  UsedSpareParts,
 } from '@core/interfaces/task.interface';
 import { BaseApiName } from '@core/types/base.type';
+import { translateDeptName } from '@core/utils/misc';
 import { BaseRegisterStore } from '@store/base/base.register.store';
 import { ModalStore } from '@store/modal/modal.store';
 import { Subscription } from 'rxjs';
@@ -47,6 +56,9 @@ import { Subscription } from 'rxjs';
     SelectComponent,
     TextAreaComponent,
     PhotoBoxListComponent,
+    ToogleButtonComponent,
+    ButtonIconComponent,
+    ButtonDeleteComponent,
   ],
   templateUrl: './task-form.component.html',
   styleUrl: './task-form.component.scss',
@@ -72,22 +84,66 @@ export class TaskFormComponent implements OnInit, OnDestroy, AfterViewInit {
   taskStatus = '';
   idCompany = 1;
 
+  eligibleOptionsForTooling: string[] = ['Ferramenta'];
+  eligibleOptionsForProductionLine: string[] = ['Ferramenta', 'Corretiva', 'Preventiva'];
   toolingOptionList: string[] = [];
   taskTypeOptionList: string[] = [];
   productionLineOptionList: string[] = [];
   employeeOptionList: string[] = [];
+  usedSparePartsOptionList: string[] = [];
+  separatorSymbol = '_';
+
+  usedSparePartsMock = [
+    {
+      idProduct: 11,
+      internalPartNumber: '111-111',
+      name: 'Nome 1',
+      qty: 1,
+    },
+    {
+      idProduct: 22,
+      internalPartNumber: '222-222',
+      name: 'Nome 2',
+      qty: 2,
+    },
+    {
+      idProduct: 33,
+      internalPartNumber: '333-333',
+      name: 'Nome 3',
+      qty: 3,
+    },
+  ];
+
+  showSpareParts = false;
+  initialUsedSparePartsList: UsedSpareParts[] = [
+    {
+      idProduct: 0,
+      internalPartNumber: '',
+      name: '',
+      qty: 1,
+    },
+  ];
 
   isProductionLineSelectDisabled = false;
+
   fileList: File[] | null = [];
   taskFormData: ITask = {
     idTask: 0,
     startDate: null,
     finishDate: null,
     name: '',
-    status: 0,
+    usedSpareParts: [
+      {
+        idProduct: 0,
+        internalPartNumber: '',
+        name: '',
+        qty: 1,
+      },
+    ],
+    status: TASK_NUMBER_STATUS.NOT_STARTED,
     comment: '',
     imgPreviewList: [],
-    productList: [],
+    toolingList: [],
     product: {
       idProduct: 0,
       internalPartNumber: '',
@@ -121,15 +177,35 @@ export class TaskFormComponent implements OnInit, OnDestroy, AfterViewInit {
       this.paramsIdTask as number
     );
     this.taskFormData = response.data as ITask;
+    this.taskFormData.usedSpareParts = [...this.usedSparePartsMock];
+    this.showSpareParts = this.taskFormData.usedSpareParts.length > 0;
     this.onSetOptionsList();
-    this.taskStatus = onStringfyTaskStatus(this.taskFormData.status as number);
+    this.taskStatus = onConvertTaskStatusFromNumberToFriendlyName(
+      this.taskFormData.status as number
+    );
+    this.onDisabledStatusOptions();
     this.defineTitle();
     this.breadcrumbList = ['Cadastro', this.currentViewTranslated, `${this.defineTitle()}`];
+    console.log('spare', this.taskFormData.usedSpareParts);
   }
 
+  isStatusDisabled = false;
+
+  onDisabledStatusOptions = (): void => {
+    this.isStatusDisabled =
+      this.taskFormData.status == TASK_NUMBER_STATUS.NOT_STARTED ||
+      this.taskFormData.status == TASK_NUMBER_STATUS.FINISHED;
+  };
+
   onSetOptionsList = (): void => {
-    this.toolingOptionList = this.taskFormData?.productList?.map(
-      tooling => tooling.internalPartNumber + ' - ' + tooling.name
+    if (this.taskFormData.usedSpareParts) {
+      this.initialUsedSparePartsList = [...this.taskFormData.usedSpareParts];
+      this.usedSparePartsOptionList = this.taskFormData.usedSpareParts?.map(
+        sp => sp.internalPartNumber + this.separatorSymbol + sp.name
+      );
+    }
+    this.toolingOptionList = this.taskFormData?.toolingList?.map(
+      tooling => tooling.internalPartNumber + this.separatorSymbol + tooling.name
     ) as string[];
     this.taskTypeOptionList = this.taskFormData?.taskTypeList?.map(
       taskType => taskType.name
@@ -199,30 +275,70 @@ export class TaskFormComponent implements OnInit, OnDestroy, AfterViewInit {
   };
 
   onSetSelectedTooling = (tooling: string): void => {
-    const internalPartNumber = tooling.split('-')[0].trim();
+    const internalPartNumber = tooling.split(this.separatorSymbol)[0].trim();
     if (!internalPartNumber) {
       return;
     }
     const foundProductionLine = this.taskFormData.productionLineList?.find(pl =>
       pl.toolingList?.some(tool => {
-        if (tool.internalPartNumber == internalPartNumber) {
-          (this.taskFormData.productionLine as PartialProductionLine).toolingList =
-            tool as Partial<IProduct>[];
-        }
         return tool.internalPartNumber == internalPartNumber;
       })
     );
-    if (foundProductionLine) {
+    if (foundProductionLine && foundProductionLine?.lineCode.length > 0) {
       this.taskFormData.productionLine = foundProductionLine as IProductionLine;
       this.isProductionLineSelectDisabled = true;
     } else {
       this.onClearProductionLineData();
+      this.isProductionLineSelectDisabled = false;
     }
   };
 
   setStatusValue = (status: string): void => {
-    const statusNumber = onConvertTaskStatusToNumber(status);
-    this.taskFormData.status = statusNumber;
+    this.taskFormData.status = onConvertTaskStatusToNumber(status);
+  };
+
+  onSparePartNameChange = (name: string, index: number): void => {
+    console.log('name', name);
+    const internalPartNumber = name?.split(this.separatorSymbol)[0];
+    if (this.taskFormData.usedSpareParts) {
+      const selectedItem = this.initialUsedSparePartsList.find(
+        sp => sp.internalPartNumber.trim() == internalPartNumber.trim()
+      ) as UsedSpareParts;
+      if (selectedItem) {
+        this.taskFormData.usedSpareParts[index] = { ...selectedItem };
+      }
+    }
+  };
+
+  onSparePartQtyChange = (value: string, index: number): void => {
+    if (this.taskFormData.usedSpareParts) {
+      this.taskFormData.usedSpareParts[index].qty = Number(value);
+    }
+  };
+
+  onAddSparePartsRow = (): void => {
+    this.taskFormData.usedSpareParts?.push({
+      idProduct: 0,
+      internalPartNumber: '',
+      name: '',
+      qty: 1,
+    });
+  };
+
+  onRemoveSparePartsRow = (sparePart: UsedSpareParts): void => {
+    if (this.taskFormData.usedSpareParts?.length == 1) {
+      this.taskFormData.usedSpareParts[0] = {
+        idProduct: 0,
+        internalPartNumber: '',
+        name: '',
+        qty: 1,
+      };
+      this.showSpareParts = false;
+      return;
+    }
+    const index = this.taskFormData.usedSpareParts?.indexOf(sparePart) as number;
+    if (index && index < 0) return;
+    this.taskFormData.usedSpareParts?.splice(index, 1);
   };
 
   defineTitle = (): string => {
@@ -256,7 +372,7 @@ export class TaskFormComponent implements OnInit, OnDestroy, AfterViewInit {
   };
 
   fieldValidation = (): void => {
-    const message = 'O campo Nome do Cargo não pode estar vazio.';
+    const message = '';
     if (this.taskFormData.name?.length == 0) {
       this.modalStore.onShowInfoModal(`Cadastro de ${this.currentViewTranslatedSingular}`, message);
       throw Error(message);
@@ -270,52 +386,66 @@ export class TaskFormComponent implements OnInit, OnDestroy, AfterViewInit {
         formData.append('files', file);
       }
     }
-    formData.append('data', JSON.stringify(this.taskFormData));
+    const finalData: ITask = {
+      idTask: this.taskFormData.idTask,
+      usedSpareParts: this.taskFormData.usedSpareParts,
+      startDate: this.taskFormData.startDate,
+      finishDate: this.taskFormData.finishDate,
+      name: this.taskFormData.name,
+      status: this.taskFormData.status,
+      comment: this.taskFormData.comment,
+      product: this.taskFormData.product,
+      productionLine: this.taskFormData.productionLine,
+      taskType: this.taskFormData.taskType,
+      employee: this.taskFormData.employee,
+    };
+    formData.append('data', JSON.stringify(finalData));
     return formData;
   };
 
   onSaveRegister = async (onActionOk?: ActionCallback): Promise<void> => {
-    const finalData = this.setFinalData();
-    console.log('data', finalData.getAll('data'));
-    console.log('files', finalData.getAll('files'));
+    // const finalData = this.setFinalData();
+    // console.log('data', finalData.getAll('data'));
+    // console.log('files', finalData.getAll('files'));
 
-    // try {
-    // this.modalStore.onLoading(true);
-    // this.fieldValidation();
-    // const deptNameTranslated = translateDeptName(this.deptName);
-    // const dept = await this.departmentApi.onGetDataByField('name', deptNameTranslated);
-    // const deptData = dept.data as IDepartment;
-    // this.data.department = deptData;
-    // const response = await this.taskApi.onSave(this.deptName, this.data);
-    // if (response.status) {
-    //   this.modalStore.onSetModalInfoType('success');
-    //   this.modalStore.onShowInfoModal(
-    //     `Cadastro de ${this.currentViewTranslatedSingular}`,
-    //     response.message,
-    //     onActionOk
-    //   );
-    // } else {
-    //   this.modalStore.onShowInfoModal(
-    //     `Cadastro de ${this.currentViewTranslatedSingular}`,
-    //     response.error?.message || ''
-    //   );
-    // }
-    // } catch (e: unknown) {
-    //   if (e instanceof HttpErrorResponse) {
-    //     const error = e as HttpErrorResponse;
-    //     this.modalStore.onShowInfoModal(
-    //       `Cadastro de ${this.currentViewTranslated}`,
-    //       error.error.message
-    //     );
-    //   } else {
-    //     this.modalStore.onShowInfoModal(
-    //       `Cadastro de ${this.currentViewTranslated}`,
-    //       (e as Error).message
-    //     );
-    //   }
-    // } finally {
-    //   this.modalStore.onLoading(false);
-    // }
+    try {
+      this.modalStore.onLoading(true);
+      const formData = this.setFinalData();
+      this.fieldValidation();
+      // const deptNameTranslated = translateDeptName(this.paramsDeptName);
+      // const dept = await this.departmentApi.onGetDataByField('name', deptNameTranslated);
+      // const deptData = dept.data as IDepartment;
+      // this.data.department = deptData;
+      const response = await this.taskApi.onSave(this.paramsDeptName, formData);
+      if (response.status) {
+        this.modalStore.onSetModalInfoType('success');
+        this.modalStore.onShowInfoModal(
+          `Cadastro de ${this.currentViewTranslatedSingular}`,
+          response.message,
+          onActionOk
+        );
+      } else {
+        this.modalStore.onShowInfoModal(
+          `Cadastro de ${this.currentViewTranslatedSingular}`,
+          response.error?.message || ''
+        );
+      }
+    } catch (e: unknown) {
+      if (e instanceof HttpErrorResponse) {
+        const error = e as HttpErrorResponse;
+        this.modalStore.onShowInfoModal(
+          `Cadastro de ${this.currentViewTranslated}`,
+          error.error.message
+        );
+      } else {
+        this.modalStore.onShowInfoModal(
+          `Cadastro de ${this.currentViewTranslated}`,
+          (e as Error).message
+        );
+      }
+    } finally {
+      this.modalStore.onLoading(false);
+    }
   };
 
   ngOnDestroy() {

@@ -41,10 +41,10 @@
           <app-select
             [selectType]="'custom'"
             [optionList]="taskTypeOptionList"
-            [selectValue]="taskFormData.taskType?.name || ''"
+            [selectValue]="taskFormData.taskType?.name || 'Selecione um item'"
             (selectValueEmitter)="setTaskTypeValue($event.toString())" />
         </div>
-        @if (taskFormData.taskType?.name == 'Ferramenta') {
+        @if (eligibleOptionsForTooling.includes(taskFormData.taskType?.name ?? '')) {
           <div class="flex flex-col gap-1 grow">
             <label #labelForm class="font-medium text-sm" for="default"
               >Ferramenta <span class="font-bold text-red-400">*</span></label
@@ -52,23 +52,38 @@
             <app-select
               [selectType]="'custom'"
               [optionList]="toolingOptionList"
-              [selectValue]="taskFormData.product?.name || ''"
+              [selectValue]="taskFormData.product?.name || 'Selecione um item'"
               (selectValueEmitter)="onSetSelectedTooling($event)" />
           </div>
         }
       </div>
       <div class="flex flex-col md:flex-row gap-4">
+        @if (eligibleOptionsForProductionLine.includes(taskFormData.taskType?.name || '')) {
+          <div class="flex flex-col gap-1 grow-0">
+            <label #labelForm class="font-medium text-sm" for="default"
+              >Linha de Produção <span class="font-bold text-red-400">*</span></label
+            >
+            <app-select
+              [selectType]="'custom'"
+              [optionList]="productionLineOptionList"
+              [isDisabled]="isProductionLineSelectDisabled"
+              [selectValue]="taskFormData.productionLine?.lineCode || 'Selecione um item'"
+              (selectValueEmitter)="setProductionLineValue($event.toString())" />
+          </div>
+        }
         <div class="flex flex-col gap-1 grow">
           <label #labelForm class="font-medium text-sm" for="default"
-            >Linha de Produção <span class="font-bold text-red-400">*</span></label
+            >Atividade <span class="font-bold text-red-400">*</span></label
           >
-          <app-select
-            [selectType]="'custom'"
-            [optionList]="productionLineOptionList"
-            [isDisabled]="isProductionLineSelectDisabled"
-            [selectValue]="taskFormData.productionLine?.lineCode || ''"
-            (selectValueEmitter)="setProductionLineValue($event.toString())" />
+          <app-input
+            [inputName]="'custom'"
+            [inputValue]="taskFormData.name || ''"
+            [type]="'search'"
+            (inputValueEmitter)="taskFormData.name = $event" />
         </div>
+      </div>
+      <h1 class="text-lg font-semibold bg-gray-200 p-1 rounded-md">Resultado</h1>
+      <div class="flex flex-col md:flex-row gap-4 grow">
         <div class="flex flex-col gap-1 grow">
           <label #labelForm class="font-medium text-sm" for="default">Inicio</label>
           <app-input
@@ -87,32 +102,63 @@
               taskFormData.finishDate == null ? '' : taskFormData.finishDate.toString()
             " />
         </div>
-      </div>
-      <div class="flex flex-col md:flex-row gap-4 grow">
         <div class="flex flex-col gap-1 grow">
-          <label #labelForm class="font-medium text-sm" for="default"
-            >Atividade <span class="font-bold text-red-400">*</span></label
-          >
-          <app-input
-            [inputName]="'custom'"
-            [inputValue]="taskFormData.name || ''"
-            [type]="'search'"
-            (inputValueEmitter)="taskFormData.name = $event" />
-        </div>
-        <div class="flex flex-col gap-1">
           <label #labelForm class="font-medium text-sm" for="default">Status</label>
           <app-select
             [selectType]="'status'"
-            [optionList]="['Pausado', 'Em andamento', 'Finalizado']"
-            [selectValue]="taskStatus"
+            [isDisabled]="isStatusDisabled"
+            [selectValue]="taskStatus || 'Não iniciado'"
             (selectValueEmitter)="setStatusValue($event.toString())" />
         </div>
       </div>
+      <div class="flex gap-4">
+        <app-toogle-button
+          [isChecked]="showSpareParts"
+          [toggleId]="'task-form-tooggle'"
+          (isCheckedEmitter)="showSpareParts = $event" />
+        <p>Houve troca de peças?</p>
+      </div>
+      @if (
+        showSpareParts && taskFormData.usedSpareParts && taskFormData.usedSpareParts.length > 0
+      ) {
+        <div class="flex flex-col items-end gap-4 w-full">
+          @for (sparePart of taskFormData.usedSpareParts; track $index) {
+            <div class="flex md:flex-row items-end gap-4 w-full">
+              <div class="flex md:flex-row items-end gap-4 w-full">
+                <div class="flex flex-col gap-1 grow">
+                  <label #labelForm class="font-medium text-sm" for="default">Peça trocada</label>
+                  <app-select
+                    [selectType]="'custom'"
+                    [optionList]="usedSparePartsOptionList"
+                    [selectValue]="
+                      sparePart.internalPartNumber + separatorSymbol + sparePart.name ||
+                      'Escolha um item'
+                    "
+                    (selectValueEmitter)="onSparePartNameChange($event, $index)" />
+                </div>
+                <app-button-icon [iconName]="'search'" class="grow-0" />
+                <div class="flex flex-col gap-1 grow-0">
+                  <label #labelForm class="font-medium text-sm" for="default">Qtd trocada</label>
+                  <app-input
+                    [inputName]="'custom'"
+                    [type]="'number'"
+                    [inputValue]="sparePart.qty.toString()"
+                    (inputValueEmitter)="onSparePartQtyChange($event, $index)" />
+                </div>
+              </div>
+              <div class="flex gap-2">
+                <app-button-icon [iconName]="'add'" class="grow-0" (click)="onAddSparePartsRow()" />
+                <app-button-delete (click)="onRemoveSparePartsRow(sparePart)" />
+              </div>
+            </div>
+          }
+        </div>
+      }
       <app-photo-box-list
         [imgPreviewUrlList]="taskFormData.imgPreviewList || []"
         (fileListEmitter)="onFileListChange($event)"></app-photo-box-list>
       <div class="flex flex-col gap-1 grow">
-        <label #labelForm class="font-medium text-sm" for="default">Comentários</label>
+        <label #labelForm class="font-medium text-sm" for="default">Laudo técnico</label>
         <app-text-area
           [inputValue]="taskFormData.comment ?? ''"
           (inputValueEmitter)="taskFormData.comment = $event" />

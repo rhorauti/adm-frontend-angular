@@ -25,7 +25,7 @@ export class TaskApi {
     );
   }
 
-  async onSave(department: string, data: ITask): Promise<IResponseTask> {
+  async onSave(department: string, data: FormData): Promise<IResponseTask> {
     return await this.httpRequestService.sendHttpRequest(
       `${environment.apiUrl}/${department}/${this.baseApiName}`,
       'POST',

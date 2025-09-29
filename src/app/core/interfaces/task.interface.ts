@@ -20,6 +20,7 @@ export type PartialProductionLine = Pick<
 export type PartialProduct = Pick<IProduct, 'idProduct' | 'internalPartNumber' | 'name'>;
 export interface UsedSpareParts {
   idProduct: number;
+  internalPartNumber: string;
   name: string;
   qty: number;
 }
@@ -32,9 +33,8 @@ export interface ITask {
   status?: number;
   comment?: string;
   imgPreviewList?: string[];
-  productList?: PartialProduct[];
+  toolingList?: PartialProduct[];
   product?: PartialProduct;
-  isSparePartsChanged?: boolean;
   usedSpareParts?: UsedSpareParts[];
   productionLineList?: PartialProductionLine[];
   productionLine?: PartialProductionLine;

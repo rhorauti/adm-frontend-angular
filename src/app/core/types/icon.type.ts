@@ -1,6 +1,7 @@
 export type Icon =
   | ''
   | 'add'
+  | 'remove'
   | 'search'
   | 'filter_list'
   | 'view_column'

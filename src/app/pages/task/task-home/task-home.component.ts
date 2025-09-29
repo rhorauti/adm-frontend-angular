@@ -23,7 +23,6 @@ import { ITableHeader } from '@core/interfaces/table.interface';
 import { ITask } from '@core/interfaces/task.interface';
 import { ActivatedRoute } from '@angular/router';
 import { Subscription } from 'rxjs';
-import { DepartmentApi } from '@core/http/department/department.api';
 import { TaskApi } from '@core/http/task/task.api';
 
 @Component({
@@ -48,13 +47,12 @@ import { TaskApi } from '@core/http/task/task.api';
 })
 export class TaskHomeComponent implements OnInit {
   readonly taskApi = inject(TaskApi);
-  readonly departmentApi = inject(DepartmentApi);
   readonly baseRegisterStore = inject(BaseRegisterStore);
   private activatedRoute = inject(ActivatedRoute);
-  subscription: Subscription | undefined = undefined;
-
   readonly authStore = inject(AuthStore);
   readonly modalStore = inject(ModalStore);
+
+  subscription: Subscription | undefined = undefined;
 
   readonly currentView = 'tasks';
   relatedView: BaseApiName = 'departments';

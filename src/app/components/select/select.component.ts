@@ -2,6 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, EventEmitter, Input, OnChanges, OnInit, Output } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
+import { optionTaskStatusList, TASK_STRING_STATUS } from '@core/enum/status.enum';
 
 type SelectType = 'state' | 'addressType' | 'status' | 'custom';
 type Status = 'Não iniciado' | 'Em andamento' | 'Pausado' | 'Finalizado';
@@ -76,28 +77,31 @@ export class SelectComponent implements OnInit, OnChanges {
         ];
         break;
       }
+      case 'status': {
+        this.optionList = optionTaskStatusList;
+      }
     }
   }
 
   changeStatusIcon = (): void => {
     if (this.selectType == 'status') {
       switch (this.selectValue as Status) {
-        case 'Não iniciado': {
+        case TASK_STRING_STATUS.NOT_STARTED: {
           this.statusIcon = 'stop';
           this.iconClass = 'text-gray-400';
           break;
         }
-        case 'Em andamento': {
+        case TASK_STRING_STATUS.UNDER_PROGRESS: {
           this.statusIcon = 'play_circle_filled';
           this.iconClass = 'text-yellow-400';
           break;
         }
-        case 'Pausado': {
+        case TASK_STRING_STATUS.PAUSED: {
           this.statusIcon = 'pause_circle_filled';
           this.iconClass = 'text-blue-400';
           break;
         }
-        case 'Finalizado': {
+        case TASK_STRING_STATUS.FINISHED: {
           this.statusIcon = 'check_circle';
           this.iconClass = 'text-green-400';
           break;
@@ -112,6 +116,7 @@ export class SelectComponent implements OnInit, OnChanges {
 
   outputSelectValue(event: Event): void {
     this.selectValue = (event.target as HTMLSelectElement).value;
+    this.changeStatusIcon();
     this.selectValueEmitter.emit(this.selectValue);
   }
 
