@@ -40,7 +40,7 @@ import {
   UsedSpareParts,
 } from '@core/interfaces/task.interface';
 import { BaseApiName } from '@core/types/base.type';
-import { translateDeptName } from '@core/utils/misc';
+import { dateAndHourFormatted } from '@core/utils/misc';
 import { BaseRegisterStore } from '@store/base/base.register.store';
 import { ModalStore } from '@store/modal/modal.store';
 import { Subscription } from 'rxjs';
@@ -125,6 +125,8 @@ export class TaskFormComponent implements OnInit, OnDestroy, AfterViewInit {
   ];
 
   isProductionLineSelectDisabled = false;
+  startDate = '';
+  finishDate = '';
 
   fileList: File[] | null = [];
   taskFormData: ITask = {
@@ -176,9 +178,16 @@ export class TaskFormComponent implements OnInit, OnDestroy, AfterViewInit {
       this.paramsDeptName,
       this.paramsIdTask as number
     );
-    this.taskFormData = response.data as ITask;
-    this.taskFormData.usedSpareParts = [...this.usedSparePartsMock];
-    this.showSpareParts = this.taskFormData.usedSpareParts.length > 0;
+    const taskData = response.data as ITask;
+    this.taskFormData = {
+      ...taskData,
+      startDate: taskData.startDate ? new Date(taskData.startDate) : null,
+      finishDate: taskData.finishDate ? new Date(taskData.finishDate) : null,
+    };
+    if (this.taskFormData.usedSpareParts) {
+      this.showSpareParts = this.taskFormData.usedSpareParts.length > 0;
+    }
+    this.onSetStartAndFinishDate();
     this.onSetOptionsList();
     this.taskStatus = onConvertTaskStatusFromNumberToFriendlyName(
       this.taskFormData.status as number
@@ -186,8 +195,16 @@ export class TaskFormComponent implements OnInit, OnDestroy, AfterViewInit {
     this.onDisabledStatusOptions();
     this.defineTitle();
     this.breadcrumbList = ['Cadastro', this.currentViewTranslated, `${this.defineTitle()}`];
-    console.log('spare', this.taskFormData.usedSpareParts);
   }
+
+  onSetStartAndFinishDate = (): void => {
+    if (this.taskFormData.startDate) {
+      this.startDate = dateAndHourFormatted(this.taskFormData.startDate);
+    }
+    if (this.taskFormData.finishDate) {
+      this.finishDate = dateAndHourFormatted(this.taskFormData.finishDate);
+    }
+  };
 
   isStatusDisabled = false;
 
@@ -284,6 +301,11 @@ export class TaskFormComponent implements OnInit, OnDestroy, AfterViewInit {
         return tool.internalPartNumber == internalPartNumber;
       })
     );
+    this.taskFormData.toolingList?.forEach(tooling => {
+      if (tooling.internalPartNumber == internalPartNumber) {
+        this.taskFormData.product = tooling;
+      }
+    });
     if (foundProductionLine && foundProductionLine?.lineCode.length > 0) {
       this.taskFormData.productionLine = foundProductionLine as IProductionLine;
       this.isProductionLineSelectDisabled = true;
@@ -404,18 +426,10 @@ export class TaskFormComponent implements OnInit, OnDestroy, AfterViewInit {
   };
 
   onSaveRegister = async (onActionOk?: ActionCallback): Promise<void> => {
-    // const finalData = this.setFinalData();
-    // console.log('data', finalData.getAll('data'));
-    // console.log('files', finalData.getAll('files'));
-
     try {
       this.modalStore.onLoading(true);
       const formData = this.setFinalData();
       this.fieldValidation();
-      // const deptNameTranslated = translateDeptName(this.paramsDeptName);
-      // const dept = await this.departmentApi.onGetDataByField('name', deptNameTranslated);
-      // const deptData = dept.data as IDepartment;
-      // this.data.department = deptData;
       const response = await this.taskApi.onSave(this.paramsDeptName, formData);
       if (response.status) {
         this.modalStore.onSetModalInfoType('success');
@@ -431,6 +445,7 @@ export class TaskFormComponent implements OnInit, OnDestroy, AfterViewInit {
         );
       }
     } catch (e: unknown) {
+      console.log('error', e);
       if (e instanceof HttpErrorResponse) {
         const error = e as HttpErrorResponse;
         this.modalStore.onShowInfoModal(

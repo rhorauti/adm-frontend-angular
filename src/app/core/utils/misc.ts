@@ -197,3 +197,17 @@ export const setDeptNameTranslationToDefaultName = (deptName: string): string =>
   }
   return '';
 };
+
+const countrySetup = 'pt-BR';
+type DateFormat = 'short' | 'long' | 'medium' | 'full';
+
+export const dateAndHourFormatted = (
+  dateAndHour: Date,
+  dateFormat: DateFormat = 'short',
+  timeFormat: DateFormat = 'short'
+): string => {
+  return new Intl.DateTimeFormat(countrySetup, {
+    dateStyle: dateFormat,
+    timeStyle: timeFormat,
+  }).format(dateAndHour);
+};

@@ -12,17 +12,17 @@
   <div class="flex flex-col gap-4">
     <h1 class="text-lg font-semibold bg-gray-200 p-1 rounded-md">Dados cadastrais</h1>
     <div class="flex flex-col gap-4">
-      @if (taskFormData.idTask != null && taskFormData.idTask > 0) {
-        <div class="flex flex-col gap-1 grow">
-          <label #labelForm class="font-medium text-sm" for="default">Id da Atividade</label>
-          <app-input
-            [inputName]="'custom'"
-            [isDisabled]="true"
-            [inputValue]="taskFormData.idTask == 0 ? '' : taskFormData.idTask.toString()"
-            [type]="'search'" />
-        </div>
-      }
       <div class="flex flex-col md:flex-row gap-4">
+        @if (taskFormData.idTask != null && taskFormData.idTask > 0) {
+          <div class="flex flex-col gap-1 shrink">
+            <label #labelForm class="font-medium text-sm" for="default">Id da Atividade</label>
+            <app-input
+              [inputName]="'custom'"
+              [isDisabled]="true"
+              [inputValue]="taskFormData.idTask == 0 ? '' : taskFormData.idTask.toString()"
+              [type]="'search'" />
+          </div>
+        }
         <div class="flex flex-col gap-1 grow">
           <label #labelForm class="font-medium text-sm" for="default"
             >Funcionário <span class="font-bold text-red-400">*</span></label
@@ -52,7 +52,10 @@
             <app-select
               [selectType]="'custom'"
               [optionList]="toolingOptionList"
-              [selectValue]="taskFormData.product?.name || 'Selecione um item'"
+              [selectValue]="
+                taskFormData.product?.internalPartNumber + '_' + taskFormData.product?.name ||
+                'Selecione um item'
+              "
               (selectValueEmitter)="onSetSelectedTooling($event)" />
           </div>
         }
@@ -86,21 +89,11 @@
       <div class="flex flex-col md:flex-row gap-4 grow">
         <div class="flex flex-col gap-1 grow">
           <label #labelForm class="font-medium text-sm" for="default">Inicio</label>
-          <app-input
-            [inputName]="'custom'"
-            [isDisabled]="true"
-            [inputValue]="
-              taskFormData.startDate == null ? '' : taskFormData.startDate.toString()
-            " />
+          <app-input [inputName]="'custom'" [isDisabled]="true" [inputValue]="startDate" />
         </div>
         <div class="flex flex-col gap-1 grow">
           <label #labelForm class="font-medium text-sm" for="default">Fim</label>
-          <app-input
-            [inputName]="'custom'"
-            [isDisabled]="true"
-            [inputValue]="
-              taskFormData.finishDate == null ? '' : taskFormData.finishDate.toString()
-            " />
+          <app-input [inputName]="'custom'" [isDisabled]="true" [inputValue]="finishDate" />
         </div>
         <div class="flex flex-col gap-1 grow">
           <label #labelForm class="font-medium text-sm" for="default">Status</label>

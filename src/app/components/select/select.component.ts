@@ -3,13 +3,14 @@ import { Component, EventEmitter, Input, OnChanges, OnInit, Output } from '@angu
 import { FormsModule } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
 import { optionTaskStatusList, TASK_STRING_STATUS } from '@core/enum/status.enum';
+import { MatSelectModule } from '@angular/material/select';
 
 type SelectType = 'state' | 'addressType' | 'status' | 'custom';
 type Status = 'Não iniciado' | 'Em andamento' | 'Pausado' | 'Finalizado';
 
 @Component({
   selector: 'app-select',
-  imports: [CommonModule, MatIconModule, FormsModule],
+  imports: [CommonModule, MatIconModule, FormsModule, MatSelectModule],
   templateUrl: './select.component.html',
   styleUrl: './select.component.scss',
 })
