@@ -108,7 +108,7 @@
         <app-toogle-button
           [isChecked]="showSpareParts"
           [toggleId]="'task-form-tooggle'"
-          (isCheckedEmitter)="showSpareParts = $event" />
+          (isCheckedEmitter)="onToogleButtonChange($event)" />
         <p>Houve troca de peças?</p>
       </div>
       @if (
@@ -148,8 +148,8 @@
         </div>
       }
       <app-photo-box-list
-        [imgPreviewUrlList]="taskFormData.imgPreviewList || []"
-        (fileListEmitter)="onFileListChange($event)"></app-photo-box-list>
+        [imgPreviewList]="taskFormData.imgPreviewList || []"
+        (fileListChangeEmitter)="onFileListChange($event)"></app-photo-box-list>
       <div class="flex flex-col gap-1 grow">
         <label #labelForm class="font-medium text-sm" for="default">Laudo técnico</label>
         <app-text-area

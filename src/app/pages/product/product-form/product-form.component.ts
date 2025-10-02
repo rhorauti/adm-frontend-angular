@@ -278,7 +278,7 @@ export class ProductFormComponent implements OnInit, OnDestroy, AfterViewInit {
     }
   };
 
-  onPhotoRemoved = (file: File | null): void => {
+  onFileChange = (file: File | null): void => {
     if (file == null) {
       this.isRemovedPhoto = true;
       this.imgPreview = null;

@@ -1,15 +1,15 @@
 <div class="flex flex-wrap gap-4">
-  @for (imgUrl of imgPreviewUrlList; track $index) {
-    @if (imgUrl) {
+  @for (img of imgPreviewList; track $index) {
+    @if (img) {
       <div class="relative">
         <img
           [ngClass]="divClass"
-          [src]="imgUrl"
+          [src]="img.previewUrl"
           alt="Profile Image"
           class="border border-gray-400 rounded-md aspect-square object-cover" />
         <app-button-close
-          (click)="clearPhoto($index)"
-          class="absolute top-1 right-1"></app-button-close>
+          (click)="clearPhoto(img)"
+          class="absolute -top-1 -right-1"></app-button-close>
       </div>
     }
   }

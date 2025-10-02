@@ -105,7 +105,7 @@ export class TaskHomeComponent implements OnInit {
       isHeaderActive: true,
       sortDirection: 0,
       icon: defaultTableHeaderIcon,
-      headerName: 'Tipo da Atividade',
+      headerName: 'Tipo',
       databaseField: 'taskType',
     },
     {

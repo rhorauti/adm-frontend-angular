@@ -4,7 +4,7 @@ import { IUnit } from './unit.interface';
 export interface IProductType {
   idProductType: number | null;
   name: string;
-  comment: string;
+  comment?: string;
 }
 
 export interface IProduct {

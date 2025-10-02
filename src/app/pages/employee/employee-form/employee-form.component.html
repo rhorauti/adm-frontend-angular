@@ -50,7 +50,7 @@
         </div>
         <app-photo-box-single
           [imgPreviewUrl]="employeeData.photoUrl ?? ''"
-          (fileUrlEmitter)="onPhotoRemoved($event)" />
+          (fileChangeEmitter)="onFileChange($event)" />
       </div>
       <div class="flex flex-col md:flex-row gap-4">
         <div class="flex flex-col gap-1 grow">

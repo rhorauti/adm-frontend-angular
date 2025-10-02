@@ -1,7 +1,16 @@
 import { CommonModule } from '@angular/common';
-import { Component, EventEmitter, inject, Input, OnDestroy, Output } from '@angular/core';
+import {
+  Component,
+  EventEmitter,
+  inject,
+  Input,
+  OnChanges,
+  OnDestroy,
+  Output,
+} from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
 import { ButtonCloseComponent } from '@components/button/button-close/button-close.component';
+import { IPhoto } from '@core/interfaces/photo.interface';
 import { ModalStore } from '@store/modal/modal.store';
 
 @Component({
@@ -10,13 +19,16 @@ import { ModalStore } from '@store/modal/modal.store';
   templateUrl: './photo-box-list.component.html',
   styleUrl: './photo-box-list.component.scss',
 })
-export class PhotoBoxListComponent implements OnDestroy {
+export class PhotoBoxListComponent implements OnDestroy, OnChanges {
   readonly modalStore = inject(ModalStore);
   @Input() divClass = 'w-12';
-  @Input() imgPreviewUrlList: string[] | null = null;
-  fileList: File[] = [];
+  @Input() imgPreviewList: IPhoto[] = [];
 
-  @Output() fileListEmitter = new EventEmitter<File[]>();
+  @Output() fileListChangeEmitter = new EventEmitter<IPhoto[]>();
+
+  ngOnChanges(): void {
+    console.log('imgList', this.imgPreviewList);
+  }
 
   uploadFiles = (event: Event): void => {
     const files = (event.target as HTMLInputElement).files;
@@ -30,26 +42,26 @@ export class PhotoBoxListComponent implements OnDestroy {
           'O arquivo selecionado não é uma imagem.'
         );
       } else {
-        this.fileList.push(file);
-        const fileUrl = URL.createObjectURL(file);
-        this.imgPreviewUrlList?.push(fileUrl);
-        this.fileListEmitter.emit(this.fileList);
+        const photo: IPhoto = { idPhoto: null, previewUrl: '', file: file };
+        photo.previewUrl = URL.createObjectURL(photo.file as File);
+        this.imgPreviewList.push(photo);
+        this.fileListChangeEmitter.emit(this.imgPreviewList);
       }
     });
   };
 
-  clearPhoto = (index: number): void => {
-    this.fileList?.splice(index, 1);
-    if (this.imgPreviewUrlList != null) {
-      this.imgPreviewUrlList.splice(index, 1);
-    }
-    this.fileListEmitter.emit(this.fileList);
+  clearPhoto = (photo: IPhoto): void => {
+    if (!this.imgPreviewList) return;
+    const index = this.imgPreviewList?.findIndex(img => img.idPhoto == photo.idPhoto);
+    if (index == -1) return;
+    this.imgPreviewList.splice(index, 1);
+    this.fileListChangeEmitter.emit([...this.imgPreviewList]);
   };
 
   ngOnDestroy(): void {
-    if (this.imgPreviewUrlList) {
-      this.imgPreviewUrlList.forEach(imgUrl => {
-        URL.revokeObjectURL(imgUrl);
+    if (this.imgPreviewList) {
+      this.imgPreviewList.forEach(img => {
+        URL.revokeObjectURL(img.previewUrl as string);
       });
     }
   }

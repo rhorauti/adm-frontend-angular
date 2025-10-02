@@ -17,7 +17,7 @@ export class PhotoBoxSingleComponent implements OnDestroy {
   readonly modalStore = inject(ModalStore);
   fileUrl: string | null = null;
 
-  @Output() fileUrlEmitter = new EventEmitter<File | null>();
+  @Output() fileChangeEmitter = new EventEmitter<File | null>();
 
   uploadFile = (event: Event): void => {
     const files = (event.target as HTMLInputElement).files;
@@ -33,14 +33,14 @@ export class PhotoBoxSingleComponent implements OnDestroy {
     } else {
       this.fileUrl = URL.createObjectURL(file);
       this.imgPreviewUrl = this.fileUrl;
-      this.fileUrlEmitter.emit(file);
+      this.fileChangeEmitter.emit(file);
     }
   };
 
   clearPhoto = (): void => {
     this.fileUrl = null;
     this.imgPreviewUrl = null;
-    this.fileUrlEmitter.emit(null);
+    this.fileChangeEmitter.emit(null);
   };
 
   ngOnDestroy(): void {

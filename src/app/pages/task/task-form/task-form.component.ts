@@ -30,11 +30,13 @@ import {
 import { TaskApi } from '@core/http/task/task.api';
 import { IEmployee } from '@core/interfaces/employee.interface';
 import { ActionCallback } from '@core/interfaces/modal.interface';
+import { IPhoto } from '@core/interfaces/photo.interface';
 import { IProductionLine } from '@core/interfaces/production-line.interface';
 import {
   ITask,
   ITaskType,
   PartialEmployee,
+  PartialProduct,
   PartialProductionLine,
   PartialTaskType,
   UsedSpareParts,
@@ -86,49 +88,52 @@ export class TaskFormComponent implements OnInit, OnDestroy, AfterViewInit {
 
   eligibleOptionsForTooling: string[] = ['Ferramenta'];
   eligibleOptionsForProductionLine: string[] = ['Ferramenta', 'Corretiva', 'Preventiva'];
+
   toolingOptionList: string[] = [];
   taskTypeOptionList: string[] = [];
   productionLineOptionList: string[] = [];
   employeeOptionList: string[] = [];
   usedSparePartsOptionList: string[] = [];
   separatorSymbol = '_';
+  sparePartsProductType = 'Ativo';
+  toolingProductType = 'Despesa';
 
-  usedSparePartsMock = [
-    {
-      idProduct: 11,
-      internalPartNumber: '111-111',
-      name: 'Nome 1',
-      qty: 1,
-    },
-    {
-      idProduct: 22,
-      internalPartNumber: '222-222',
-      name: 'Nome 2',
-      qty: 2,
-    },
-    {
-      idProduct: 33,
-      internalPartNumber: '333-333',
-      name: 'Nome 3',
-      qty: 3,
-    },
-  ];
+  // usedSparePartsMock = [
+  //   {
+  //     idProduct: 11,
+  //     internalPartNumber: '232323',
+  //     name: 'Ferramenta 1',
+  //     qty: 1,
+  //   },
+  //   {
+  //     idProduct: 22,
+  //     internalPartNumber: '222-222',
+  //     name: 'Nome 2',
+  //     qty: 2,
+  //   },
+  //   {
+  //     idProduct: 33,
+  //     internalPartNumber: '333-333',
+  //     name: 'Nome 3',
+  //     qty: 3,
+  //   },
+  // ];
 
   showSpareParts = false;
-  initialUsedSparePartsList: UsedSpareParts[] = [
-    {
-      idProduct: 0,
-      internalPartNumber: '',
-      name: '',
-      qty: 1,
-    },
-  ];
+  // databaseUsedSparePartsList: UsedSpareParts[] = [
+  //   {
+  //     idProduct: 0,
+  //     internalPartNumber: '',
+  //     name: '',
+  //     qty: 1,
+  //   },
+  // ];
 
   isProductionLineSelectDisabled = false;
   startDate = '';
   finishDate = '';
 
-  fileList: File[] | null = [];
+  // fileList: File[] | null = [];
   taskFormData: ITask = {
     idTask: 0,
     startDate: null,
@@ -145,11 +150,15 @@ export class TaskFormComponent implements OnInit, OnDestroy, AfterViewInit {
     status: TASK_NUMBER_STATUS.NOT_STARTED,
     comment: '',
     imgPreviewList: [],
-    toolingList: [],
+    productList: [],
     product: {
       idProduct: 0,
       internalPartNumber: '',
       name: '',
+      productType: {
+        idProductType: 0,
+        name: '',
+      },
     },
     productionLineList: [],
     productionLine: {
@@ -184,6 +193,7 @@ export class TaskFormComponent implements OnInit, OnDestroy, AfterViewInit {
       startDate: taskData.startDate ? new Date(taskData.startDate) : null,
       finishDate: taskData.finishDate ? new Date(taskData.finishDate) : null,
     };
+    // this.taskFormData.usedSpareParts = this.usedSparePartsMock;
     if (this.taskFormData.usedSpareParts) {
       this.showSpareParts = this.taskFormData.usedSpareParts.length > 0;
     }
@@ -214,22 +224,35 @@ export class TaskFormComponent implements OnInit, OnDestroy, AfterViewInit {
       this.taskFormData.status == TASK_NUMBER_STATUS.FINISHED;
   };
 
+  onFilterProductList = (value: string): string[] => {
+    const productsFilter = this.taskFormData.productList
+      ? (this.taskFormData.productList?.filter(
+          p => p.productType.name == value
+        ) as PartialProduct[])
+      : [];
+    return productsFilter.map(
+      product => product.internalPartNumber + this.separatorSymbol + product.name
+    );
+  };
+
   onSetOptionsList = (): void => {
     if (this.taskFormData.usedSpareParts) {
-      this.initialUsedSparePartsList = [...this.taskFormData.usedSpareParts];
       this.usedSparePartsOptionList = this.taskFormData.usedSpareParts?.map(
         sp => sp.internalPartNumber + this.separatorSymbol + sp.name
       );
     }
-    this.toolingOptionList = this.taskFormData?.toolingList?.map(
-      tooling => tooling.internalPartNumber + this.separatorSymbol + tooling.name
-    ) as string[];
+
+    this.toolingOptionList = this.onFilterProductList(this.sparePartsProductType);
+    this.usedSparePartsOptionList = this.onFilterProductList(this.sparePartsProductType);
+
     this.taskTypeOptionList = this.taskFormData?.taskTypeList?.map(
       taskType => taskType.name
     ) as string[];
+
     this.productionLineOptionList = this.taskFormData?.productionLineList?.map(
       pl => pl.lineCode
     ) as string[];
+
     this.employeeOptionList = this.taskFormData?.employeeList?.map(
       employee => employee.name
     ) as string[];
@@ -301,7 +324,7 @@ export class TaskFormComponent implements OnInit, OnDestroy, AfterViewInit {
         return tool.internalPartNumber == internalPartNumber;
       })
     );
-    this.taskFormData.toolingList?.forEach(tooling => {
+    this.taskFormData.productList?.forEach(tooling => {
       if (tooling.internalPartNumber == internalPartNumber) {
         this.taskFormData.product = tooling;
       }
@@ -320,14 +343,23 @@ export class TaskFormComponent implements OnInit, OnDestroy, AfterViewInit {
   };
 
   onSparePartNameChange = (name: string, index: number): void => {
-    console.log('name', name);
     const internalPartNumber = name?.split(this.separatorSymbol)[0];
     if (this.taskFormData.usedSpareParts) {
-      const selectedItem = this.initialUsedSparePartsList.find(
-        sp => sp.internalPartNumber.trim() == internalPartNumber.trim()
-      ) as UsedSpareParts;
+      const productsFilter = this.taskFormData.productList
+        ? (this.taskFormData.productList?.filter(
+            p =>
+              p.productType.name.toLocaleLowerCase().trim() ==
+              this.sparePartsProductType.toLowerCase().trim()
+          ) as PartialProduct[])
+        : [];
+      const selectedItem = productsFilter.find(
+        sp => sp.internalPartNumber?.trim() == internalPartNumber.trim()
+      ) as PartialProduct;
       if (selectedItem) {
-        this.taskFormData.usedSpareParts[index] = { ...selectedItem };
+        this.taskFormData.usedSpareParts[index].idProduct = selectedItem.idProduct as number;
+        this.taskFormData.usedSpareParts[index].internalPartNumber =
+          selectedItem.internalPartNumber as string;
+        this.taskFormData.usedSpareParts[index].name = selectedItem.name;
       }
     }
   };
@@ -335,6 +367,14 @@ export class TaskFormComponent implements OnInit, OnDestroy, AfterViewInit {
   onSparePartQtyChange = (value: string, index: number): void => {
     if (this.taskFormData.usedSpareParts) {
       this.taskFormData.usedSpareParts[index].qty = Number(value);
+    }
+  };
+
+  onToogleButtonChange = (isButtonActive: boolean): void => {
+    this.showSpareParts = isButtonActive;
+    if (isButtonActive) {
+      this.taskFormData.usedSpareParts = [];
+      this.onAddSparePartsRow();
     }
   };
 
@@ -373,8 +413,8 @@ export class TaskFormComponent implements OnInit, OnDestroy, AfterViewInit {
 
   isRemovedPhoto = false;
 
-  onFileListChange = (fileList: File[]): void => {
-    this.fileList = fileList;
+  onFileListChange = (fileList: IPhoto[]): void => {
+    this.taskFormData.imgPreviewList = fileList;
   };
 
   ngAfterViewInit(): void {
@@ -403,10 +443,15 @@ export class TaskFormComponent implements OnInit, OnDestroy, AfterViewInit {
 
   setFinalData = (): FormData => {
     const formData = new FormData();
-    if (this.fileList) {
-      for (const file of this.fileList) {
-        formData.append('files', file);
-      }
+    if (this.taskFormData.imgPreviewList) {
+      this.taskFormData.imgPreviewList.forEach((photo, index) => {
+        const file = photo.file;
+        if (file) {
+          formData.append('files', file, 'new');
+        } else {
+          formData.append('files', `${photo.idPhoto}`);
+        }
+      });
     }
     const finalData: ITask = {
       idTask: this.taskFormData.idTask,

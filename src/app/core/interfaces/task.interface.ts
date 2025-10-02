@@ -1,5 +1,6 @@
 import { IDepartment } from './department.interface';
 import { IEmployee } from './employee.interface';
+import { IPhoto } from './photo.interface';
 import { IProduct } from './product.interface';
 import { IProductionLine } from './production-line.interface';
 import { IBaseResponse } from './response.interface';
@@ -17,7 +18,10 @@ export type PartialProductionLine = Pick<
   IProductionLine,
   'idProductionLine' | 'lineCode' | 'toolingList'
 >;
-export type PartialProduct = Pick<IProduct, 'idProduct' | 'internalPartNumber' | 'name'>;
+export type PartialProduct = Pick<
+  IProduct,
+  'idProduct' | 'internalPartNumber' | 'name' | 'productType'
+>;
 export interface UsedSpareParts {
   idProduct: number;
   internalPartNumber: string;
@@ -32,8 +36,8 @@ export interface ITask {
   name?: string;
   status?: number;
   comment?: string;
-  imgPreviewList?: string[];
-  toolingList?: PartialProduct[];
+  imgPreviewList?: IPhoto[];
+  productList?: PartialProduct[];
   product?: PartialProduct;
   usedSpareParts?: UsedSpareParts[];
   productionLineList?: PartialProductionLine[];

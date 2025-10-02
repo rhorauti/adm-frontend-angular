@@ -80,7 +80,7 @@
         <app-photo-box-single
           class="mx-auto"
           [imgPreviewUrl]="productData.photoUrl ?? ''"
-          (fileUrlEmitter)="onPhotoRemoved($event)" />
+          (fileChangeEmitter)="onFileChange($event)" />
       </div>
 
       <h1 class="text-lg font-semibold bg-gray-200 p-1 rounded-md">Dados Comerciais</h1>
