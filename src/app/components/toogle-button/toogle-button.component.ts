@@ -11,6 +11,7 @@ import { FormsModule } from '@angular/forms';
 export class ToogleButtonComponent {
   @Input() isChecked = false;
   @Input({ required: true }) toggleId!: string;
+  @Input() isDisabled = false;
   @Output() isCheckedEmitter = new EventEmitter<boolean>();
 
   onChecked(checkedEvent: Event): void {

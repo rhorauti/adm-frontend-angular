@@ -4,7 +4,7 @@
     <div class="fixed flex justify-center items-center inset-0 w-screen h-full overflow-y-auto">
       <div
         class="flex flex-col justify-center min-h-full rounded-lg w-full overflow-auto"
-        [ngClass]="[isModalForm ? 'sm:w-[92%]' : 'sm:w-96', divClass]">
+        [ngClass]="[width, divClass]">
         @if (showHeader) {
           <div
             [ngClass]="headerClass"
@@ -20,7 +20,7 @@
           </div>
         }
         <div
-          class="bg-white w-full h-full p-5"
+          class="bg-white w-full h-full p-4"
           [ngClass]="showHeader ? 'rounded-b-lg' : 'rounded-lg'">
           <div [ngClass]="bodyClass">
             <ng-content select=".body-block"></ng-content>

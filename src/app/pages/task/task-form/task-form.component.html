@@ -14,11 +14,11 @@
     <div class="flex flex-col gap-4">
       <div class="flex flex-col md:flex-row gap-4">
         @if (taskFormData.idTask != null && taskFormData.idTask > 0) {
-          <div class="flex flex-col gap-1 shrink">
-            <label #labelForm class="font-medium text-sm" for="default">Id da Atividade</label>
+          <div class="flex flex-col gap-1 md:w-24 w-full">
+            <label #labelForm class="font-medium text-sm" for="default">Id</label>
             <app-input
               [inputName]="'custom'"
-              [isDisabled]="true"
+              [isDisabled]="isDisabled.idTask"
               [inputValue]="taskFormData.idTask == 0 ? '' : taskFormData.idTask.toString()"
               [type]="'search'" />
           </div>
@@ -29,6 +29,7 @@
           >
           <app-select
             [selectType]="'custom'"
+            [isDisabled]="isDisabled.employee"
             [optionList]="employeeOptionList"
             [selectValue]="taskFormData.employee?.name || 'Selecione um item'"
             (selectValueEmitter)="setEmployeeValue($event.toString())" />
@@ -40,28 +41,36 @@
           >
           <app-select
             [selectType]="'custom'"
+            [isDisabled]="isDisabled.taskType"
             [optionList]="taskTypeOptionList"
             [selectValue]="taskFormData.taskType?.name || 'Selecione um item'"
             (selectValueEmitter)="setTaskTypeValue($event.toString())" />
         </div>
-        @if (eligibleOptionsForTooling.includes(taskFormData.taskType?.name ?? '')) {
-          <div class="flex flex-col gap-1 grow">
-            <label #labelForm class="font-medium text-sm" for="default"
-              >Ferramenta <span class="font-bold text-red-400">*</span></label
-            >
-            <app-select
-              [selectType]="'custom'"
-              [optionList]="toolingOptionList"
-              [selectValue]="
-                taskFormData.product?.internalPartNumber + '_' + taskFormData.product?.name ||
-                'Selecione um item'
-              "
-              (selectValueEmitter)="onSetSelectedTooling($event)" />
+        @if (eligibleTaskTypeOptionsForTooling.includes(taskFormData.taskType?.name ?? '')) {
+          <div class="flex items-end gap-4 grow">
+            <div class="flex flex-col gap-1 grow">
+              <label #labelForm class="font-medium text-sm" for="default"
+                >Ferramenta <span class="font-bold text-red-400">*</span></label
+              >
+              <app-input
+                [inputName]="'custom'"
+                [isDisabled]="isDisabled.tooling"
+                [initialInputList]="toolingOptionList"
+                [inputValue]="
+                  taskFormData.product?.internalPartNumber + '_' + taskFormData.product?.name || ''
+                "
+                [type]="'search'"
+                (inputValueEmitter)="onSetSelectedTooling($event)" />
+            </div>
+            <app-button-icon
+              [iconName]="'search'"
+              [isDisabled]="isDisabled.usedSpareParts"
+              class="grow-0" />
           </div>
         }
       </div>
       <div class="flex flex-col md:flex-row gap-4">
-        @if (eligibleOptionsForProductionLine.includes(taskFormData.taskType?.name || '')) {
+        @if (eligibleTaskTypeOptionsForProductionLine.includes(taskFormData.taskType?.name || '')) {
           <div class="flex flex-col gap-1 grow-0">
             <label #labelForm class="font-medium text-sm" for="default"
               >Linha de Produção <span class="font-bold text-red-400">*</span></label
@@ -69,7 +78,7 @@
             <app-select
               [selectType]="'custom'"
               [optionList]="productionLineOptionList"
-              [isDisabled]="isProductionLineSelectDisabled"
+              [isDisabled]="isDisabled.productionLine"
               [selectValue]="taskFormData.productionLine?.lineCode || 'Selecione um item'"
               (selectValueEmitter)="setProductionLineValue($event.toString())" />
           </div>
@@ -80,6 +89,7 @@
           >
           <app-input
             [inputName]="'custom'"
+            [isDisabled]="isDisabled.name"
             [inputValue]="taskFormData.name || ''"
             [type]="'search'"
             (inputValueEmitter)="taskFormData.name = $event" />
@@ -89,17 +99,23 @@
       <div class="flex flex-col md:flex-row gap-4 grow">
         <div class="flex flex-col gap-1 grow">
           <label #labelForm class="font-medium text-sm" for="default">Inicio</label>
-          <app-input [inputName]="'custom'" [isDisabled]="true" [inputValue]="startDate" />
+          <app-input
+            [inputName]="'custom'"
+            [isDisabled]="isDisabled.startDate"
+            [inputValue]="startDate" />
         </div>
         <div class="flex flex-col gap-1 grow">
           <label #labelForm class="font-medium text-sm" for="default">Fim</label>
-          <app-input [inputName]="'custom'" [isDisabled]="true" [inputValue]="finishDate" />
+          <app-input
+            [inputName]="'custom'"
+            [isDisabled]="isDisabled.finishDate"
+            [inputValue]="finishDate" />
         </div>
         <div class="flex flex-col gap-1 grow">
           <label #labelForm class="font-medium text-sm" for="default">Status</label>
           <app-select
             [selectType]="'status'"
-            [isDisabled]="isStatusDisabled"
+            [isDisabled]="isDisabled.status"
             [selectValue]="taskStatus || 'Não iniciado'"
             (selectValueEmitter)="setStatusValue($event.toString())" />
         </div>
@@ -107,6 +123,7 @@
       <div class="flex gap-4">
         <app-toogle-button
           [isChecked]="showSpareParts"
+          [isDisabled]="isDisabled.usedSpareParts"
           [toggleId]="'task-form-tooggle'"
           (isCheckedEmitter)="onToogleButtonChange($event)" />
         <p>Houve troca de peças?</p>
@@ -120,28 +137,40 @@
               <div class="flex md:flex-row items-end gap-4 w-full">
                 <div class="flex flex-col gap-1 grow">
                   <label #labelForm class="font-medium text-sm" for="default">Peça trocada</label>
-                  <app-select
-                    [selectType]="'custom'"
-                    [optionList]="usedSparePartsOptionList"
-                    [selectValue]="
+                  <app-input
+                    [inputName]="'custom'"
+                    [isDisabled]="isDisabled.usedSpareParts"
+                    [initialInputList]="usedSparePartsOptionList"
+                    [inputValue]="
                       sparePart.internalPartNumber + separatorSymbol + sparePart.name ||
                       'Escolha um item'
                     "
-                    (selectValueEmitter)="onSparePartNameChange($event, $index)" />
+                    [type]="'search'"
+                    (inputValueEmitter)="onSparePartNameChange($event, $index)" />
                 </div>
-                <app-button-icon [iconName]="'search'" class="grow-0" />
+                <app-button-icon
+                  [iconName]="'search'"
+                  [isDisabled]="isDisabled.usedSpareParts"
+                  class="grow-0" />
                 <div class="flex flex-col gap-1 grow-0">
                   <label #labelForm class="font-medium text-sm" for="default">Qtd trocada</label>
                   <app-input
                     [inputName]="'custom'"
+                    [isDisabled]="isDisabled.usedSpareParts"
                     [type]="'number'"
                     [inputValue]="sparePart.qty.toString()"
                     (inputValueEmitter)="onSparePartQtyChange($event, $index)" />
                 </div>
               </div>
               <div class="flex gap-2">
-                <app-button-icon [iconName]="'add'" class="grow-0" (click)="onAddSparePartsRow()" />
-                <app-button-delete (click)="onRemoveSparePartsRow(sparePart)" />
+                <app-button-icon
+                  [iconName]="'add'"
+                  [isDisabled]="isDisabled.usedSpareParts"
+                  class="grow-0"
+                  (click)="onAddSparePartsRow()" />
+                <app-button-delete
+                  [isDisabled]="isDisabled.usedSpareParts"
+                  (click)="onRemoveSparePartsRow(sparePart)" />
               </div>
             </div>
           }
@@ -149,11 +178,13 @@
       }
       <app-photo-box-list
         [imgPreviewList]="taskFormData.imgPreviewList || []"
+        [isDisabled]="isDisabled.photoBoxList"
         (fileListChangeEmitter)="onFileListChange($event)"></app-photo-box-list>
       <div class="flex flex-col gap-1 grow">
         <label #labelForm class="font-medium text-sm" for="default">Laudo técnico</label>
         <app-text-area
           [inputValue]="taskFormData.comment ?? ''"
+          [isDisabled]="isDisabled.comment"
           (inputValueEmitter)="taskFormData.comment = $event" />
       </div>
     </div>
@@ -168,6 +199,7 @@
     <app-button-label
       [iconRightName]="'save'"
       [label]="'Salvar'"
+      [isDisabled]="isDisabled.saveButton"
       (click)="onSaveRegister(onBackToPreviousPage)"></app-button-label>
   </footer>
 </div>

@@ -39,13 +39,29 @@ import {
   PartialProduct,
   PartialProductionLine,
   PartialTaskType,
-  UsedSpareParts,
+  IUsedSpareParts,
 } from '@core/interfaces/task.interface';
 import { BaseApiName } from '@core/types/base.type';
 import { dateAndHourFormatted } from '@core/utils/misc';
 import { BaseRegisterStore } from '@store/base/base.register.store';
 import { ModalStore } from '@store/modal/modal.store';
 import { Subscription } from 'rxjs';
+
+interface IDisabled {
+  idTask: boolean;
+  name: boolean;
+  startDate: boolean;
+  finishDate: boolean;
+  status: boolean;
+  usedSpareParts: boolean;
+  comment: boolean;
+  employee: boolean;
+  taskType: boolean;
+  tooling: boolean;
+  productionLine: boolean;
+  saveButton: boolean;
+  photoBoxList: boolean;
+}
 
 @Component({
   selector: 'app-task-form',
@@ -86,17 +102,34 @@ export class TaskFormComponent implements OnInit, OnDestroy, AfterViewInit {
   taskStatus = '';
   idCompany = 1;
 
-  eligibleOptionsForTooling: string[] = ['Ferramenta'];
-  eligibleOptionsForProductionLine: string[] = ['Ferramenta', 'Corretiva', 'Preventiva'];
+  eligibleTaskTypeOptionsForTooling: string[] = ['Ferramenta'];
+  eligibleTaskTypeOptionsForProductionLine: string[] = ['Ferramenta', 'Corretiva', 'Preventiva'];
 
   toolingOptionList: string[] = [];
   taskTypeOptionList: string[] = [];
   productionLineOptionList: string[] = [];
   employeeOptionList: string[] = [];
   usedSparePartsOptionList: string[] = [];
+
   separatorSymbol = '_';
-  sparePartsProductType = 'Ativo';
-  toolingProductType = 'Despesa';
+  sparePartsProductType = 'Despesa';
+  toolingProductType = 'Ativo';
+
+  isDisabled: IDisabled = {
+    idTask: true,
+    name: false,
+    startDate: true,
+    finishDate: true,
+    status: false,
+    usedSpareParts: false,
+    comment: false,
+    employee: false,
+    taskType: false,
+    tooling: false,
+    productionLine: false,
+    saveButton: false,
+    photoBoxList: false,
+  };
 
   // usedSparePartsMock = [
   //   {
@@ -129,7 +162,6 @@ export class TaskFormComponent implements OnInit, OnDestroy, AfterViewInit {
   //   },
   // ];
 
-  isProductionLineSelectDisabled = false;
   startDate = '';
   finishDate = '';
 
@@ -202,10 +234,19 @@ export class TaskFormComponent implements OnInit, OnDestroy, AfterViewInit {
     this.taskStatus = onConvertTaskStatusFromNumberToFriendlyName(
       this.taskFormData.status as number
     );
-    this.onDisabledStatusOptions();
+    // this.onDisabledStatusOptions();
+    // if (this.taskFormData.status == TASK_NUMBER_STATUS.FINISHED) {
+    // this.onDisbledForm();
+    // }
     this.defineTitle();
     this.breadcrumbList = ['Cadastro', this.currentViewTranslated, `${this.defineTitle()}`];
   }
+
+  onDisbledForm = (): void => {
+    (Object.keys(this.isDisabled) as (keyof IDisabled)[]).forEach(key => {
+      this.isDisabled[key] = true;
+    });
+  };
 
   onSetStartAndFinishDate = (): void => {
     if (this.taskFormData.startDate) {
@@ -216,12 +257,8 @@ export class TaskFormComponent implements OnInit, OnDestroy, AfterViewInit {
     }
   };
 
-  isStatusDisabled = false;
-
   onDisabledStatusOptions = (): void => {
-    this.isStatusDisabled =
-      this.taskFormData.status == TASK_NUMBER_STATUS.NOT_STARTED ||
-      this.taskFormData.status == TASK_NUMBER_STATUS.FINISHED;
+    this.isDisabled.status = this.taskFormData.status == TASK_NUMBER_STATUS.NOT_STARTED;
   };
 
   onFilterProductList = (value: string): string[] => {
@@ -242,7 +279,7 @@ export class TaskFormComponent implements OnInit, OnDestroy, AfterViewInit {
       );
     }
 
-    this.toolingOptionList = this.onFilterProductList(this.sparePartsProductType);
+    this.toolingOptionList = this.onFilterProductList(this.toolingProductType);
     this.usedSparePartsOptionList = this.onFilterProductList(this.sparePartsProductType);
 
     this.taskTypeOptionList = this.taskFormData?.taskTypeList?.map(
@@ -279,17 +316,27 @@ export class TaskFormComponent implements OnInit, OnDestroy, AfterViewInit {
     } as PartialEmployee;
   };
 
+  onClearToolingData = (): void => {
+    this.taskFormData.product = {
+      idProduct: 0,
+      name: '',
+      internalPartNumber: '',
+      productType: {
+        idProductType: 0,
+        name: '',
+      },
+    } as PartialProduct;
+  };
+
   setTaskTypeValue = (taskTypeName: string): void => {
     this.onClearProductionLineData();
-    if (this.isProductionLineSelectDisabled) this.isProductionLineSelectDisabled = false;
+    this.onClearToolingData();
+    if (this.isDisabled.productionLine) this.isDisabled.productionLine = false;
     const taskType = this.taskFormData.taskTypeList?.find(
       taskType => taskType.name == taskTypeName
     ) as ITaskType;
-    if (taskTypeName) {
-      this.taskFormData.taskType = taskType;
-    } else {
-      this.onClearTaskTypeData();
-    }
+    this.taskFormData.taskType = taskType;
+    console.log('taskType', this.taskFormData);
   };
 
   setEmployeeValue = (employeeName: string): void => {
@@ -331,10 +378,10 @@ export class TaskFormComponent implements OnInit, OnDestroy, AfterViewInit {
     });
     if (foundProductionLine && foundProductionLine?.lineCode.length > 0) {
       this.taskFormData.productionLine = foundProductionLine as IProductionLine;
-      this.isProductionLineSelectDisabled = true;
+      this.isDisabled.productionLine = true;
     } else {
       this.onClearProductionLineData();
-      this.isProductionLineSelectDisabled = false;
+      this.isDisabled.productionLine = false;
     }
   };
 
@@ -366,14 +413,17 @@ export class TaskFormComponent implements OnInit, OnDestroy, AfterViewInit {
 
   onSparePartQtyChange = (value: string, index: number): void => {
     if (this.taskFormData.usedSpareParts) {
-      this.taskFormData.usedSpareParts[index].qty = Number(value);
+      if (Number(value) < 1) {
+        this.taskFormData.usedSpareParts[index].qty = 1;
+      } else {
+        this.taskFormData.usedSpareParts[index].qty = Number(value);
+      }
     }
   };
 
   onToogleButtonChange = (isButtonActive: boolean): void => {
     this.showSpareParts = isButtonActive;
-    if (isButtonActive) {
-      this.taskFormData.usedSpareParts = [];
+    if (isButtonActive && this.taskFormData.usedSpareParts?.length == 0) {
       this.onAddSparePartsRow();
     }
   };
@@ -387,20 +437,11 @@ export class TaskFormComponent implements OnInit, OnDestroy, AfterViewInit {
     });
   };
 
-  onRemoveSparePartsRow = (sparePart: UsedSpareParts): void => {
-    if (this.taskFormData.usedSpareParts?.length == 1) {
-      this.taskFormData.usedSpareParts[0] = {
-        idProduct: 0,
-        internalPartNumber: '',
-        name: '',
-        qty: 1,
-      };
-      this.showSpareParts = false;
-      return;
-    }
+  onRemoveSparePartsRow = (sparePart: IUsedSpareParts): void => {
     const index = this.taskFormData.usedSpareParts?.indexOf(sparePart) as number;
     if (index && index < 0) return;
     this.taskFormData.usedSpareParts?.splice(index, 1);
+    this.showSpareParts = (this.taskFormData.usedSpareParts as IUsedSpareParts[]).length > 0;
   };
 
   defineTitle = (): string => {
@@ -455,7 +496,7 @@ export class TaskFormComponent implements OnInit, OnDestroy, AfterViewInit {
     }
     const finalData: ITask = {
       idTask: this.taskFormData.idTask,
-      usedSpareParts: this.taskFormData.usedSpareParts,
+      usedSpareParts: !this.showSpareParts ? [] : this.taskFormData.usedSpareParts,
       startDate: this.taskFormData.startDate,
       finishDate: this.taskFormData.finishDate,
       name: this.taskFormData.name,
@@ -466,11 +507,13 @@ export class TaskFormComponent implements OnInit, OnDestroy, AfterViewInit {
       taskType: this.taskFormData.taskType,
       employee: this.taskFormData.employee,
     };
+    console.log('finalData', finalData);
     formData.append('data', JSON.stringify(finalData));
     return formData;
   };
 
   onSaveRegister = async (onActionOk?: ActionCallback): Promise<void> => {
+    // const formData = this.setFinalData();
     try {
       this.modalStore.onLoading(true);
       const formData = this.setFinalData();

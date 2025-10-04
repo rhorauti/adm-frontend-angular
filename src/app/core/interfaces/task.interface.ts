@@ -22,7 +22,7 @@ export type PartialProduct = Pick<
   IProduct,
   'idProduct' | 'internalPartNumber' | 'name' | 'productType'
 >;
-export interface UsedSpareParts {
+export interface IUsedSpareParts {
   idProduct: number;
   internalPartNumber: string;
   name: string;
@@ -39,7 +39,7 @@ export interface ITask {
   imgPreviewList?: IPhoto[];
   productList?: PartialProduct[];
   product?: PartialProduct;
-  usedSpareParts?: UsedSpareParts[];
+  usedSpareParts?: IUsedSpareParts[];
   productionLineList?: PartialProductionLine[];
   productionLine?: PartialProductionLine;
   taskTypeList?: PartialTaskType[];

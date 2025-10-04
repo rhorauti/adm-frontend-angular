@@ -1,4 +1,14 @@
-import { Component, EventEmitter, Input, OnChanges, OnInit, Output } from '@angular/core';
+import {
+  Component,
+  ElementRef,
+  EventEmitter,
+  HostListener,
+  inject,
+  Input,
+  OnChanges,
+  OnInit,
+  Output,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
@@ -21,14 +31,17 @@ type InputType = 'search' | 'text' | 'password' | 'number' | 'date' | 'datetime'
 @Component({
   selector: 'app-input',
   imports: [CommonModule, FormsModule, MatIconModule, NgxMaskDirective],
-  providers: [provideNgxMask()],
+  providers: [provideNgxMask(), HostListener],
   templateUrl: './input.component.html',
   styleUrl: './input.component.scss',
 })
 export class InputComponent implements OnInit, OnChanges {
+  elRef = inject(ElementRef);
+
   @Input({ required: true }) inputName!: InputName;
   @Input() id?: string;
   @Input() inputValue = '';
+  @Input() initialInputList: string[] = [];
   @Input() isDisabled = false;
   @Input() borderType: ValidationType = 'initial';
   @Input() inputClass = '';
@@ -37,8 +50,12 @@ export class InputComponent implements OnInit, OnChanges {
   @Input() type: InputType = 'search';
   @Input() divClass = '';
   @Input() tabIndex = 0;
+  @Input() min = 1;
   maskValue = '';
   showPassword = false;
+  showInputBox = false;
+  inputListFiltered: string[] = [];
+  idx = -1;
 
   @Output() inputValueEmitter = new EventEmitter<string>();
 
@@ -95,10 +112,19 @@ export class InputComponent implements OnInit, OnChanges {
         break;
       }
     }
+    this.inputListFiltered = [...this.initialInputList];
   }
 
-  onInputValue(event: Event): void {
+  onFilterInputList = (): void => {
+    this.inputListFiltered = this.initialInputList.filter(value =>
+      value.toLowerCase().trim().includes(this.inputValue.toLowerCase().trim())
+    );
+    this.showInputBox = this.inputValue.length > 0;
+  };
+
+  onInputValueChange(event: Event): void {
     this.inputValue = (event.target as HTMLInputElement).value;
+    if (this.inputListFiltered.length > 0) this.onFilterInputList();
     this.inputValueEmitter.emit(this.inputValue.trim());
   }
 
@@ -119,9 +145,47 @@ export class InputComponent implements OnInit, OnChanges {
     this.clickEmitter.emit();
   }
 
+  onSelectOptionThroughKeyboard = (event: KeyboardEvent): void => {
+    if (this.inputListFiltered.length > 0) {
+      if (event.key == 'ArrowDown') {
+        if (this.idx == -1 || this.idx == this.inputListFiltered.length - 1) {
+          this.idx = 0;
+        } else {
+          this.idx += 1;
+        }
+        this.showInputBox = true;
+      } else if (event.key == 'ArrowUp') {
+        if (this.idx == -1 || this.idx == 0) {
+          this.idx = this.inputListFiltered.length - 1;
+        } else {
+          this.idx -= 1;
+        }
+        this.showInputBox = true;
+      } else if (event.key == 'Enter') {
+        this.inputValue = this.inputListFiltered[this.idx];
+        this.showInputBox = false;
+      }
+    }
+  };
+
+  @HostListener('document:click', ['$event'])
+  clickout(event: MouseEvent) {
+    if (!this.elRef.nativeElement.contains(event.target)) {
+      this.showInputBox = false;
+    }
+  }
+
+  onInputBoxItemClick = (event: MouseEvent | KeyboardEvent, index: number): void => {
+    event.stopPropagation();
+    this.idx = index;
+    this.inputValue = this.inputListFiltered[this.idx];
+    this.showInputBox = false;
+  };
+
   @Output() keyboardEmitter = new EventEmitter();
 
   onKeydown(event: KeyboardEvent): void {
+    this.onSelectOptionThroughKeyboard(event);
     this.keyboardEmitter.emit(event);
   }
 

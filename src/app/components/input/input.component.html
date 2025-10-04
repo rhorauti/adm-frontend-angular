@@ -1,23 +1,49 @@
-<div
-  [ngClass]="divClass"
-  class="flex w-full h-full border rounded-md focus-within:shadow-md focus-within:border-2 transition-all duration-100 ease-in-out">
-  <input
-    [id]="id"
-    [type]="type"
-    [disabled]="isDisabled"
-    [placeholder]="placeholder"
-    [mask]="maskValue"
-    [ngModel]="inputValue"
-    (input)="onInputValue($event)"
-    [ngClass]="inputClass"
-    (keydown)="onKeydown($event)"
-    (change)="onChange($event)"
-    (focus)="onFocus($event)"
-    (blur)="onBlur($event)"
-    class="flex-1 bg-transparent w-full focus:outline-none pl-3 pr-1 py-1 disabled:bg-gray-100 disabled:text-gray-600 disabled:border-1 disabled:rounded-md placeholder:text-sm" />
-  @if (iconName && iconName.length > 0) {
-    <button (click)="onClick($event)" [tabIndex]="tabIndex" class="inline-flex items-center mr-1">
-      <mat-icon class="text-logo font-semibold">{{ iconName }}</mat-icon>
-    </button>
+<div class="relative flex flex-col">
+  <div
+    [ngClass]="[
+      divClass,
+      showInputBox
+        ? 'rounded-t-md border-t border-x focus-within:border-t focus-within:border-x'
+        : 'rounded-md border focus-within:border-2',
+    ]"
+    class="flex w-full h-full focus-within:shadow-md transition-all duration-100 ease-in-out">
+    <input
+      [id]="id"
+      [type]="type"
+      [disabled]="isDisabled"
+      [placeholder]="placeholder"
+      [mask]="maskValue"
+      [ngModel]="inputValue"
+      [min]="min"
+      (input)="onInputValueChange($event)"
+      [ngClass]="inputClass"
+      (keydown)="onKeydown($event)"
+      (change)="onChange($event)"
+      (focus)="onFocus($event)"
+      (blur)="onBlur($event)"
+      class="flex-1 bg-transparent w-full focus:outline-none pl-3 pr-1 py-1 disabled:bg-gray-100 disabled:text-gray-600 disabled:border-1 disabled:rounded-md placeholder:text-sm" />
+    @if (iconName && iconName.length > 0) {
+      <button (click)="onClick($event)" [tabIndex]="tabIndex" class="inline-flex items-center mr-1">
+        <mat-icon class="text-logo font-semibold">{{ iconName }}</mat-icon>
+      </button>
+    }
+  </div>
+  @if (showInputBox) {
+    <div
+      #inputBox
+      class="absolute w-full z-[200] top-[2rem] left-0 flex flex-col gap-1 border rounded-b border-gray-400 bg-white p-2">
+      @for (item of inputListFiltered; track $index) {
+        <p
+          tabindex="0"
+          (keydown)="onInputBoxItemClick($event, $index)"
+          (click)="onInputBoxItemClick($event, $index)"
+          [ngClass]="idx == $index ? 'bg-logo text-white' : ''"
+          class="px-2 rounded-sm hover:bg-logo hover:text-white">
+          {{ item }}
+        </p>
+      } @empty {
+        <p class="italic">Não existem items a serem exibidos</p>
+      }
+    </div>
   }
 </div>

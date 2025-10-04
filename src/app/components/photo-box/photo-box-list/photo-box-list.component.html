@@ -3,31 +3,52 @@
     @if (img) {
       <div class="relative">
         <img
-          [ngClass]="divClass"
+          tabindex="0"
+          (keydown)="onShowModal(img)"
+          (click)="onShowModal(img)"
+          [ngClass]="[divClass, isDisabled ? 'grayscale-[75%]' : '']"
           [src]="img.previewUrl"
           alt="Profile Image"
-          class="border border-gray-400 rounded-md aspect-square object-cover" />
-        <app-button-close
-          (click)="clearPhoto(img)"
-          class="absolute -top-1 -right-1"></app-button-close>
+          class="border border-gray-400 rounded-md aspect-square object-cover cursor-pointer" />
+        @if (!isDisabled) {
+          <app-button-close
+            (click)="clearPhoto(img, $event)"
+            class="absolute -top-1 -right-1"></app-button-close>
+        }
       </div>
     }
   }
-  <div
-    [ngClass]="divClass"
-    class="relative flex flex-col justify-center items-center border border-gray-400 rounded-md aspect-square overflow-hidden">
-    <input
-      #inputFile
-      multiple
-      type="file"
-      id="file-input"
-      accept="image/*"
-      class="hidden overflow-hidden"
-      (change)="uploadFiles($event)" />
-    <label
-      for="file-input"
-      class="text-logo absolute flex flex-col justify-center items-center w-full h-full top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 cursor-pointer"
-      ><mat-icon class="text-[1.5rem]">add_to_photos</mat-icon></label
-    >
-  </div>
+  @if (!isDisabled) {
+    <div
+      [ngClass]="divClass"
+      class="relative flex flex-col justify-center items-center border border-gray-400 rounded-md aspect-square overflow-hidden">
+      <input
+        #inputFile
+        multiple
+        [disabled]="isDisabled"
+        type="file"
+        id="file-input"
+        accept="image/*"
+        class="hidden overflow-hidden"
+        (change)="uploadFiles($event)" />
+      <label
+        for="file-input"
+        class="absolute flex flex-col justify-center items-center text-logo w-full h-full top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 cursor-pointer"
+        ><mat-icon class="text-[1.5rem]">add_to_photos</mat-icon></label
+      >
+    </div>
+  }
 </div>
+
+<app-modal-base
+  [showModal]="isModalActive"
+  [width]="'sm:w-[40rem]'"
+  [showHeader]="false"
+  (emitCloseModal)="isModalActive = false">
+  <div class="body-block relative">
+    <app-button-close
+      (click)="isModalActive = false"
+      class="absolute top-1 right-1"></app-button-close>
+    <img [src]="modalImgSrc" alt="Image fullscreen" class="object-cover" />
+  </div>
+</app-modal-base>

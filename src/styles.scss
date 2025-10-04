@@ -13,6 +13,7 @@ body {
   background-color: #f5f5f5;
   margin: 0;
   padding: 0;
+  font-family: Roboto, 'Helvetica Neue', sans-serif;
 }
 
 .mat-typography p {
@@ -63,13 +64,4 @@ body {
   .is-hidden-mobile {
     display: none;
   }
-}
-
-html,
-body {
-  height: 100%;
-}
-body {
-  margin: 0;
-  font-family: Roboto, 'Helvetica Neue', sans-serif;
 }

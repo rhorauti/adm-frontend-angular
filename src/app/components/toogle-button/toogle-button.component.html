@@ -1,12 +1,17 @@
-<label [for]="toggleId" class="relative inline-flex items-center cursor-pointer">
+<label
+  [for]="toggleId"
+  [ngClass]="isDisabled ? '' : 'cursor-pointer'"
+  class="relative inline-flex items-center">
   <input
     type="checkbox"
+    [disabled]="isDisabled"
     [id]="toggleId"
     class="sr-only peer"
     (change)="onChecked($event)"
     [ngModel]="isChecked" />
   <div
-    class="w-11 h-6 bg-gray-200 rounded-full peer-focus:outline-none dark:bg-gray-500 peer-checked:bg-logo"></div>
+    [ngClass]="isDisabled ? 'peer-checked:bg-gray-400' : 'peer-checked:bg-logo'"
+    class="w-11 h-6 bg-gray-200 rounded-full peer-focus:outline-none dark:bg-gray-500"></div>
   <div
     class="absolute top-0.5 left-[2px] w-5 h-5 bg-white border-gray-300 border rounded-full transition-all dark:border-gray-600 peer-checked:translate-x-full peer-checked:border-white"></div>
 </label>
