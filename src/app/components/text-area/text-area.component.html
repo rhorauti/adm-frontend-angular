@@ -5,7 +5,7 @@
   [placeholder]="placeholder"
   [ngModel]="inputValue"
   (input)="onInputValue($event)"
-  [ngClass]="inputClass"
+  [ngClass]="[borderClass]"
   (keydown)="onKeydown($event)"
   (change)="onChange($event)"
   (focus)="onFocus($event)"

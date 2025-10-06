@@ -29,6 +29,7 @@
           >
           <app-select
             [selectType]="'custom'"
+            [borderType]="'success'"
             [isDisabled]="isDisabled.employee"
             [optionList]="employeeOptionList"
             [selectValue]="taskFormData.employee?.name || 'Selecione um item'"
@@ -57,12 +58,15 @@
                 [isDisabled]="isDisabled.tooling"
                 [initialInputList]="toolingOptionList"
                 [inputValue]="
-                  taskFormData.product?.internalPartNumber + '_' + taskFormData.product?.name || ''
+                  taskFormData.product?.internalPartNumber && taskFormData.product?.name
+                    ? taskFormData.product?.internalPartNumber + '_' + taskFormData.product?.name
+                    : ''
                 "
                 [type]="'search'"
                 (inputValueEmitter)="onSetSelectedTooling($event)" />
             </div>
             <app-button-icon
+              (click)="onShowModalForm(toolingProductType)"
               [iconName]="'search'"
               [isDisabled]="isDisabled.usedSpareParts"
               class="grow-0" />
@@ -90,6 +94,7 @@
           <app-input
             [inputName]="'custom'"
             [isDisabled]="isDisabled.name"
+            [borderType]="'success'"
             [inputValue]="taskFormData.name || ''"
             [type]="'search'"
             (inputValueEmitter)="taskFormData.name = $event" />
@@ -142,14 +147,16 @@
                     [isDisabled]="isDisabled.usedSpareParts"
                     [initialInputList]="usedSparePartsOptionList"
                     [inputValue]="
-                      sparePart.internalPartNumber + separatorSymbol + sparePart.name ||
-                      'Escolha um item'
+                      sparePart.internalPartNumber && sparePart.name
+                        ? sparePart.internalPartNumber + separatorSymbol + sparePart.name
+                        : ''
                     "
                     [type]="'search'"
                     (inputValueEmitter)="onSparePartNameChange($event, $index)" />
                 </div>
                 <app-button-icon
                   [iconName]="'search'"
+                  (click)="onShowModalForm(sparePartsProductType)"
                   [isDisabled]="isDisabled.usedSpareParts"
                   class="grow-0" />
                 <div class="flex flex-col gap-1 grow-0">
@@ -203,3 +210,105 @@
       (click)="onSaveRegister(onBackToPreviousPage)"></app-button-label>
   </footer>
 </div>
+
+<app-modal-base [showModal]="modalForm.isActive" [width]="'sm:w-5/6'" [showHeader]="false">
+  <div class="body-block">
+    <div class="flex flex-col gap-5">
+      <app-breadcrumb [items]="modalBreadcrumbList" />
+      @if (baseRegisterStore.dataList().length > 0) {
+        <div class="flex flex-col gap-5">
+          <div class="top-button-layout gap-6 sm:gap-3 overflow-x-auto">
+            <div class="flex gap-3">
+              <app-input
+                [inputValue]="baseRegisterStore.inputSearchValue()"
+                [id]="'input-filter'"
+                [placeholder]="inputSearchPlaceholder"
+                [inputName]="'search'"
+                (clickEmitter)="
+                  baseRegisterStore.onSetInputSearchFilterItemToDefault(inputSearchFilterList)
+                "
+                (keyboardEmitter)="
+                  baseRegisterStore.onKeyPressOnSearchInput($event, inputSearchFilterList)
+                "
+                (inputValueEmitter)="
+                  baseRegisterStore.onSetSlicePropsToNewValue('inputSearchValue', $event)
+                " />
+            </div>
+          </div>
+          @if (baseRegisterStore.isAtLeastOneFilterHelpNotEmpty()) {
+            <div class="flex flex-wrap items-center gap-3 text-sm">
+              @if (baseRegisterStore.filterHelp().inputSearch.length > 0) {
+                <div class="flex items-center gap-2">
+                  <p>Pesquisa: {{ baseRegisterStore.filterHelp().inputSearch }}</p>
+                  <app-button-close
+                    (click)="
+                      baseRegisterStore.onSetInputSearchFilterItemToDefault()
+                    "></app-button-close>
+                </div>
+              } @else {
+                @for (tableHeader of baseRegisterStore.tableHeaders(); track $index) {
+                  @if (baseRegisterStore.filterHelp()[tableHeader.databaseField]) {
+                    <div class="flex items-center gap-2">
+                      <p>
+                        {{ tableHeader.headerName }} :
+                        {{ baseRegisterStore.filterHelp()[tableHeader.databaseField] }}
+                      </p>
+                      <app-button-close
+                        (click)="
+                          baseRegisterStore.onSetFilterBoxItemToDefault(tableHeader.databaseField)
+                        "></app-button-close>
+                    </div>
+                  }
+                }
+              }
+              <button
+                (click)="baseRegisterStore.onClearData()"
+                class="text-logo font-semibold cursor-pointer hover:text-logo-hover hover:underline">
+                Limpar
+              </button>
+            </div>
+          }
+          <app-table
+            [isModalView]="true"
+            [modalItemList]="modalItemList"
+            (dataEmitter)="onSetTableItem($event)" />
+          <app-pagination
+            [currentPage]="baseRegisterStore.pagination().currentPage"
+            [totalRegister]="baseRegisterStore.dataList().length"
+            [pagesArray]="baseRegisterStore.pagination().pagesArray"
+            [qtyPerPage]="baseRegisterStore.pagination().qtyPerPage"
+            [totalPages]="baseRegisterStore.pagination().totalPages"
+            [breakpointPage]="baseRegisterStore.pagination().breakpointPage"
+            (currentPageEmitter)="baseRegisterStore.onSetCurrentPagePagination($event)" />
+        </div>
+      } @else {
+        <div class="flex flex-col items-center gap-4 w-full mt-10">
+          <p class="font-semibold">Nenhum registro encontrado</p>
+          @if (baseRegisterStore.inputSearchValue().length > 0) {
+            <p>
+              Palavra(s) Pesquisada(s) :
+              <span class="font-semibold">{{ baseRegisterStore.inputSearchValue() }}</span>
+            </p>
+          }
+          <app-button-label
+            (keyboardEmitter)="baseRegisterStore.onKeyPressOnNotFoundFilterRegister($event)"
+            (click)="baseRegisterStore.onClearData()"
+            [label]="'Voltar'" />
+        </div>
+      }
+    </div>
+  </div>
+  <div
+    class="footer-block flex gap-5 justify-center items-stretch border-t border-gray-400 mt-3 pt-4">
+    <app-button-label
+      [label]="'Cancelar'"
+      [isColorLogo]="false"
+      [iconRightName]="'close'"
+      (click)="onActionNokModalForm()"></app-button-label>
+    <app-button-label
+      [label]="'Selecionar'"
+      [isDisabled]="modalForm.isBtnDisabled"
+      [iconRightName]="'save'"
+      (click)="onActionOkModalForm()"></app-button-label>
+  </div>
+</app-modal-base>

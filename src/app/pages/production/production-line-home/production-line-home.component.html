@@ -81,7 +81,7 @@
       <app-table
         (refreshBtnClickEmitter)="onShowDataList()"
         (deleteBtnClickEmitter)="onShowModalToDelete($event)"
-        (rowClickEmitter)="onRedirectToEditPage($event)"
+        (dataEmitter)="onRedirectToEditPage($event)"
         (cloneBtnClickEmitter)="onCloneRegister($event)" />
       <app-pagination
         [currentPage]="baseRegisterStore.pagination().currentPage"

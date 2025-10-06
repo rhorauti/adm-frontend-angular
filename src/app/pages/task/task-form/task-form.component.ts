@@ -14,12 +14,17 @@ import {
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { BreadcrumbComponent } from '@components/breadcrumb/breadcrumb.component';
+import { ButtonCloseComponent } from '@components/button/button-close/button-close.component';
 import { ButtonDeleteComponent } from '@components/button/button-delete/button-delete.component';
 import { ButtonIconComponent } from '@components/button/button-icon/button-icon.component';
 import { ButtonLabelComponent } from '@components/button/button-label/button-label.component';
 import { InputComponent } from '@components/input/input.component';
+import { ModalBaseComponent } from '@components/modal/modal-base/modal-base.component';
+import { ModalFormComponent } from '@components/modal/modal-form/modal-form.component';
+import { PaginationComponent } from '@components/pagination/pagination.component';
 import { PhotoBoxListComponent } from '@components/photo-box/photo-box-list/photo-box-list.component';
 import { SelectComponent } from '@components/select/select.component';
+import { TableComponent } from '@components/table/table.component';
 import { TextAreaComponent } from '@components/text-area/text-area.component';
 import { ToogleButtonComponent } from '@components/toogle-button/toogle-button.component';
 import {
@@ -27,11 +32,13 @@ import {
   onStringfyTaskStatus as onConvertTaskStatusFromNumberToFriendlyName,
   TASK_NUMBER_STATUS,
 } from '@core/enum/status.enum';
+import { ProductApi } from '@core/http/product/product.api';
 import { TaskApi } from '@core/http/task/task.api';
 import { IEmployee } from '@core/interfaces/employee.interface';
 import { ActionCallback } from '@core/interfaces/modal.interface';
 import { IPhoto } from '@core/interfaces/photo.interface';
 import { IProductionLine } from '@core/interfaces/production-line.interface';
+import { ITableHeader } from '@core/interfaces/table.interface';
 import {
   ITask,
   ITaskType,
@@ -41,9 +48,10 @@ import {
   PartialTaskType,
   IUsedSpareParts,
 } from '@core/interfaces/task.interface';
-import { BaseApiName } from '@core/types/base.type';
-import { dateAndHourFormatted } from '@core/utils/misc';
-import { BaseRegisterStore } from '@store/base/base.register.store';
+import { BaseApiName, KeyOfData } from '@core/types/base.type';
+import { dateAndHourFormatted, loadStorage } from '@core/utils/misc';
+import { AuthStore } from '@store/auth/auth.store';
+import { BaseRegisterStore, defaultTableHeaderIcon } from '@store/base/base.register.store';
 import { ModalStore } from '@store/modal/modal.store';
 import { Subscription } from 'rxjs';
 
@@ -77,6 +85,10 @@ interface IDisabled {
     ToogleButtonComponent,
     ButtonIconComponent,
     ButtonDeleteComponent,
+    ModalBaseComponent,
+    TableComponent,
+    ButtonCloseComponent,
+    PaginationComponent,
   ],
   templateUrl: './task-form.component.html',
   styleUrl: './task-form.component.scss',
@@ -88,7 +100,9 @@ export class TaskFormComponent implements OnInit, OnDestroy, AfterViewInit {
   readonly baseRegisterStore = inject(BaseRegisterStore);
   private activatedRoute = inject(ActivatedRoute);
   readonly router = inject(Router);
+  readonly authStore = inject(AuthStore);
   readonly modalStore = inject(ModalStore);
+  readonly productApi = inject(ProductApi);
 
   private cdr = inject(ChangeDetectorRef);
 
@@ -97,10 +111,45 @@ export class TaskFormComponent implements OnInit, OnDestroy, AfterViewInit {
   currentViewTranslatedSingular = this.currentViewTranslated.slice(0, -1);
   subscription: Subscription | undefined = undefined;
   breadcrumbList: string[] = [];
+  modalBreadcrumbList: string[] = [];
   paramsDeptName = '';
   paramsIdTask: number | null = null;
   taskStatus = '';
   idCompany = 1;
+  readonly inputSearchPlaceholder = 'Id, PN interno, Nome';
+  readonly inputSearchFilterList: KeyOfData[] = [
+    'idProduct',
+    'internalPartNumber',
+    'customerPartNumber',
+    'name',
+  ];
+  tableHeadersLocalStorageId = `table_headers_modal_${this.currentView} + ${this.authStore.user().id}`;
+  readonly initialTableHeaders = [
+    {
+      id: 0,
+      isHeaderActive: true,
+      sortDirection: 0,
+      icon: defaultTableHeaderIcon,
+      headerName: 'Id',
+      databaseField: 'idProduct',
+    },
+    {
+      id: 1,
+      isHeaderActive: true,
+      sortDirection: 0,
+      icon: defaultTableHeaderIcon,
+      headerName: 'PN interno',
+      databaseField: 'internalPartNumber',
+    },
+    {
+      id: 2,
+      isHeaderActive: true,
+      sortDirection: 0,
+      icon: defaultTableHeaderIcon,
+      headerName: 'Nome',
+      databaseField: 'name',
+    },
+  ] as ITableHeader<PartialProduct>[];
 
   eligibleTaskTypeOptionsForTooling: string[] = ['Ferramenta'];
   eligibleTaskTypeOptionsForProductionLine: string[] = ['Ferramenta', 'Corretiva', 'Preventiva'];
@@ -131,6 +180,13 @@ export class TaskFormComponent implements OnInit, OnDestroy, AfterViewInit {
     photoBoxList: false,
   };
 
+  modalForm = {
+    isActive: false,
+    isBtnDisabled: true,
+  };
+
+  modalItemList: boolean[] = [];
+
   // usedSparePartsMock = [
   //   {
   //     idProduct: 11,
@@ -153,19 +209,9 @@ export class TaskFormComponent implements OnInit, OnDestroy, AfterViewInit {
   // ];
 
   showSpareParts = false;
-  // databaseUsedSparePartsList: UsedSpareParts[] = [
-  //   {
-  //     idProduct: 0,
-  //     internalPartNumber: '',
-  //     name: '',
-  //     qty: 1,
-  //   },
-  // ];
-
   startDate = '';
   finishDate = '';
 
-  // fileList: File[] | null = [];
   taskFormData: ITask = {
     idTask: 0,
     startDate: null,
@@ -238,6 +284,9 @@ export class TaskFormComponent implements OnInit, OnDestroy, AfterViewInit {
     // if (this.taskFormData.status == TASK_NUMBER_STATUS.FINISHED) {
     // this.onDisbledForm();
     // }
+    const tableHeaders = await loadStorage(this.tableHeadersLocalStorageId);
+    const headers = tableHeaders ? tableHeaders : this.initialTableHeaders;
+    this.baseRegisterStore.onSetSlicePropsToNewValue('tableHeaders', headers);
     this.defineTitle();
     this.breadcrumbList = ['Cadastro', this.currentViewTranslated, `${this.defineTitle()}`];
   }
@@ -336,7 +385,6 @@ export class TaskFormComponent implements OnInit, OnDestroy, AfterViewInit {
       taskType => taskType.name == taskTypeName
     ) as ITaskType;
     this.taskFormData.taskType = taskType;
-    console.log('taskType', this.taskFormData);
   };
 
   setEmployeeValue = (employeeName: string): void => {
@@ -474,6 +522,65 @@ export class TaskFormComponent implements OnInit, OnDestroy, AfterViewInit {
     this.modalStore.onRedirectPage(`/${this.paramsDeptName}/${this.currentView}`);
   };
 
+  onCreateBooleanListFromDataList = (): void => {
+    this.modalItemList = Array.from(
+      { length: this.baseRegisterStore.dataList().length },
+      () => false
+    );
+  };
+
+  onActionOkModalForm = (): void => {
+    this.modalForm.isActive = false;
+  };
+
+  onActionNokModalForm = (): void => {
+    this.onClearToolingData();
+    this.modalForm.isActive = false;
+  };
+
+  onSetTableItem = (data: PartialProduct): void => {
+    if (data) this.taskFormData.product = data;
+    else this.onClearToolingData();
+  };
+
+  onShowModalForm = (type: string): void => {
+    this.modalBreadcrumbList = ['Produtos', 'Selecione um item'];
+    const sparePartsList = this.taskFormData.productList
+      ? (this.taskFormData.productList?.filter(p => p.productType.name == type) as PartialProduct[])
+      : [];
+    this.baseRegisterStore.onSetSlicePropsToNewValue(
+      'initialData',
+      sparePartsList as PartialProduct[]
+    );
+    this.baseRegisterStore.onSetSlicePropsToNewValue(
+      'dataList',
+      sparePartsList as PartialProduct[]
+    );
+    this.onCreateBooleanListFromDataList();
+    this.baseRegisterStore.onClearData(sparePartsList);
+    this.modalForm.isActive = true;
+  };
+
+  // onShowDataList = async (): Promise<void> => {
+  //   try {
+  //     this.modalStore.onLoading(true);
+  //     const response = await this.productApi.onGetDataList();
+  //     if (response.data) {
+  //       const data = response.data as IProduct[];
+  //       this.baseRegisterStore.onSetSlicePropsToNewValue('initialData', data);
+  //       this.baseRegisterStore.onSetSlicePropsToNewValue('dataList', data);
+  //       this.baseRegisterStore.onClearData(data);
+  //     } else {
+  //       return;
+  //     }
+  //   } catch (e: unknown) {
+  //     const error = e as HttpErrorResponse;
+  //     this.modalStore.onShowInfoModal('Listar registros', error.error?.message);
+  //   } finally {
+  //     this.modalStore.onLoading(false);
+  //   }
+  // };
+
   fieldValidation = (): void => {
     const message = '';
     if (this.taskFormData.name?.length == 0) {
@@ -485,7 +592,7 @@ export class TaskFormComponent implements OnInit, OnDestroy, AfterViewInit {
   setFinalData = (): FormData => {
     const formData = new FormData();
     if (this.taskFormData.imgPreviewList) {
-      this.taskFormData.imgPreviewList.forEach((photo, index) => {
+      this.taskFormData.imgPreviewList.forEach((photo, _) => {
         const file = photo.file;
         if (file) {
           formData.append('files', file, 'new');

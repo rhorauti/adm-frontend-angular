@@ -43,12 +43,12 @@ export class InputComponent implements OnInit, OnChanges {
   @Input() inputValue = '';
   @Input() initialInputList: string[] = [];
   @Input() isDisabled = false;
-  @Input() borderType: ValidationType = 'initial';
+  @Input() borderType: ValidationType = 'success';
   @Input() inputClass = '';
   @Input() placeholder = '';
   @Input() iconName: Icon = '';
   @Input() type: InputType = 'search';
-  @Input() divClass = '';
+  @Input() borderClass = '';
   @Input() tabIndex = 0;
   @Input() min = 1;
   maskValue = '';
@@ -100,15 +100,15 @@ export class InputComponent implements OnInit, OnChanges {
   ngOnChanges(): void {
     switch (this.borderType) {
       case 'initial': {
-        this.divClass = 'border-gray-400';
+        this.borderClass = 'focus-within:border-gray-500 border-gray-500';
         break;
       }
       case 'success': {
-        this.divClass = 'focus-within:border-logo border-logo';
+        this.borderClass = 'focus-within:border-logo border-logo';
         break;
       }
       case 'failure': {
-        this.divClass = 'focus-within:border-red-400 border-red-400';
+        this.borderClass = 'focus-within:border-red-400 border-red-400';
         break;
       }
     }
@@ -116,15 +116,15 @@ export class InputComponent implements OnInit, OnChanges {
   }
 
   onFilterInputList = (): void => {
-    this.inputListFiltered = this.initialInputList.filter(value =>
-      value.toLowerCase().trim().includes(this.inputValue.toLowerCase().trim())
-    );
+    this.inputListFiltered = this.initialInputList
+      .filter(value => value.toLowerCase().includes(this.inputValue.toLowerCase()))
+      .slice(0, 5);
     this.showInputBox = this.inputValue.length > 0;
   };
 
   onInputValueChange(event: Event): void {
     this.inputValue = (event.target as HTMLInputElement).value;
-    if (this.inputListFiltered.length > 0) this.onFilterInputList();
+    this.onFilterInputList();
     this.inputValueEmitter.emit(this.inputValue.trim());
   }
 
@@ -145,23 +145,27 @@ export class InputComponent implements OnInit, OnChanges {
     this.clickEmitter.emit();
   }
 
+  onMouseOver = (index: number): void => {
+    this.idx = index;
+  };
+
   onSelectOptionThroughKeyboard = (event: KeyboardEvent): void => {
     if (this.inputListFiltered.length > 0) {
       if (event.key == 'ArrowDown') {
-        if (this.idx == -1 || this.idx == this.inputListFiltered.length - 1) {
+        if (this.idx >= this.inputListFiltered.length - 1) {
           this.idx = 0;
         } else {
-          this.idx += 1;
+          this.idx++;
         }
         this.showInputBox = true;
       } else if (event.key == 'ArrowUp') {
-        if (this.idx == -1 || this.idx == 0) {
+        if (this.idx <= 0) {
           this.idx = this.inputListFiltered.length - 1;
         } else {
-          this.idx -= 1;
+          this.idx--;
         }
         this.showInputBox = true;
-      } else if (event.key == 'Enter') {
+      } else if (event.key == 'Enter' && this.idx > -1) {
         this.inputValue = this.inputListFiltered[this.idx];
         this.showInputBox = false;
       }

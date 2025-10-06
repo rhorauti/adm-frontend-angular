@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, EventEmitter, Input, OnChanges, Output } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { ValidationType } from '@core/types/validation.type';
 
 @Component({
   selector: 'app-text-area',
@@ -8,13 +9,31 @@ import { FormsModule } from '@angular/forms';
   templateUrl: './text-area.component.html',
   styleUrl: './text-area.component.scss',
 })
-export class TextAreaComponent {
+export class TextAreaComponent implements OnChanges {
   @Input() id?: string;
   @Input() name = 'default';
   @Input() inputValue = '';
+  @Input() borderType: ValidationType = 'success';
   @Input() isDisabled = false;
-  @Input() inputClass = '';
   @Input() placeholder = '';
+  borderClass = '';
+
+  ngOnChanges(): void {
+    switch (this.borderType) {
+      case 'initial': {
+        this.borderClass = 'focus-within:border-gray-500 border-gray-500';
+        break;
+      }
+      case 'success': {
+        this.borderClass = 'focus-within:border-logo border-logo';
+        break;
+      }
+      case 'failure': {
+        this.borderClass = 'focus-within:border-red-400 border-red-400';
+        break;
+      }
+    }
+  }
 
   @Output() inputValueEmitter = new EventEmitter();
 

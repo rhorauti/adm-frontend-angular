@@ -5,7 +5,7 @@ import { IDepartment } from '@core/interfaces/department.interface';
 import { IEmployee, IEmployeePosition } from '@core/interfaces/employee.interface';
 import { IProduct, IProductType } from '@core/interfaces/product.interface';
 import { IProductionLine } from '@core/interfaces/production-line.interface';
-import { ITask, ITaskType } from '@core/interfaces/task.interface';
+import { ITask, ITaskType, PartialProduct } from '@core/interfaces/task.interface';
 import { IUnit } from '@core/interfaces/unit.interface';
 
 export type StoreType = IBaseRegisterStore<BaseType>;
@@ -26,7 +26,8 @@ export type BaseType =
   | IProductionLine
   | IProductType
   | IDepartment
-  | ITask;
+  | ITask
+  | PartialProduct;
 
 type UnionToIntersection<U> = (U extends unknown ? (arg: U) => void : never) extends (
   arg: infer I

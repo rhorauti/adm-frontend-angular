@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
 import { optionTaskStatusList, TASK_STRING_STATUS } from '@core/enum/status.enum';
 import { MatSelectModule } from '@angular/material/select';
+import { ValidationType } from '@core/types/validation.type';
 
 type SelectType = 'state' | 'addressType' | 'status' | 'custom';
 type Status = 'Não iniciado' | 'Em andamento' | 'Pausado' | 'Finalizado';
@@ -18,11 +19,13 @@ export class SelectComponent implements OnInit, OnChanges {
   @Input() optionList: string[] = [];
   @Input() selectValue = 'Selecione um item';
   @Input() id = '';
+  @Input() borderType: ValidationType = 'success';
   @Input() isDisabled = false;
   @Input() selectType: SelectType = 'custom';
   @Output() selectValueEmitter = new EventEmitter();
   statusIcon = '';
   iconClass = '';
+  borderClass = '';
 
   ngOnInit(): void {
     this.changeStatusIcon();
@@ -113,6 +116,20 @@ export class SelectComponent implements OnInit, OnChanges {
 
   ngOnChanges(): void {
     this.changeStatusIcon();
+    switch (this.borderType) {
+      case 'initial': {
+        this.borderClass = 'focus-within:border-gray-500 border-gray-500';
+        break;
+      }
+      case 'success': {
+        this.borderClass = 'focus-within:border-logo border-logo';
+        break;
+      }
+      case 'failure': {
+        this.borderClass = 'focus-within:border-red-400 border-red-400';
+        break;
+      }
+    }
   }
 
   outputSelectValue(event: Event): void {

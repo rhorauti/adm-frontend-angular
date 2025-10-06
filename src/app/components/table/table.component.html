@@ -1,18 +1,20 @@
 <div class="flex flex-col overflow-x-auto scrollbar-thin">
   <div class="hidden sm:grid dynamic-grid sm:gap-2" [style.--grid-layout]="gridTemplateColumns()">
-    <div class="table-td flex items-center gap-6 sm:justify-center overflow-hidden text-ellipsis">
-      <input
-        type="checkbox"
-        name="table-checkbox"
-        (change)="baseRegisterStore.onHeaderCheckboxChecked($event)"
-        [(ngModel)]="baseRegisterStore.tableCheckbox().header" />
-      <mat-icon
-        (click)="onRefreshBtnClick()"
-        content
-        class="text-sm text-logo hover:bg-gray-200 hover:rounded-md cursor-pointer"
-        >refresh</mat-icon
-      >
-    </div>
+    @if (!isModalView) {
+      <div class="table-td flex items-center gap-6 sm:justify-center overflow-hidden text-ellipsis">
+        <input
+          type="checkbox"
+          name="table-checkbox"
+          (change)="baseRegisterStore.onHeaderCheckboxChecked($event)"
+          [(ngModel)]="baseRegisterStore.tableCheckbox().header" />
+        <mat-icon
+          (click)="onRefreshBtnClick()"
+          content
+          class="text-sm text-logo hover:bg-gray-200 hover:rounded-md cursor-pointer"
+          >refresh</mat-icon
+        >
+      </div>
+    }
     @for (header of baseRegisterStore.tableHeaders(); track $index) {
       @if (header.isHeaderActive) {
         <div
@@ -35,55 +37,61 @@
     }
   </div>
   <div class="flex flex-col sm:gap-0">
-    @for (data of dataList().slice(computedFirstRegister(), computedLastRegister()); track $index) {
+    @for (
+      data of dataList().slice(computedFirstRegister(), computedLastRegister());
+      let dataIdx = $index;
+      track data
+    ) {
       <div
         tabindex="0"
-        (click)="onRowClick(data)"
-        (keydown)="onRowClick(data)"
+        (click)="onRowClick(data, dataIdx)"
+        (keydown)="onRowClick(data, dataIdx)"
         [style.--grid-layout]="gridTemplateColumns()"
         class="grid grid-cols-1 sm:gap-2 dynamic-grid mb-2 pb-2 sm:pb-0 sm:mb-0 border-b-[2.5px] border-solid border-gray-200 hover:bg-gray-200 cursor-pointer">
-        <div
-          tabindex="0"
-          (click)="$event.stopPropagation()"
-          (keydown)="$event.stopPropagation()"
-          class="table-td relative flex sm:justify-center items-center gap-4">
-          <input
-            type="checkbox"
-            name="table-checkbox"
-            (change)="baseRegisterStore.onBodyCheckboxCheckChange($index, $event)"
-            [(ngModel)]="baseRegisterStore.tableCheckbox().body[$index]" />
-          <mat-icon
-            #iconOptions
-            (keydown)="baseRegisterStore.onShowTableItemBox($event, $index)"
-            (click)="baseRegisterStore.onShowTableItemBox($event, $index)"
-            class="border border-gray-800 rounded-full hover:text-white hover:bg-logo text-center text-sm cursor-pointer p-1 font-semibold"
-            >more_horiz</mat-icon
-          >
-          @if (baseRegisterStore.tableItemsBox()[$index]) {
-            <div
-              #divBoxes
-              tabindex="0"
-              [ngClass]="{
-                'opacity-100': baseRegisterStore.tableItemsBox()[$index],
-                'opacity-0': !baseRegisterStore.tableItemsBox()[$index],
-                'sm:-top-6': $last,
-                'top-1': $first,
-              }"
-              class="absolute flex flex-col gap-1 translate-x-[4.7rem] p-2 border border-gray-400 rounded-md bg-gray-100 text-xs transition-opacity duration-300 ease-in-out">
-              <button
-                (click)="onCloneBtnClick(data)"
-                class="hover:bg-gray-200 hover:rounded-md px-2">
-                Clonar
-              </button>
-              <button
-                (click)="onDeleteBtnClick(data)"
-                class="hover:bg-gray-200 hover:rounded-md px-2">
-                Excluir
-              </button>
-            </div>
-          }
-        </div>
-        @for (header of baseRegisterStore.tableHeaders(); track $index) {
+        @if (!isModalView) {
+          <div
+            tabindex="0"
+            (click)="$event.stopPropagation()"
+            (keydown)="$event.stopPropagation()"
+            class="table-td relative flex sm:justify-center items-center gap-4">
+            <input
+              type="checkbox"
+              name="table-checkbox"
+              (change)="baseRegisterStore.onBodyCheckboxCheckChange(dataIdx, $event)"
+              [(ngModel)]="baseRegisterStore.tableCheckbox().body[$index]" />
+            <mat-icon
+              #iconOptions
+              (keydown)="baseRegisterStore.onShowTableItemBox($event, dataIdx)"
+              (click)="baseRegisterStore.onShowTableItemBox($event, dataIdx)"
+              class="border border-gray-800 rounded-full hover:text-white hover:bg-logo text-center text-sm cursor-pointer p-1 font-semibold"
+              >more_horiz</mat-icon
+            >
+            @if (baseRegisterStore.tableItemsBox()[dataIdx]) {
+              <div
+                #divBoxes
+                tabindex="0"
+                [ngClass]="{
+                  'opacity-100': baseRegisterStore.tableItemsBox()[dataIdx],
+                  'opacity-0': !baseRegisterStore.tableItemsBox()[dataIdx],
+                  'sm:-top-6': $last,
+                  'top-1': $first,
+                }"
+                class="absolute flex flex-col gap-1 translate-x-[4.7rem] p-2 border border-gray-400 rounded-md bg-gray-100 text-xs transition-opacity duration-300 ease-in-out">
+                <button
+                  (click)="onCloneBtnClick(data)"
+                  class="hover:bg-gray-200 hover:rounded-md px-2">
+                  Clonar
+                </button>
+                <button
+                  (click)="onDeleteBtnClick(data)"
+                  class="hover:bg-gray-200 hover:rounded-md px-2">
+                  Excluir
+                </button>
+              </div>
+            }
+          </div>
+        }
+        @for (header of baseRegisterStore.tableHeaders(); let headerIdx = $index; track header) {
           @if (header.isHeaderActive) {
             <div class="table-td overflow-hidden text-ellipsis">
               @if (data[header.databaseField]) {
@@ -95,19 +103,28 @@
                   alt="Photo Image"
                   class="w-5 aspect-square" />
               } @else {
-                <span>
-                  @switch (header.databaseField) {
-                    @case ('cnpj') {
-                      {{ formatCell(data, header.databaseField) }}
+                <p class="flex justify-between">
+                  <span>
+                    @switch (header.databaseField) {
+                      @case ('cnpj') {
+                        {{ formatCell(data, header.databaseField) }}
+                      }
+                      @case ('origin') {
+                        {{ onSetOrigin(data) }}
+                      }
+                      @default {
+                        {{ data[header.databaseField] }}
+                      }
                     }
-                    @case ('origin') {
-                      {{ onSetOrigin(data) }}
-                    }
-                    @default {
-                      {{ data[header.databaseField] }}
-                    }
+                  </span>
+                  @if (
+                    isModalView &&
+                    baseRegisterStore.tableHeaders().length - 1 == headerIdx &&
+                    modalItemList[dataIdx]
+                  ) {
+                    <mat-icon class="text-green-400">check_circle</mat-icon>
                   }
-                </span>
+                </p>
               }
             </div>
           }

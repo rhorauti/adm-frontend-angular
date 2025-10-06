@@ -1,0 +1,18 @@
+<app-modal-base [showModal]="isModalActive" [showHeader]="false" [width]="width">
+  <div class="body-block p-2" [ngClass]="bodyClass">
+    <ng-content select=".body-block-modal-form"></ng-content>
+  </div>
+  <div
+    class="footer-block flex gap-5 justify-center items-stretch border-t border-gray-400 mt-3 pt-4">
+    <app-button-label
+      [label]="'Cancelar'"
+      [isColorLogo]="false"
+      [iconRightName]="'close'"
+      (click)="OnActionNok()"></app-button-label>
+    <app-button-label
+      [label]="'Selecionar'"
+      [isDisabled]="isDisabled"
+      [iconRightName]="'save'"
+      (click)="OnActionOk()"></app-button-label>
+  </div>
+</app-modal-base>

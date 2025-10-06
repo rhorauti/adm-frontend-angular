@@ -5,6 +5,7 @@ import {
   ElementRef,
   EventEmitter,
   inject,
+  Input,
   OnDestroy,
   OnInit,
   Output,
@@ -36,6 +37,8 @@ export class TableComponent implements OnInit, OnDestroy {
   readonly modalStore = inject(ModalStore);
   readonly mask = inject(NgxMaskPipe);
   dataList = computed<BaseType[]>(() => this.baseRegisterStore.dataList());
+  @Input() isModalView = false;
+  @Input() modalItemList: boolean[] = [];
 
   ngOnInit() {
     this.baseRegisterStore.onCheckTableCheckboxStatus(this.baseRegisterStore.tableCheckbox().body);
@@ -47,9 +50,9 @@ export class TableComponent implements OnInit, OnDestroy {
   }
 
   gridTemplateColumns = computed(() => {
-    const columnsWidth: string[] = ['2fr'];
+    const columnsWidth: string[] = this.isModalView ? [] : ['2fr'];
     this.baseRegisterStore.tableHeaders().forEach(header => {
-      if (header.isHeaderActive) {
+      if (header.isHeaderActive && !this.isModalView) {
         if (header.id != 0 && header.id != 2) {
           columnsWidth.push('2fr');
         } else if (header.id == 2) {
@@ -57,10 +60,24 @@ export class TableComponent implements OnInit, OnDestroy {
         } else {
           columnsWidth.push('1fr');
         }
+      } else {
+        if (header.id == 0) {
+          columnsWidth.push('1fr');
+        } else if (header.id == 1) {
+          columnsWidth.push('1fr');
+        } else {
+          columnsWidth.push('2fr');
+        }
       }
     });
     return columnsWidth.join(' ');
   });
+
+  onSelectTableItem = (event: MouseEvent, idx: number, data: BaseType): void => {
+    event.stopPropagation();
+    this.modalItemList[idx] = !this.modalItemList[idx];
+    this.baseRegisterStore.onSetSlicePropsToNewValue('data', data);
+  };
 
   onTableItemClick = (event: MouseEvent): void => {
     const targetNode = event.target as Node;
@@ -131,10 +148,24 @@ export class TableComponent implements OnInit, OnDestroy {
     return '';
   }
 
-  @Output() rowClickEmitter = new EventEmitter();
+  @Output() dataEmitter = new EventEmitter();
+  @Output() modalItemListEmitter = new EventEmitter();
 
-  onRowClick(data: BaseType): void {
-    this.rowClickEmitter.emit(data);
+  onRowClick(data: BaseType, idx: number): void {
+    if (this.modalItemList && this.modalItemList.length > 0) {
+      const shouldBeActive = !this.modalItemList[idx];
+      this.modalItemList = this.modalItemList.map((item, index) => {
+        return index == idx ? shouldBeActive : false;
+      });
+      if (this.modalItemList[idx]) {
+        this.dataEmitter.emit(data);
+      } else {
+        this.dataEmitter.emit();
+      }
+      this.modalItemListEmitter.emit(this.modalItemList);
+    } else {
+      this.dataEmitter.emit(data);
+    }
   }
 
   @Output() refreshBtnClickEmitter = new EventEmitter();

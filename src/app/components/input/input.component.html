@@ -1,11 +1,6 @@
-<div class="relative flex flex-col">
+<div class="relative">
   <div
-    [ngClass]="[
-      divClass,
-      showInputBox
-        ? 'rounded-t-md border-t border-x focus-within:border-t focus-within:border-x'
-        : 'rounded-md border focus-within:border-2',
-    ]"
+    [ngClass]="[borderClass, showInputBox ? 'rounded-t-md border-t border-x' : 'rounded-md border']"
     class="flex w-full h-full focus-within:shadow-md transition-all duration-100 ease-in-out">
     <input
       [id]="id"
@@ -15,6 +10,7 @@
       [mask]="maskValue"
       [ngModel]="inputValue"
       [min]="min"
+      autocomplete="off"
       (input)="onInputValueChange($event)"
       [ngClass]="inputClass"
       (keydown)="onKeydown($event)"
@@ -31,14 +27,15 @@
   @if (showInputBox) {
     <div
       #inputBox
-      class="absolute w-full z-[200] top-[2rem] left-0 flex flex-col gap-1 border rounded-b border-gray-400 bg-white p-2">
+      class="absolute w-full z-[200] top-[2rem] left-0 flex flex-col gap-1 border rounded-b border-gray-500 bg-white p-2">
       @for (item of inputListFiltered; track $index) {
         <p
           tabindex="0"
+          (mouseenter)="onMouseOver($index)"
           (keydown)="onInputBoxItemClick($event, $index)"
           (click)="onInputBoxItemClick($event, $index)"
           [ngClass]="idx == $index ? 'bg-logo text-white' : ''"
-          class="px-2 rounded-sm hover:bg-logo hover:text-white">
+          class="px-2 rounded-sm cursor-pointer">
           {{ item }}
         </p>
       } @empty {

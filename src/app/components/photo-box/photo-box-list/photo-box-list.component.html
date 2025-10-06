@@ -9,7 +9,7 @@
           [ngClass]="[divClass, isDisabled ? 'grayscale-[75%]' : '']"
           [src]="img.previewUrl"
           alt="Profile Image"
-          class="border border-gray-400 rounded-md aspect-square object-cover cursor-pointer" />
+          class="border border-logo rounded-md aspect-square object-cover cursor-pointer" />
         @if (!isDisabled) {
           <app-button-close
             (click)="clearPhoto(img, $event)"
@@ -21,7 +21,7 @@
   @if (!isDisabled) {
     <div
       [ngClass]="divClass"
-      class="relative flex flex-col justify-center items-center border border-gray-400 rounded-md aspect-square overflow-hidden">
+      class="relative flex flex-col justify-center items-center border border-logo rounded-md aspect-square overflow-hidden">
       <input
         #inputFile
         multiple
