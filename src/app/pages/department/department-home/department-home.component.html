@@ -16,12 +16,12 @@
               baseRegisterStore.onKeyPressOnSearchInput($event, inputSearchFilterList)
             "
             (inputValueEmitter)="
-              baseRegisterStore.onSetSlicePropsToNewValue('inputSearchValue', $event)
+              baseRegisterStore.onSetStateToNewValue('inputSearchValue', $event)
             " />
           <app-tooltip [description]="'Filtro'" [position]="'right'">
             <app-button-icon
               content
-              (click)="baseRegisterStore.onSetSlicePropsToNewValue('isFilterBoxActive', true)"
+              (click)="baseRegisterStore.onSetStateToNewValue('isFilterBoxActive', true)"
               [iconName]="'filter_list'" />
           </app-tooltip>
         </div>
@@ -36,9 +36,7 @@
             <app-button-icon
               content
               [iconName]="'view_column'"
-              (click)="
-                baseRegisterStore.onSetSlicePropsToNewValue('isTableHeaderBoxActive', true)
-              " />
+              (click)="baseRegisterStore.onSetStateToNewValue('isTableHeaderBoxActive', true)" />
           </app-tooltip>
           <div class="is-hidden-from-640px">
             <app-button-icon [iconName]="'refresh'" (click)="onShowDataList()" />
@@ -81,16 +79,9 @@
       <app-table
         (refreshBtnClickEmitter)="onShowDataList()"
         (deleteBtnClickEmitter)="onShowModalToDelete($event)"
-        (dataEmitter)="onRedirectToEditPage($event)"
+        (rowClickEmitter)="onRedirectToEditPage($event)"
         (cloneBtnClickEmitter)="onCloneRegister($event)" />
-      <app-pagination
-        [currentPage]="baseRegisterStore.pagination().currentPage"
-        [totalRegister]="baseRegisterStore.dataList().length"
-        [pagesArray]="baseRegisterStore.pagination().pagesArray"
-        [qtyPerPage]="baseRegisterStore.pagination().qtyPerPage"
-        [totalPages]="baseRegisterStore.pagination().totalPages"
-        [breakpointPage]="baseRegisterStore.pagination().breakpointPage"
-        (currentPageEmitter)="baseRegisterStore.onSetCurrentPagePagination($event)" />
+      <app-pagination [dataList]="baseRegisterStore.dataList()" />
     </div>
   } @else {
     <div class="flex flex-col items-center gap-4 w-full mt-10">
@@ -140,9 +131,7 @@
   [btnLabel]="'Aplicar'"
   [isPrimaryBtnDisabled]="!baseRegisterStore.isAtLeastOneFilterBoxNotEmpty()"
   (primaryBtnClickEmitter)="baseRegisterStore.onClickOnFilterBtnThroughFilterBox()"
-  (isCloseBtnClickEmitter)="
-    baseRegisterStore.onSetSlicePropsToNewValue('isFilterBoxActive', false)
-  ">
+  (isCloseBtnClickEmitter)="baseRegisterStore.onSetStateToNewValue('isFilterBoxActive', false)">
   <div body class="flex flex-col gap-4">
     @for (tableHeader of baseRegisterStore.tableHeaders(); track $index) {
       <div class="flex flex-col gap-2">
@@ -167,7 +156,7 @@
   [isFooterActive]="false"
   [title]="'Colunas Visíveis'"
   (isCloseBtnClickEmitter)="
-    baseRegisterStore.onSetSlicePropsToNewValue('isTableHeaderBoxActive', false)
+    baseRegisterStore.onSetStateToNewValue('isTableHeaderBoxActive', false)
   ">
   <div body class="flex flex-col gap-6">
     <p>Selecione abaixo as colunas que deseja estarem visíveis na tabela</p>

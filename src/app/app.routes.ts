@@ -1,185 +1,252 @@
 import { Routes } from '@angular/router';
-import { LoginComponent } from './pages/auth/login/login.component';
-import { SignupComponent } from './pages/auth/signup/signup.component';
-import { ResetPasswordComponent } from './pages/auth/reset-password/reset-password.component';
-import { NewPasswordComponent } from './pages/auth/new-password/new-password.component';
-import { RedirectComponent } from './pages/auth/redirect/redirect.component';
-import { CompanyHomeComponent } from '@pages/company/company-home/company-home.component';
-import { CompanyFormComponent } from '@pages/company/company-form/company-form.component';
-import { DepartmentHomeComponent } from '@pages/department/department-home/department-home.component';
-import { DepartmentFormComponent } from '@pages/department/department-form/department-form.component';
-import { EmployeePositionHomeComponent } from '@pages/employee/employee-position-home/employee-position-home.component';
-import { EmployeePositionFormComponent } from '@pages/employee/employee-position-form/employee-position-form.component';
-import { EmployeeHomeComponent } from '@pages/employee/employee-home/employee-home.component';
-import { EmployeeFormComponent } from '@pages/employee/employee-form/employee-form.component';
-import { ProductHomeComponent } from '@pages/product/product-home/product-home.component';
-import { ProductFormComponent } from '@pages/product/product-form/product-form.component';
-import { TaskTypeHomeComponent } from '@pages/task/task-type-home/task-type-home.component';
-import { TaskTypeFormComponent } from '@pages/task/task-type-form/task-type-form.component';
-import { ProductionLineHomeComponent } from '@pages/production/production-line-home/production-line-home.component';
-import { ProductionLineFormComponent } from '@pages/production/production-line-form/production-line-form.component';
-import { TaskHomeComponent } from '@pages/task/task-home/task-home.component';
-import { TaskFormComponent } from '@pages/task/task-form/task-form.component';
-import { ProductTypeHomeComponent } from '@pages/product/product-type-home/product-type-home.component';
-import { ProductTypeFormComponent } from '@pages/product/product-type-form/product-type-form.component';
-import { UnitHomeComponent } from '@pages/unit/unit-home/unit-home.component';
-import { UnitFormComponent } from '@pages/unit/unit-form/unit-form.component';
 
 export const routes: Routes = [
   {
     path: 'login',
-    component: LoginComponent,
+    loadComponent: () => import('@pages/auth/login/login.component').then(c => c.LoginComponent),
   },
   {
     path: 'signup',
-    component: SignupComponent,
+    loadComponent: () => import('@pages/auth/signup/signup.component').then(c => c.SignupComponent),
   },
   {
     path: 'reset-password',
-    component: ResetPasswordComponent,
+    loadComponent: () =>
+      import('@pages/auth/reset-password/reset-password.component').then(
+        c => c.ResetPasswordComponent
+      ),
   },
   {
     path: 'new-password',
-    component: NewPasswordComponent,
+    loadComponent: () =>
+      import('@pages/auth/new-password/new-password.component').then(c => c.NewPasswordComponent),
   },
   {
     path: 'redirect',
-    component: RedirectComponent,
+    loadComponent: () =>
+      import('@pages/auth/redirect/redirect.component').then(c => c.RedirectComponent),
   },
   {
     path: 'companies',
-    component: CompanyHomeComponent,
+    loadComponent: () =>
+      import('@pages/company/company-home/company-home.component').then(
+        c => c.CompanyHomeComponent
+      ),
   },
   {
     path: 'companies/new',
-    component: CompanyFormComponent,
+    loadComponent: () =>
+      import('@pages/company/company-form/company-form.component').then(
+        c => c.CompanyFormComponent
+      ),
   },
   {
     path: 'companies/edit/:id',
-    component: CompanyFormComponent,
+    loadComponent: () =>
+      import('@pages/company/company-form/company-form.component').then(
+        c => c.CompanyFormComponent
+      ),
   },
   {
     path: 'products',
-    component: ProductHomeComponent,
+    loadComponent: () =>
+      import('@pages/product/product-home/product-home.component').then(
+        c => c.ProductHomeComponent
+      ),
   },
   {
     path: 'products/new',
-    component: ProductFormComponent,
+    loadComponent: () =>
+      import('@pages/product/product-form/product-form.component').then(
+        c => c.ProductFormComponent
+      ),
   },
   {
     path: 'products/edit/:id',
-    component: ProductFormComponent,
+    loadComponent: () =>
+      import('@pages/product/product-form/product-form.component').then(
+        c => c.ProductFormComponent
+      ),
   },
   {
     path: 'departments',
-    component: DepartmentHomeComponent,
+    loadComponent: () =>
+      import('@pages/department/department-home/department-home.component').then(
+        c => c.DepartmentHomeComponent
+      ),
   },
   {
     path: 'departments/new',
-    component: DepartmentFormComponent,
+    loadComponent: () =>
+      import('@pages/department/department-form/department-form.component').then(
+        c => c.DepartmentFormComponent
+      ),
   },
   {
     path: 'departments/edit/:id',
-    component: DepartmentFormComponent,
+    loadComponent: () =>
+      import('@pages/department/department-form/department-form.component').then(
+        c => c.DepartmentFormComponent
+      ),
   },
   {
     path: ':idCompany/employees',
-    component: EmployeeHomeComponent,
+    loadComponent: () =>
+      import('@pages/employee/employee-home/employee-home.component').then(
+        c => c.EmployeeHomeComponent
+      ),
   },
   {
     path: ':idCompany/employees/new',
-    component: EmployeeFormComponent,
+    loadComponent: () =>
+      import('@pages/employee/employee-form/employee-form.component').then(
+        c => c.EmployeeFormComponent
+      ),
   },
   {
     path: ':idCompany/employees/edit/:idEmployee',
-    component: EmployeeFormComponent,
+    loadComponent: () =>
+      import('@pages/employee/employee-form/employee-form.component').then(
+        c => c.EmployeeFormComponent
+      ),
   },
   {
     path: 'employee-positions',
-    component: EmployeePositionHomeComponent,
+    loadComponent: () =>
+      import('@pages/employee/employee-position-home/employee-position-home.component').then(
+        c => c.EmployeePositionHomeComponent
+      ),
   },
   {
     path: 'employee-positions/new',
-    component: EmployeePositionFormComponent,
+    loadComponent: () =>
+      import('@pages/employee/employee-position-form/employee-position-form.component').then(
+        c => c.EmployeePositionFormComponent
+      ),
   },
   {
     path: 'employee-positions/edit/:id',
-    component: EmployeePositionFormComponent,
+    loadComponent: () =>
+      import('@pages/employee/employee-position-form/employee-position-form.component').then(
+        c => c.EmployeePositionFormComponent
+      ),
   },
   {
     path: 'production-lines',
-    component: ProductionLineHomeComponent,
+    loadComponent: () =>
+      import('@pages/production/production-line-home/production-line-home.component').then(
+        c => c.ProductionLineHomeComponent
+      ),
   },
   {
     path: 'production-lines/new',
-    component: ProductionLineFormComponent,
+    loadComponent: () =>
+      import('@pages/production/production-line-form/production-line-form.component').then(
+        c => c.ProductionLineFormComponent
+      ),
   },
   {
     path: 'production-lines/edit/:id',
-    component: ProductionLineFormComponent,
+    loadComponent: () =>
+      import('@pages/production/production-line-form/production-line-form.component').then(
+        c => c.ProductionLineFormComponent
+      ),
   },
   {
     path: 'products',
-    component: ProductHomeComponent,
+    loadComponent: () =>
+      import('@pages/product/product-home/product-home.component').then(
+        c => c.ProductHomeComponent
+      ),
   },
   {
     path: 'products/new',
-    component: ProductFormComponent,
+    loadComponent: () =>
+      import('@pages/product/product-form/product-form.component').then(
+        c => c.ProductFormComponent
+      ),
   },
   {
     path: 'products/edit/:id',
-    component: ProductFormComponent,
+    loadComponent: () =>
+      import('@pages/product/product-form/product-form.component').then(
+        c => c.ProductFormComponent
+      ),
   },
   {
     path: 'product-types',
-    component: ProductTypeHomeComponent,
+    loadComponent: () =>
+      import('@pages/product/product-type-home/product-type-home.component').then(
+        c => c.ProductTypeHomeComponent
+      ),
   },
   {
     path: 'product-types/new',
-    component: ProductTypeFormComponent,
+    loadComponent: () =>
+      import('@pages/product/product-type-form/product-type-form.component').then(
+        c => c.ProductTypeFormComponent
+      ),
   },
   {
     path: 'product-types/edit/:id',
-    component: ProductTypeFormComponent,
+    loadComponent: () =>
+      import('@pages/product/product-type-form/product-type-form.component').then(
+        c => c.ProductTypeFormComponent
+      ),
   },
   {
     path: 'units',
-    component: UnitHomeComponent,
+    loadComponent: () =>
+      import('@pages/unit/unit-home/unit-home.component').then(c => c.UnitHomeComponent),
   },
   {
     path: 'units/new',
-    component: UnitFormComponent,
+    loadComponent: () =>
+      import('@pages/unit/unit-form/unit-form.component').then(c => c.UnitFormComponent),
   },
   {
     path: 'units/edit/:id',
-    component: UnitFormComponent,
+    loadComponent: () =>
+      import('@pages/unit/unit-form/unit-form.component').then(c => c.UnitFormComponent),
   },
   {
     path: ':department/task-types',
-    component: TaskTypeHomeComponent,
+    loadComponent: () =>
+      import('@pages/task/task-type-home/task-type-home.component').then(
+        c => c.TaskTypeHomeComponent
+      ),
   },
   {
     path: ':department/task-types/new',
-    component: TaskTypeFormComponent,
+    loadComponent: () =>
+      import('@pages/task/task-type-form/task-type-form.component').then(
+        c => c.TaskTypeFormComponent
+      ),
   },
   {
     path: ':department/task-types/edit/:idTask',
-    component: TaskTypeFormComponent,
+    loadComponent: () =>
+      import('@pages/task/task-type-form/task-type-form.component').then(
+        c => c.TaskTypeFormComponent
+      ),
   },
   {
     path: ':department/tasks',
-    component: TaskHomeComponent,
+    loadComponent: () =>
+      import('@pages/task/task-home/task-home.component').then(c => c.TaskHomeComponent),
   },
   {
     path: ':department/tasks/new',
-    component: TaskFormComponent,
+    loadComponent: () =>
+      import('@pages/task/task-form/task-form.component').then(c => c.TaskFormComponent),
   },
   {
     path: ':department/tasks/edit/:idTask',
-    component: TaskFormComponent,
+    loadComponent: () =>
+      import('@pages/task/task-form/task-form.component').then(c => c.TaskFormComponent),
   },
   {
     path: '**',
-    component: LoginComponent,
+    loadComponent: () => import('@pages/auth/login/login.component').then(c => c.LoginComponent),
   },
 ];

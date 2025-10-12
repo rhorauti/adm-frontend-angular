@@ -12,3 +12,8 @@ export interface IProductionLine {
 export interface IResponseProductionLine extends IBaseResponse {
   data?: IProductionLine | IProductionLine[];
 }
+
+export type PartialProductionLine = Pick<
+  IProductionLine,
+  'idProductionLine' | 'lineCode' | 'toolingList'
+>;

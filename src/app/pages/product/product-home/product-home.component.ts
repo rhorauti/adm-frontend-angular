@@ -1,9 +1,7 @@
 import { Component, inject, OnDestroy, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { TableComponent } from '@components/table/table.component';
 import { BreadcrumbComponent } from '@components/breadcrumb/breadcrumb.component';
 import { TableHeaderBoxComponent } from '@components/side-bar/side-bar.component';
-import { PaginationComponent } from '@components/pagination/pagination.component';
 import { MatIconModule } from '@angular/material/icon';
 import { ButtonLabelComponent } from '@components/button/button-label/button-label.component';
 import { ButtonDeleteComponent } from '@components/button/button-delete/button-delete.component';
@@ -24,6 +22,8 @@ import { ActivatedRoute } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { ProductApi } from '@core/http/product/product.api';
 import { IProduct } from '@core/interfaces/product.interface';
+import { TableComponent } from '@components/table/table.component';
+import { PaginationComponent } from '@components/pagination/pagination.component';
 
 @Component({
   selector: 'app-product-home',
@@ -121,7 +121,7 @@ export class ProductHomeComponent implements OnInit, OnDestroy {
       databaseField: 'purchasingUnitPrice',
     },
     {
-      id: 6,
+      id: 7,
       isHeaderActive: false,
       sortDirection: 0,
       icon: defaultTableHeaderIcon,
@@ -129,7 +129,7 @@ export class ProductHomeComponent implements OnInit, OnDestroy {
       databaseField: 'weight',
     },
     {
-      id: 6,
+      id: 8,
       isHeaderActive: false,
       sortDirection: 0,
       icon: defaultTableHeaderIcon,
@@ -137,27 +137,27 @@ export class ProductHomeComponent implements OnInit, OnDestroy {
       databaseField: 'stock',
     },
   ] as ITableHeader<IProduct>[];
-  tableHeadersLocalStorageId = `table_headers_${this.currentView} + ${this.authStore.user().id}`;
+  tableHeadersLocalStorageId = `table_headers_${this.currentView}_${this.authStore.user().id}`;
   subscription: Subscription | undefined = undefined;
 
   async ngOnInit() {
     this.onShowDataList();
     const tableHeaders = await loadStorage(this.tableHeadersLocalStorageId);
     const headers = tableHeaders ? tableHeaders : this.initialTableHeaders;
-    this.baseRegisterStore.onSetSlicePropsToNewValue('tableHeaders', headers);
+    this.baseRegisterStore.onSetStateToNewValue('tableHeaders', headers);
   }
 
   onRedirectToEditPage = (data: IProduct): void => {
-    this.baseRegisterStore.onSetSlicePropsToNewValue('data', data);
-    this.baseRegisterStore.onSetSlicePropsToNewValue('isEditData', true);
+    this.baseRegisterStore.onSetStateToNewValue('data', data);
+    this.baseRegisterStore.onSetStateToNewValue('isEditData', true);
     this.modalStore.onRedirectPage(
       `/${this.currentView}/edit/${(this.baseRegisterStore.data() as IProduct)[this.keyId]}`
     );
   };
 
   onCloneRegister = async (data: IProduct): Promise<void> => {
-    this.baseRegisterStore.onSetSlicePropsToNewValue('isCopiedData', true);
-    this.baseRegisterStore.onSetSlicePropsToNewValue('data', data);
+    this.baseRegisterStore.onSetStateToNewValue('isCopiedData', true);
+    this.baseRegisterStore.onSetStateToNewValue('data', data);
     this.modalStore.onRedirectPage(`/${this.currentView}/new`);
   };
 
@@ -167,8 +167,8 @@ export class ProductHomeComponent implements OnInit, OnDestroy {
       const response = await this.productApi.onGetDataList();
       if (response.data) {
         const data = response.data as IProduct[];
-        this.baseRegisterStore.onSetSlicePropsToNewValue('initialData', data);
-        this.baseRegisterStore.onSetSlicePropsToNewValue('dataList', data);
+        this.baseRegisterStore.onSetStateToNewValue('initialData', data);
+        this.baseRegisterStore.onSetStateToNewValue('dataList', data);
         this.baseRegisterStore.onClearData(data);
       } else {
         return;

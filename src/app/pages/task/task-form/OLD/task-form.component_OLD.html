@@ -1,4 +1,4 @@
-<div class="flex flex-col gap-4">
+<!-- <div class="flex flex-col gap-4">
   <div class="flex items-center justify-between gap-4 overflow-auto">
     <app-breadcrumb [items]="breadcrumbList" />
     <app-button-label
@@ -79,7 +79,7 @@
                 [isHelpTextActive]="borderType.tooling == 'failure'"></app-help>
             </div>
             <app-button-icon
-              (click)="onShowModalForm('toolingCache')"
+              (click)="onShowModalForm(toolingProductType)"
               [iconName]="'search'"
               [isDisabled]="isDisabled.usedSpareParts"
               class="grow-0" />
@@ -187,7 +187,7 @@
                 </div>
                 <app-button-icon
                   [iconName]="'search'"
-                  (click)="onShowModalForm('sparePartsCache', $index)"
+                  (click)="onShowModalForm(sparePartsProductType, $index)"
                   [isDisabled]="isDisabled.usedSpareParts"
                   class="grow-0" />
                 <div class="flex flex-col gap-1 grow-0">
@@ -242,20 +242,6 @@
   </footer>
 </div>
 
-<app-modal-ask
-  [isModalActive]="modalAsk.isActive"
-  [type]="'warning'"
-  [title]="modalAsk.title"
-  [description]="modalAsk.description"
-  (closeActionNokEmitter)="onCloseAskModalAction(false)"
-  (closeActionOkEmitter)="onCloseAskModalAction(true)" />
-<app-modal-info
-  [isModalActive]="modalInfo.isActive"
-  [description]="modalInfo.description"
-  [title]="modalInfo.title"
-  (clickEmitter)="onCloseInfoModal()" />
-<app-loading [isLoading]="isLoading" />
-
 <app-modal-base [showModal]="modalForm.isActive" [width]="'sm:w-5/6'" [showHeader]="false">
   <div class="body-block">
     <div class="flex flex-col gap-5">
@@ -276,7 +262,7 @@
                   baseRegisterStore.onKeyPressOnSearchInput($event, inputSearchFilterList)
                 "
                 (inputValueEmitter)="
-                  baseRegisterStore.onSetStateToNewValue('inputSearchValue', $event)
+                  baseRegisterStore.onSetSlicePropsToNewValue('inputSearchValue', $event)
                 " />
             </div>
           </div>
@@ -314,10 +300,18 @@
             </div>
           }
           <app-table
-            [initialDataList]="baseRegisterStore.dataList()"
-            [tableHeaders]="baseRegisterStore.tableHeaders()"
-            (rowClickEmitter)="onSetData($event)" />
-          <app-pagination [dataList]="baseRegisterStore.dataList()" />
+            [isModalView]="true"
+            [modalItemList]="modalItemList"
+            (modalItemListEmitter)="onModalItemChange($event)"
+            (dataEmitter)="onSetTableItem($event)" />
+          <app-pagination
+            [currentPage]="baseRegisterStore.pagination().currentPage"
+            [totalRegister]="baseRegisterStore.dataList().length"
+            [pagesArray]="baseRegisterStore.pagination().pagesArray"
+            [qtyPerPage]="baseRegisterStore.pagination().qtyPerPage"
+            [totalPages]="baseRegisterStore.pagination().totalPages"
+            [breakpointPage]="baseRegisterStore.pagination().breakpointPage"
+            (currentPageEmitter)="baseRegisterStore.onSetCurrentPagePagination($event)" />
         </div>
       } @else {
         <div class="flex flex-col items-center gap-4 w-full mt-10">
@@ -349,4 +343,4 @@
       [iconRightName]="'save'"
       (click)="onActionOkModalForm()"></app-button-label>
   </div>
-</app-modal-base>
+</app-modal-base> -->

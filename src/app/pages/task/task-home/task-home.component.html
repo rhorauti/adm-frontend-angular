@@ -1,131 +1,110 @@
 <div class="flex flex-col gap-5">
   <app-breadcrumb [items]="breadcrumbList" />
-  @if (baseRegisterStore.dataList().length > 0) {
+  @if (dataList() && dataList().length > 0) {
     <div class="flex flex-col gap-5">
       <div class="top-button-layout gap-6 sm:gap-3 overflow-x-auto">
         <div class="flex gap-3">
           <app-input
-            [inputValue]="baseRegisterStore.inputSearchValue()"
+            [inputValue]="inputSearchValue()"
             [id]="'input-filter'"
             [placeholder]="inputSearchPlaceholder"
             [inputName]="'search'"
-            (clickEmitter)="
-              baseRegisterStore.onSetInputSearchFilterItemToDefault(inputSearchFilterList)
-            "
-            (keyboardEmitter)="
-              baseRegisterStore.onKeyPressOnSearchInput($event, inputSearchFilterList)
-            "
-            (inputValueEmitter)="
-              baseRegisterStore.onSetSlicePropsToNewValue('inputSearchValue', $event)
-            " />
+            (iconClickEmitter)="onSetInputSearchFilterItemToDefault(inputSearchFilterList)"
+            (keyboardEmitter)="onKeyPressOnSearchInput($event, inputSearchFilterList)"
+            (inputValueEmitter)="inputSearchValue.set($event)" />
           <app-tooltip [description]="'Filtro'" [position]="'right'">
             <app-button-icon
               content
-              (click)="baseRegisterStore.onSetSlicePropsToNewValue('isFilterBoxActive', true)"
+              (click)="isFilterBoxActive.set(true)"
               [iconName]="'filter_list'" />
           </app-tooltip>
         </div>
         <div class="flex gap-3">
           <app-button-icon
-            (click)="modalStore.onRedirectPage(`/${deptName}/${currentView}/new`)"
+            (click)="onRedirectPage(`/${deptName}/${currentView}/new`)"
             [iconName]="'add'" />
-          <app-button-delete
-            (click)="onShowModalToDelete()"
-            [isDisabled]="baseRegisterStore.isDelBtnDisabled()" />
+          <app-button-delete (click)="onShowModalToDelete()" [isDisabled]="isDelBtnDisabled()" />
           <app-tooltip [position]="'left'" [description]="'Colunas visíveis'">
             <app-button-icon
               content
               [iconName]="'view_column'"
-              (click)="
-                baseRegisterStore.onSetSlicePropsToNewValue('isTableHeaderBoxActive', true)
-              " />
+              (click)="isTableHeaderBoxActive.set(true)" />
           </app-tooltip>
           <div class="is-hidden-from-640px">
             <app-button-icon [iconName]="'refresh'" (click)="onShowDataList()" />
           </div>
         </div>
       </div>
-      @if (baseRegisterStore.isAtLeastOneFilterHelpNotEmpty()) {
+      @if (isAtLeastOneFilterHelpNotEmpty()) {
         <div class="flex flex-wrap items-center gap-3 text-sm">
-          @if (baseRegisterStore.filterHelp().inputSearch.length > 0) {
+          @if (filterHelp().inputSearch.length > 0) {
             <div class="flex items-center gap-2">
-              <p>Pesquisa: {{ baseRegisterStore.filterHelp().inputSearch }}</p>
-              <app-button-close
-                (click)="
-                  baseRegisterStore.onSetInputSearchFilterItemToDefault()
-                "></app-button-close>
+              <p>Pesquisa: {{ filterHelp().inputSearch }}</p>
+              <app-button-close (click)="onSetInputSearchFilterItemToDefault()"></app-button-close>
             </div>
           } @else {
-            @for (tableHeader of baseRegisterStore.tableHeaders(); track $index) {
-              @if (baseRegisterStore.filterHelp()[tableHeader.databaseField]) {
+            @for (tableHeader of tableHeaders(); track $index) {
+              @if (filterHelp()[tableHeader.databaseField]) {
                 <div class="flex items-center gap-2">
                   <p>
                     {{ tableHeader.headerName }} :
-                    {{ baseRegisterStore.filterHelp()[tableHeader.databaseField] }}
+                    {{ filterHelp()[tableHeader.databaseField] }}
                   </p>
-                  <app-button-close
-                    (click)="
-                      baseRegisterStore.onSetFilterBoxItemToDefault(tableHeader.databaseField)
-                    "></app-button-close>
+                  <app-button-close (click)="onSetFilterBoxItemToDefault()"></app-button-close>
                 </div>
               }
             }
           }
           <button
-            (click)="baseRegisterStore.onClearData()"
+            (click)="onClearData()"
             class="text-logo font-semibold cursor-pointer hover:text-logo-hover hover:underline">
             Limpar
           </button>
         </div>
       }
       <app-table
+        [initialDataList]="dataList()"
+        [tableHeaders]="tableHeaders()"
         (refreshBtnClickEmitter)="onShowDataList()"
-        (deleteBtnClickEmitter)="onShowModalToDelete($event)"
-        (dataEmitter)="onRedirectToEditPage($event)"
+        (tableDataEmitter)="data.set($event)"
+        (deleteBtnClickEmitter)="onShowModalToDelete()"
+        (isDelBtnDisabledEmitter)="isDelBtnDisabled.set($event)"
+        (rowClickEmitter)="onRedirectToEditPage($event)"
         (cloneBtnClickEmitter)="onCloneRegister($event)" />
-      <app-pagination
-        [currentPage]="baseRegisterStore.pagination().currentPage"
-        [totalRegister]="baseRegisterStore.dataList().length"
-        [pagesArray]="baseRegisterStore.pagination().pagesArray"
-        [qtyPerPage]="baseRegisterStore.pagination().qtyPerPage"
-        [totalPages]="baseRegisterStore.pagination().totalPages"
-        [breakpointPage]="baseRegisterStore.pagination().breakpointPage"
-        (currentPageEmitter)="baseRegisterStore.onSetCurrentPagePagination($event)" />
+      <app-pagination [dataList]="dataList()" />
     </div>
   } @else {
     <div class="flex flex-col items-center gap-4 w-full mt-10">
       <mat-icon class="text-logo text-6xl">{{
-        baseRegisterStore.isFilterResultZeroRegister() ? 'search_off' : 'library_add'
+        isFilterResultZeroRegister() ? 'search_off' : 'library_add'
       }}</mat-icon>
       <p class="font-semibold">Nenhum registro encontrado</p>
-      @if (!baseRegisterStore.isFilterResultZeroRegister()) {
+      @if (!isFilterResultZeroRegister()) {
         <app-button-label
-          (click)="modalStore.onRedirectPage(`/${deptName}/${currentView}/new`)"
+          (click)="onRedirectPage(`/${deptName}/${currentView}/new`)"
           [showLeftIcon]="true"
           [iconRightName]="'add'"
           [label]="'Adicionar um novo registro'" />
       } @else {
-        @if (baseRegisterStore.inputSearchValue().length > 0) {
+        @if (inputSearchValue().length > 0) {
           <p>
             Palavra(s) Pesquisada(s) :
-            <span class="font-semibold">{{ baseRegisterStore.inputSearchValue() }}</span>
+            <span class="font-semibold">{{ inputSearchValue() }}</span>
           </p>
         } @else {
           <p>Campo(s) pesquisado(s) :</p>
-          @for (tableHeader of baseRegisterStore.tableHeaders(); track $index) {
-            @if (baseRegisterStore.filterBox()[tableHeader.databaseField]) {
+          @for (tableHeader of tableHeaders(); track $index) {
+            @if (filterBox()[tableHeader.databaseField]) {
               <p>
                 {{ tableHeader.headerName }} :
-                <span class="font-semibold">{{
-                  baseRegisterStore.filterBox()[tableHeader.databaseField]
-                }}</span>
+                <span class="font-semibold">{{ filterBox()[tableHeader.databaseField] }}</span>
               </p>
             }
           }
         }
         <app-button-label
-          (keyboardEmitter)="baseRegisterStore.onKeyPressOnNotFoundFilterRegister($event)"
-          (click)="baseRegisterStore.onClearData()"
+          (keyboardEmitter)="onKeyPressOnNotFoundFilterRegister($event)"
+          (click)="onClearData()"
           [label]="'Voltar'" />
       }
     </div>
@@ -133,58 +112,69 @@
 </div>
 
 <app-side-bar
-  [isSideBarActive]="baseRegisterStore.isFilterBoxActive()"
+  [isSideBarActive]="isFilterBoxActive()"
   [isTwoThirdWidth]="false"
   [titleIconName]="'filter_list'"
   [title]="'Filtro'"
   [btnLabel]="'Aplicar'"
-  [isPrimaryBtnDisabled]="!baseRegisterStore.isAtLeastOneFilterBoxNotEmpty()"
-  (primaryBtnClickEmitter)="baseRegisterStore.onClickOnFilterBtnThroughFilterBox()"
-  (isCloseBtnClickEmitter)="
-    baseRegisterStore.onSetSlicePropsToNewValue('isFilterBoxActive', false)
-  ">
-  <div body class="flex flex-col gap-4">
-    @for (tableHeader of baseRegisterStore.tableHeaders(); track $index) {
+  [isPrimaryBtnDisabled]="!isAtLeastOneFilterBoxNotEmpty()"
+  (primaryBtnClickEmitter)="onClickOnFilterBtnThroughFilterBox()"
+  (isCloseBtnClickEmitter)="isFilterBoxActive.set(false)">
+  @if (isFilterBoxActive()) {
+    <div body class="flex flex-col gap-4">
+      @for (tableHeader of tableHeaders(); track trackByHeaderId($index, tableHeader)) {
+        <div class="flex flex-col gap-2">
+          <p class="font-medium">{{ tableHeader.headerName }}</p>
+          <app-input
+            [id]="`filter-${ currentView }-${ tableHeader.databaseField }`"
+            [inputName]="'custom'"
+            [inputValue]="filterBox()[tableHeader.databaseField].toString()"
+            [type]="'search'"
+            (inputValueEmitter)="onSetFilterBoxValue(tableHeader.databaseField, $event)"
+            (keyboardEmitter)="onKeyPressOnFilterBox($event)" />
+        </div>
+      }
+    </div>
+  }
+</app-side-bar>
+
+<app-side-bar
+  [isSideBarActive]="isTableHeaderBoxActive()"
+  [isTwoThirdWidth]="false"
+  [isFooterActive]="false"
+  [title]="'Colunas Visíveis'"
+  (isCloseBtnClickEmitter)="isTableHeaderBoxActive.set(false)">
+  <div body class="flex flex-col gap-6">
+    @if (isTableHeaderBoxActive()) {
+      <p>Selecione abaixo as colunas que deseja estarem visíveis na tabela</p>
       <div class="flex flex-col gap-2">
-        <p class="font-medium">{{ tableHeader.headerName }}</p>
-        <app-input
-          [id]="`filter-${ currentView }-${ tableHeader.databaseField }`"
-          [inputName]="tableHeader.databaseField == 'cnpj' ? 'cnpj' : 'custom'"
-          [inputValue]="baseRegisterStore.filterBox()[tableHeader.databaseField]"
-          [type]="'search'"
-          (inputValueEmitter)="
-            baseRegisterStore.onSetFilterBoxValue(tableHeader.databaseField, $event)
-          "
-          (keyboardEmitter)="baseRegisterStore.onKeyPressOnFilterBox($event)" />
+        @for (header of tableHeaders(); track trackByHeaderId($index, header)) {
+          @if (!$first) {
+            <div class="flex gap-4">
+              <app-toogle-button
+                [isChecked]="header.isHeaderActive"
+                [toggleId]="'task-toggle'"
+                (isCheckedEmitter)="onSetHeaderDisplay($index, tableHeadersLocalStorageId)" />
+              <p>{{ header.headerName }}</p>
+            </div>
+          }
+        }
       </div>
     }
   </div>
 </app-side-bar>
 
-<app-side-bar
-  [isSideBarActive]="baseRegisterStore.isTableHeaderBoxActive()"
-  [isTwoThirdWidth]="false"
-  [isFooterActive]="false"
-  [title]="'Colunas Visíveis'"
-  (isCloseBtnClickEmitter)="
-    baseRegisterStore.onSetSlicePropsToNewValue('isTableHeaderBoxActive', false)
-  ">
-  <div body class="flex flex-col gap-6">
-    <p>Selecione abaixo as colunas que deseja estarem visíveis na tabela</p>
-    <div class="flex flex-col gap-2">
-      @for (header of baseRegisterStore.tableHeaders(); track $index) {
-        @if (!$first) {
-          <div class="flex gap-4">
-            <app-toogle-button
-              [isChecked]="header.isHeaderActive"
-              [toggleId]="'task-toggle'"
-              (isCheckedEmitter)="
-                baseRegisterStore.onSetHeaderDisplay($index, tableHeadersLocalStorageId)
-              " />
-            <p>{{ header.headerName }}</p>
-          </div>
-        }
-      }
-    </div>
-  </div>
-</app-side-bar>
+<app-modal-ask
+  [isModalActive]="modalAsk().isActive"
+  [type]="'warning'"
+  [title]="modalAsk().title"
+  [description]="modalAsk().description"
+  (closeActionNokEmitter)="onCloseAskModalAction(false)"
+  (closeActionOkEmitter)="onCloseAskModalAction(true)" />
+<app-modal-info
+  [isModalActive]="modalInfo().isActive"
+  [type]="modalInfo().type"
+  [description]="modalInfo().description"
+  [title]="modalInfo().title"
+  (clickEmitter)="onCloseInfoModal()" />
+<app-loading [isLoading]="isLoading()" />

@@ -132,7 +132,7 @@ export class CompanyFormComponent implements OnInit, OnDestroy, AfterViewInit {
         this.detailedData.company.idCompany = null;
         this.detailedData.address.idAddress = null;
         this.detailedData.employee.idEmployee = null;
-        this.baseRegisterStore.onSetSlicePropsToNewValue('isCopiedData', false);
+        this.baseRegisterStore.onSetStateToNewValue('isCopiedData', false);
       }
     }
     this.defineTitle();
@@ -366,7 +366,7 @@ export class CompanyFormComponent implements OnInit, OnDestroy, AfterViewInit {
       const error = e as HttpErrorResponse;
       this.modalStore.onShowInfoModal(
         `Cadastro de ${this.currentViewTranslated}`,
-        error.error.message
+        error.error?.message || 'Erro desconhecido'
       );
     } finally {
       this.modalStore.onLoading(false);

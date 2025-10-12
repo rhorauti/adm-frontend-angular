@@ -42,3 +42,8 @@ export interface IResponseProductType extends IBaseResponse {
 export interface IResponseProduct extends IBaseResponse {
   data?: IProduct | IProduct[];
 }
+
+export type PartialProduct = Pick<
+  IProduct,
+  'idProduct' | 'internalPartNumber' | 'name' | 'productType'
+>;

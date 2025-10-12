@@ -1,9 +1,7 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { TableComponent } from '@components/table/table.component';
 import { BreadcrumbComponent } from '@components/breadcrumb/breadcrumb.component';
 import { TableHeaderBoxComponent } from '@components/side-bar/side-bar.component';
-import { PaginationComponent } from '@components/pagination/pagination.component';
 import { MatIconModule } from '@angular/material/icon';
 import { ButtonLabelComponent } from '@components/button/button-label/button-label.component';
 import { ButtonDeleteComponent } from '@components/button/button-delete/button-delete.component';
@@ -25,6 +23,8 @@ import { ActivatedRoute } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { TaskTypeApi } from '@core/http/task-type/task-type.api';
 import { DepartmentApi } from '@core/http/department/department.api';
+import { TableComponent } from '@components/table/table.component';
+import { PaginationComponent } from '@components/pagination/pagination.component';
 
 @Component({
   selector: 'app-task-type-home',
@@ -33,8 +33,8 @@ import { DepartmentApi } from '@core/http/department/department.api';
     TableHeaderBoxComponent,
     InputComponent,
     TableComponent,
-    PaginationComponent,
     BreadcrumbComponent,
+    PaginationComponent,
     MatIconModule,
     ButtonLabelComponent,
     ButtonDeleteComponent,
@@ -46,7 +46,7 @@ import { DepartmentApi } from '@core/http/department/department.api';
   templateUrl: './task-type-home.component.html',
   styleUrl: './task-type-home.component.scss',
 })
-export class TaskTypeHomeComponent implements OnInit {
+export class TaskTypeHomeComponent implements OnDestroy, OnInit {
   readonly taskTypeApi = inject(TaskTypeApi);
   readonly departmentApi = inject(DepartmentApi);
   readonly baseRegisterStore = inject(BaseRegisterStore);
@@ -87,7 +87,7 @@ export class TaskTypeHomeComponent implements OnInit {
       databaseField: 'comment',
     },
   ] as ITableHeader<ITaskType>[];
-  tableHeadersLocalStorageId = `table_headers_${this.currentView} + ${this.authStore.user().id}`;
+  tableHeadersLocalStorageId = `table_headers_${this.currentView}_${this.authStore.user().id}`;
   deptName = '';
 
   async ngOnInit() {
@@ -97,20 +97,26 @@ export class TaskTypeHomeComponent implements OnInit {
     this.onShowDataList();
     const tableHeaders = await loadStorage(this.tableHeadersLocalStorageId);
     const headers = tableHeaders ? tableHeaders : this.initialTableHeaders;
-    this.baseRegisterStore.onSetSlicePropsToNewValue('tableHeaders', headers);
+    this.baseRegisterStore.onSetStateToNewValue('tableHeaders', headers);
+  }
+
+  ngOnDestroy(): void {
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
   }
 
   onRedirectToEditPage = (data: ITaskType): void => {
-    this.baseRegisterStore.onSetSlicePropsToNewValue('data', data);
-    this.baseRegisterStore.onSetSlicePropsToNewValue('isEditData', true);
+    this.baseRegisterStore.onSetStateToNewValue('data', data);
+    this.baseRegisterStore.onSetStateToNewValue('isEditData', true);
     this.modalStore.onRedirectPage(
       `/${this.deptName}/${this.currentView}/edit/${(this.baseRegisterStore.data() as ITaskType).idTaskType}`
     );
   };
 
   onCloneRegister = async (data: ITaskType): Promise<void> => {
-    this.baseRegisterStore.onSetSlicePropsToNewValue('isCopiedData', true);
-    this.baseRegisterStore.onSetSlicePropsToNewValue('data', data);
+    this.baseRegisterStore.onSetStateToNewValue('isCopiedData', true);
+    this.baseRegisterStore.onSetStateToNewValue('data', data);
     this.modalStore.onRedirectPage(`/${this.deptName}/${this.currentView}/new`);
   };
 
@@ -120,8 +126,8 @@ export class TaskTypeHomeComponent implements OnInit {
       const response = await this.taskTypeApi.onGetDataList(this.deptName);
       if (response.data) {
         const dataList = response.data as ITaskType[];
-        this.baseRegisterStore.onSetSlicePropsToNewValue('initialData', dataList);
-        this.baseRegisterStore.onSetSlicePropsToNewValue('dataList', dataList);
+        this.baseRegisterStore.onSetStateToNewValue('initialData', dataList);
+        this.baseRegisterStore.onSetStateToNewValue('dataList', dataList);
         this.baseRegisterStore.onClearData(dataList);
       } else {
         return;
@@ -147,7 +153,10 @@ export class TaskTypeHomeComponent implements OnInit {
       }
     } catch (e: unknown) {
       const error = e as HttpErrorResponse;
-      this.modalStore.onShowInfoModal('Excluir registro', error.error.message);
+      this.modalStore.onShowInfoModal(
+        'Excluir registro',
+        error.error?.message || 'Erro desconhecido'
+      );
     } finally {
       this.modalStore.onLoading(false);
     }

@@ -1,9 +1,7 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { TableComponent } from '@components/table/table.component';
 import { BreadcrumbComponent } from '@components/breadcrumb/breadcrumb.component';
 import { TableHeaderBoxComponent } from '@components/side-bar/side-bar.component';
-import { PaginationComponent } from '@components/pagination/pagination.component';
 import { MatIconModule } from '@angular/material/icon';
 import { ButtonLabelComponent } from '@components/button/button-label/button-label.component';
 import { ButtonDeleteComponent } from '@components/button/button-delete/button-delete.component';
@@ -22,6 +20,8 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { CompanyApi } from '@core/http/company/company.api';
 import { KeyOfData } from '@core/types/base.type';
 import { ITableHeader } from '@core/interfaces/table.interface';
+import { TableComponent } from '@components/table/table.component';
+import { PaginationComponent } from '@components/pagination/pagination.component';
 
 @Component({
   selector: 'app-company-home',
@@ -105,25 +105,25 @@ export class CompanyHomeComponent implements OnInit {
       databaseField: 'im',
     },
   ] as ITableHeader<ICompany>[];
-  tableHeadersLocalStorageId = `table_headers_${this.currentView} + ${this.authStore.user().id}`;
+  tableHeadersLocalStorageId = `table_headers_${this.currentView}_${this.authStore.user().id}`;
 
   async ngOnInit() {
     this.onShowDataList();
     const tableHeaders = await loadStorage(this.tableHeadersLocalStorageId);
     const headers = tableHeaders ? tableHeaders : this.initialTableHeaders;
-    this.baseRegisterStore.onSetSlicePropsToNewValue('tableHeaders', headers);
+    this.baseRegisterStore.onSetStateToNewValue('tableHeaders', headers);
   }
 
   onRedirectToEditPage = (data: ICompany): void => {
-    this.baseRegisterStore.onSetSlicePropsToNewValue('data', data);
+    this.baseRegisterStore.onSetStateToNewValue('data', data);
     this.modalStore.onRedirectPage(
       `/${this.currentView}/edit/${(this.baseRegisterStore.data() as ICompany)[this.keyId]}`
     );
   };
 
   onCloneRegister = async (data: ICompany): Promise<void> => {
-    this.baseRegisterStore.onSetSlicePropsToNewValue('isCopiedData', true);
-    this.baseRegisterStore.onSetSlicePropsToNewValue('data', data);
+    this.baseRegisterStore.onSetStateToNewValue('isCopiedData', true);
+    this.baseRegisterStore.onSetStateToNewValue('data', data);
     this.modalStore.onRedirectPage(`/${this.currentView}/new`);
   };
 
@@ -132,8 +132,8 @@ export class CompanyHomeComponent implements OnInit {
       this.modalStore.onLoading(true);
       const response = await this.companyApi.onGetDataList();
       if (response.data) {
-        this.baseRegisterStore.onSetSlicePropsToNewValue('initialData', response.data);
-        this.baseRegisterStore.onSetSlicePropsToNewValue('dataList', response.data);
+        this.baseRegisterStore.onSetStateToNewValue('initialData', response.data);
+        this.baseRegisterStore.onSetStateToNewValue('dataList', response.data);
         this.baseRegisterStore.onClearData(response.data);
       } else {
         return;

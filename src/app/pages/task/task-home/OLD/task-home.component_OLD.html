@@ -1,4 +1,4 @@
-<div class="flex flex-col gap-5">
+<!-- <div class="flex flex-col gap-5">
   <app-breadcrumb [items]="breadcrumbList" />
   @if (baseRegisterStore.dataList().length > 0) {
     <div class="flex flex-col gap-5">
@@ -9,25 +9,25 @@
             [id]="'input-filter'"
             [placeholder]="inputSearchPlaceholder"
             [inputName]="'search'"
-            (iconClickEmitter)="
+            (clickEmitter)="
               baseRegisterStore.onSetInputSearchFilterItemToDefault(inputSearchFilterList)
             "
             (keyboardEmitter)="
               baseRegisterStore.onKeyPressOnSearchInput($event, inputSearchFilterList)
             "
             (inputValueEmitter)="
-              baseRegisterStore.onSetStateToNewValue('inputSearchValue', $event)
+              baseRegisterStore.onSetSlicePropsToNewValue('inputSearchValue', $event)
             " />
           <app-tooltip [description]="'Filtro'" [position]="'right'">
             <app-button-icon
               content
-              (click)="baseRegisterStore.onSetStateToNewValue('isFilterBoxActive', true)"
+              (click)="baseRegisterStore.onSetSlicePropsToNewValue('isFilterBoxActive', true)"
               [iconName]="'filter_list'" />
           </app-tooltip>
         </div>
         <div class="flex gap-3">
           <app-button-icon
-            (click)="modalStore.onRedirectPage(`/${idCompany}/${currentView}/new`)"
+            (click)="modalStore.onRedirectPage(`/${deptName}/${currentView}/new`)"
             [iconName]="'add'" />
           <app-button-delete
             (click)="onShowModalToDelete()"
@@ -36,7 +36,9 @@
             <app-button-icon
               content
               [iconName]="'view_column'"
-              (click)="baseRegisterStore.onSetStateToNewValue('isTableHeaderBoxActive', true)" />
+              (click)="
+                baseRegisterStore.onSetSlicePropsToNewValue('isTableHeaderBoxActive', true)
+              " />
           </app-tooltip>
           <div class="is-hidden-from-640px">
             <app-button-icon [iconName]="'refresh'" (click)="onShowDataList()" />
@@ -79,9 +81,16 @@
       <app-table
         (refreshBtnClickEmitter)="onShowDataList()"
         (deleteBtnClickEmitter)="onShowModalToDelete($event)"
-        (rowClickEmitter)="onRedirectToEditPage($event)"
+        (dataEmitter)="onRedirectToEditPage($event)"
         (cloneBtnClickEmitter)="onCloneRegister($event)" />
-      <app-pagination [dataList]="baseRegisterStore.dataList()" />
+      <app-pagination
+        [currentPage]="baseRegisterStore.pagination().currentPage"
+        [totalRegister]="baseRegisterStore.dataList().length"
+        [pagesArray]="baseRegisterStore.pagination().pagesArray"
+        [qtyPerPage]="baseRegisterStore.pagination().qtyPerPage"
+        [totalPages]="baseRegisterStore.pagination().totalPages"
+        [breakpointPage]="baseRegisterStore.pagination().breakpointPage"
+        (currentPageEmitter)="baseRegisterStore.onSetCurrentPagePagination($event)" />
     </div>
   } @else {
     <div class="flex flex-col items-center gap-4 w-full mt-10">
@@ -91,7 +100,7 @@
       <p class="font-semibold">Nenhum registro encontrado</p>
       @if (!baseRegisterStore.isFilterResultZeroRegister()) {
         <app-button-label
-          (click)="modalStore.onRedirectPage(`/${idCompany}/${currentView}/new`)"
+          (click)="modalStore.onRedirectPage(`/${deptName}/${currentView}/new`)"
           [showLeftIcon]="true"
           [iconRightName]="'add'"
           [label]="'Adicionar um novo registro'" />
@@ -131,9 +140,14 @@
   [btnLabel]="'Aplicar'"
   [isPrimaryBtnDisabled]="!baseRegisterStore.isAtLeastOneFilterBoxNotEmpty()"
   (primaryBtnClickEmitter)="baseRegisterStore.onClickOnFilterBtnThroughFilterBox()"
-  (isCloseBtnClickEmitter)="baseRegisterStore.onSetStateToNewValue('isFilterBoxActive', false)">
+  (isCloseBtnClickEmitter)="
+    baseRegisterStore.onSetSlicePropsToNewValue('isFilterBoxActive', false)
+  ">
   <div body class="flex flex-col gap-4">
-    @for (tableHeader of baseRegisterStore.tableHeaders(); track $index) {
+    @for (
+      tableHeader of baseRegisterStore.tableHeaders();
+      track trackByHeaderId($index, tableHeader)
+    ) {
       <div class="flex flex-col gap-2">
         <p class="font-medium">{{ tableHeader.headerName }}</p>
         <app-input
@@ -156,17 +170,17 @@
   [isFooterActive]="false"
   [title]="'Colunas Visíveis'"
   (isCloseBtnClickEmitter)="
-    baseRegisterStore.onSetStateToNewValue('isTableHeaderBoxActive', false)
+    baseRegisterStore.onSetSlicePropsToNewValue('isTableHeaderBoxActive', false)
   ">
   <div body class="flex flex-col gap-6">
     <p>Selecione abaixo as colunas que deseja estarem visíveis na tabela</p>
     <div class="flex flex-col gap-2">
-      @for (header of baseRegisterStore.tableHeaders(); track $index) {
+      @for (header of baseRegisterStore.tableHeaders(); track trackByHeaderId($index, header)) {
         @if (!$first) {
           <div class="flex gap-4">
             <app-toogle-button
               [isChecked]="header.isHeaderActive"
-              [toggleId]="'employee-toogle'"
+              [toggleId]="'task-toggle'"
               (isCheckedEmitter)="
                 baseRegisterStore.onSetHeaderDisplay($index, tableHeadersLocalStorageId)
               " />
@@ -176,4 +190,4 @@
       }
     </div>
   </div>
-</app-side-bar>
+</app-side-bar> -->

@@ -1,9 +1,7 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { TableComponent } from '@components/table/table.component';
 import { BreadcrumbComponent } from '@components/breadcrumb/breadcrumb.component';
 import { TableHeaderBoxComponent } from '@components/side-bar/side-bar.component';
-import { PaginationComponent } from '@components/pagination/pagination.component';
 import { MatIconModule } from '@angular/material/icon';
 import { ButtonLabelComponent } from '@components/button/button-label/button-label.component';
 import { ButtonDeleteComponent } from '@components/button/button-delete/button-delete.component';
@@ -22,6 +20,8 @@ import { KeyOfData } from '@core/types/base.type';
 import { ITableHeader } from '@core/interfaces/table.interface';
 import { IEmployeePosition } from '@core/interfaces/employee.interface';
 import { EmployeePositionApi } from '@core/http/employee/employee-position.api';
+import { TableComponent } from '@components/table/table.component';
+import { PaginationComponent } from '@components/pagination/pagination.component';
 
 @Component({
   selector: 'app-employee-position-home',
@@ -81,26 +81,26 @@ export class EmployeePositionHomeComponent implements OnInit {
       databaseField: 'comment',
     },
   ] as ITableHeader<IEmployeePosition>[];
-  tableHeadersLocalStorageId = `table_headers_${this.currentView} + ${this.authStore.user().id}`;
+  tableHeadersLocalStorageId = `table_headers_${this.currentView}_${this.authStore.user().id}`;
 
   async ngOnInit() {
     this.onShowDataList();
     const tableHeaders = await loadStorage(this.tableHeadersLocalStorageId);
     const headers = tableHeaders ? tableHeaders : this.initialTableHeaders;
-    this.baseRegisterStore.onSetSlicePropsToNewValue('tableHeaders', headers);
+    this.baseRegisterStore.onSetStateToNewValue('tableHeaders', headers);
   }
 
   onRedirectToEditPage = (data: IEmployeePosition): void => {
-    this.baseRegisterStore.onSetSlicePropsToNewValue('data', data);
-    this.baseRegisterStore.onSetSlicePropsToNewValue('isEditData', true);
+    this.baseRegisterStore.onSetStateToNewValue('data', data);
+    this.baseRegisterStore.onSetStateToNewValue('isEditData', true);
     this.modalStore.onRedirectPage(
       `/${this.currentView}/edit/${(this.baseRegisterStore.data() as IEmployeePosition)[this.keyId]}`
     );
   };
 
   onCloneRegister = async (data: IEmployeePosition): Promise<void> => {
-    this.baseRegisterStore.onSetSlicePropsToNewValue('isCopiedData', true);
-    this.baseRegisterStore.onSetSlicePropsToNewValue('data', data);
+    this.baseRegisterStore.onSetStateToNewValue('isCopiedData', true);
+    this.baseRegisterStore.onSetStateToNewValue('data', data);
     this.modalStore.onRedirectPage(`/${this.currentView}/new`);
   };
 
@@ -110,8 +110,8 @@ export class EmployeePositionHomeComponent implements OnInit {
       const response = await this.employeePositionApi.onGetDataList();
       if (response.data) {
         const data = response.data as IEmployeePosition[];
-        this.baseRegisterStore.onSetSlicePropsToNewValue('initialData', data);
-        this.baseRegisterStore.onSetSlicePropsToNewValue('dataList', data);
+        this.baseRegisterStore.onSetStateToNewValue('initialData', data);
+        this.baseRegisterStore.onSetStateToNewValue('dataList', data);
         this.baseRegisterStore.onClearData(data);
       } else {
         return;

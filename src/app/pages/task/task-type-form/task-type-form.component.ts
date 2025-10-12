@@ -78,12 +78,12 @@ export class TaskTypeFormComponent implements OnInit, OnDestroy, AfterViewInit {
     });
     if (this.baseRegisterStore.isEditData()) {
       this.data = this.baseRegisterStore.data() as ITaskType;
-      this.baseRegisterStore.onSetSlicePropsToNewValue('isEditData', false);
+      this.baseRegisterStore.onSetStateToNewValue('isEditData', false);
     } else if (this.baseRegisterStore.isCopiedData()) {
       this.data = this.baseRegisterStore.data() as ITaskType;
       this.id = 0;
       this.data.idTaskType = 0;
-      this.baseRegisterStore.onSetSlicePropsToNewValue('isCopiedData', false);
+      this.baseRegisterStore.onSetStateToNewValue('isCopiedData', false);
     }
     this.defineTitle();
     this.breadcrumbList = ['Cadastro', this.currentViewTranslated, `${this.defineTitle()}`];

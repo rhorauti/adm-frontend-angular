@@ -134,13 +134,13 @@ export class ProductFormComponent implements OnInit, OnDestroy, AfterViewInit {
     await this.onGetProductTypeList();
     if (this.baseRegisterStore.isEditData()) {
       this.productData = this.baseRegisterStore.data() as IProduct;
-      this.baseRegisterStore.onSetSlicePropsToNewValue('isEditData', false);
+      this.baseRegisterStore.onSetStateToNewValue('isEditData', false);
     } else if (this.baseRegisterStore.isCopiedData()) {
       this.productData = this.baseRegisterStore.data() as IProduct;
       this.productData.idProduct = 0;
       this.idProduct = 0;
       this.productData.photoUrl = '';
-      this.baseRegisterStore.onSetSlicePropsToNewValue('isCopiedData', false);
+      this.baseRegisterStore.onSetStateToNewValue('isCopiedData', false);
     }
     this.productData.unit = this.unitList.find(d => d.idUnit == this.productData.unit.idUnit) ?? {
       idUnit: null,
@@ -363,7 +363,7 @@ export class ProductFormComponent implements OnInit, OnDestroy, AfterViewInit {
         const error = e as HttpErrorResponse;
         this.modalStore.onShowInfoModal(
           `Cadastro de ${this.currentViewTranslated}`,
-          error.error.message
+          error.error?.message || 'Erro desconhecido'
         );
       } else {
         this.modalStore.onShowInfoModal(

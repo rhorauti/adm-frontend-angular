@@ -1,5 +1,4 @@
 import { computed } from '@angular/core';
-import { IDepartment } from '@core/interfaces/department.interface';
 import { patchState, signalStore, withComputed, withMethods, withState } from '@ngrx/signals';
 
 type UserField = 'name' | 'email' | 'password' | 'confirmPassword';

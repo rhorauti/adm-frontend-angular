@@ -1,9 +1,9 @@
 import { CommonModule } from '@angular/common';
-import { Component, computed, EventEmitter, inject, Input, Output } from '@angular/core';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
 import { ModalBaseComponent } from '../modal-base/modal-base.component';
 import { ButtonLabelComponent } from '@components/button/button-label/button-label.component';
-import { ModalStore } from '@store/modal/modal.store';
+import { ModalType } from '@store/modal/modal.store';
 
 export type ModalIconType = 'success' | 'failure';
 
@@ -14,16 +14,25 @@ export type ModalIconType = 'success' | 'failure';
   styleUrl: './modal-info.component.scss',
 })
 export class ModalInfoComponent {
-  readonly modalStore = inject(ModalStore);
-  readonly icon = computed(() => (this.modalStore.info().type == 'success' ? 'check' : 'close'));
-  readonly iconBackgroundColor = computed(() =>
-    this.modalStore.info().type == 'success' ? 'bg-green-600' : 'bg-red-500'
-  );
-
   @Input({ required: true }) isModalActive!: boolean;
   @Input({ required: true }) title!: string;
   @Input({ required: true }) description!: string;
   @Input() showHeader = false;
+  @Input() type: ModalType = 'failure';
+  icon = '';
+  iconBackgroundColor = '';
+
+  ngOnChanges = (): void => {
+    if (this.type == 'success') {
+      this.icon = 'check';
+      this.iconBackgroundColor = 'bg-green-600';
+    } else {
+      this.icon = 'close';
+      this.iconBackgroundColor = 'bg-red-500';
+    }
+    console.log('icon', this.icon);
+    console.log('iconBackgroundColor', this.iconBackgroundColor);
+  };
 
   onKeyBoardEnter(event: KeyboardEvent): void {
     if (event.key == 'Enter') {

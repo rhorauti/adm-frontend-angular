@@ -1,14 +1,14 @@
 <div class="relative">
   <div
     [ngClass]="[borderClass, showInputBox ? 'rounded-t-md border-t border-x' : 'rounded-md border']"
-    class="flex w-full h-full focus-within:shadow-md transition-all duration-100 ease-in-out">
+    class="flex w-full h-full focus-within:shadow-md">
     <input
       [id]="id"
       [type]="type"
       [disabled]="isDisabled"
       [placeholder]="placeholder"
       [mask]="maskValue"
-      [ngModel]="inputValue"
+      [value]="inputValue"
       [min]="min"
       autocomplete="off"
       (input)="onInputValueChange($event)"
@@ -19,7 +19,10 @@
       (blur)="onBlur($event)"
       class="flex-1 bg-transparent w-full focus:outline-none pl-3 pr-1 py-1 disabled:bg-gray-100 disabled:text-gray-600 disabled:border-1 disabled:rounded-md placeholder:text-sm" />
     @if (iconName && iconName.length > 0) {
-      <button (click)="onClick($event)" [tabIndex]="tabIndex" class="inline-flex items-center mr-1">
+      <button
+        (click)="onIconClick($event)"
+        [tabIndex]="tabIndex"
+        class="inline-flex items-center mr-1">
         <mat-icon class="text-logo font-semibold">{{ iconName }}</mat-icon>
       </button>
     }
@@ -31,7 +34,6 @@
       @for (item of inputListFiltered; track $index) {
         <p
           tabindex="0"
-          (mouseenter)="onMouseOver($index)"
           (keydown)="onInputBoxItemClick($event, $index)"
           (click)="onInputBoxItemClick($event, $index)"
           [ngClass]="idx == $index ? 'bg-logo text-white' : ''"

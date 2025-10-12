@@ -67,12 +67,12 @@ export class EmployeePositionFormComponent implements OnInit, OnDestroy, AfterVi
     });
     if (this.baseRegisterStore.isEditData()) {
       this.data = this.baseRegisterStore.data() as IEmployeePosition;
-      this.baseRegisterStore.onSetSlicePropsToNewValue('isEditData', false);
+      this.baseRegisterStore.onSetStateToNewValue('isEditData', false);
     } else if (this.baseRegisterStore.isCopiedData()) {
       this.data = this.baseRegisterStore.data() as IEmployeePosition;
       this.id = 0;
       this.data.idEmployeePosition = 0;
-      this.baseRegisterStore.onSetSlicePropsToNewValue('isCopiedData', false);
+      this.baseRegisterStore.onSetStateToNewValue('isCopiedData', false);
     }
     this.defineTitle();
     this.breadcrumbList = ['Cadastro', this.currentViewTranslated, `${this.defineTitle()}`];
@@ -132,7 +132,7 @@ export class EmployeePositionFormComponent implements OnInit, OnDestroy, AfterVi
         const error = e as HttpErrorResponse;
         this.modalStore.onShowInfoModal(
           `Cadastro de ${this.currentViewTranslated}`,
-          error.error.message
+          error.error?.message || 'Erro desconhecido'
         );
       } else {
         this.modalStore.onShowInfoModal(

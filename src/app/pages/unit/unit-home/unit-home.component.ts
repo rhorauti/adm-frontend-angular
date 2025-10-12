@@ -1,9 +1,7 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { TableComponent } from '@components/table/table.component';
 import { BreadcrumbComponent } from '@components/breadcrumb/breadcrumb.component';
 import { TableHeaderBoxComponent } from '@components/side-bar/side-bar.component';
-import { PaginationComponent } from '@components/pagination/pagination.component';
 import { MatIconModule } from '@angular/material/icon';
 import { ButtonLabelComponent } from '@components/button/button-label/button-label.component';
 import { ButtonDeleteComponent } from '@components/button/button-delete/button-delete.component';
@@ -22,6 +20,8 @@ import { KeyOfData } from '@core/types/base.type';
 import { ITableHeader } from '@core/interfaces/table.interface';
 import { IUnit } from '@core/interfaces/unit.interface';
 import { UnitApi } from '@core/http/unit/unit.api';
+import { TableComponent } from '@components/table/table.component';
+import { PaginationComponent } from '@components/pagination/pagination.component';
 
 @Component({
   selector: 'app-unit-home',
@@ -48,6 +48,10 @@ export class UnitHomeComponent implements OnInit {
   readonly baseRegisterStore = inject(BaseRegisterStore);
   readonly authStore = inject(AuthStore);
   readonly modalStore = inject(ModalStore);
+
+  unitHomeData = {
+    dataList: [],
+  };
 
   readonly currentView = 'units';
   readonly currentViewTranslated = 'Unidades de medida';
@@ -81,26 +85,26 @@ export class UnitHomeComponent implements OnInit {
       databaseField: 'comment',
     },
   ] as ITableHeader<IUnit>[];
-  tableHeadersLocalStorageId = `table_headers_${this.currentView} + ${this.authStore.user().id}`;
+  tableHeadersLocalStorageId = `table_headers_${this.currentView}_${this.authStore.user().id}`;
 
   async ngOnInit() {
     this.onShowDataList();
     const tableHeaders = await loadStorage(this.tableHeadersLocalStorageId);
     const headers = tableHeaders ? tableHeaders : this.initialTableHeaders;
-    this.baseRegisterStore.onSetSlicePropsToNewValue('tableHeaders', headers);
+    this.baseRegisterStore.onSetStateToNewValue('tableHeaders', headers);
   }
 
   onRedirectToEditPage = (data: IUnit): void => {
-    this.baseRegisterStore.onSetSlicePropsToNewValue('data', data);
-    this.baseRegisterStore.onSetSlicePropsToNewValue('isEditData', true);
+    this.baseRegisterStore.onSetStateToNewValue('data', data);
+    this.baseRegisterStore.onSetStateToNewValue('isEditData', true);
     this.modalStore.onRedirectPage(
       `/${this.currentView}/edit/${(this.baseRegisterStore.data() as IUnit)[this.keyId]}`
     );
   };
 
   onCloneRegister = async (data: IUnit): Promise<void> => {
-    this.baseRegisterStore.onSetSlicePropsToNewValue('isCopiedData', true);
-    this.baseRegisterStore.onSetSlicePropsToNewValue('data', data);
+    this.baseRegisterStore.onSetStateToNewValue('isCopiedData', true);
+    this.baseRegisterStore.onSetStateToNewValue('data', data);
     this.modalStore.onRedirectPage(`/${this.currentView}/new`);
   };
 
@@ -110,8 +114,8 @@ export class UnitHomeComponent implements OnInit {
       const response = await this.unitApi.onGetDataList();
       if (response.data) {
         const data = response.data as IUnit[];
-        this.baseRegisterStore.onSetSlicePropsToNewValue('initialData', data);
-        this.baseRegisterStore.onSetSlicePropsToNewValue('dataList', data);
+        this.baseRegisterStore.onSetStateToNewValue('initialData', data);
+        this.baseRegisterStore.onSetStateToNewValue('dataList', data);
         this.baseRegisterStore.onClearData(data);
       } else {
         return;

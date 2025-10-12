@@ -116,21 +116,23 @@ export class InputComponent implements OnInit, OnChanges {
   }
 
   onFilterInputList = (): void => {
-    this.inputListFiltered = this.initialInputList
-      .filter(value => value.toLowerCase().includes(this.inputValue.toLowerCase()))
-      .slice(0, 5);
-    this.showInputBox = this.inputValue.length > 0;
+    if (this.initialInputList.length > 0) {
+      this.inputListFiltered = this.initialInputList
+        .filter(value => value.toLowerCase().includes(this.inputValue.toLowerCase()))
+        .slice(0, 5);
+      this.showInputBox = this.inputValue.length > 0;
+    }
   };
 
   onInputValueChange(event: Event): void {
     this.inputValue = (event.target as HTMLInputElement).value;
-    this.onFilterInputList();
+    // this.onFilterInputList();
     this.inputValueEmitter.emit(this.inputValue.trim());
   }
 
-  @Output() clickEmitter = new EventEmitter();
+  @Output() iconClickEmitter = new EventEmitter();
 
-  onClick(event: MouseEvent): void {
+  onIconClick(event: MouseEvent): void {
     event.stopPropagation();
     if (this.inputName == 'password') {
       if (this.showPassword) {
@@ -140,17 +142,18 @@ export class InputComponent implements OnInit, OnChanges {
         this.iconName = 'lock_open';
         this.type = 'text';
       }
+      this.showPassword = !this.showPassword;
     }
-    this.showPassword = !this.showPassword;
-    this.clickEmitter.emit();
+    this.iconClickEmitter.emit();
   }
 
-  onMouseOver = (index: number): void => {
-    this.idx = index;
-  };
+  // onMouseOver = (index: number): void => {
+  //   this.idx = index;
+  // };
 
   onSelectOptionThroughKeyboard = (event: KeyboardEvent): void => {
     if (this.inputListFiltered.length > 0) {
+      this.onFilterInputList();
       if (event.key == 'ArrowDown') {
         if (this.idx >= this.inputListFiltered.length - 1) {
           this.idx = 0;
@@ -168,6 +171,7 @@ export class InputComponent implements OnInit, OnChanges {
       } else if (event.key == 'Enter' && this.idx > -1) {
         this.inputValue = this.inputListFiltered[this.idx];
         this.showInputBox = false;
+        this.inputValueEmitter.emit(this.inputValue.trim());
       }
     }
   };

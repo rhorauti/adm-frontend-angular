@@ -1,9 +1,15 @@
-import { Component, inject, OnInit } from '@angular/core';
+import {
+  Component,
+  inject,
+  OnInit,
+  OnDestroy,
+  computed,
+  signal,
+  WritableSignal,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { TableComponent } from '@components/table/table.component';
 import { BreadcrumbComponent } from '@components/breadcrumb/breadcrumb.component';
 import { TableHeaderBoxComponent } from '@components/side-bar/side-bar.component';
-import { PaginationComponent } from '@components/pagination/pagination.component';
 import { MatIconModule } from '@angular/material/icon';
 import { ButtonLabelComponent } from '@components/button/button-label/button-label.component';
 import { ButtonDeleteComponent } from '@components/button/button-delete/button-delete.component';
@@ -12,18 +18,26 @@ import { TooltipComponent } from '@components/tooltip/tooltip.component';
 import { ToogleButtonComponent } from '@components/toogle-button/toogle-button.component';
 import { InputComponent } from '@components/input/input.component';
 import { ButtonCloseComponent } from '@components/button/button-close/button-close.component';
-import { ModalStore } from '@store/modal/modal.store';
+import { ModalType } from '@store/modal/modal.store';
 import { AuthStore } from '@store/auth/auth.store';
-import { loadStorage } from '@core/utils/misc';
-import { BaseRegisterStore, defaultTableHeaderIcon } from '@store/base/base.register.store';
-import { ActionCallback } from '@core/interfaces/modal.interface';
+import { loadStorage, saveStorage } from '@core/utils/misc';
+import { defaultTableHeaderIcon } from '@store/base/base.register.store';
+import { ActionCallback, IModalAsk, IModalInfo } from '@core/interfaces/modal.interface';
 import { HttpErrorResponse } from '@angular/common/http';
-import { BaseApiName, KeyOfData } from '@core/types/base.type';
-import { ITableHeader } from '@core/interfaces/table.interface';
-import { ITask } from '@core/interfaces/task.interface';
-import { ActivatedRoute } from '@angular/router';
+import { KeyOfData } from '@core/types/base.type';
+import { ITaskFilterHelp, ITaskHomeData } from '@core/interfaces/task.interface';
+import { ActivatedRoute, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { TaskApi } from '@core/http/task/task.api';
+import { TASK_NUMBER_STATUS } from '@core/enum/status.enum';
+import { ModalAskComponent } from '@components/modal/modal-ask/modal-ask.component';
+import { ModalInfoComponent } from '@components/modal/modal-info/modal-info.component';
+import { LoadingComponent } from '@components/loading/loading.component';
+import { TableComponent } from '@components/table/table.component';
+import { PaginationComponent } from '@components/pagination/pagination.component';
+import { ITableHeader } from '@core/interfaces/table.interface';
+
+type Property = 'data' | 'filterBox' | 'filterHelp';
 
 @Component({
   selector: 'app-task-home',
@@ -41,25 +55,33 @@ import { TaskApi } from '@core/http/task/task.api';
     TooltipComponent,
     ToogleButtonComponent,
     ButtonCloseComponent,
+    ModalAskComponent,
+    ModalInfoComponent,
+    LoadingComponent,
   ],
   templateUrl: './task-home.component.html',
   styleUrl: './task-home.component.scss',
 })
-export class TaskHomeComponent implements OnInit {
+export class TaskHomeComponent implements OnInit, OnDestroy {
   readonly taskApi = inject(TaskApi);
-  readonly baseRegisterStore = inject(BaseRegisterStore);
+  readonly router = inject(Router);
   private activatedRoute = inject(ActivatedRoute);
   readonly authStore = inject(AuthStore);
-  readonly modalStore = inject(ModalStore);
 
   subscription: Subscription | undefined = undefined;
 
   readonly currentView = 'tasks';
-  relatedView: BaseApiName = 'departments';
   readonly breadcrumbList = ['Cadastro', 'Atividades'];
   readonly inputSearchFilterList: KeyOfData[] = ['idTask', 'name', 'comment'];
   readonly inputSearchPlaceholder = 'Id ou Nome, Comentários';
-  readonly initialTableHeaders = [
+  tableHeadersLocalStorageId = `table_headers_${this.currentView}_${this.authStore.user().id}`;
+  deptName = '';
+
+  isCopiedData = signal(false);
+  isEditData = signal(false);
+  inputSearchValue = signal('');
+  isTableHeaderBoxActive = signal(false);
+  tableHeaders = signal<ITableHeader<ITaskHomeData>[]>([
     {
       id: 0,
       isHeaderActive: true,
@@ -113,94 +135,413 @@ export class TaskHomeComponent implements OnInit {
       isHeaderActive: true,
       sortDirection: 0,
       icon: defaultTableHeaderIcon,
-      headerName: 'Linha',
-      databaseField: 'productionLine',
+      headerName: 'Ferramenta',
+      databaseField: 'product',
     },
     {
       id: 7,
       isHeaderActive: true,
       sortDirection: 0,
       icon: defaultTableHeaderIcon,
+      headerName: 'Linha',
+      databaseField: 'productionLine',
+    },
+    {
+      id: 8,
+      isHeaderActive: true,
+      sortDirection: 0,
+      icon: defaultTableHeaderIcon,
       headerName: 'Status',
       databaseField: 'status',
     },
-  ] as ITableHeader<ITask>[];
-  tableHeadersLocalStorageId = `table_headers_${this.currentView} + ${this.authStore.user().id}`;
-  deptName = '';
+  ]);
+  data = signal<ITaskHomeData>({
+    idTask: 0,
+    employee: '',
+    startDate: '',
+    finishDate: '',
+    name: '',
+    status: TASK_NUMBER_STATUS.NOT_STARTED,
+    taskType: '',
+    product: '',
+    productionLine: '',
+  });
+  dataList = signal<ITaskHomeData[]>([]);
+  initialData = signal<ITaskHomeData[]>([]);
+  isDelBtnDisabled = signal(true);
+  isFilterBoxActive = signal(false);
+  isFilterResultZeroRegister = signal(false);
+  filterBox = signal<ITaskHomeData>({
+    idTask: 0,
+    employee: '',
+    startDate: '',
+    finishDate: '',
+    name: '',
+    status: TASK_NUMBER_STATUS.NOT_STARTED,
+    taskType: '',
+    product: '',
+    productionLine: '',
+  });
+  filterHelp = signal<ITaskFilterHelp>({
+    inputSearch: '',
+    idTask: 0,
+    employee: '',
+    startDate: '',
+    finishDate: '',
+    name: '',
+    status: TASK_NUMBER_STATUS.NOT_STARTED,
+    taskType: '',
+    product: '',
+    productionLine: '',
+  });
+
+  modalInfo = signal<IModalInfo>({
+    isActive: false,
+    title: '',
+    description: '',
+    type: 'failure',
+    onActionOk: null,
+  });
+
+  modalAsk = signal<IModalAsk>({
+    isActive: false,
+    title: '',
+    description: '',
+    onActionOk: null as ActionCallback,
+    onActionNok: null as ActionCallback,
+  });
+
+  isLoading = signal(false);
+
+  trackByHeaderId = (_: number, header: any): number => header.id;
+  trackByIndex = (index: number): number => index;
 
   async ngOnInit() {
     this.subscription = this.activatedRoute.paramMap.subscribe(params => {
       this.deptName = params.get('department') || '';
     });
     this.onShowDataList();
-    const tableHeaders = await loadStorage(this.tableHeadersLocalStorageId);
-    const headers = tableHeaders ? tableHeaders : this.initialTableHeaders;
-    this.baseRegisterStore.onSetSlicePropsToNewValue('tableHeaders', headers);
+    const selectedTableHeaders = await loadStorage(this.tableHeadersLocalStorageId);
+    const headers = selectedTableHeaders ? selectedTableHeaders : this.tableHeaders();
+    this.tableHeaders.set(headers);
   }
 
-  onRedirectToEditPage = (data: ITask): void => {
-    this.baseRegisterStore.onSetSlicePropsToNewValue('data', data);
-    this.baseRegisterStore.onSetSlicePropsToNewValue('isEditData', true);
-    this.modalStore.onRedirectPage(
-      `/${this.deptName}/${this.currentView}/edit/${(this.baseRegisterStore.data() as ITask).idTask}`
+  ngOnDestroy(): void {
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
+  }
+
+  isAtLeastOneFilterBoxNotEmpty = computed(() => {
+    return Object.values(this.filterBox).some(v => v != 0 || v != null || v != '');
+  });
+
+  isAtLeastOneFilterHelpNotEmpty = computed(() => {
+    return Object.values(this.filterHelp).some(v => v != null || v != '');
+  });
+
+  onSetHeaderDisplay = (idx: number, tableHeadersLocalStorageId: string): void => {
+    const newHeaders = this.tableHeaders().map((header, index) => {
+      if (index == idx) {
+        return {
+          ...header,
+          isHeaderAtive: !header.isHeaderActive,
+        };
+      } else {
+        return header;
+      }
+    });
+    this.tableHeaders.set([...newHeaders]);
+    saveStorage(tableHeadersLocalStorageId, this.tableHeaders);
+  };
+
+  onKeyPressOnNotFoundFilterRegister = (event: KeyboardEvent): void => {
+    if (event.key == 'Escape') {
+      this.onClearData();
+    }
+  };
+
+  onClearDataOrFilterBoxOrFilterHelp = (property: Property): void => {
+    let defaultValue: ITaskFilterHelp | ITaskHomeData;
+    if (property == 'data' || property == 'filterBox') {
+      defaultValue = {
+        idTask: 0,
+        employee: '',
+        startDate: '',
+        finishDate: '',
+        name: '',
+        status: TASK_NUMBER_STATUS.NOT_STARTED,
+        taskType: '',
+        product: '',
+        productionLine: '',
+      } as ITaskHomeData;
+    } else {
+      defaultValue = {
+        inputSearch: '',
+        idTask: 0,
+        employee: '',
+        startDate: '',
+        finishDate: '',
+        name: '',
+        status: TASK_NUMBER_STATUS.NOT_STARTED,
+        taskType: '',
+        product: '',
+        productionLine: '',
+      } as ITaskFilterHelp;
+    }
+    (this[property] as WritableSignal<ITaskFilterHelp | ITaskHomeData>).set(defaultValue);
+  };
+
+  onClearFilterHelp = (): void => {
+    this.filterHelp.update(current => ({ ...current, inputSearch: '' }));
+    this.onClearDataOrFilterBoxOrFilterHelp('filterHelp');
+  };
+
+  onClearData = (): void => {
+    this.onClearDataOrFilterBoxOrFilterHelp('filterBox');
+    this.onClearDataOrFilterBoxOrFilterHelp('data');
+    this.onClearFilterHelp();
+    this.dataList.set(this.initialData());
+    this.isFilterResultZeroRegister.set(false);
+    this.isDelBtnDisabled.set(true);
+    this.inputSearchValue.set('');
+  };
+
+  onSetInputSearchFilterItemToDefault = (fieldList?: KeyOfData[]): void => {
+    this.onClearDataOrFilterBoxOrFilterHelp('filterBox');
+    this.onClearDataOrFilterBoxOrFilterHelp('filterHelp');
+    const fields = fieldList ?? this.tableHeaders().map(h => h.databaseField as KeyOfData);
+    this.dataList.set(this.onFilterThroughSearchInput(fields));
+    if (this.dataList().length == 0) {
+      this.isFilterResultZeroRegister.set(true);
+    }
+  };
+
+  onSetFilterBoxValue = <K extends keyof ITaskHomeData>(key: K, value: ITaskHomeData[K]): void => {
+    this.filterBox.update(current => ({ ...current, [key]: value }));
+  };
+
+  onSetFilterBoxItemToDefault = (): void => {
+    this.filterHelp.update(current => ({ ...current, inputSearch: '' }));
+    this.onClearDataOrFilterBoxOrFilterHelp('filterBox');
+    this.dataList.set(this.onFilterThroughFilterBox());
+    if (this.dataList().length == 0) {
+      this.isFilterResultZeroRegister.set(true);
+    } else {
+      this.onApplyFilterHelpThroughFilterBox();
+    }
+    this.inputSearchValue.set('');
+    this.isFilterBoxActive.set(false);
+  };
+
+  onClickOnFilterBtnThroughSearchInput = (fieldList: KeyOfData[]): void => {
+    this.onClearFilterHelp();
+    this.onClearDataOrFilterBoxOrFilterHelp('filterBox');
+    const fields = fieldList ?? this.tableHeaders().map(h => h.databaseField as KeyOfData);
+    this.dataList.set(this.onFilterThroughSearchInput(fields));
+    if (this.dataList().length == 0) {
+      this.isFilterResultZeroRegister.set(true);
+    } else {
+      this.filterHelp.update(current => ({ ...current, inputSearch: this.inputSearchValue() }));
+    }
+  };
+
+  onClickOnFilterBtnThroughFilterBox = (): void => {
+    this.dataList.set(this.onFilterThroughFilterBox());
+    if (this.dataList().length == 0) {
+      this.isFilterResultZeroRegister.set(true);
+    } else {
+      this.onApplyFilterHelpThroughFilterBox();
+      this.inputSearchValue.set('');
+    }
+    this.isFilterBoxActive.set(false);
+  };
+
+  onFilterThroughSearchInput = <K extends keyof ITaskHomeData>(
+    fieldList?: KeyOfData[]
+  ): ITaskHomeData[] => {
+    const fields = fieldList ?? this.tableHeaders().map(h => h.databaseField as KeyOfData);
+    return this.initialData().filter(task => {
+      return fields.some(key => {
+        const propertyValue = task[key as K];
+        return String(propertyValue)
+          .toLowerCase()
+          .trim()
+          .includes(this.inputSearchValue().toLowerCase().trim());
+      });
+    });
+  };
+
+  onFilterThroughFilterBox = <K extends keyof ITaskHomeData>(): ITaskHomeData[] => {
+    return this.initialData().filter(data => {
+      const stringObj = Object.fromEntries(
+        Object.entries(data).map(([key, value]) => [key, String(value || '')])
+      ) as Record<string, string>;
+      return Object.keys(stringObj).every(key => {
+        const filterVal = this.filterBox()[key as K];
+        if (filterVal == null || String(filterVal).trim() === '') return true;
+        return stringObj[key].toLowerCase().trim().includes(String(filterVal).toLowerCase().trim());
+      });
+    });
+  };
+
+  onKeyPressOnFilterBox = (event: KeyboardEvent): void => {
+    if (event.key == 'Enter') {
+      this.onClickOnFilterBtnThroughFilterBox();
+    }
+  };
+
+  onKeyPressOnSearchInput = (event: KeyboardEvent, fieldList: KeyOfData[]): void => {
+    const fields = fieldList ?? this.tableHeaders().map(h => h.databaseField as KeyOfData);
+    if (event.key == 'Enter') {
+      this.onClickOnFilterBtnThroughSearchInput(fields);
+    } else if (event.key == 'Escape') {
+      this.onClearData();
+    }
+  };
+
+  onApplyFilterHelpThroughFilterBox = <K extends keyof ITaskHomeData>(): void => {
+    const keys = Object.keys(this.filterBox());
+    keys.forEach(key => {
+      if (key !== 'inputSearch') {
+        this.filterHelp.update(current => ({
+          ...current,
+          [key as keyof ITaskFilterHelp]: String(this.filterBox()[key as K]),
+        }));
+      }
+    });
+  };
+
+  onSetModalInfoType = (type: ModalType): void => {
+    this.modalInfo.update(current => ({ ...current, type: type }));
+  };
+
+  onShowInfoModal = (
+    type: ModalType,
+    title: string,
+    description: string,
+    onActionOk?: ActionCallback
+  ): void => {
+    this.modalInfo.update(current => ({
+      ...current,
+      isActive: true,
+      type: type,
+      title: title,
+      description: description,
+      onActionOk: onActionOk,
+    }));
+  };
+
+  onCloseInfoModal = async (): Promise<void> => {
+    const callback = this.modalInfo().onActionOk;
+    if (callback) await Promise.resolve(callback());
+    this.modalInfo.update(current => ({
+      ...current,
+      isActive: false,
+      onActionOk: null,
+      type: '',
+    }));
+  };
+
+  onShowAskModal = (
+    title: string,
+    description: string,
+    onActionOk?: ActionCallback,
+    onActionNok?: ActionCallback
+  ): void => {
+    this.modalAsk.update(current => ({
+      ...current,
+      isActive: true,
+      title: title,
+      description: description,
+      onActionOk: onActionOk,
+      onActionNok: onActionNok,
+    }));
+  };
+
+  onCloseAskModalAction = async (isConfirmed: boolean): Promise<void> => {
+    const callback = isConfirmed ? this.modalAsk().onActionOk : this.modalAsk().onActionNok;
+    if (callback) {
+      await Promise.resolve(callback());
+      this.modalInfo.update(current => ({ ...current, type: 'success' }));
+    }
+    this.modalAsk.update(current => ({
+      ...current,
+      isActive: false,
+      onActionOk: null,
+      onActionNok: null,
+    }));
+  };
+
+  onRedirectToEditPage = (data: ITaskHomeData): void => {
+    this.data.set(data);
+    this.isEditData.set(true);
+    this.onRedirectPage(
+      `/${this.deptName}/${this.currentView}/edit/${(this.data() as ITaskHomeData).idTask}`
     );
   };
 
-  onCloneRegister = async (data: ITask): Promise<void> => {
-    this.baseRegisterStore.onSetSlicePropsToNewValue('isCopiedData', true);
-    this.baseRegisterStore.onSetSlicePropsToNewValue('data', data);
-    this.modalStore.onRedirectPage(`/${this.deptName}/${this.currentView}/new`);
+  onRedirectPage = (route: string): void => {
+    this.router.navigate([route]);
+  };
+
+  onCloneRegister = async (data: ITaskHomeData): Promise<void> => {
+    this.isCopiedData.set(true);
+    this.data.set(data);
+    this.onRedirectPage(`/${this.deptName}/${this.currentView}/new`);
   };
 
   onShowDataList = async (): Promise<void> => {
     try {
-      this.modalStore.onLoading(true);
+      this.isLoading.set(true);
       const response = await this.taskApi.onGetDataList(this.deptName);
       if (response.data) {
-        const dataList = response.data as ITask[];
-        this.baseRegisterStore.onSetSlicePropsToNewValue('initialData', dataList);
-        this.baseRegisterStore.onSetSlicePropsToNewValue('dataList', dataList);
-        this.baseRegisterStore.onClearData(dataList);
+        const dataList = response.data as ITaskHomeData[];
+        this.initialData.set([...dataList]);
+        this.dataList.set([...dataList]);
+        this.onClearData();
       } else {
         return;
       }
     } catch (e: unknown) {
       const error = e as HttpErrorResponse;
-      this.modalStore.onShowInfoModal('Listar registros', error.error?.message);
+      this.onShowInfoModal('failure', 'Listar registros', error.error?.message);
     } finally {
-      this.modalStore.onLoading(false);
+      this.isLoading.set(false);
     }
   };
 
   onDeleteRegister = async (id: number, onActionOk?: ActionCallback): Promise<void> => {
     try {
-      this.modalStore.onLoading(true);
+      this.isLoading.set(true);
       const response = await this.taskApi.onDelete(this.deptName, id);
       if (response.status) {
         this.onShowDataList();
-        this.modalStore.onSetModalInfoType('success');
-        this.modalStore.onShowInfoModal('Excluir registro', response.message, onActionOk);
+        this.onShowInfoModal('success', 'Excluir registro', response.message, onActionOk);
       } else {
-        this.modalStore.onShowInfoModal('Excluir registro', response.error?.message || '');
+        this.onShowInfoModal('failure', 'Excluir registro', response.error?.message || '');
       }
     } catch (e: unknown) {
       const error = e as HttpErrorResponse;
-      this.modalStore.onShowInfoModal('Excluir registro', error.error.message);
+      this.onShowInfoModal(
+        'failure',
+        'Excluir registro',
+        error.error?.message || 'Erro desconhecido'
+      );
     } finally {
-      this.modalStore.onLoading(false);
+      this.isLoading.set(false);
     }
   };
 
-  async onDelete(data: ITask): Promise<void> {
-    await this.onDeleteRegister(data.idTask as number);
+  async onDelete(): Promise<void> {
+    await this.onDeleteRegister(this.data().idTask as number);
   }
 
-  onShowModalToDelete(data?: ITask): void {
-    const selectedData = data ? data : (this.baseRegisterStore.itemSelected() as ITask) || '';
-    this.modalStore.onShowAskModal(
-      'Cadastro de departamentos',
-      `Deseja excluir o registro <b>${selectedData.name}</b>?`,
-      () => this.onDelete(selectedData)
+  onShowModalToDelete(): void {
+    this.onShowAskModal(
+      'Cadastro de atividades',
+      `Deseja excluir o registro <b>${this.data().name}</b>?`,
+      () => this.onDelete()
     );
   }
 }

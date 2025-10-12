@@ -28,6 +28,8 @@ export interface IEmployeePayload {
   employeePosition?: IEmployeePosition | null;
 }
 
+export type PartialEmployee = Pick<IEmployee, 'idEmployee' | 'name'>;
+
 // export type IEmployeePayload = Omit<IEmployee, 'photoUrl' | 'employeePosition'> & {
 //   imgPreview?: FormData | null;
 //   employeePosition?: IEmployeePosition;

@@ -84,12 +84,12 @@ export class ProductionLineFormComponent implements OnInit, OnDestroy, AfterView
     );
     if (this.baseRegisterStore.isEditData()) {
       this.productionLineData = this.baseRegisterStore.data() as IProductionLine;
-      this.baseRegisterStore.onSetSlicePropsToNewValue('isEditData', false);
+      this.baseRegisterStore.onSetStateToNewValue('isEditData', false);
     } else if (this.baseRegisterStore.isCopiedData()) {
       this.productionLineData = this.baseRegisterStore.data() as IProductionLine;
       this.id = 0;
       this.productionLineData.idProductionLine = 0;
-      this.baseRegisterStore.onSetSlicePropsToNewValue('isCopiedData', false);
+      this.baseRegisterStore.onSetStateToNewValue('isCopiedData', false);
     }
     if (this.productionLineData.toolingList && this.productionLineData.toolingList.length > 0) {
       this.selectedListBoxStringList = this.productionLineData.toolingList.map(
@@ -184,7 +184,7 @@ export class ProductionLineFormComponent implements OnInit, OnDestroy, AfterView
         const error = e as HttpErrorResponse;
         this.modalStore.onShowInfoModal(
           `Cadastro de ${this.currentViewTranslated}`,
-          error.error.message
+          error.error?.message || 'Erro desconhecido'
         );
       } else {
         this.modalStore.onShowInfoModal(

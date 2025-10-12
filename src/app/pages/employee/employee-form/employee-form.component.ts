@@ -103,13 +103,13 @@ export class EmployeeFormComponent implements OnInit, OnDestroy, AfterViewInit {
     await this.onGetEmployeePositionList();
     if (this.baseRegisterStore.isEditData()) {
       this.employeeData = this.baseRegisterStore.data() as IEmployee;
-      this.baseRegisterStore.onSetSlicePropsToNewValue('isEditData', false);
+      this.baseRegisterStore.onSetStateToNewValue('isEditData', false);
     } else if (this.baseRegisterStore.isCopiedData()) {
       this.employeeData = this.baseRegisterStore.data() as IEmployee;
       this.idEmployee = 0;
       this.employeeData.idEmployee = 0;
       this.employeeData.photoUrl = '';
-      this.baseRegisterStore.onSetSlicePropsToNewValue('isCopiedData', false);
+      this.baseRegisterStore.onSetStateToNewValue('isCopiedData', false);
     }
     const dept = this.departmentList.find(
       d => d.name === (this.employeeData as IEmployee).department
@@ -294,7 +294,7 @@ export class EmployeeFormComponent implements OnInit, OnDestroy, AfterViewInit {
         const error = e as HttpErrorResponse;
         this.modalStore.onShowInfoModal(
           `Cadastro de ${this.currentViewTranslated}`,
-          error.error.message
+          error.error?.message || 'Erro desconhecido'
         );
       } else {
         this.modalStore.onShowInfoModal(

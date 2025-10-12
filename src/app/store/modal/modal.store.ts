@@ -3,7 +3,7 @@ import { Router } from '@angular/router';
 import { patchState, signalStore, withMethods, withState } from '@ngrx/signals';
 
 type ActionCallback = (() => void | Promise<void>) | null | undefined;
-export type ModalType = 'success' | 'failure';
+export type ModalType = 'success' | 'failure' | '';
 
 export const ModalStore = signalStore(
   { providedIn: 'root' },

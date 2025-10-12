@@ -77,7 +77,7 @@ export const BaseRegisterStore = signalStore(
     const isPlainObject = (v: unknown): v is Record<string, unknown> =>
       v !== null && typeof v == 'object' && !Array.isArray(v);
 
-    const onSetSlicePropsToNewValue = <K extends keyof StoreType>(
+    const onSetStateToNewValue = <K extends keyof StoreType>(
       sliceKey: K,
       value: MaybeMergeValue<StoreType, K>
     ): void => {
@@ -94,7 +94,7 @@ export const BaseRegisterStore = signalStore(
       patchState(store, { [sliceKey]: next } as Partial<StoreType>);
     };
 
-    const onSetSliceObjectToDefault = <K extends keyof StoreType>(
+    const onSetStateToDefault = <K extends keyof StoreType>(
       sliceKey: K,
       defaultValue: string | number | boolean = ''
     ): void => {
@@ -167,7 +167,7 @@ export const BaseRegisterStore = signalStore(
     const onSetTableDataSortDirectionToDefault = <T extends keyof BaseType>(): void => {
       const keyId = Object.keys(store.data())[0] as T;
       if (!keyId) return;
-      onSetSlicePropsToNewValue('dataList', [
+      onSetStateToNewValue('dataList', [
         ...store.dataList().sort((a, b) => {
           return b[keyId] - a[keyId];
         }),
@@ -206,8 +206,8 @@ export const BaseRegisterStore = signalStore(
 
     const onCheckTableCheckboxStatus = (array: boolean[]): void => {
       const bodyCheckboxListUpdated = array.filter(element => element == true);
-      onSetSlicePropsToNewValue('isDelBtnDisabled', bodyCheckboxListUpdated.length != 1);
-      onSetSlicePropsToNewValue('tableCheckbox', { header: bodyCheckboxListUpdated.length > 0 });
+      onSetStateToNewValue('isDelBtnDisabled', bodyCheckboxListUpdated.length != 1);
+      onSetStateToNewValue('tableCheckbox', { header: bodyCheckboxListUpdated.length > 0 });
     };
 
     const onKeyPressOnNotFoundFilterRegister = (event: KeyboardEvent): void => {
@@ -217,19 +217,19 @@ export const BaseRegisterStore = signalStore(
     };
 
     const onClearData = (data: BaseType[] = store.initialData()): void => {
-      onSetSliceObjectToDefault('filterBox');
-      onSetSliceObjectToDefault('filterHelp');
-      onSetSliceObjectToDefault('data');
+      onSetStateToDefault('filterBox');
+      onSetStateToDefault('filterHelp');
+      onSetStateToDefault('data');
       onSetSortStateToDefault();
-      onSetSlicePropsToNewValue('dataList', data);
-      onSetSlicePropsToNewValue('isFilterResultZeroRegister', false);
-      onSetSlicePropsToNewValue('isDelBtnDisabled', true);
-      onSetSlicePropsToNewValue('tableCheckbox', { header: false });
-      onSetSlicePropsToNewValue('inputSearchValue', '');
-      onSetSlicePropsToNewValue('tableCheckbox', {
+      onSetStateToNewValue('dataList', data);
+      onSetStateToNewValue('isFilterResultZeroRegister', false);
+      onSetStateToNewValue('isDelBtnDisabled', true);
+      onSetStateToNewValue('tableCheckbox', { header: false });
+      onSetStateToNewValue('inputSearchValue', '');
+      onSetStateToNewValue('tableCheckbox', {
         body: Array.from({ length: data.length }, () => false),
       });
-      onSetSlicePropsToNewValue(
+      onSetStateToNewValue(
         'tableItemsBox',
         Array.from({ length: data.length }, () => false)
       );
@@ -245,60 +245,60 @@ export const BaseRegisterStore = signalStore(
     };
 
     const onSetInputSearchFilterItemToDefault = (fieldList?: KeyOfData[]): void => {
-      onSetSliceObjectToDefault('filterBox');
-      onSetSliceObjectToDefault('filterHelp');
-      onSetSlicePropsToNewValue('inputSearchValue', '');
+      onSetStateToDefault('filterBox');
+      onSetStateToDefault('filterHelp');
+      onSetStateToNewValue('inputSearchValue', '');
       const fields = fieldList ?? store.tableHeaders().map(h => h.databaseField as KeyOfData);
       const filterData = onFilterThroughSearchInput(fields);
-      onSetSlicePropsToNewValue('dataList', filterData);
+      onSetStateToNewValue('dataList', filterData);
       if (filterData.length == 0) {
-        onSetSlicePropsToNewValue('isFilterResultZeroRegister', true);
+        onSetStateToNewValue('isFilterResultZeroRegister', true);
       }
       onSetPaginationToDefault();
       onSetSortStateToDefault();
     };
 
     const onSetFilterBoxItemToDefault = (key: string): void => {
-      onSetSlicePropsToNewValue('filterHelp', { inputSearch: '' });
-      onSetSlicePropsToNewValue('filterBox', { [key]: '' });
+      onSetStateToNewValue('filterHelp', { inputSearch: '' });
+      onSetStateToNewValue('filterBox', { [key]: '' });
       const filterData = onFilterThroughFilterBox();
-      onSetSlicePropsToNewValue('dataList', filterData);
+      onSetStateToNewValue('dataList', filterData);
       if (filterData.length == 0) {
-        onSetSlicePropsToNewValue('isFilterResultZeroRegister', true);
+        onSetStateToNewValue('isFilterResultZeroRegister', true);
       } else {
         onApplyFilterHelpThroughFilterBox();
       }
       onSetPaginationToDefault();
-      onSetSlicePropsToNewValue('inputSearchValue', '');
+      onSetStateToNewValue('inputSearchValue', '');
       onSetSortStateToDefault();
       onSetPaginationToDefault();
-      onSetSlicePropsToNewValue('isFilterBoxActive', false);
+      onSetStateToNewValue('isFilterBoxActive', false);
     };
 
     const onClickOnFilterBtnThroughSearchInput = (fieldList: KeyOfData[]): void => {
-      onSetSliceObjectToDefault('filterBox');
-      onSetSliceObjectToDefault('filterHelp');
+      onSetStateToDefault('filterBox');
+      onSetStateToDefault('filterHelp');
       const fields = fieldList ?? store.tableHeaders().map(h => h.databaseField as KeyOfData);
       const filterData = onFilterThroughSearchInput(fields);
-      onSetSlicePropsToNewValue('dataList', filterData);
+      onSetStateToNewValue('dataList', filterData);
       if (filterData.length == 0) {
-        onSetSlicePropsToNewValue('isFilterResultZeroRegister', true);
+        onSetStateToNewValue('isFilterResultZeroRegister', true);
       } else {
-        onSetSlicePropsToNewValue('filterHelp', { inputSearch: store.inputSearchValue() });
+        onSetStateToNewValue('filterHelp', { inputSearch: store.inputSearchValue() });
       }
       onSetPaginationToDefault();
     };
 
     const onClickOnFilterBtnThroughFilterBox = (): void => {
       const filterData = onFilterThroughFilterBox();
-      onSetSlicePropsToNewValue('dataList', filterData);
+      onSetStateToNewValue('dataList', filterData);
       if (filterData.length == 0) {
-        onSetSlicePropsToNewValue('isFilterResultZeroRegister', true);
+        onSetStateToNewValue('isFilterResultZeroRegister', true);
       } else {
         onApplyFilterHelpThroughFilterBox();
-        onSetSlicePropsToNewValue('inputSearchValue', '');
+        onSetStateToNewValue('inputSearchValue', '');
       }
-      onSetSlicePropsToNewValue('isFilterBoxActive', false);
+      onSetStateToNewValue('isFilterBoxActive', false);
       onSetPaginationToDefault();
     };
 
@@ -306,7 +306,7 @@ export const BaseRegisterStore = signalStore(
       onSetTableHeaderSortMethod(idx || 0);
       onSetTableHeaderIcon();
       const filterData = onFilterThroughSort(idx || 0);
-      onSetSlicePropsToNewValue('dataList', filterData);
+      onSetStateToNewValue('dataList', filterData);
       onSetPaginationToDefault();
     };
 
@@ -482,7 +482,7 @@ export const BaseRegisterStore = signalStore(
     };
 
     const onSetCurrentPagePagination = (currentPage: number): void => {
-      onSetSlicePropsToNewValue('pagination', { currentPage: currentPage });
+      onSetStateToNewValue('pagination', { currentPage: currentPage });
       onSetPaginationArray();
     };
 
@@ -524,8 +524,8 @@ export const BaseRegisterStore = signalStore(
       onClickOnFilterBtnThroughSearchInput,
       onClickOnFilterBtnThroughFilterBox,
       onClickOnFilterBtnThroughSort,
-      onSetSlicePropsToNewValue,
-      onSetSliceObjectToDefault,
+      onSetStateToNewValue,
+      onSetSliceObjectToDefault: onSetStateToDefault,
       onSetPaginationToDefault,
       onSetCurrentPagePagination,
       onShowTableItemBox,

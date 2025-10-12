@@ -18,9 +18,12 @@ import { ButtonCloseComponent } from '@components/button/button-close/button-clo
 import { ButtonDeleteComponent } from '@components/button/button-delete/button-delete.component';
 import { ButtonIconComponent } from '@components/button/button-icon/button-icon.component';
 import { ButtonLabelComponent } from '@components/button/button-label/button-label.component';
+import { HelpComponent } from '@components/help/help.component';
 import { InputComponent } from '@components/input/input.component';
+import { LoadingComponent } from '@components/loading/loading.component';
+import { ModalAskComponent } from '@components/modal/modal-ask/modal-ask.component';
 import { ModalBaseComponent } from '@components/modal/modal-base/modal-base.component';
-import { ModalFormComponent } from '@components/modal/modal-form/modal-form.component';
+import { ModalInfoComponent } from '@components/modal/modal-info/modal-info.component';
 import { PaginationComponent } from '@components/pagination/pagination.component';
 import { PhotoBoxListComponent } from '@components/photo-box/photo-box-list/photo-box-list.component';
 import { SelectComponent } from '@components/select/select.component';
@@ -31,28 +34,27 @@ import {
   onConvertTaskStatusToNumber,
   onStringfyTaskStatus as onConvertTaskStatusFromNumberToFriendlyName,
   TASK_NUMBER_STATUS,
+  TASK_STRING_STATUS,
 } from '@core/enum/status.enum';
-import { ProductApi } from '@core/http/product/product.api';
 import { TaskApi } from '@core/http/task/task.api';
-import { IEmployee } from '@core/interfaces/employee.interface';
-import { ActionCallback } from '@core/interfaces/modal.interface';
+import { IEmployee, PartialEmployee } from '@core/interfaces/employee.interface';
+import { ActionCallback, IModalAsk, IModalInfo } from '@core/interfaces/modal.interface';
 import { IPhoto } from '@core/interfaces/photo.interface';
-import { IProductionLine } from '@core/interfaces/production-line.interface';
+import { PartialProduct } from '@core/interfaces/product.interface';
+import { IProductionLine, PartialProductionLine } from '@core/interfaces/production-line.interface';
 import { ITableHeader } from '@core/interfaces/table.interface';
 import {
-  ITask,
   ITaskType,
-  PartialEmployee,
-  PartialProduct,
-  PartialProductionLine,
   PartialTaskType,
   IUsedSpareParts,
+  ITaskForm,
 } from '@core/interfaces/task.interface';
 import { BaseApiName, KeyOfData } from '@core/types/base.type';
-import { dateAndHourFormatted, loadStorage } from '@core/utils/misc';
+import { ValidationType } from '@core/types/validation.type';
+import { dateAndHourFormatted } from '@core/utils/misc';
 import { AuthStore } from '@store/auth/auth.store';
 import { BaseRegisterStore, defaultTableHeaderIcon } from '@store/base/base.register.store';
-import { ModalStore } from '@store/modal/modal.store';
+import { ModalType } from '@store/modal/modal.store';
 import { Subscription } from 'rxjs';
 
 interface IDisabled {
@@ -70,6 +72,17 @@ interface IDisabled {
   saveButton: boolean;
   photoBoxList: boolean;
 }
+
+interface IBorderType {
+  name: ValidationType;
+  usedSpareParts: ValidationType[];
+  employee: ValidationType;
+  taskType: ValidationType;
+  tooling: ValidationType;
+  productionLine: ValidationType;
+}
+
+type ProductCache = 'toolingCache' | 'sparePartsCache';
 
 @Component({
   selector: 'app-task-form',
@@ -89,6 +102,10 @@ interface IDisabled {
     TableComponent,
     ButtonCloseComponent,
     PaginationComponent,
+    HelpComponent,
+    ModalInfoComponent,
+    ModalAskComponent,
+    LoadingComponent,
   ],
   templateUrl: './task-form.component.html',
   styleUrl: './task-form.component.scss',
@@ -101,8 +118,8 @@ export class TaskFormComponent implements OnInit, OnDestroy, AfterViewInit {
   private activatedRoute = inject(ActivatedRoute);
   readonly router = inject(Router);
   readonly authStore = inject(AuthStore);
-  readonly modalStore = inject(ModalStore);
-  readonly productApi = inject(ProductApi);
+  // readonly modalStore = inject(ModalStore);
+  // readonly productApi = inject(ProductApi);
 
   private cdr = inject(ChangeDetectorRef);
 
@@ -123,7 +140,7 @@ export class TaskFormComponent implements OnInit, OnDestroy, AfterViewInit {
     'customerPartNumber',
     'name',
   ];
-  tableHeadersLocalStorageId = `table_headers_modal_${this.currentView} + ${this.authStore.user().id}`;
+  tableHeadersLocalStorageId = `table_headers_modal_${this.currentView}_${this.authStore.user().id}`;
   readonly initialTableHeaders = [
     {
       id: 0,
@@ -180,39 +197,165 @@ export class TaskFormComponent implements OnInit, OnDestroy, AfterViewInit {
     photoBoxList: false,
   };
 
-  modalForm = {
-    isActive: false,
-    isBtnDisabled: true,
+  borderType: IBorderType = {
+    name: 'success',
+    usedSpareParts: [],
+    employee: 'success',
+    taskType: 'success',
+    tooling: 'success',
+    productionLine: 'success',
   };
 
-  modalItemList: boolean[] = [];
+  modalForm = {
+    isActive: false,
+    modalType: '',
+    isBtnDisabled: true,
+    sparePartsIdx: 0,
+    isCopiedData: false,
+    isEditData: false,
+    inputSearchValue: '',
+    isTableHeaderBoxActive: false,
+    tableHeaders: [
+      {
+        id: 0,
+        isHeaderActive: true,
+        sortDirection: 0,
+        icon: defaultTableHeaderIcon,
+        headerName: 'Id',
+        databaseField: 'idTask',
+      },
+      {
+        id: 1,
+        isHeaderActive: true,
+        sortDirection: 0,
+        icon: defaultTableHeaderIcon,
+        headerName: 'Atividade',
+        databaseField: 'name',
+      },
+      {
+        id: 2,
+        isHeaderActive: true,
+        sortDirection: 0,
+        icon: defaultTableHeaderIcon,
+        headerName: 'Funcionário',
+        databaseField: 'employee',
+      },
+      {
+        id: 3,
+        isHeaderActive: true,
+        sortDirection: 0,
+        icon: defaultTableHeaderIcon,
+        headerName: 'Início',
+        databaseField: 'startDate',
+      },
+      {
+        id: 4,
+        isHeaderActive: true,
+        sortDirection: 0,
+        icon: defaultTableHeaderIcon,
+        headerName: 'Fim',
+        databaseField: 'finishDate',
+      },
+      {
+        id: 5,
+        isHeaderActive: true,
+        sortDirection: 0,
+        icon: defaultTableHeaderIcon,
+        headerName: 'Tipo',
+        databaseField: 'taskType',
+      },
+      {
+        id: 6,
+        isHeaderActive: true,
+        sortDirection: 0,
+        icon: defaultTableHeaderIcon,
+        headerName: 'Ferramenta',
+        databaseField: 'product',
+      },
+      {
+        id: 7,
+        isHeaderActive: true,
+        sortDirection: 0,
+        icon: defaultTableHeaderIcon,
+        headerName: 'Linha',
+        databaseField: 'productionLine',
+      },
+      {
+        id: 8,
+        isHeaderActive: true,
+        sortDirection: 0,
+        icon: defaultTableHeaderIcon,
+        headerName: 'Status',
+        databaseField: 'status',
+      },
+    ],
+    tableCheckbox: {
+      header: false,
+      body: [],
+    },
+    tableItemsBox: [],
+    initialData: [],
+    isDelBtnDisabled: false,
+    dataList: [],
+    data: {
+      idTask: 0,
+      employee: '',
+      startDate: '',
+      finishDate: '',
+      name: '',
+      status: TASK_NUMBER_STATUS.NOT_STARTED,
+      taskType: '',
+      product: '',
+      productionLine: '',
+    },
+    isFilterBoxActive: false,
+    isFilterResultZeroRegister: false,
+    filterBox: {
+      idTask: 0,
+      employee: '',
+      startDate: '',
+      finishDate: '',
+      name: '',
+      status: TASK_NUMBER_STATUS.NOT_STARTED,
+      taskType: '',
+      product: '',
+      productionLine: '',
+    },
+    filterHelp: {
+      inputSearch: '',
+      idTask: '',
+      employee: '',
+      startDate: '',
+      finishDate: '',
+      name: '',
+      status: TASK_STRING_STATUS.NOT_STARTED,
+      taskType: '',
+      product: '',
+      productionLine: '',
+    },
+    // pagination: {
+    //   currentPage: 1,
+    //   totalPages: 1,
+    //   qtyPerPage: 10,
+    //   breakpointPage: 7,
+    //   pagesArray: [],
+    // },
+  };
 
-  // usedSparePartsMock = [
-  //   {
-  //     idProduct: 11,
-  //     internalPartNumber: '232323',
-  //     name: 'Ferramenta 1',
-  //     qty: 1,
-  //   },
-  //   {
-  //     idProduct: 22,
-  //     internalPartNumber: '222-222',
-  //     name: 'Nome 2',
-  //     qty: 2,
-  //   },
-  //   {
-  //     idProduct: 33,
-  //     internalPartNumber: '333-333',
-  //     name: 'Nome 3',
-  //     qty: 3,
-  //   },
-  // ];
+  // modalForm = {
+  //   isActive: false,
+  //   modalType: '',
+  //   isBtnDisabled: true,
+  //   sparePartsIdx: 0,
+  // };
+
+  modalItemList: boolean[] = [];
 
   showSpareParts = false;
   startDate = '';
   finishDate = '';
 
-  taskFormData: ITask = {
+  taskFormData: ITaskForm = {
     idTask: 0,
     startDate: null,
     finishDate: null,
@@ -256,6 +399,24 @@ export class TaskFormComponent implements OnInit, OnDestroy, AfterViewInit {
     },
   };
 
+  modalInfo: IModalInfo = {
+    isActive: false,
+    title: '',
+    description: '',
+    type: 'failure',
+    onActionOk: null,
+  };
+
+  modalAsk: IModalAsk = {
+    isActive: false,
+    title: '',
+    description: '',
+    onActionOk: null as ActionCallback,
+    onActionNok: null as ActionCallback,
+  };
+
+  isLoading = false;
+
   async ngOnInit(): Promise<void> {
     this.subscription = this.activatedRoute.paramMap.subscribe(params => {
       this.paramsIdTask = Number(params.get('idTask')) || 0;
@@ -265,13 +426,12 @@ export class TaskFormComponent implements OnInit, OnDestroy, AfterViewInit {
       this.paramsDeptName,
       this.paramsIdTask as number
     );
-    const taskData = response.data as ITask;
+    const taskData = response.data as ITaskForm;
     this.taskFormData = {
       ...taskData,
       startDate: taskData.startDate ? new Date(taskData.startDate) : null,
       finishDate: taskData.finishDate ? new Date(taskData.finishDate) : null,
     };
-    // this.taskFormData.usedSpareParts = this.usedSparePartsMock;
     if (this.taskFormData.usedSpareParts) {
       this.showSpareParts = this.taskFormData.usedSpareParts.length > 0;
     }
@@ -284,11 +444,13 @@ export class TaskFormComponent implements OnInit, OnDestroy, AfterViewInit {
     // if (this.taskFormData.status == TASK_NUMBER_STATUS.FINISHED) {
     // this.onDisbledForm();
     // }
-    const tableHeaders = await loadStorage(this.tableHeadersLocalStorageId);
-    const headers = tableHeaders ? tableHeaders : this.initialTableHeaders;
-    this.baseRegisterStore.onSetSlicePropsToNewValue('tableHeaders', headers);
+    // const tableHeaders = await loadStorage(this.tableHeadersLocalStorageId);
+    // const headers = tableHeaders ? tableHeaders : this.initialTableHeaders;
+    // this.initialTableHeaders = headers
+    // this.baseRegisterStore.onSetSlicePropsToNewValue('tableHeaders', headers);
     this.defineTitle();
     this.breadcrumbList = ['Cadastro', this.currentViewTranslated, `${this.defineTitle()}`];
+    this.cdr.markForCheck();
   }
 
   onDisbledForm = (): void => {
@@ -310,42 +472,60 @@ export class TaskFormComponent implements OnInit, OnDestroy, AfterViewInit {
     this.isDisabled.status = this.taskFormData.status == TASK_NUMBER_STATUS.NOT_STARTED;
   };
 
-  onFilterProductList = (value: string): string[] => {
+  toolingCache = new Map<string, string[]>();
+  sparePartsCache = new Map<string, string[]>();
+
+  onFilterProductList = (productCache: string, value: string): string[] => {
+    if (this[productCache as ProductCache].has(value)) {
+      return this[productCache as ProductCache].get(value)!;
+    }
+
     const productsFilter = this.taskFormData.productList
       ? (this.taskFormData.productList?.filter(
           p => p.productType.name == value
         ) as PartialProduct[])
       : [];
-    return productsFilter.map(
-      product => product.internalPartNumber + this.separatorSymbol + product.name
+
+    const result = productsFilter.map(
+      product => `${product.internalPartNumber}${this.separatorSymbol}${product.name}`
     );
+
+    this[productCache as ProductCache].set(value, result);
+    return result;
   };
 
   onSetOptionsList = (): void => {
-    if (this.taskFormData.usedSpareParts) {
-      this.usedSparePartsOptionList = this.taskFormData.usedSpareParts?.map(
-        sp => sp.internalPartNumber + this.separatorSymbol + sp.name
-      );
+    if (this.taskFormData.usedSpareParts?.length) {
+      this.usedSparePartsOptionList = [
+        ...this.taskFormData.usedSpareParts.map(
+          sp => `${sp.internalPartNumber}${this.separatorSymbol}${sp.name}`
+        ),
+      ];
     }
 
-    this.toolingOptionList = this.onFilterProductList(this.toolingProductType);
-    this.usedSparePartsOptionList = this.onFilterProductList(this.sparePartsProductType);
+    this.toolingOptionList = this.onFilterProductList('toolingCache', this.toolingProductType);
+    this.usedSparePartsOptionList = [
+      ...this.onFilterProductList('sparePartsCache', this.sparePartsProductType),
+    ];
 
-    this.taskTypeOptionList = this.taskFormData?.taskTypeList?.map(
-      taskType => taskType.name
-    ) as string[];
+    if (this.taskFormData?.taskTypeList?.length) {
+      this.taskTypeOptionList = [...this.taskFormData.taskTypeList.map(taskType => taskType.name)];
+    }
 
-    this.productionLineOptionList = this.taskFormData?.productionLineList?.map(
-      pl => pl.lineCode
-    ) as string[];
+    if (this.taskFormData?.productionLineList?.length) {
+      this.productionLineOptionList = [
+        ...this.taskFormData.productionLineList.map(pl => pl.lineCode),
+      ];
+    }
 
-    this.employeeOptionList = this.taskFormData?.employeeList?.map(
-      employee => employee.name
-    ) as string[];
+    if (this.taskFormData?.employeeList?.length) {
+      this.employeeOptionList = [...this.taskFormData.employeeList.map(employee => employee.name)];
+    }
   };
 
   onClearProductionLineData = (): void => {
     this.taskFormData.productionLine = {
+      ...this.taskFormData.productionLine,
       idProductionLine: 0,
       lineCode: '',
     } as PartialProductionLine;
@@ -353,6 +533,7 @@ export class TaskFormComponent implements OnInit, OnDestroy, AfterViewInit {
 
   onClearTaskTypeData = (): void => {
     this.taskFormData.taskType = {
+      ...this.taskFormData.taskType,
       idTaskType: 0,
       name: '',
     } as PartialTaskType;
@@ -360,13 +541,15 @@ export class TaskFormComponent implements OnInit, OnDestroy, AfterViewInit {
 
   onClearEmployeeData = (): void => {
     this.taskFormData.employee = {
+      ...this.taskFormData.employee,
       idEmployee: 0,
       name: '',
     } as PartialEmployee;
   };
 
-  onClearToolingData = (): void => {
+  onClearProductData = (): void => {
     this.taskFormData.product = {
+      ...this.taskFormData.product,
       idProduct: 0,
       name: '',
       internalPartNumber: '',
@@ -379,12 +562,13 @@ export class TaskFormComponent implements OnInit, OnDestroy, AfterViewInit {
 
   setTaskTypeValue = (taskTypeName: string): void => {
     this.onClearProductionLineData();
-    this.onClearToolingData();
+    this.onClearProductData();
     if (this.isDisabled.productionLine) this.isDisabled.productionLine = false;
     const taskType = this.taskFormData.taskTypeList?.find(
       taskType => taskType.name == taskTypeName
     ) as ITaskType;
     this.taskFormData.taskType = taskType;
+    this.onFormFieldsChange('taskType');
   };
 
   setEmployeeValue = (employeeName: string): void => {
@@ -392,10 +576,11 @@ export class TaskFormComponent implements OnInit, OnDestroy, AfterViewInit {
       employee => employee.name == employeeName
     ) as IEmployee;
     if (employeeName) {
-      this.taskFormData.employee = employee;
+      this.taskFormData.employee = { ...employee };
     } else {
       this.onClearEmployeeData();
     }
+    this.onFormFieldsChange('employee');
   };
 
   setProductionLineValue = (productionLineName: string): void => {
@@ -403,42 +588,70 @@ export class TaskFormComponent implements OnInit, OnDestroy, AfterViewInit {
       productionLine => productionLine.lineCode == productionLineName
     ) as IProductionLine;
     if (productionLineName) {
-      this.taskFormData.productionLine = productionLine;
+      this.taskFormData.productionLine = { ...productionLine };
     } else {
       this.onClearProductionLineData();
     }
+    this.onFormFieldsChange('productionLine');
   };
 
-  onSetSelectedTooling = (tooling: string): void => {
-    const internalPartNumber = tooling.split(this.separatorSymbol)[0].trim();
-    if (!internalPartNumber) {
-      return;
-    }
+  onSetProductionLineBasedOnToolingChange = (internalPartNumber = ''): void => {
     const foundProductionLine = this.taskFormData.productionLineList?.find(pl =>
       pl.toolingList?.some(tool => {
         return tool.internalPartNumber == internalPartNumber;
       })
     );
-    this.taskFormData.productList?.forEach(tooling => {
-      if (tooling.internalPartNumber == internalPartNumber) {
-        this.taskFormData.product = tooling;
-      }
-    });
-    if (foundProductionLine && foundProductionLine?.lineCode.length > 0) {
+    if (foundProductionLine && foundProductionLine.lineCode?.length > 0) {
       this.taskFormData.productionLine = foundProductionLine as IProductionLine;
-      this.isDisabled.productionLine = true;
+      this.isDisabled = { ...this.isDisabled, productionLine: true };
     } else {
       this.onClearProductionLineData();
-      this.isDisabled.productionLine = false;
+      this.isDisabled = { ...this.isDisabled, productionLine: false };
     }
+  };
+
+  onSetSelectedTooling = (tooling: string): void => {
+    if ((this.taskFormData.product?.internalPartNumber || '')?.length > 0) {
+      this.onClearProductData();
+    }
+    let internalPartNumber = '';
+    if (
+      JSON.stringify(tooling && tooling.split(this.separatorSymbol)) == JSON.stringify([tooling])
+    ) {
+      internalPartNumber = tooling;
+    } else {
+      internalPartNumber = tooling.split(this.separatorSymbol)[0].trim();
+    }
+    this.taskFormData.productList?.forEach(tool => {
+      if (tool.internalPartNumber == internalPartNumber) {
+        this.taskFormData.product = tool;
+      } else {
+        if (this.taskFormData.product) {
+          this.taskFormData.product = {
+            ...this.taskFormData.product,
+            internalPartNumber: internalPartNumber,
+          };
+        }
+      }
+    });
+    this.onSetProductionLineBasedOnToolingChange(internalPartNumber);
+    this.onFormFieldsChange('tooling');
   };
 
   setStatusValue = (status: string): void => {
     this.taskFormData.status = onConvertTaskStatusToNumber(status);
   };
 
-  onSparePartNameChange = (name: string, index: number): void => {
-    const internalPartNumber = name?.split(this.separatorSymbol)[0];
+  onSparePartInputChange = (inputValue: string, index: number): void => {
+    let internalPartNumber = '';
+    if (
+      JSON.stringify(inputValue && inputValue.split(this.separatorSymbol)) ==
+      JSON.stringify([inputValue])
+    ) {
+      internalPartNumber = inputValue;
+    } else {
+      internalPartNumber = inputValue.split(this.separatorSymbol)[0].trim();
+    }
     if (this.taskFormData.usedSpareParts) {
       const productsFilter = this.taskFormData.productList
         ? (this.taskFormData.productList?.filter(
@@ -455,6 +668,8 @@ export class TaskFormComponent implements OnInit, OnDestroy, AfterViewInit {
         this.taskFormData.usedSpareParts[index].internalPartNumber =
           selectedItem.internalPartNumber as string;
         this.taskFormData.usedSpareParts[index].name = selectedItem.name;
+      } else {
+        this.taskFormData.usedSpareParts[index].internalPartNumber = internalPartNumber;
       }
     }
   };
@@ -471,7 +686,11 @@ export class TaskFormComponent implements OnInit, OnDestroy, AfterViewInit {
 
   onToogleButtonChange = (isButtonActive: boolean): void => {
     this.showSpareParts = isButtonActive;
-    if (isButtonActive && this.taskFormData.usedSpareParts?.length == 0) {
+    if (
+      isButtonActive &&
+      (this.taskFormData.usedSpareParts?.length == 0 || this.taskFormData.usedSpareParts == null)
+    ) {
+      this.taskFormData.usedSpareParts = [];
       this.onAddSparePartsRow();
     }
   };
@@ -488,7 +707,9 @@ export class TaskFormComponent implements OnInit, OnDestroy, AfterViewInit {
   onRemoveSparePartsRow = (sparePart: IUsedSpareParts): void => {
     const index = this.taskFormData.usedSpareParts?.indexOf(sparePart) as number;
     if (index && index < 0) return;
-    this.taskFormData.usedSpareParts?.splice(index, 1);
+    // Always assign a new array reference
+    this.taskFormData.usedSpareParts =
+      this.taskFormData.usedSpareParts?.filter((sp, idx) => idx !== index) || [];
     this.showSpareParts = (this.taskFormData.usedSpareParts as IUsedSpareParts[]).length > 0;
   };
 
@@ -499,8 +720,6 @@ export class TaskFormComponent implements OnInit, OnDestroy, AfterViewInit {
       return this.taskFormData.name as string;
     }
   };
-
-  isRemovedPhoto = false;
 
   onFileListChange = (fileList: IPhoto[]): void => {
     this.taskFormData.imgPreviewList = fileList;
@@ -519,89 +738,254 @@ export class TaskFormComponent implements OnInit, OnDestroy, AfterViewInit {
   };
 
   onBackToPreviousPage = (): void => {
-    this.modalStore.onRedirectPage(`/${this.paramsDeptName}/${this.currentView}`);
+    this.onRedirectPage(`/${this.paramsDeptName}/${this.currentView}`);
   };
 
-  onCreateBooleanListFromDataList = (): void => {
-    this.modalItemList = Array.from(
-      { length: this.baseRegisterStore.dataList().length },
-      () => false
-    );
+  onCreateBooleanListFromDataList = (productCache: ProductCache): void => {
+    const dataListLength = this[productCache].size;
+    if (this.modalItemList.length !== dataListLength) {
+      this.modalItemList = new Array(dataListLength).fill(false);
+    }
   };
 
   onActionOkModalForm = (): void => {
+    if (this.modalForm.modalType == this.toolingProductType) {
+      this.onSetProductionLineBasedOnToolingChange(
+        this.taskFormData.product?.internalPartNumber || ''
+      );
+    }
     this.modalForm.isActive = false;
   };
 
   onActionNokModalForm = (): void => {
-    this.onClearToolingData();
+    if (this.modalForm.modalType == this.toolingProductType) {
+      this.onSetProductionLineBasedOnToolingChange();
+    }
     this.modalForm.isActive = false;
   };
 
   onSetTableItem = (data: PartialProduct): void => {
-    if (data) this.taskFormData.product = data;
-    else this.onClearToolingData();
+    if (this.modalForm.modalType == this.toolingProductType) {
+      if (data) {
+        this.taskFormData.product = { ...data };
+      } else {
+        this.onClearProductData();
+      }
+    } else {
+      if (data && this.taskFormData.usedSpareParts) {
+        // Always assign a new array reference for usedSpareParts
+        const updatedSpareParts = this.taskFormData.usedSpareParts.map((sp, idx) => {
+          if (idx === this.modalForm.sparePartsIdx) {
+            return {
+              ...sp,
+              idProduct: data.idProduct || 0,
+              internalPartNumber: data.internalPartNumber || '',
+              name: data.name || '',
+            };
+          }
+          return sp;
+        });
+        this.taskFormData.usedSpareParts = [...updatedSpareParts];
+      } else {
+        this.taskFormData.usedSpareParts = [];
+      }
+    }
   };
 
-  onShowModalForm = (type: string): void => {
+  onModalItemChange = (list: boolean[]): void => {
+    if (list.some(item => item == true)) {
+      this.modalForm.isBtnDisabled = false;
+    } else {
+      this.modalForm.isBtnDisabled = true;
+    }
+  };
+
+  onSetData = (data: ITaskForm): void => {
+    this.baseRegisterStore.onSetStateToNewValue('data', data);
+  };
+
+  onShowModalForm = (type: ProductCache, sparePartIdx?: number): void => {
+    this.modalForm.modalType = type;
+    if (this.modalForm.modalType == this.sparePartsProductType) {
+      this.modalForm.sparePartsIdx = sparePartIdx as number;
+    }
     this.modalBreadcrumbList = ['Produtos', 'Selecione um item'];
-    const sparePartsList = this.taskFormData.productList
-      ? (this.taskFormData.productList?.filter(p => p.productType.name == type) as PartialProduct[])
-      : [];
-    this.baseRegisterStore.onSetSlicePropsToNewValue(
-      'initialData',
-      sparePartsList as PartialProduct[]
-    );
-    this.baseRegisterStore.onSetSlicePropsToNewValue(
-      'dataList',
-      sparePartsList as PartialProduct[]
-    );
-    this.onCreateBooleanListFromDataList();
-    this.baseRegisterStore.onClearData(sparePartsList);
+    // const sparePartsList = this.taskFormData.productList
+    //   ? (this.taskFormData.productList?.filter(
+    //       p => p.productType.name == this.modalForm.modalType
+    //     ) as PartialProduct[])
+    //   : [];
+    // this.baseRegisterStore.onSetSlicePropsToNewValue(
+    //   'initialData',
+    //   sparePartsList as PartialProduct[]
+    // );
+    // this.baseRegisterStore.onSetSlicePropsToNewValue(
+    //   'dataList',
+    //   sparePartsList as PartialProduct[]
+    // );
+    this.onCreateBooleanListFromDataList(type);
     this.modalForm.isActive = true;
   };
 
-  // onShowDataList = async (): Promise<void> => {
-  //   try {
-  //     this.modalStore.onLoading(true);
-  //     const response = await this.productApi.onGetDataList();
-  //     if (response.data) {
-  //       const data = response.data as IProduct[];
-  //       this.baseRegisterStore.onSetSlicePropsToNewValue('initialData', data);
-  //       this.baseRegisterStore.onSetSlicePropsToNewValue('dataList', data);
-  //       this.baseRegisterStore.onClearData(data);
-  //     } else {
-  //       return;
-  //     }
-  //   } catch (e: unknown) {
-  //     const error = e as HttpErrorResponse;
-  //     this.modalStore.onShowInfoModal('Listar registros', error.error?.message);
-  //   } finally {
-  //     this.modalStore.onLoading(false);
-  //   }
-  // };
+  onFormFieldsChange = <K extends keyof IBorderType>(property: K, index?: number): void => {
+    if (Array.isArray(this.borderType[property])) {
+      if (this.borderType[property][index || 0] == 'failure')
+        this.borderType[property][index || 0] = 'success';
+    } else {
+      if (this.borderType[property] == 'failure')
+        this.borderType[property] = 'success' as IBorderType[K];
+    }
+  };
 
-  fieldValidation = (): void => {
-    const message = '';
-    if (this.taskFormData.name?.length == 0) {
-      this.modalStore.onShowInfoModal(`Cadastro de ${this.currentViewTranslatedSingular}`, message);
+  onSetBorderTypeToDefault = (): void => {
+    this.borderType.name = 'success';
+    this.borderType.usedSpareParts = [];
+    this.borderType.employee = 'success';
+    this.borderType.taskType = 'success';
+    this.borderType.tooling = 'success';
+    this.borderType.productionLine = 'success';
+  };
+
+  formValidation = (): void => {
+    this.onSetBorderTypeToDefault();
+    let message = '';
+    if (
+      this.finalTaskFormData.name == null ||
+      (this.finalTaskFormData.name && this.finalTaskFormData.name?.length < 3)
+    ) {
+      message = 'O campo Atividade precisa ter pelo menos 3 caracteres';
+      this.borderType.name = 'failure';
+    } else if (
+      this.finalTaskFormData.employee == null ||
+      (this.finalTaskFormData.employee && this.finalTaskFormData.employee.name?.length < 1)
+    ) {
+      message = 'O campo Funcionário não pode estar vazio';
+      this.borderType.employee = 'failure';
+    } else if (
+      this.finalTaskFormData.taskType == null ||
+      (this.finalTaskFormData.taskType && this.finalTaskFormData.taskType.name?.length < 1)
+    ) {
+      message = 'O campo Tipo de Atividade não pode estar vazio';
+      this.borderType.taskType = 'failure';
+    } else if (
+      this.eligibleTaskTypeOptionsForTooling.includes(this.taskFormData.taskType?.name || '') &&
+      this.taskFormData.product == null
+    ) {
+      message = `O campo Ferramenta não pode estar vazio caso o campo Tipo de Atividade seja ${this.taskFormData.taskType?.name}`;
+      this.borderType.tooling = 'failure';
+    } else if (
+      this.eligibleTaskTypeOptionsForProductionLine.includes(
+        this.taskFormData.taskType?.name || ''
+      ) &&
+      this.taskFormData.productionLine == null
+    ) {
+      message =
+        'O campo Linha de Produção não pode estar vazio caso o campo Ferramenta esteja preenchido';
+      this.borderType.productionLine = 'failure';
+    } else {
+      if (this.taskFormData.usedSpareParts) {
+        const uniques: IUsedSpareParts[] = [];
+        const duplicates: IUsedSpareParts[] = [];
+        this.taskFormData.usedSpareParts.forEach((sp, idx) => {
+          if (uniques.includes(sp)) {
+            duplicates.push(sp);
+            this.borderType.usedSpareParts[idx] = 'failure';
+          } else {
+            uniques.push(sp);
+          }
+        });
+        if (duplicates.length > 0) {
+          message = 'Existem peças trocadas duplicadas.';
+        }
+      }
+    }
+    if (message.length > 0) {
+      this.onShowInfoModal(`Cadastro de ${this.currentViewTranslatedSingular}`, message);
       throw Error(message);
     }
   };
 
-  setFinalData = (): FormData => {
-    const formData = new FormData();
-    if (this.taskFormData.imgPreviewList) {
-      this.taskFormData.imgPreviewList.forEach((photo, _) => {
-        const file = photo.file;
-        if (file) {
-          formData.append('files', file, 'new');
-        } else {
-          formData.append('files', `${photo.idPhoto}`);
-        }
-      });
+  onSetModalInfoType = (type: ModalType): void => {
+    this.modalInfo = {
+      ...this.modalInfo,
+      type: type,
+    };
+  };
+
+  onShowInfoModal = (title: string, description: string, onActionOk?: ActionCallback): void => {
+    this.modalInfo = {
+      ...this.modalInfo,
+      isActive: true,
+      title: title,
+      description: description,
+      onActionOk: onActionOk,
+    };
+  };
+
+  onCloseInfoModal = async (): Promise<void> => {
+    const callback = this.modalInfo.onActionOk;
+    if (callback) await Promise.resolve(callback());
+    this.modalInfo = {
+      ...this.modalInfo,
+      isActive: false,
+      onActionOk: null,
+      type: 'failure',
+    };
+  };
+
+  onShowAskModal = (
+    title: string,
+    description: string,
+    onActionOk?: ActionCallback,
+    onActionNok?: ActionCallback
+  ): void => {
+    this.modalAsk = {
+      ...this.modalAsk,
+      isActive: true,
+      title: title,
+      description: description,
+      onActionOk: onActionOk,
+      onActionNok: onActionNok,
+    };
+  };
+
+  onCloseAskModalAction = async (isConfirmed: boolean): Promise<void> => {
+    const callback = isConfirmed ? this.modalAsk.onActionOk : this.modalAsk.onActionNok;
+    if (callback) {
+      await Promise.resolve(callback());
+      this.modalInfo = {
+        ...this.modalInfo,
+        type: 'success',
+      };
     }
-    const finalData: ITask = {
+    this.modalAsk = {
+      ...this.modalAsk,
+      isActive: false,
+      onActionOk: null,
+      onActionNok: null,
+    };
+  };
+
+  onRedirectPage = (path: string): void => {
+    this.router.navigate([path]);
+  };
+
+  finalTaskFormData: ITaskForm = {
+    idTask: 0,
+    usedSpareParts: [],
+    startDate: null,
+    finishDate: null,
+    name: '',
+    status: 0,
+    comment: '',
+    product: null,
+    productionLine: null,
+    taskType: null,
+    employee: null,
+  };
+
+  setFinalTaskFormData = (): void => {
+    this.finalTaskFormData = {
       idTask: this.taskFormData.idTask,
       usedSpareParts: !this.showSpareParts ? [] : this.taskFormData.usedSpareParts,
       startDate: this.taskFormData.startDate,
@@ -609,56 +993,81 @@ export class TaskFormComponent implements OnInit, OnDestroy, AfterViewInit {
       name: this.taskFormData.name,
       status: this.taskFormData.status,
       comment: this.taskFormData.comment,
-      product: this.taskFormData.product,
-      productionLine: this.taskFormData.productionLine,
-      taskType: this.taskFormData.taskType,
-      employee: this.taskFormData.employee,
+      product: this.taskFormData.product?.idProduct == 0 ? null : this.taskFormData.product,
+      productionLine:
+        this.taskFormData.productionLine?.idProductionLine == 0
+          ? null
+          : this.taskFormData.productionLine,
+      taskType: this.taskFormData.taskType?.idTaskType == 0 ? null : this.taskFormData.taskType,
+      employee: this.taskFormData.employee?.idEmployee == 0 ? null : this.taskFormData.employee,
     };
-    console.log('finalData', finalData);
-    formData.append('data', JSON.stringify(finalData));
+    console.log('finalData', this.finalTaskFormData);
+  };
+
+  setFinalData = (): FormData => {
+    const formData = new FormData();
+    this.setFinalTaskFormData();
+    if (this.taskFormData.imgPreviewList) {
+      this.taskFormData.imgPreviewList.forEach(photo => {
+        const file = photo.file;
+        if (file) {
+          formData.append('files', file, photo.file?.name);
+        } else {
+          formData.append('files', `${photo.idPhoto}`);
+        }
+      });
+    }
+    formData.append('data', JSON.stringify(this.finalTaskFormData));
     return formData;
   };
 
   onSaveRegister = async (onActionOk?: ActionCallback): Promise<void> => {
     // const formData = this.setFinalData();
     try {
-      this.modalStore.onLoading(true);
+      this.isLoading = true;
       const formData = this.setFinalData();
-      this.fieldValidation();
+      this.formValidation();
       const response = await this.taskApi.onSave(this.paramsDeptName, formData);
       if (response.status) {
-        this.modalStore.onSetModalInfoType('success');
-        this.modalStore.onShowInfoModal(
+        this.onSetModalInfoType('success');
+        this.onShowInfoModal(
           `Cadastro de ${this.currentViewTranslatedSingular}`,
           response.message,
           onActionOk
         );
       } else {
-        this.modalStore.onShowInfoModal(
+        this.onShowInfoModal(
           `Cadastro de ${this.currentViewTranslatedSingular}`,
           response.error?.message || ''
         );
       }
+      this.cdr.markForCheck();
     } catch (e: unknown) {
       console.log('error', e);
       if (e instanceof HttpErrorResponse) {
         const error = e as HttpErrorResponse;
-        this.modalStore.onShowInfoModal(
+        this.onShowInfoModal(
           `Cadastro de ${this.currentViewTranslated}`,
-          error.error.message
+          error.error?.message || 'Erro desconhecido'
         );
       } else {
-        this.modalStore.onShowInfoModal(
-          `Cadastro de ${this.currentViewTranslated}`,
-          (e as Error).message
-        );
+        this.onShowInfoModal(`Cadastro de ${this.currentViewTranslated}`, (e as Error).message);
       }
     } finally {
-      this.modalStore.onLoading(false);
+      this.isLoading = false;
     }
   };
 
   ngOnDestroy() {
     this.subscription?.unsubscribe();
+    this.toolingCache.clear();
+    this.sparePartsCache.clear();
   }
+
+  // TrackBy functions para otimizar performance
+  trackByIndex = (index: number): number => index;
+  trackBySparePartId = (index: number, sparePart: any): string => {
+    // Cria uma chave única combinando idProduct e index para evitar duplicatas
+    return `${sparePart.idProduct || 'no-id'}-${index}`;
+  };
 }

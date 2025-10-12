@@ -1,14 +1,19 @@
+import { ModalType } from '@store/modal/modal.store';
+
 export interface IModalInfo {
-  type: string;
-  description: string;
   isActive: boolean;
-  isActionOk: boolean;
+  title: string;
+  description: string;
+  type: ModalType;
+  onActionOk: ActionCallback;
 }
 
-export interface IModalForm {
+export interface IModalAsk {
   isActive: boolean;
-  isEditForm: boolean;
-  isInputClear: boolean;
+  title: string;
+  description: string;
+  onActionOk: ActionCallback;
+  onActionNok: ActionCallback;
 }
 
 export interface IModalCheck {

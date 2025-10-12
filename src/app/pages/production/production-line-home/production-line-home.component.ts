@@ -1,9 +1,7 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { TableComponent } from '@components/table/table.component';
 import { BreadcrumbComponent } from '@components/breadcrumb/breadcrumb.component';
 import { TableHeaderBoxComponent } from '@components/side-bar/side-bar.component';
-import { PaginationComponent } from '@components/pagination/pagination.component';
 import { MatIconModule } from '@angular/material/icon';
 import { ButtonLabelComponent } from '@components/button/button-label/button-label.component';
 import { ButtonDeleteComponent } from '@components/button/button-delete/button-delete.component';
@@ -22,6 +20,8 @@ import { KeyOfData } from '@core/types/base.type';
 import { ITableHeader } from '@core/interfaces/table.interface';
 import { ProductionLineApi } from '@core/http/production-line/production-line.api';
 import { IProductionLine } from '@core/interfaces/production-line.interface';
+import { TableComponent } from '@components/table/table.component';
+import { PaginationComponent } from '@components/pagination/pagination.component';
 
 @Component({
   selector: 'app-production-line-home',
@@ -89,26 +89,26 @@ export class ProductionLineHomeComponent implements OnInit {
       databaseField: 'comment',
     },
   ] as ITableHeader<IProductionLine>[];
-  tableHeadersLocalStorageId = `table_headers_${this.currentView} + ${this.authStore.user().id}`;
+  tableHeadersLocalStorageId = `table_headers_${this.currentView}_${this.authStore.user().id}`;
 
   async ngOnInit() {
     this.onShowDataList();
     const tableHeaders = await loadStorage(this.tableHeadersLocalStorageId);
     const headers = tableHeaders ? tableHeaders : this.initialTableHeaders;
-    this.baseRegisterStore.onSetSlicePropsToNewValue('tableHeaders', headers);
+    this.baseRegisterStore.onSetStateToNewValue('tableHeaders', headers);
   }
 
   onRedirectToEditPage = (data: IProductionLine): void => {
-    this.baseRegisterStore.onSetSlicePropsToNewValue('data', data);
-    this.baseRegisterStore.onSetSlicePropsToNewValue('isEditData', true);
+    this.baseRegisterStore.onSetStateToNewValue('data', data);
+    this.baseRegisterStore.onSetStateToNewValue('isEditData', true);
     this.modalStore.onRedirectPage(
       `/${this.currentView}/edit/${(this.baseRegisterStore.data() as IProductionLine)[this.keyId]}`
     );
   };
 
   onCloneRegister = async (data: IProductionLine): Promise<void> => {
-    this.baseRegisterStore.onSetSlicePropsToNewValue('isCopiedData', true);
-    this.baseRegisterStore.onSetSlicePropsToNewValue('data', data);
+    this.baseRegisterStore.onSetStateToNewValue('isCopiedData', true);
+    this.baseRegisterStore.onSetStateToNewValue('data', data);
     this.modalStore.onRedirectPage(`/${this.currentView}/new`);
   };
 
@@ -118,8 +118,8 @@ export class ProductionLineHomeComponent implements OnInit {
       const response = await this.productionLineApi.onGetDataList();
       if (response.data) {
         const data = response.data as IProductionLine[];
-        this.baseRegisterStore.onSetSlicePropsToNewValue('initialData', data);
-        this.baseRegisterStore.onSetSlicePropsToNewValue('dataList', data);
+        this.baseRegisterStore.onSetStateToNewValue('initialData', data);
+        this.baseRegisterStore.onSetStateToNewValue('dataList', data);
         this.baseRegisterStore.onClearData(data);
       } else {
         return;

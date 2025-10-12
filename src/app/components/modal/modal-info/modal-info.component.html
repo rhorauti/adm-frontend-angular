@@ -1,7 +1,7 @@
 <app-modal-base [showModal]="isModalActive" [showHeader]="showHeader">
   <div class="body-block flex flex-col gap-5">
-    <div class="mx-auto h-8 w-8 rounded-full p-1" [ngClass]="iconBackgroundColor()">
-      <mat-icon class="text-white">{{ icon() }}</mat-icon>
+    <div class="mx-auto h-8 w-8 rounded-full p-1" [ngClass]="iconBackgroundColor">
+      <mat-icon class="text-white">{{ icon }}</mat-icon>
     </div>
     <div class="flex flex-col gap-3 text-center text-gray-900">
       <h1 class="font-semibold">

@@ -68,12 +68,12 @@ export class ProductTypeFormComponent implements OnInit, OnDestroy, AfterViewIni
     });
     if (this.baseRegisterStore.isEditData()) {
       this.data = this.baseRegisterStore.data() as IProductType;
-      this.baseRegisterStore.onSetSlicePropsToNewValue('isEditData', false);
+      this.baseRegisterStore.onSetStateToNewValue('isEditData', false);
     } else if (this.baseRegisterStore.isCopiedData()) {
       this.data = this.baseRegisterStore.data() as IProductType;
       this.id = 0;
       this.data.idProductType = 0;
-      this.baseRegisterStore.onSetSlicePropsToNewValue('isCopiedData', false);
+      this.baseRegisterStore.onSetStateToNewValue('isCopiedData', false);
     }
     this.defineTitle();
     this.breadcrumbList = ['Cadastro', this.currentViewTranslated, `${this.defineTitle()}`];

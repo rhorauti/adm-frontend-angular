@@ -12,7 +12,7 @@ import { ValidationType } from '@core/types/validation.type';
 })
 export class HelpComponent implements OnChanges {
   @Input({ required: true }) text!: string;
-  @Input() type: ValidationType = 'initial';
+  @Input() type: ValidationType = 'success';
   @Input() isHelpTextActive = false;
   icon: Icon = '';
   textColor = '';
@@ -22,13 +22,11 @@ export class HelpComponent implements OnChanges {
       case 'success': {
         this.icon = 'check';
         this.textColor = 'text-green-500';
-        this.isHelpTextActive = true;
         break;
       }
       case 'failure': {
         this.icon = 'cancel';
         this.textColor = 'text-red-400';
-        this.isHelpTextActive = true;
         break;
       }
     }
