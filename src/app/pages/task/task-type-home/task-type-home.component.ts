@@ -24,7 +24,7 @@ import { Subscription } from 'rxjs';
 import { TaskTypeApi } from '@core/http/task-type/task-type.api';
 import { DepartmentApi } from '@core/http/department/department.api';
 import { TableComponent } from '@components/table/table.component';
-import { PaginationComponent } from '@components/pagination/pagination.component';
+// import { PaginationComponent } from '@components/pagination/pagination.component';
 
 @Component({
   selector: 'app-task-type-home',
@@ -34,7 +34,7 @@ import { PaginationComponent } from '@components/pagination/pagination.component
     InputComponent,
     TableComponent,
     BreadcrumbComponent,
-    PaginationComponent,
+    // PaginationComponent,
     MatIconModule,
     ButtonLabelComponent,
     ButtonDeleteComponent,

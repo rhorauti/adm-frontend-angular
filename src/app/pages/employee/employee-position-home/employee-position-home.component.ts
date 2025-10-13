@@ -21,7 +21,7 @@ import { ITableHeader } from '@core/interfaces/table.interface';
 import { IEmployeePosition } from '@core/interfaces/employee.interface';
 import { EmployeePositionApi } from '@core/http/employee/employee-position.api';
 import { TableComponent } from '@components/table/table.component';
-import { PaginationComponent } from '@components/pagination/pagination.component';
+// import { PaginationComponent } from '@components/pagination/pagination.component';
 
 @Component({
   selector: 'app-employee-position-home',
@@ -30,7 +30,7 @@ import { PaginationComponent } from '@components/pagination/pagination.component
     TableHeaderBoxComponent,
     InputComponent,
     TableComponent,
-    PaginationComponent,
+    // PaginationComponent,
     BreadcrumbComponent,
     MatIconModule,
     ButtonLabelComponent,

@@ -21,7 +21,7 @@ import { ITableHeader } from '@core/interfaces/table.interface';
 import { IUnit } from '@core/interfaces/unit.interface';
 import { UnitApi } from '@core/http/unit/unit.api';
 import { TableComponent } from '@components/table/table.component';
-import { PaginationComponent } from '@components/pagination/pagination.component';
+// import { PaginationComponent } from '@components/pagination/pagination.component';
 
 @Component({
   selector: 'app-unit-home',
@@ -30,7 +30,7 @@ import { PaginationComponent } from '@components/pagination/pagination.component
     TableHeaderBoxComponent,
     InputComponent,
     TableComponent,
-    PaginationComponent,
+    // PaginationComponent,
     BreadcrumbComponent,
     MatIconModule,
     ButtonLabelComponent,

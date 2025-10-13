@@ -23,7 +23,9 @@
           <app-button-icon
             (click)="onRedirectPage(`/${deptName}/${currentView}/new`)"
             [iconName]="'add'" />
-          <app-button-delete (click)="onShowModalToDelete()" [isDisabled]="isDelBtnDisabled()" />
+          <app-button-delete
+            (click)="onShowModalToDeleteThroughTopBtn()"
+            [isDisabled]="isDelBtnDisabled()" />
           <app-tooltip [position]="'left'" [description]="'Colunas visíveis'">
             <app-button-icon
               content
@@ -50,7 +52,10 @@
                     {{ tableHeader.headerName }} :
                     {{ filterHelp()[tableHeader.databaseField] }}
                   </p>
-                  <app-button-close (click)="onSetFilterBoxItemToDefault()"></app-button-close>
+                  <app-button-close
+                    (click)="
+                      onSetFilterBoxItemToDefault(tableHeader.databaseField)
+                    "></app-button-close>
                 </div>
               }
             }
@@ -67,11 +72,11 @@
         [tableHeaders]="tableHeaders()"
         (refreshBtnClickEmitter)="onShowDataList()"
         (tableDataEmitter)="data.set($event)"
-        (deleteBtnClickEmitter)="onShowModalToDelete()"
+        (deleteBtnClickEmitter)="onShowModalToDeleteThroughTableBtn($event)"
         (isDelBtnDisabledEmitter)="isDelBtnDisabled.set($event)"
         (rowClickEmitter)="onRedirectToEditPage($event)"
         (cloneBtnClickEmitter)="onCloneRegister($event)" />
-      <app-pagination [dataList]="dataList()" />
+      <app-pagination [initialDataList]="dataList()" />
     </div>
   } @else {
     <div class="flex flex-col items-center gap-4 w-full mt-10">
@@ -153,8 +158,8 @@
             <div class="flex gap-4">
               <app-toogle-button
                 [isChecked]="header.isHeaderActive"
-                [toggleId]="'task-toggle'"
-                (isCheckedEmitter)="onSetHeaderDisplay($index, tableHeadersLocalStorageId)" />
+                [toggleId]="`task-toggle-${header.id}`"
+                (isCheckedEmitter)="onSetHeaderDisplay(header.id)" />
               <p>{{ header.headerName }}</p>
             </div>
           }

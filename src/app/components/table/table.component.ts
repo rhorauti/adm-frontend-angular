@@ -14,6 +14,7 @@ import {
   OnChanges,
   SimpleChanges,
   HostListener,
+  signal,
 } from '@angular/core';
 import { NgxMaskPipe, provideNgxMask } from 'ngx-mask';
 import { FormsModule } from '@angular/forms';
@@ -26,6 +27,12 @@ import { ITableCheckbox, ITableHeader } from '@core/interfaces/table.interface';
 import { defaultTableHeaderIcon } from '@store/base/base.register.store';
 import { DataService } from '@core/services/data.service';
 import { Subscription } from 'rxjs';
+import { onSetIconStatus, onSetIconStatusBackgroundColor, Status } from 'app/enum/status.enum';
+
+interface StatusIcon {
+  iconName: string;
+  backgroundColor: string;
+}
 
 @Component({
   selector: 'app-table',
@@ -48,28 +55,48 @@ export class TableComponent<T = BaseType> implements OnInit, OnDestroy, OnChange
   @Input() initialDataList: T[] = [];
   @Input() tableHeaders: ITableHeader<T>[] = [];
   @Input() isModal = false;
-  @Input() currentPage = 1;
+  @Input() currentPage = signal<number>(1);
+
+  gridTemplateColumns = '';
 
   qtyPerPage = 10;
   dataList: T[] = [];
   rowModalVisibilityControlList: boolean[] = [];
   tableCheckBox: ITableCheckbox = { header: false, body: [] };
+  icons: StatusIcon[] = [];
 
   ngOnInit(): void {
     this.dataList = [...this.initialDataList] as T[];
     this.subscribe = this.dataService.emitEvent.subscribe(currentPage => {
-      this.currentPage = currentPage;
+      this.currentPage.set(currentPage);
     });
     this.onSetCheckboxArrayToDefault();
-    this.onCreateTableItemsBox();
+    this.onCreateTableItemsBoxArray();
+    this.onGridTemplateColumnsChange();
+    this.onCreateTableIconArray();
   }
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['initialDataList']) {
       this.dataList = [...this.initialDataList] as T[];
       this.onSetSortFilterToDefault();
+      this.onCreateTableIconArray();
+    }
+    if (changes['tableHeaders']) {
+      this.onGridTemplateColumnsChange();
     }
   }
+
+  onCreateTableIconArray = (): void => {
+    this.icons = Array.from({ length: this.dataList.length }, (_, i) => {
+      const row = this.dataList[i] as any;
+      const value = row?.status ?? row?.statusId ?? undefined;
+      return {
+        iconName: onSetIconStatus(value),
+        backgroundColor: onSetIconStatusBackgroundColor(value),
+      };
+    });
+  };
 
   @Output() isDelBtnDisabledEmitter = new EventEmitter();
   @Output() tableDataEmitter = new EventEmitter();
@@ -88,7 +115,7 @@ export class TableComponent<T = BaseType> implements OnInit, OnDestroy, OnChange
     }
   }
 
-  onCreateTableItemsBox = (): void => {
+  onCreateTableItemsBoxArray = (): void => {
     this.rowModalVisibilityControlList = Array.from({ length: this.dataList.length }, () => false);
   };
 
@@ -98,7 +125,8 @@ export class TableComponent<T = BaseType> implements OnInit, OnDestroy, OnChange
     return `${id}-${index}`;
   };
 
-  gridTemplateColumns = computed(() => {
+  onGridTemplateColumnsChange = (): void => {
+    this.gridTemplateColumns = '';
     const columnsWidth: string[] = this.isModal ? [] : ['2fr'];
     this.tableHeaders.forEach(header => {
       if (header.isHeaderActive && !this.isModal) {
@@ -109,7 +137,7 @@ export class TableComponent<T = BaseType> implements OnInit, OnDestroy, OnChange
         } else {
           columnsWidth.push('1fr');
         }
-      } else {
+      } else if (this.isModal) {
         if (header.id == 0) {
           columnsWidth.push('1fr');
         } else if (header.id == 1) {
@@ -119,8 +147,8 @@ export class TableComponent<T = BaseType> implements OnInit, OnDestroy, OnChange
         }
       }
     });
-    return columnsWidth.join(' ');
-  });
+    this.gridTemplateColumns = columnsWidth.join(' ');
+  };
 
   @Output() rowClickEmitter = new EventEmitter();
 
@@ -130,11 +158,11 @@ export class TableComponent<T = BaseType> implements OnInit, OnDestroy, OnChange
   };
 
   computedFirstRegister = computed(() => {
-    return (this.currentPage - 1) * this.qtyPerPage;
+    return (this.currentPage() - 1) * this.qtyPerPage;
   });
 
   computedLastRegister = computed(() => {
-    return this.currentPage * this.qtyPerPage;
+    return this.currentPage() * this.qtyPerPage;
   });
 
   getCnpj(row: T): string {
@@ -312,14 +340,14 @@ export class TableComponent<T = BaseType> implements OnInit, OnDestroy, OnChange
     this.refreshBtnClickEmitter.emit();
   }
 
-  @Output() deleteBtnClickEmitter = new EventEmitter();
+  @Output() deleteBtnClickEmitter = new EventEmitter<T>();
 
   onDeleteBtnClick(data: T): void {
     console.log('table data', data);
     this.deleteBtnClickEmitter.emit(data);
   }
 
-  @Output() cloneBtnClickEmitter = new EventEmitter();
+  @Output() cloneBtnClickEmitter = new EventEmitter<T>();
 
   onCloneBtnClick(data: T): void {
     this.cloneBtnClickEmitter.emit(data);

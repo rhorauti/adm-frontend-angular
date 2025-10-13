@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, inject, Input, OnChanges, SimpleChanges } from '@angular/core';
+import { Component, inject, Input, OnChanges, OnInit, SimpleChanges } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
 import { ButtonLabelComponent } from '@components/button/button-label/button-label.component';
 import { DataService } from '@core/services/data.service';
@@ -11,10 +11,11 @@ import { BaseType } from '@core/types/base.type';
   templateUrl: './pagination.component.html',
   styleUrl: './pagination.component.scss',
 })
-export class PaginationComponent implements OnChanges {
+export class PaginationComponent<T = BaseType> implements OnInit, OnChanges {
   readonly dataService = inject(DataService);
 
-  @Input() dataList: BaseType[] = [];
+  @Input() initialDataList: T[] = [];
+  dataList: T[] = [];
 
   currentPage = 1;
   qtyPerPage = 10;
@@ -22,13 +23,20 @@ export class PaginationComponent implements OnChanges {
   totalQtyRegister = 1;
   pagesArray: string[] | number[] = [];
 
-  // @Output() currentPageEmitter = new EventEmitter<number>();
+  ngOnInit(): void {
+    this.dataList = [...this.initialDataList];
+    this.onSetPaginationToDefault();
+    console.log('this.dataList', this.dataList);
+    console.log('totalPages', this.totalPages);
+    console.log('pagesArray', this.pagesArray);
+  }
 
-  ngOnChanges = (changes: SimpleChanges): void => {
-    if (changes['dataList']) {
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['initialDataList']) {
+      this.dataList = [...this.initialDataList];
       this.onSetPaginationToDefault();
     }
-  };
+  }
 
   onSetPaginationArray = (): void => {
     if (this.totalPages < 7) {
@@ -79,6 +87,7 @@ export class PaginationComponent implements OnChanges {
     if (typeof page == 'number') {
       const pageNumber = Number(page);
       this.dataService.emitData(pageNumber);
+      console.log('pageNumber', pageNumber);
     }
   }
 

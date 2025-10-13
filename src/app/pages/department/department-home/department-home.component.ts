@@ -21,7 +21,7 @@ import { ITableHeader } from '@core/interfaces/table.interface';
 import { IDepartment } from '@core/interfaces/department.interface';
 import { DepartmentApi } from '@core/http/department/department.api';
 import { TableComponent } from '@components/table/table.component';
-import { PaginationComponent } from '@components/pagination/pagination.component';
+// import { PaginationComponent } from '@components/pagination/pagination.component';
 
 @Component({
   selector: 'app-department-home',
@@ -30,7 +30,7 @@ import { PaginationComponent } from '@components/pagination/pagination.component
     TableHeaderBoxComponent,
     InputComponent,
     TableComponent,
-    PaginationComponent,
+    // PaginationComponent,
     BreadcrumbComponent,
     MatIconModule,
     ButtonLabelComponent,

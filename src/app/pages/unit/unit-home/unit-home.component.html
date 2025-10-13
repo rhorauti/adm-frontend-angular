@@ -78,10 +78,9 @@
       }
       <app-table
         (refreshBtnClickEmitter)="onShowDataList()"
-        (deleteBtnClickEmitter)="onShowModalToDelete($event)"
-        (rowClickEmitter)="onRedirectToEditPage($event)"
-        (cloneBtnClickEmitter)="onCloneRegister($event)" />
-      <app-pagination [dataList]="baseRegisterStore.dataList()" />
+        (deleteBtnClickEmitter)="onShowModalToDelete()"
+        (rowClickEmitter)="onRedirectToEditPage($event)" />
+      <!-- <app-pagination [dataList]="baseRegisterStore.dataList()" /> -->
     </div>
   } @else {
     <div class="flex flex-col items-center gap-4 w-full mt-10">

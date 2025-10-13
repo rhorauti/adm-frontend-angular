@@ -23,7 +23,7 @@ import { IEmployee } from '@core/interfaces/employee.interface';
 import { ActivatedRoute } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { TableComponent } from '@components/table/table.component';
-import { PaginationComponent } from '@components/pagination/pagination.component';
+// import { PaginationComponent } from '@components/pagination/pagination.component';
 
 @Component({
   selector: 'app-employee-home',
@@ -32,7 +32,7 @@ import { PaginationComponent } from '@components/pagination/pagination.component
     TableHeaderBoxComponent,
     InputComponent,
     TableComponent,
-    PaginationComponent,
+    // PaginationComponent,
     BreadcrumbComponent,
     MatIconModule,
     ButtonLabelComponent,

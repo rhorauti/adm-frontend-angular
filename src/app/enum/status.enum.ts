@@ -18,7 +18,7 @@ export const optionTaskStatusList = [
   TASK_STRING_STATUS.FINISHED,
 ];
 
-export const onStringfyTaskStatus = (status: number | null): string => {
+export const onTranslateStatusToString = (status: number | null): string => {
   switch (status) {
     case null: {
       return TASK_STRING_STATUS.NOT_STARTED;
@@ -39,7 +39,7 @@ export const onStringfyTaskStatus = (status: number | null): string => {
   return '';
 };
 
-export const onConvertTaskStatusToNumber = (status: string | null): number => {
+export const onTranslateStatusToNumber = (status: string | null): number => {
   switch (status) {
     case null: {
       return TASK_NUMBER_STATUS.NOT_STARTED;
@@ -58,4 +58,42 @@ export const onConvertTaskStatusToNumber = (status: string | null): number => {
     }
   }
   return 4;
+};
+
+export type Status = 'Não iniciado' | 'Em andamento' | 'Pausado' | 'Finalizado';
+
+export const onSetIconStatus = (status: Status): string => {
+  switch (status) {
+    case TASK_STRING_STATUS.NOT_STARTED: {
+      return 'stop';
+    }
+    case TASK_STRING_STATUS.UNDER_PROGRESS: {
+      return 'play_circle_filled';
+    }
+    case TASK_STRING_STATUS.PAUSED: {
+      return 'pause_circle_filled';
+    }
+    case TASK_STRING_STATUS.FINISHED: {
+      return 'check_circle';
+    }
+  }
+  return ';';
+};
+
+export const onSetIconStatusBackgroundColor = (status: Status): string => {
+  switch (status) {
+    case TASK_STRING_STATUS.NOT_STARTED: {
+      return 'text-gray-400';
+    }
+    case TASK_STRING_STATUS.UNDER_PROGRESS: {
+      return 'text-yellow-400';
+    }
+    case TASK_STRING_STATUS.PAUSED: {
+      return 'text-blue-400';
+    }
+    case TASK_STRING_STATUS.FINISHED: {
+      return 'text-green-400';
+    }
+  }
+  return '';
 };

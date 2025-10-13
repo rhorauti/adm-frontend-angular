@@ -20,7 +20,7 @@ import { InputComponent } from '@components/input/input.component';
 import { ButtonCloseComponent } from '@components/button/button-close/button-close.component';
 import { ModalType } from '@store/modal/modal.store';
 import { AuthStore } from '@store/auth/auth.store';
-import { loadStorage, saveStorage } from '@core/utils/misc';
+import { dateAndHourFormatted, loadStorage, saveStorage } from '@core/utils/misc';
 import { defaultTableHeaderIcon } from '@store/base/base.register.store';
 import { ActionCallback, IModalAsk, IModalInfo } from '@core/interfaces/modal.interface';
 import { HttpErrorResponse } from '@angular/common/http';
@@ -29,7 +29,7 @@ import { ITaskFilterHelp, ITaskHomeData } from '@core/interfaces/task.interface'
 import { ActivatedRoute, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { TaskApi } from '@core/http/task/task.api';
-import { TASK_NUMBER_STATUS } from '@core/enum/status.enum';
+import { onTranslateStatusToString, TASK_NUMBER_STATUS } from 'app/enum/status.enum';
 import { ModalAskComponent } from '@components/modal/modal-ask/modal-ask.component';
 import { ModalInfoComponent } from '@components/modal/modal-info/modal-info.component';
 import { LoadingComponent } from '@components/loading/loading.component';
@@ -72,8 +72,18 @@ export class TaskHomeComponent implements OnInit, OnDestroy {
 
   readonly currentView = 'tasks';
   readonly breadcrumbList = ['Cadastro', 'Atividades'];
-  readonly inputSearchFilterList: KeyOfData[] = ['idTask', 'name', 'comment'];
-  readonly inputSearchPlaceholder = 'Id ou Nome, Comentários';
+  readonly inputSearchFilterList: KeyOfData[] = [
+    'idTask',
+    'name',
+    'employee',
+    'startDate',
+    'finishDate',
+    'taskType',
+    'product',
+    'productionLine',
+    'status',
+  ];
+  readonly inputSearchPlaceholder = 'Id, Atividade, etc';
   tableHeadersLocalStorageId = `table_headers_${this.currentView}_${this.authStore.user().id}`;
   deptName = '';
 
@@ -95,16 +105,16 @@ export class TaskHomeComponent implements OnInit, OnDestroy {
       isHeaderActive: true,
       sortDirection: 0,
       icon: defaultTableHeaderIcon,
-      headerName: 'Atividade',
-      databaseField: 'name',
+      headerName: 'Funcionário',
+      databaseField: 'employee',
     },
     {
       id: 2,
       isHeaderActive: true,
       sortDirection: 0,
       icon: defaultTableHeaderIcon,
-      headerName: 'Funcionário',
-      databaseField: 'employee',
+      headerName: 'Atividade',
+      databaseField: 'name',
     },
     {
       id: 3,
@@ -132,22 +142,6 @@ export class TaskHomeComponent implements OnInit, OnDestroy {
     },
     {
       id: 6,
-      isHeaderActive: true,
-      sortDirection: 0,
-      icon: defaultTableHeaderIcon,
-      headerName: 'Ferramenta',
-      databaseField: 'product',
-    },
-    {
-      id: 7,
-      isHeaderActive: true,
-      sortDirection: 0,
-      icon: defaultTableHeaderIcon,
-      headerName: 'Linha',
-      databaseField: 'productionLine',
-    },
-    {
-      id: 8,
       isHeaderActive: true,
       sortDirection: 0,
       icon: defaultTableHeaderIcon,
@@ -233,26 +227,27 @@ export class TaskHomeComponent implements OnInit, OnDestroy {
   }
 
   isAtLeastOneFilterBoxNotEmpty = computed(() => {
-    return Object.values(this.filterBox).some(v => v != 0 || v != null || v != '');
+    return Object.values(this.filterBox()).some(v => v != 0 && v != null && v != '');
   });
 
   isAtLeastOneFilterHelpNotEmpty = computed(() => {
-    return Object.values(this.filterHelp).some(v => v != null || v != '');
+    return Object.values(this.filterHelp()).some(v => v != null && v != '' && v != 0);
   });
 
-  onSetHeaderDisplay = (idx: number, tableHeadersLocalStorageId: string): void => {
+  onSetHeaderDisplay = (idx: number): void => {
+    console.log('idx', idx);
     const newHeaders = this.tableHeaders().map((header, index) => {
       if (index == idx) {
         return {
           ...header,
-          isHeaderAtive: !header.isHeaderActive,
+          isHeaderActive: !header.isHeaderActive,
         };
       } else {
         return header;
       }
     });
     this.tableHeaders.set([...newHeaders]);
-    saveStorage(tableHeadersLocalStorageId, this.tableHeaders);
+    saveStorage(this.tableHeadersLocalStorageId, this.tableHeaders());
   };
 
   onKeyPressOnNotFoundFilterRegister = (event: KeyboardEvent): void => {
@@ -315,23 +310,11 @@ export class TaskHomeComponent implements OnInit, OnDestroy {
     if (this.dataList().length == 0) {
       this.isFilterResultZeroRegister.set(true);
     }
+    this.inputSearchValue.set('');
   };
 
   onSetFilterBoxValue = <K extends keyof ITaskHomeData>(key: K, value: ITaskHomeData[K]): void => {
     this.filterBox.update(current => ({ ...current, [key]: value }));
-  };
-
-  onSetFilterBoxItemToDefault = (): void => {
-    this.filterHelp.update(current => ({ ...current, inputSearch: '' }));
-    this.onClearDataOrFilterBoxOrFilterHelp('filterBox');
-    this.dataList.set(this.onFilterThroughFilterBox());
-    if (this.dataList().length == 0) {
-      this.isFilterResultZeroRegister.set(true);
-    } else {
-      this.onApplyFilterHelpThroughFilterBox();
-    }
-    this.inputSearchValue.set('');
-    this.isFilterBoxActive.set(false);
   };
 
   onClickOnFilterBtnThroughSearchInput = (fieldList: KeyOfData[]): void => {
@@ -344,17 +327,6 @@ export class TaskHomeComponent implements OnInit, OnDestroy {
     } else {
       this.filterHelp.update(current => ({ ...current, inputSearch: this.inputSearchValue() }));
     }
-  };
-
-  onClickOnFilterBtnThroughFilterBox = (): void => {
-    this.dataList.set(this.onFilterThroughFilterBox());
-    if (this.dataList().length == 0) {
-      this.isFilterResultZeroRegister.set(true);
-    } else {
-      this.onApplyFilterHelpThroughFilterBox();
-      this.inputSearchValue.set('');
-    }
-    this.isFilterBoxActive.set(false);
   };
 
   onFilterThroughSearchInput = <K extends keyof ITaskHomeData>(
@@ -372,25 +344,6 @@ export class TaskHomeComponent implements OnInit, OnDestroy {
     });
   };
 
-  onFilterThroughFilterBox = <K extends keyof ITaskHomeData>(): ITaskHomeData[] => {
-    return this.initialData().filter(data => {
-      const stringObj = Object.fromEntries(
-        Object.entries(data).map(([key, value]) => [key, String(value || '')])
-      ) as Record<string, string>;
-      return Object.keys(stringObj).every(key => {
-        const filterVal = this.filterBox()[key as K];
-        if (filterVal == null || String(filterVal).trim() === '') return true;
-        return stringObj[key].toLowerCase().trim().includes(String(filterVal).toLowerCase().trim());
-      });
-    });
-  };
-
-  onKeyPressOnFilterBox = (event: KeyboardEvent): void => {
-    if (event.key == 'Enter') {
-      this.onClickOnFilterBtnThroughFilterBox();
-    }
-  };
-
   onKeyPressOnSearchInput = (event: KeyboardEvent, fieldList: KeyOfData[]): void => {
     const fields = fieldList ?? this.tableHeaders().map(h => h.databaseField as KeyOfData);
     if (event.key == 'Enter') {
@@ -400,14 +353,64 @@ export class TaskHomeComponent implements OnInit, OnDestroy {
     }
   };
 
+  onClickOnFilterBtnThroughFilterBox = (): void => {
+    this.dataList.set(this.onFilterThroughFilterBox());
+    if (this.dataList().length == 0) {
+      this.isFilterResultZeroRegister.set(true);
+    } else {
+      this.onApplyFilterHelpThroughFilterBox();
+      this.inputSearchValue.set('');
+    }
+    this.isFilterBoxActive.set(false);
+  };
+
+  onFilterThroughFilterBox = <K extends keyof ITaskHomeData>(): ITaskHomeData[] => {
+    return this.initialData().filter(initialData => {
+      return Object.keys(this.filterBox()).every(key => {
+        const filterBoxValue = this.filterBox()[key as K];
+        if (
+          filterBoxValue == null ||
+          filterBoxValue == '' ||
+          filterBoxValue == 0 ||
+          filterBoxValue == '0'
+        )
+          return true;
+        const filterBoxValueToString = String(filterBoxValue);
+        const initialDataToBeCompared = initialData[key as K].toString();
+        return initialDataToBeCompared.includes(filterBoxValueToString);
+      });
+    });
+  };
+
+  onSetFilterBoxItemToDefault = (key: string): void => {
+    this.filterHelp.update(current => ({ ...current, inputSearch: '' }));
+    this.filterBox.update(current => ({ ...current, [key]: '' }));
+    this.dataList.set(this.onFilterThroughFilterBox());
+    if (this.dataList().length == 0) {
+      this.isFilterResultZeroRegister.set(true);
+    } else {
+      this.onApplyFilterHelpThroughFilterBox();
+    }
+    this.inputSearchValue.set('');
+    this.isFilterBoxActive.set(false);
+  };
+
+  onKeyPressOnFilterBox = (event: KeyboardEvent): void => {
+    if (event.key == 'Enter') {
+      this.onClickOnFilterBtnThroughFilterBox();
+    }
+  };
+
   onApplyFilterHelpThroughFilterBox = <K extends keyof ITaskHomeData>(): void => {
     const keys = Object.keys(this.filterBox());
     keys.forEach(key => {
       if (key !== 'inputSearch') {
-        this.filterHelp.update(current => ({
-          ...current,
-          [key as keyof ITaskFilterHelp]: String(this.filterBox()[key as K]),
-        }));
+        if (this.filterBox()[key as K] != 0 || this.filterBox()[key as K] != '0') {
+          this.filterHelp.update(current => ({
+            ...current,
+            [key as keyof ITaskFilterHelp]: String(this.filterBox()[key as K]),
+          }));
+        }
       }
     });
   };
@@ -497,8 +500,19 @@ export class TaskHomeComponent implements OnInit, OnDestroy {
       const response = await this.taskApi.onGetDataList(this.deptName);
       if (response.data) {
         const dataList = response.data as ITaskHomeData[];
-        this.initialData.set([...dataList]);
-        this.dataList.set([...dataList]);
+        const translatedStatusData = dataList.map(data => {
+          if (typeof data.status == 'number') {
+            return {
+              ...data,
+              startDate: dateAndHourFormatted(data.startDate),
+              finishDate: dateAndHourFormatted(data.finishDate),
+              status: onTranslateStatusToString(data.status),
+            };
+          }
+          return data;
+        });
+        this.initialData.set([...translatedStatusData]);
+        this.dataList.set([...translatedStatusData]);
         this.onClearData();
       } else {
         return;
@@ -533,15 +547,24 @@ export class TaskHomeComponent implements OnInit, OnDestroy {
     }
   };
 
-  async onDelete(): Promise<void> {
-    await this.onDeleteRegister(this.data().idTask as number);
+  async onDelete(selectedData: ITaskHomeData): Promise<void> {
+    await this.onDeleteRegister(selectedData.idTask as number);
   }
 
-  onShowModalToDelete(): void {
+  onShowModalToDeleteThroughTopBtn(): void {
     this.onShowAskModal(
       'Cadastro de atividades',
       `Deseja excluir o registro <b>${this.data().name}</b>?`,
-      () => this.onDelete()
+      () => this.onDelete(this.data())
+    );
+  }
+
+  onShowModalToDeleteThroughTableBtn(data?: ITaskHomeData): void {
+    const selectedData = data ? data : this.data();
+    this.onShowAskModal(
+      'Cadastro de atividades',
+      `Deseja excluir o registro <b>${selectedData.name}</b>?`,
+      () => this.onDelete(selectedData)
     );
   }
 }

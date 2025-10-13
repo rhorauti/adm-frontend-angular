@@ -23,7 +23,7 @@ import { Subscription } from 'rxjs';
 import { ProductApi } from '@core/http/product/product.api';
 import { IProduct } from '@core/interfaces/product.interface';
 import { TableComponent } from '@components/table/table.component';
-import { PaginationComponent } from '@components/pagination/pagination.component';
+// import { PaginationComponent } from '@components/pagination/pagination.component';
 
 @Component({
   selector: 'app-product-home',
@@ -32,7 +32,7 @@ import { PaginationComponent } from '@components/pagination/pagination.component
     TableHeaderBoxComponent,
     InputComponent,
     TableComponent,
-    PaginationComponent,
+    // PaginationComponent,
     BreadcrumbComponent,
     MatIconModule,
     ButtonLabelComponent,

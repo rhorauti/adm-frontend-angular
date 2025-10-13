@@ -1,3 +1,5 @@
+import { TASK_NUMBER_STATUS } from 'app/enum/status.enum';
+
 function safeEncryptU(str: string): string {
   try {
     // Converter caracteres especiais para formato seguro
@@ -202,12 +204,14 @@ const countrySetup = 'pt-BR';
 type DateFormat = 'short' | 'long' | 'medium' | 'full';
 
 export const dateAndHourFormatted = (
-  dateAndHour: Date,
+  dateAndHour: string,
   dateFormat: DateFormat = 'short',
   timeFormat: DateFormat = 'short'
 ): string => {
+  if (dateAndHour == '' || dateAndHour == null) return '';
+  const date = new Date(dateAndHour);
   return new Intl.DateTimeFormat(countrySetup, {
     dateStyle: dateFormat,
     timeStyle: timeFormat,
-  }).format(dateAndHour);
+  }).format(date);
 };

@@ -1,13 +1,20 @@
 import { CommonModule } from '@angular/common';
-import { Component, EventEmitter, Input, OnChanges, OnInit, Output } from '@angular/core';
+import {
+  Component,
+  EventEmitter,
+  Input,
+  OnChanges,
+  OnInit,
+  Output,
+  SimpleChanges,
+} from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
-import { optionTaskStatusList, TASK_STRING_STATUS } from '@core/enum/status.enum';
+import { onSetIconStatus, optionTaskStatusList, Status } from 'app/enum/status.enum';
 import { MatSelectModule } from '@angular/material/select';
 import { ValidationType } from '@core/types/validation.type';
 
 type SelectType = 'state' | 'addressType' | 'status' | 'custom';
-type Status = 'Não iniciado' | 'Em andamento' | 'Pausado' | 'Finalizado';
 
 @Component({
   selector: 'app-select',
@@ -28,7 +35,7 @@ export class SelectComponent implements OnInit, OnChanges {
   borderClass = '';
 
   ngOnInit(): void {
-    this.changeStatusIcon();
+    this.changeStatusInfo(this.selectValue as Status);
     switch (this.selectType) {
       case 'state': {
         this.optionList = [
@@ -87,54 +94,34 @@ export class SelectComponent implements OnInit, OnChanges {
     }
   }
 
-  changeStatusIcon = (): void => {
-    if (this.selectType == 'status') {
-      switch (this.selectValue as Status) {
-        case TASK_STRING_STATUS.NOT_STARTED: {
-          this.statusIcon = 'stop';
-          this.iconClass = 'text-gray-400';
-          break;
-        }
-        case TASK_STRING_STATUS.UNDER_PROGRESS: {
-          this.statusIcon = 'play_circle_filled';
-          this.iconClass = 'text-yellow-400';
-          break;
-        }
-        case TASK_STRING_STATUS.PAUSED: {
-          this.statusIcon = 'pause_circle_filled';
-          this.iconClass = 'text-blue-400';
-          break;
-        }
-        case TASK_STRING_STATUS.FINISHED: {
-          this.statusIcon = 'check_circle';
-          this.iconClass = 'text-green-400';
-          break;
-        }
-      }
-    }
+  changeStatusInfo = (value: Status): void => {
+    this.statusIcon = onSetIconStatus(value);
   };
 
-  ngOnChanges(): void {
-    this.changeStatusIcon();
-    switch (this.borderType) {
-      case 'initial': {
-        this.borderClass = 'focus-within:border-gray-500 border-gray-500';
-        break;
-      }
-      case 'success': {
-        this.borderClass = 'focus-within:border-logo border-logo';
-        break;
-      }
-      case 'failure': {
-        this.borderClass = 'focus-within:border-red-400 border-red-400';
-        break;
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['borderType']) {
+      switch (this.borderType) {
+        case 'initial': {
+          this.borderClass = 'focus-within:border-gray-500 border-gray-500';
+          break;
+        }
+        case 'success': {
+          this.borderClass = 'focus-within:border-logo border-logo';
+          break;
+        }
+        case 'failure': {
+          this.borderClass = 'focus-within:border-red-400 border-red-400';
+          break;
+        }
       }
     }
   }
 
   outputSelectValue(event: Event): void {
     this.selectValue = (event.target as HTMLSelectElement).value;
-    this.changeStatusIcon();
+    if (this.selectType == 'status') {
+      this.changeStatusInfo(this.selectValue as Status);
+    }
     this.selectValueEmitter.emit(this.selectValue);
   }
 

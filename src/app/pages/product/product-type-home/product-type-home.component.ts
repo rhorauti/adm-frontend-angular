@@ -21,7 +21,7 @@ import { ITableHeader } from '@core/interfaces/table.interface';
 import { IProductType } from '@core/interfaces/product.interface';
 import { ProductTypeApi } from '@core/http/product/product-type.api';
 import { TableComponent } from '@components/table/table.component';
-import { PaginationComponent } from '@components/pagination/pagination.component';
+// import { PaginationComponent } from '@components/pagination/pagination.component';
 
 @Component({
   selector: 'app-product-type-home',
@@ -30,7 +30,7 @@ import { PaginationComponent } from '@components/pagination/pagination.component
     TableHeaderBoxComponent,
     InputComponent,
     TableComponent,
-    PaginationComponent,
+    // PaginationComponent,
     BreadcrumbComponent,
     MatIconModule,
     ButtonLabelComponent,

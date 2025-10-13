@@ -21,7 +21,7 @@ import { ITableHeader } from '@core/interfaces/table.interface';
 import { ProductionLineApi } from '@core/http/production-line/production-line.api';
 import { IProductionLine } from '@core/interfaces/production-line.interface';
 import { TableComponent } from '@components/table/table.component';
-import { PaginationComponent } from '@components/pagination/pagination.component';
+// import { PaginationComponent } from '@components/pagination/pagination.component';
 
 @Component({
   selector: 'app-production-line-home',
@@ -30,7 +30,7 @@ import { PaginationComponent } from '@components/pagination/pagination.component
     TableHeaderBoxComponent,
     InputComponent,
     TableComponent,
-    PaginationComponent,
+    // PaginationComponent,
     BreadcrumbComponent,
     MatIconModule,
     ButtonLabelComponent,

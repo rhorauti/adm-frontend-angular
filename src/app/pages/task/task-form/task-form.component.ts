@@ -24,18 +24,18 @@ import { LoadingComponent } from '@components/loading/loading.component';
 import { ModalAskComponent } from '@components/modal/modal-ask/modal-ask.component';
 import { ModalBaseComponent } from '@components/modal/modal-base/modal-base.component';
 import { ModalInfoComponent } from '@components/modal/modal-info/modal-info.component';
-import { PaginationComponent } from '@components/pagination/pagination.component';
+// import { PaginationComponent } from '@components/pagination/pagination.component';
 import { PhotoBoxListComponent } from '@components/photo-box/photo-box-list/photo-box-list.component';
 import { SelectComponent } from '@components/select/select.component';
 import { TableComponent } from '@components/table/table.component';
 import { TextAreaComponent } from '@components/text-area/text-area.component';
 import { ToogleButtonComponent } from '@components/toogle-button/toogle-button.component';
 import {
-  onConvertTaskStatusToNumber,
-  onStringfyTaskStatus as onConvertTaskStatusFromNumberToFriendlyName,
+  onTranslateStatusToNumber,
+  onTranslateStatusToString as onConvertTaskStatusFromNumberToFriendlyName,
   TASK_NUMBER_STATUS,
   TASK_STRING_STATUS,
-} from '@core/enum/status.enum';
+} from 'app/enum/status.enum';
 import { TaskApi } from '@core/http/task/task.api';
 import { IEmployee, PartialEmployee } from '@core/interfaces/employee.interface';
 import { ActionCallback, IModalAsk, IModalInfo } from '@core/interfaces/modal.interface';
@@ -101,7 +101,7 @@ type ProductCache = 'toolingCache' | 'sparePartsCache';
     ModalBaseComponent,
     TableComponent,
     ButtonCloseComponent,
-    PaginationComponent,
+    // PaginationComponent,
     HelpComponent,
     ModalInfoComponent,
     ModalAskComponent,
@@ -429,8 +429,8 @@ export class TaskFormComponent implements OnInit, OnDestroy, AfterViewInit {
     const taskData = response.data as ITaskForm;
     this.taskFormData = {
       ...taskData,
-      startDate: taskData.startDate ? new Date(taskData.startDate) : null,
-      finishDate: taskData.finishDate ? new Date(taskData.finishDate) : null,
+      startDate: taskData.startDate ? taskData.startDate : null,
+      finishDate: taskData.finishDate ? taskData.finishDate : null,
     };
     if (this.taskFormData.usedSpareParts) {
       this.showSpareParts = this.taskFormData.usedSpareParts.length > 0;
@@ -639,7 +639,7 @@ export class TaskFormComponent implements OnInit, OnDestroy, AfterViewInit {
   };
 
   setStatusValue = (status: string): void => {
-    this.taskFormData.status = onConvertTaskStatusToNumber(status);
+    this.taskFormData.status = onTranslateStatusToNumber(status);
   };
 
   onSparePartInputChange = (inputValue: string, index: number): void => {

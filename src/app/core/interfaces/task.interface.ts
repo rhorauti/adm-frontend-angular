@@ -24,10 +24,10 @@ export interface IUsedSpareParts {
 
 export interface ITaskForm {
   idTask: number;
-  startDate?: Date | null;
-  finishDate?: Date | null;
+  startDate?: string | null;
+  finishDate?: string | null;
   name?: string;
-  status?: number;
+  status?: number | string;
   comment?: string;
   imgPreviewList?: IPhoto[];
   productList?: PartialProduct[];
@@ -51,7 +51,7 @@ export interface ITaskHomeData {
   startDate: string;
   finishDate: string;
   name: string;
-  status: number;
+  status: number | string;
   taskType: string;
   product: string;
   productionLine: string;

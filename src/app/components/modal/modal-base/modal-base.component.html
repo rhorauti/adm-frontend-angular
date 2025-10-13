@@ -1,37 +1,50 @@
-@if (showModal) {
-  <div class="relative z-[1000]" aria-labelledby="modal-title" role="dialog" aria-modal="true">
-    <div class="fixed inset-0 bg-black bg-opacity-60"></div>
-    <div class="fixed flex justify-center items-center inset-0 w-screen h-full overflow-y-auto">
-      <div
-        class="flex flex-col justify-center min-h-full rounded-lg w-full overflow-auto"
-        [ngClass]="[width, divClass]">
-        @if (showHeader) {
-          <div
-            [ngClass]="headerClass"
-            class="flex w-full font-semibold leading-3 justify-between items-center bg-gray-500 text-white text-lg p-3 rounded-t-lg">
-            <p class="text-base">{{ title }}</p>
-            @if (showCloseBtn) {
-              <mat-icon
-                (click)="closeModal()"
-                class="bg-red-500 py-0.5 font-semibold hover:bg-red-400 rounded-full text-center text-sm cursor-pointer"
-                >close</mat-icon
-              >
-            }
-          </div>
-        }
+<!-- @if (showModal) { -->
+<div
+  class="relative z-[1000]"
+  aria-labelledby="modal-title"
+  role="dialog"
+  aria-modal="true"
+  [class.invisible]="!showModal"
+  [class.pointer-events-none]="!showModal">
+  <div class="fixed inset-0 bg-black bg-opacity-60"></div>
+  <div class="fixed flex justify-center items-center inset-0 w-screen h-full overflow-y-auto">
+    <div
+      class="flex flex-col justify-center min-h-full rounded-lg w-full overflow-auto"
+      [ngStyle]="{
+        transform: showModal ? 'scale(1)' : 'scale(0)',
+        transition: 'transform 0.2s ease-in-out',
+      }"
+      [ngClass]="[width, divClass]"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="modal-title">
+      @if (showHeader) {
         <div
-          class="bg-white w-full h-full p-4"
-          [ngClass]="showHeader ? 'rounded-b-lg' : 'rounded-lg'">
-          <div [ngClass]="bodyClass">
-            <ng-content select=".body-block"></ng-content>
-          </div>
-          @if (showFooter) {
-            <div [ngClass]="footerClass">
-              <ng-content select=".footer-block"></ng-content>
-            </div>
+          [ngClass]="headerClass"
+          class="flex w-full font-semibold leading-3 justify-between items-center bg-gray-500 text-white text-lg p-3 rounded-t-lg">
+          <p class="text-base">{{ title }}</p>
+          @if (showCloseBtn) {
+            <mat-icon
+              (click)="closeModal()"
+              class="bg-red-500 py-0.5 font-semibold hover:bg-red-400 rounded-full text-center text-sm cursor-pointer"
+              >close</mat-icon
+            >
           }
         </div>
+      }
+      <div
+        class="bg-white w-full h-full p-4"
+        [ngClass]="showHeader ? 'rounded-b-lg' : 'rounded-lg'">
+        <div [ngClass]="bodyClass">
+          <ng-content select=".body-block"></ng-content>
+        </div>
+        @if (showFooter) {
+          <div [ngClass]="footerClass">
+            <ng-content select=".footer-block"></ng-content>
+          </div>
+        }
       </div>
     </div>
   </div>
-}
+</div>
+<!-- } -->
