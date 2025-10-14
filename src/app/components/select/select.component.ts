@@ -10,7 +10,12 @@ import {
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
-import { onSetIconStatus, optionTaskStatusList, Status } from 'app/enum/status.enum';
+import {
+  onSetIconStatus,
+  onSetIconStatusBackgroundColor,
+  optionTaskStatusList,
+  Status,
+} from 'app/enum/status.enum';
 import { MatSelectModule } from '@angular/material/select';
 import { ValidationType } from '@core/types/validation.type';
 
@@ -96,6 +101,7 @@ export class SelectComponent implements OnInit, OnChanges {
 
   changeStatusInfo = (value: Status): void => {
     this.statusIcon = onSetIconStatus(value);
+    this.iconClass = onSetIconStatusBackgroundColor(value);
   };
 
   ngOnChanges(changes: SimpleChanges): void {

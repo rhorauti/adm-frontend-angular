@@ -10,7 +10,7 @@ import { MatIconModule } from '@angular/material/icon';
   templateUrl: './side-bar.component.html',
   styleUrl: './side-bar.component.scss',
 })
-export class TableHeaderBoxComponent implements OnInit {
+export class SideBarComponent implements OnInit {
   @Input() isSideBarActive = false;
   @Input() title = 'Title';
   @Input() btnLabel = 'Salvar';

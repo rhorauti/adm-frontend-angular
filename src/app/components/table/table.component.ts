@@ -27,7 +27,7 @@ import { ITableCheckbox, ITableHeader } from '@core/interfaces/table.interface';
 import { defaultTableHeaderIcon } from '@store/base/base.register.store';
 import { DataService } from '@core/services/data.service';
 import { Subscription } from 'rxjs';
-import { onSetIconStatus, onSetIconStatusBackgroundColor, Status } from 'app/enum/status.enum';
+import { onSetIconStatus, onSetIconStatusBackgroundColor } from 'app/enum/status.enum';
 
 interface StatusIcon {
   iconName: string;

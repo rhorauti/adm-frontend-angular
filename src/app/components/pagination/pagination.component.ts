@@ -26,9 +26,6 @@ export class PaginationComponent<T = BaseType> implements OnInit, OnChanges {
   ngOnInit(): void {
     this.dataList = [...this.initialDataList];
     this.onSetPaginationToDefault();
-    console.log('this.dataList', this.dataList);
-    console.log('totalPages', this.totalPages);
-    console.log('pagesArray', this.pagesArray);
   }
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -80,14 +77,14 @@ export class PaginationComponent<T = BaseType> implements OnInit, OnChanges {
     this.currentPage = 1;
     this.totalPages = Math.ceil(this.dataList.length / this.qtyPerPage);
     this.onSetPaginationArray();
+    this.totalQtyRegister = this.dataList.length;
     this.dataService.emitData(this.currentPage);
   };
 
   onPageNumberClick(page: string | number): void {
     if (typeof page == 'number') {
-      const pageNumber = Number(page);
-      this.dataService.emitData(pageNumber);
-      console.log('pageNumber', pageNumber);
+      this.currentPage = Number(page);
+      this.dataService.emitData(this.currentPage);
     }
   }
 

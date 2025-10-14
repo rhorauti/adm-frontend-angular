@@ -1,7 +1,7 @@
 import { Component, inject, OnDestroy, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { BreadcrumbComponent } from '@components/breadcrumb/breadcrumb.component';
-import { TableHeaderBoxComponent } from '@components/side-bar/side-bar.component';
+import { SideBarComponent } from '@components/side-bar/side-bar.component';
 import { MatIconModule } from '@angular/material/icon';
 import { ButtonLabelComponent } from '@components/button/button-label/button-label.component';
 import { ButtonDeleteComponent } from '@components/button/button-delete/button-delete.component';
@@ -29,7 +29,7 @@ import { TableComponent } from '@components/table/table.component';
   selector: 'app-product-home',
   imports: [
     CommonModule,
-    TableHeaderBoxComponent,
+    SideBarComponent,
     InputComponent,
     TableComponent,
     // PaginationComponent,
