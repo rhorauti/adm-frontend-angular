@@ -419,73 +419,59 @@ export class TaskHomeComponent implements OnInit, OnDestroy {
     initialData: ITaskHomeData,
     key: K
   ): boolean => {
-    const parseTime = (v: string | undefined | null, isFrom: boolean): number | null => {
-      if (!v || v == '') return null;
-      if (v.length > 0 && v.includes('-')) {
-        const [year, month, day] = v.split('-');
-        const yearToNumber = Number(year);
-        const monthToNumber = Number(month);
-        const dayToNumber = Number(day);
-        let dateToUtcNumber = 0;
-        if (isFrom) {
-          dateToUtcNumber = new Date(
-            yearToNumber,
-            monthToNumber - 1,
-            dayToNumber,
-            0,
-            0,
-            0,
-            0
-          ).getTime();
-        } else {
-          dateToUtcNumber =
-            new Date(yearToNumber, monthToNumber - 1, dayToNumber + 1, 0, 0, 0, 0).getTime() - 1;
-        }
-        return isNaN(dateToUtcNumber) ? null : dateToUtcNumber;
-      }
-      return null;
+    // Helper: converts 'YYYY-MM-DD' to start/end of day in local timezone (ms epoch)
+    const dateOnlyToLocalRange = (v: string | undefined | null) => {
+      if (!v || v === '') return { from: null as number | null, to: null as number | null };
+      const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(v);
+      if (!m) return { from: null as number | null, to: null as number | null };
+      const y = Number(m[1]);
+      const mo = Number(m[2]) - 1;
+      const d = Number(m[3]);
+      const from = new Date(y, mo, d, 0, 0, 0, 0).getTime(); // local midnight -> epoch ms
+      const to = new Date(y, mo, d, 23, 59, 59, 999).getTime(); // local end of day inclusive
+      return { from, to };
     };
 
-    if (key == 'startDate') {
-      const startFrom = parseTime(this.filterDateInterval().startDateFrom, true);
-      const startTo = parseTime(this.filterDateInterval().startDateTo, false);
+    if (key === 'startDate') {
+      const { from: startFrom } = dateOnlyToLocalRange(this.filterDateInterval().startDateFrom);
+      const { to: startTo } = dateOnlyToLocalRange(this.filterDateInterval().startDateTo);
+
+      // Record instant (backend returns ISO with 'Z' -> unambiguous instant)
       const startVal =
-        initialData.startDate && initialData.startDate.length > 0
+        initialData.startDate && String(initialData.startDate).length > 0
           ? new Date(initialData.startDate).getTime()
           : null;
 
-      if (startFrom == null && startTo == null) {
-        return true;
-      } else if (startVal == null) {
-        return false;
-      } else if (startFrom != null && startTo != null && startVal != null) {
-        return startVal >= startFrom && startVal <= startTo;
-      } else if (startFrom != null && startTo == null && startVal != null) {
-        return startVal >= startFrom;
-      } else if (startFrom == null && startTo != null && startVal != null) {
-        return startVal <= startTo;
-      }
+      // If no filter set -> accept
+      if (startFrom == null && startTo == null) return true;
+
+      // Comparisons: only when startVal exists
+      if (startVal == null) return false;
+
+      if (startFrom != null && startTo != null) return startVal >= startFrom && startVal <= startTo;
+      if (startFrom != null && startTo == null) return startVal >= startFrom;
+      if (startFrom == null && startTo != null) return startVal <= startTo;
+
+      return true;
     } else {
-      const finishFrom = parseTime(this.filterDateInterval().finishDateFrom, true);
-      const finishTo = parseTime(this.filterDateInterval().finishDateTo, false);
+      // finishDate branch (same idea)
+      const { from: finishFrom } = dateOnlyToLocalRange(this.filterDateInterval().finishDateFrom);
+      const { to: finishTo } = dateOnlyToLocalRange(this.filterDateInterval().finishDateTo);
+
       const finishVal =
-        initialData.finishDate && initialData.finishDate.length > 0
+        initialData.finishDate && String(initialData.finishDate).length > 0
           ? new Date(initialData.finishDate).getTime()
           : null;
 
-      if (finishFrom == null && finishTo == null) {
-        return true;
-      } else if (finishVal == null) {
-        return false;
-      } else if (finishFrom != null && finishTo != null && finishVal != null) {
+      if (finishFrom == null && finishTo == null) return true;
+      if (finishVal == null) return false;
+      if (finishFrom != null && finishTo != null)
         return finishVal >= finishFrom && finishVal <= finishTo;
-      } else if (finishFrom != null && finishTo == null && finishVal != null) {
-        return finishVal >= finishFrom;
-      } else if (finishFrom == null && finishTo != null && finishVal != null) {
-        return finishVal <= finishTo;
-      }
+      if (finishFrom != null && finishTo == null) return finishVal >= finishFrom;
+      if (finishFrom == null && finishTo != null) return finishVal <= finishTo;
+
+      return true;
     }
-    return true;
   };
 
   onSetFilterBoxStartDateValue = (tableHeader: ITableHeader<ITaskHomeData>, date: string): void => {
