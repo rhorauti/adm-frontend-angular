@@ -74,6 +74,7 @@ export class TableComponent<T = BaseType> implements OnInit, OnDestroy, OnChange
     this.onCreateTableItemsBoxArray();
     this.onGridTemplateColumnsChange();
     this.onCreateTableIconArray();
+    console.log('icons', this.icons);
   }
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -91,7 +92,10 @@ export class TableComponent<T = BaseType> implements OnInit, OnDestroy, OnChange
     this.icons = Array.from({ length: this.dataList.length }, (_, i) => {
       const row = this.dataList[i] as any;
       const value = row?.status ?? row?.statusId ?? undefined;
+      // console.log('value', value);
       return {
+        status: row.status,
+        idTask: row.idTask,
         iconName: onSetIconStatus(value),
         backgroundColor: onSetIconStatusBackgroundColor(value),
       };

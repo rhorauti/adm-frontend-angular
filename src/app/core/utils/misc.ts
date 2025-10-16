@@ -1,5 +1,3 @@
-import { TASK_NUMBER_STATUS } from 'app/enum/status.enum';
-
 function safeEncryptU(str: string): string {
   try {
     // Converter caracteres especiais para formato seguro
@@ -203,12 +201,12 @@ export const setDeptNameTranslationToDefaultName = (deptName: string): string =>
 const countrySetup = 'pt-BR';
 type DateFormat = 'short' | 'long' | 'medium' | 'full';
 
-export const dateAndHourFormatted = (
-  dateAndHour: string,
+export const onFormatDateFromUtcToLocal = (
+  dateAndHour: string | number,
   dateFormat: DateFormat = 'short',
   timeFormat: DateFormat = 'short'
 ): string => {
-  if (dateAndHour == '' || dateAndHour == null) return '';
+  if (dateAndHour == '' || dateAndHour == null || dateAndHour == 0) return '';
   const date = new Date(dateAndHour);
   return new Intl.DateTimeFormat(countrySetup, {
     dateStyle: dateFormat,

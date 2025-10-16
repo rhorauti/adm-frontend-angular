@@ -40,7 +40,7 @@
     @for (
       data of dataList.slice(computedFirstRegister(), computedLastRegister());
       let dataIdx = $index;
-      track trackByDataId(computedFirstRegister() + dataIdx, data)
+      track trackByDataId(dataIdx, data)
     ) {
       <div
         tabindex="0"
@@ -112,9 +112,9 @@
                   [class.justify-between]="isModal && tableHeaders.length - 1 == headerIdx"
                   [class.gap-2]="header.databaseField == 'status'">
                   @if (header.databaseField == 'status') {
-                    <mat-icon [ngClass]="icons[dataIdx].backgroundColor">{{
-                      icons[dataIdx].iconName
-                    }}</mat-icon>
+                    <mat-icon [ngClass]="icons[computedFirstRegister() + dataIdx].backgroundColor">
+                      {{ icons[computedFirstRegister() + dataIdx].iconName }}
+                    </mat-icon>
                   }
                   <span>
                     @switch (header.databaseField) {

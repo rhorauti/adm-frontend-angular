@@ -51,11 +51,11 @@ import {
 } from '@core/interfaces/task.interface';
 import { BaseApiName, KeyOfData } from '@core/types/base.type';
 import { ValidationType } from '@core/types/validation.type';
-import { dateAndHourFormatted } from '@core/utils/misc';
 import { AuthStore } from '@store/auth/auth.store';
 import { BaseRegisterStore, defaultTableHeaderIcon } from '@store/base/base.register.store';
 import { ModalType } from '@store/modal/modal.store';
 import { Subscription } from 'rxjs';
+import { onFormatDateFromUtcToLocal } from '@core/utils/misc';
 
 interface IDisabled {
   idTask: boolean;
@@ -461,10 +461,10 @@ export class TaskFormComponent implements OnInit, OnDestroy, AfterViewInit {
 
   onSetStartAndFinishDate = (): void => {
     if (this.taskFormData.startDate) {
-      this.startDate = dateAndHourFormatted(this.taskFormData.startDate);
+      this.startDate = onFormatDateFromUtcToLocal(this.taskFormData.startDate);
     }
     if (this.taskFormData.finishDate) {
-      this.finishDate = dateAndHourFormatted(this.taskFormData.finishDate);
+      this.finishDate = onFormatDateFromUtcToLocal(this.taskFormData.finishDate);
     }
   };
 

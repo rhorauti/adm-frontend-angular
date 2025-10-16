@@ -46,12 +46,12 @@ export interface ITaskFilterHelp extends ITaskHomeData {
 }
 
 export interface ITaskHomeData {
-  idTask: number;
+  idTask: number | null;
   employee: string;
   startDate: string;
   finishDate: string;
   name: string;
-  status: number | string;
+  status: number | string | null;
   taskType: string;
   product: string;
   productionLine: string;

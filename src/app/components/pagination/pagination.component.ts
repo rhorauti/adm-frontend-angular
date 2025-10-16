@@ -84,6 +84,7 @@ export class PaginationComponent<T = BaseType> implements OnInit, OnChanges {
   onPageNumberClick(page: string | number): void {
     if (typeof page == 'number') {
       this.currentPage = Number(page);
+      this.onSetPaginationArray();
       this.dataService.emitData(this.currentPage);
     }
   }
@@ -94,6 +95,7 @@ export class PaginationComponent<T = BaseType> implements OnInit, OnChanges {
     } else {
       this.currentPage -= 1;
     }
+    this.onSetPaginationArray();
     this.dataService.emitData(this.currentPage);
   }
 
@@ -103,6 +105,7 @@ export class PaginationComponent<T = BaseType> implements OnInit, OnChanges {
     } else {
       this.currentPage += 1;
     }
+    this.onSetPaginationArray();
     this.dataService.emitData(this.currentPage);
   }
 }

@@ -1,12 +1,4 @@
-import {
-  Component,
-  inject,
-  OnInit,
-  OnDestroy,
-  computed,
-  signal,
-  WritableSignal,
-} from '@angular/core';
+import { Component, inject, OnInit, OnDestroy, computed, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { BreadcrumbComponent } from '@components/breadcrumb/breadcrumb.component';
 import { SideBarComponent } from '@components/side-bar/side-bar.component';
@@ -20,7 +12,7 @@ import { InputComponent } from '@components/input/input.component';
 import { ButtonCloseComponent } from '@components/button/button-close/button-close.component';
 import { ModalType } from '@store/modal/modal.store';
 import { AuthStore } from '@store/auth/auth.store';
-import { dateAndHourFormatted, loadStorage, saveStorage } from '@core/utils/misc';
+import { loadStorage, onFormatDateFromUtcToLocal, saveStorage } from '@core/utils/misc';
 import { defaultTableHeaderIcon } from '@store/base/base.register.store';
 import { ActionCallback, IModalAsk, IModalInfo } from '@core/interfaces/modal.interface';
 import { HttpErrorResponse } from '@angular/common/http';
@@ -37,9 +29,6 @@ import { TableComponent } from '@components/table/table.component';
 import { PaginationComponent } from '@components/pagination/pagination.component';
 import { ITableHeader } from '@core/interfaces/table.interface';
 import { DEPT_NAMES_ENGLISH, translateDeptNameToLocalLanguage } from 'app/enum/department.enum';
-import { start } from 'repl';
-
-type Property = 'data' | 'filterBox' | 'filterHelp';
 
 @Component({
   selector: 'app-task-home',
@@ -96,7 +85,7 @@ export class TaskHomeComponent implements OnInit, OnDestroy {
   isTableHeaderBoxActive = signal(false);
   tableHeaders = signal<ITableHeader<ITaskHomeData>[]>([
     {
-      id: 0,
+      id: 500,
       isHeaderActive: true,
       sortDirection: 0,
       icon: defaultTableHeaderIcon,
@@ -104,7 +93,7 @@ export class TaskHomeComponent implements OnInit, OnDestroy {
       databaseField: 'idTask',
     },
     {
-      id: 1,
+      id: 501,
       isHeaderActive: true,
       sortDirection: 0,
       icon: defaultTableHeaderIcon,
@@ -112,7 +101,7 @@ export class TaskHomeComponent implements OnInit, OnDestroy {
       databaseField: 'employee',
     },
     {
-      id: 2,
+      id: 502,
       isHeaderActive: true,
       sortDirection: 0,
       icon: defaultTableHeaderIcon,
@@ -120,7 +109,7 @@ export class TaskHomeComponent implements OnInit, OnDestroy {
       databaseField: 'name',
     },
     {
-      id: 3,
+      id: 503,
       isHeaderActive: true,
       sortDirection: 0,
       icon: defaultTableHeaderIcon,
@@ -128,7 +117,7 @@ export class TaskHomeComponent implements OnInit, OnDestroy {
       databaseField: 'startDate',
     },
     {
-      id: 4,
+      id: 504,
       isHeaderActive: true,
       sortDirection: 0,
       icon: defaultTableHeaderIcon,
@@ -136,7 +125,7 @@ export class TaskHomeComponent implements OnInit, OnDestroy {
       databaseField: 'finishDate',
     },
     {
-      id: 5,
+      id: 505,
       isHeaderActive: true,
       sortDirection: 0,
       icon: defaultTableHeaderIcon,
@@ -144,7 +133,7 @@ export class TaskHomeComponent implements OnInit, OnDestroy {
       databaseField: 'taskType',
     },
     {
-      id: 6,
+      id: 506,
       isHeaderActive: true,
       sortDirection: 0,
       icon: defaultTableHeaderIcon,
@@ -169,12 +158,12 @@ export class TaskHomeComponent implements OnInit, OnDestroy {
   isFilterBoxActive = signal(false);
   isFilterResultZeroRegister = signal(false);
   filterBox = signal<ITaskHomeData>({
-    idTask: 0,
+    idTask: null,
     employee: '',
     name: '',
     startDate: '',
     finishDate: '',
-    status: TASK_NUMBER_STATUS.NOT_STARTED,
+    status: null,
     taskType: '',
     product: '',
     productionLine: '',
@@ -237,6 +226,16 @@ export class TaskHomeComponent implements OnInit, OnDestroy {
     }
   }
 
+  tableDataFormated = computed(() => {
+    return this.dataList().map(data => {
+      return {
+        ...data,
+        startDate: onFormatDateFromUtcToLocal(data.startDate),
+        finishDate: onFormatDateFromUtcToLocal(data.finishDate),
+      };
+    });
+  });
+
   isAtLeastOneFilterBoxNotEmpty = computed(() => {
     const isfilterBoxOk = Object.values(this.filterBox()).some(v => v != 0 && v != null && v != '');
     const isDateFilterOk = Object.values(this.filterDateInterval()).some(v => v != null && v != '');
@@ -265,49 +264,62 @@ export class TaskHomeComponent implements OnInit, OnDestroy {
 
   onKeyPressOnNotFoundFilterRegister = (event: KeyboardEvent): void => {
     if (event.key == 'Escape') {
-      this.onClearData();
+      this.onClearAllData();
     }
   };
 
-  onClearDataOrFilterBoxOrFilterHelp = (property: Property): void => {
-    let defaultValue: ITaskFilterHelp | ITaskHomeData;
-    if (property == 'data' || property == 'filterBox') {
-      defaultValue = {
-        idTask: 0,
-        employee: '',
-        startDate: '',
-        finishDate: '',
-        name: '',
-        status: TASK_NUMBER_STATUS.NOT_STARTED,
-        taskType: '',
-        product: '',
-        productionLine: '',
-      } as ITaskHomeData;
-    } else {
-      defaultValue = {
-        inputSearch: '',
-        idTask: 0,
-        employee: '',
-        startDate: '',
-        finishDate: '',
-        name: '',
-        status: TASK_NUMBER_STATUS.NOT_STARTED,
-        taskType: '',
-        product: '',
-        productionLine: '',
-      } as ITaskFilterHelp;
-    }
-    (this[property] as WritableSignal<ITaskFilterHelp | ITaskHomeData>).set(defaultValue);
+  onClearData = () => {
+    this.data.set({
+      idTask: 0,
+      employee: '',
+      startDate: '',
+      finishDate: '',
+      name: '',
+      status: TASK_NUMBER_STATUS.NOT_STARTED,
+      taskType: '',
+      product: '',
+      productionLine: '',
+    });
+  };
+
+  onClearFilterBox = (): void => {
+    this.filterBox.set({
+      idTask: 0,
+      employee: '',
+      startDate: '',
+      finishDate: '',
+      name: '',
+      status: TASK_NUMBER_STATUS.NOT_STARTED,
+      taskType: '',
+      product: '',
+      productionLine: '',
+    });
+    this.filterDateInterval.set({
+      startDateFrom: '',
+      startDateTo: '',
+      finishDateFrom: '',
+      finishDateTo: '',
+    });
   };
 
   onClearFilterHelp = (): void => {
-    this.filterHelp.update(current => ({ ...current, inputSearch: '' }));
-    this.onClearDataOrFilterBoxOrFilterHelp('filterHelp');
+    this.filterHelp.set({
+      inputSearch: '',
+      idTask: 0,
+      employee: '',
+      startDate: '',
+      finishDate: '',
+      name: '',
+      status: TASK_NUMBER_STATUS.NOT_STARTED,
+      taskType: '',
+      product: '',
+      productionLine: '',
+    });
   };
 
-  onClearData = (): void => {
-    this.onClearDataOrFilterBoxOrFilterHelp('filterBox');
-    this.onClearDataOrFilterBoxOrFilterHelp('data');
+  onClearAllData = (): void => {
+    this.onClearFilterBox();
+    this.onClearData();
     this.onClearFilterHelp();
     this.dataList.set(this.initialData());
     this.isFilterResultZeroRegister.set(false);
@@ -316,8 +328,8 @@ export class TaskHomeComponent implements OnInit, OnDestroy {
   };
 
   onSetInputSearchFilterItemToDefault = (fieldList?: KeyOfData[]): void => {
-    this.onClearDataOrFilterBoxOrFilterHelp('filterBox');
-    this.onClearDataOrFilterBoxOrFilterHelp('filterHelp');
+    this.onClearFilterBox();
+    this.onClearFilterHelp();
     this.inputSearchValue.set('');
     const fields = fieldList ?? this.tableHeaders().map(h => h.databaseField as KeyOfData);
     this.dataList.set(this.onFilterThroughSearchInput(fields));
@@ -332,7 +344,7 @@ export class TaskHomeComponent implements OnInit, OnDestroy {
 
   onClickOnFilterBtnThroughSearchInput = (fieldList: KeyOfData[]): void => {
     this.onClearFilterHelp();
-    this.onClearDataOrFilterBoxOrFilterHelp('filterBox');
+    this.onClearFilterBox();
     const fields = fieldList ?? this.tableHeaders().map(h => h.databaseField as KeyOfData);
     this.dataList.set(this.onFilterThroughSearchInput(fields));
     if (this.dataList().length == 0) {
@@ -362,16 +374,18 @@ export class TaskHomeComponent implements OnInit, OnDestroy {
     if (event.key == 'Enter') {
       this.onClickOnFilterBtnThroughSearchInput(fields);
     } else if (event.key == 'Escape') {
-      this.onClearData();
+      this.onClearAllData();
     }
   };
 
   onClickOnFilterBtnThroughFilterBox = (): void => {
+    this.onClearFilterHelp();
     this.dataList.set(this.onFilterThroughFilterBox());
     if (this.dataList().length == 0) {
       this.isFilterResultZeroRegister.set(true);
     } else {
       this.onApplyFilterHelpThroughFilterBox();
+      this.onClearFilterBox();
       this.inputSearchValue.set('');
     }
     this.isFilterBoxActive.set(false);
@@ -391,8 +405,11 @@ export class TaskHomeComponent implements OnInit, OnDestroy {
         ) {
           return true;
         } else {
-          const initialDataToBeCompared = initialData[key as K].toString();
-          return initialDataToBeCompared.includes(String(filterBoxValue));
+          const initialDataToBeCompared = (initialData[key as K] ?? '').toString();
+          return initialDataToBeCompared
+            .toLowerCase()
+            .trim()
+            .includes(String(filterBoxValue).toLowerCase().trim());
         }
       });
     });
@@ -402,42 +419,69 @@ export class TaskHomeComponent implements OnInit, OnDestroy {
     initialData: ITaskHomeData,
     key: K
   ): boolean => {
-    const parseTime = (v: string | undefined | null): number | null => {
-      if (!v) return null;
-      const d = new Date(v);
-      return isNaN(d.getTime()) ? null : d.getTime();
+    const parseTime = (v: string | undefined | null, isFrom: boolean): number | null => {
+      if (!v || v == '') return null;
+      if (v.length > 0 && v.includes('-')) {
+        const [year, month, day] = v.split('-');
+        const yearToNumber = Number(year);
+        const monthToNumber = Number(month);
+        const dayToNumber = Number(day);
+        let dateToUtcNumber = 0;
+        if (isFrom) {
+          dateToUtcNumber = new Date(
+            yearToNumber,
+            monthToNumber - 1,
+            dayToNumber,
+            0,
+            0,
+            0,
+            0
+          ).getTime();
+        } else {
+          dateToUtcNumber =
+            new Date(yearToNumber, monthToNumber - 1, dayToNumber + 1, 0, 0, 0, 0).getTime() - 1;
+        }
+        return isNaN(dateToUtcNumber) ? null : dateToUtcNumber;
+      }
+      return null;
     };
 
-    const startFrom = parseTime(this.filterDateInterval().startDateFrom);
-    const startTo = parseTime(this.filterDateInterval().startDateTo);
-    const finishFrom = parseTime(this.filterDateInterval().finishDateFrom);
-    const finishTo = parseTime(this.filterDateInterval().finishDateTo);
-
-    const startVal = parseTime(initialData.startDate);
-    const finishVal = parseTime(initialData.finishDate);
-
     if (key == 'startDate') {
+      const startFrom = parseTime(this.filterDateInterval().startDateFrom, true);
+      const startTo = parseTime(this.filterDateInterval().startDateTo, false);
+      const startVal =
+        initialData.startDate && initialData.startDate.length > 0
+          ? new Date(initialData.startDate).getTime()
+          : null;
+
       if (startFrom == null && startTo == null) {
         return true;
       } else if (startVal == null) {
         return false;
-      } else if (startFrom != null && startTo != null) {
+      } else if (startFrom != null && startTo != null && startVal != null) {
         return startVal >= startFrom && startVal <= startTo;
-      } else if (startFrom != null && startTo == null) {
+      } else if (startFrom != null && startTo == null && startVal != null) {
         return startVal >= startFrom;
-      } else if (startFrom == null && startTo != null) {
+      } else if (startFrom == null && startTo != null && startVal != null) {
         return startVal <= startTo;
       }
     } else {
+      const finishFrom = parseTime(this.filterDateInterval().finishDateFrom, true);
+      const finishTo = parseTime(this.filterDateInterval().finishDateTo, false);
+      const finishVal =
+        initialData.finishDate && initialData.finishDate.length > 0
+          ? new Date(initialData.finishDate).getTime()
+          : null;
+
       if (finishFrom == null && finishTo == null) {
         return true;
       } else if (finishVal == null) {
         return false;
-      } else if (finishFrom != null && finishTo != null) {
+      } else if (finishFrom != null && finishTo != null && finishVal != null) {
         return finishVal >= finishFrom && finishVal <= finishTo;
-      } else if (finishFrom != null && finishTo == null) {
+      } else if (finishFrom != null && finishTo == null && finishVal != null) {
         return finishVal >= finishFrom;
-      } else if (finishFrom == null && finishTo != null) {
+      } else if (finishFrom == null && finishTo != null && finishVal != null) {
         return finishVal <= finishTo;
       }
     }
@@ -491,20 +535,18 @@ export class TaskHomeComponent implements OnInit, OnDestroy {
           this.filterDateInterval().startDateFrom != '' &&
           this.filterDateInterval().startDateTo == ''
         ) {
-          startDate = '>' + this.filterDateInterval().startDateFrom;
+          startDate = '≥ ' + this.filterDateInterval().startDateFrom;
         } else if (
           this.filterDateInterval().startDateFrom == '' &&
           this.filterDateInterval().startDateTo != ''
         ) {
-          startDate = '< ' + this.filterDateInterval().startDateTo;
+          startDate = '≤ ' + this.filterDateInterval().startDateTo;
         } else if (
           this.filterDateInterval().startDateFrom != '' &&
           this.filterDateInterval().startDateTo != ''
         ) {
           startDate =
-            this.filterDateInterval().startDateFrom +
-            ' -> ' +
-            this.filterDateInterval().startDateTo;
+            this.filterDateInterval().startDateFrom + ' ➜ ' + this.filterDateInterval().startDateTo;
         }
         this.filterHelp.update(current => ({
           ...current,
@@ -516,26 +558,26 @@ export class TaskHomeComponent implements OnInit, OnDestroy {
           this.filterDateInterval().finishDateFrom != '' &&
           this.filterDateInterval().finishDateTo == ''
         ) {
-          finishDate = '>' + this.filterDateInterval().finishDateFrom;
+          finishDate = '≥ ' + this.filterDateInterval().finishDateFrom;
         } else if (
           this.filterDateInterval().finishDateFrom == '' &&
           this.filterDateInterval().finishDateTo != ''
         ) {
-          finishDate = '< ' + this.filterDateInterval().finishDateTo;
+          finishDate = '≤ ' + this.filterDateInterval().finishDateTo;
         } else if (
           this.filterDateInterval().finishDateFrom != '' &&
           this.filterDateInterval().finishDateTo != ''
         ) {
           finishDate =
             this.filterDateInterval().finishDateFrom +
-            ' -> ' +
+            ' ➜ ' +
             this.filterDateInterval().finishDateTo;
         }
         this.filterHelp.update(current => ({
           ...current,
           finishDate: finishDate,
         }));
-      } else if (key !== 'inputSearch') {
+      } else {
         if (this.filterBox()[key as K] != 0 || this.filterBox()[key as K] != '0') {
           this.filterHelp.update(current => ({
             ...current,
@@ -635,16 +677,13 @@ export class TaskHomeComponent implements OnInit, OnDestroy {
           if (typeof data.status == 'number') {
             return {
               ...data,
-              startDate: dateAndHourFormatted(data.startDate),
-              finishDate: dateAndHourFormatted(data.finishDate),
               status: onTranslateStatusToString(data.status),
             };
           }
           return data;
         });
         this.initialData.set([...translatedStatusData]);
-        this.dataList.set([...translatedStatusData]);
-        this.onClearData();
+        this.onClearAllData();
       } else {
         return;
       }

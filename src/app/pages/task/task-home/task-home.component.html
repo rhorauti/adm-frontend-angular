@@ -64,14 +64,14 @@
             }
           }
           <button
-            (click)="onClearData()"
+            (click)="onClearAllData()"
             class="text-logo font-semibold cursor-pointer hover:text-logo-hover hover:underline">
             Limpar
           </button>
         </div>
       }
       <app-table
-        [initialDataList]="dataList()"
+        [initialDataList]="tableDataFormated()"
         [tableHeaders]="tableHeaders()"
         (refreshBtnClickEmitter)="onShowDataList()"
         (tableDataEmitter)="data.set($event)"
@@ -112,7 +112,7 @@
         }
         <app-button-label
           (keyboardEmitter)="onKeyPressOnNotFoundFilterRegister($event)"
-          (click)="onClearData()"
+          (click)="onClearAllData()"
           [label]="'Voltar'" />
       }
     </div>
@@ -173,7 +173,7 @@
             <app-input
               [id]="`filter-${ currentView }-${ tableHeader.databaseField }`"
               [inputName]="'custom'"
-              [inputValue]="filterBox()[tableHeader.databaseField].toString()"
+              [inputValue]="(filterBox()[tableHeader.databaseField] ?? '').toString()"
               [type]="'search'"
               (inputValueEmitter)="onSetFilterBoxValue(tableHeader.databaseField, $event)"
               (keyboardEmitter)="onKeyPressOnFilterBox($event)" />
