@@ -112,8 +112,8 @@
                   [class.justify-between]="isModal && tableHeaders.length - 1 == headerIdx"
                   [class.gap-2]="header.databaseField == 'status'">
                   @if (header.databaseField == 'status') {
-                    <mat-icon [ngClass]="icons[computedFirstRegister() + dataIdx].backgroundColor">
-                      {{ icons[computedFirstRegister() + dataIdx].iconName }}
+                    <mat-icon [ngClass]="icons[computedFirstRegister() + dataIdx]?.backgroundColor">
+                      {{ icons[computedFirstRegister() + dataIdx]?.iconName }}
                     </mat-icon>
                   }
                   <span>
