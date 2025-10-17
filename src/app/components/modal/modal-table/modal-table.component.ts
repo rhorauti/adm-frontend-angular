@@ -1,89 +1,51 @@
-import { Component, inject, OnInit, OnDestroy, computed, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { BreadcrumbComponent } from '@components/breadcrumb/breadcrumb.component';
-import { SideBarComponent } from '@components/side-bar/side-bar.component';
-import { MatIconModule } from '@angular/material/icon';
+import { Component, EventEmitter, inject, Input, Output, signal } from '@angular/core';
+import { FormsModule } from '@angular/forms';
+import { ModalBaseComponent } from '@components/modal/modal-base/modal-base.component';
 import { ButtonLabelComponent } from '@components/button/button-label/button-label.component';
-import { ButtonDeleteComponent } from '@components/button/button-delete/button-delete.component';
-import { ButtonIconComponent } from '@components/button/button-icon/button-icon.component';
-import { TooltipComponent } from '@components/tooltip/tooltip.component';
-import { ToogleButtonComponent } from '@components/toogle-button/toogle-button.component';
-import { InputComponent } from '@components/input/input.component';
-import { ButtonCloseComponent } from '@components/button/button-close/button-close.component';
-import { ModalType } from '@store/modal/modal.store';
-import { AuthStore } from '@store/auth/auth.store';
-import { loadStorage, saveStorage } from '@core/utils/misc';
+import { ModalStore } from '@store/modal/modal.store';
+import { ITableHeader } from '@core/interfaces/table.interface';
 import { defaultTableHeaderIcon } from '@store/base/base.register.store';
-import { ActionCallback, IModalAsk, IModalInfo } from '@core/interfaces/modal.interface';
-import { HttpErrorResponse } from '@angular/common/http';
-import { KeyOfData } from '@core/types/base.type';
-import { ITaskFilterHelp, ITaskHomeData } from '@core/interfaces/task.interface';
-import { ActivatedRoute, Router } from '@angular/router';
-import { Subscription } from 'rxjs';
-import { TaskApi } from '@core/http/task/task.api';
-import { onTranslateStatusToString, TASK_NUMBER_STATUS } from 'app/enum/status.enum';
-import { ModalAskComponent } from '@components/modal/modal-ask/modal-ask.component';
-import { ModalInfoComponent } from '@components/modal/modal-info/modal-info.component';
-import { LoadingComponent } from '@components/loading/loading.component';
+import { ITaskFilterHelp } from '@core/interfaces/task.interface';
+import { TASK_NUMBER_STATUS } from 'app/enum/status.enum';
+import { BaseType } from '@core/types/base.type';
+import { InputComponent } from '@components/input/input.component';
 import { TableComponent } from '@components/table/table.component';
 import { PaginationComponent } from '@components/pagination/pagination.component';
-import { ITableHeader } from '@core/interfaces/table.interface';
-import { DEPT_NAMES_ENGLISH, translateDeptNameToLocalLanguage } from 'app/enum/department.enum';
+import { BreadcrumbComponent } from '@components/breadcrumb/breadcrumb.component';
+import { MatIconModule } from '@angular/material/icon';
+import { ButtonIconComponent } from '@components/button/button-icon/button-icon.component';
+import { TooltipComponent } from '@components/tooltip/tooltip.component';
+import { ButtonCloseComponent } from '@components/button/button-close/button-close.component';
 
 @Component({
-  selector: 'app-task-home',
+  selector: 'app-modal-table',
   imports: [
     CommonModule,
-    SideBarComponent,
     InputComponent,
     TableComponent,
     PaginationComponent,
     BreadcrumbComponent,
     MatIconModule,
     ButtonLabelComponent,
-    ButtonDeleteComponent,
     ButtonIconComponent,
-    TooltipComponent,
-    ToogleButtonComponent,
     ButtonCloseComponent,
-    ModalAskComponent,
-    ModalInfoComponent,
-    LoadingComponent,
+    TooltipComponent,
+    ModalBaseComponent,
   ],
-  templateUrl: './task-home.component.html',
-  styleUrl: './task-home.component.scss',
+  templateUrl: './modal-table.component.html',
+  styleUrl: './modal-table.component.scss',
 })
-export class TaskHomeComponent implements OnInit, OnDestroy {
-  readonly taskApi = inject(TaskApi);
-  readonly router = inject(Router);
-  private activatedRoute = inject(ActivatedRoute);
-  readonly authStore = inject(AuthStore);
+export class ModalTableComponent<T = BaseType> {
+  readonly modalStore = inject(ModalStore);
+  @Input() isModalActive!: boolean;
+  @Input() bodyClass = '';
+  @Input() width = 'sm:w-5/6';
+  @Input() isDisabled = true;
 
-  subscription: Subscription | undefined = undefined;
-
-  readonly currentView = 'tasks';
-  readonly breadcrumbList = ['Cadastro', 'Atividades'];
-  readonly inputSearchFilterList: KeyOfData[] = [
-    'idTask',
-    'name',
-    'employee',
-    'startDate',
-    'finishDate',
-    'taskType',
-    'product',
-    'productionLine',
-    'status',
-  ];
-  readonly inputSearchPlaceholder = 'Id, Atividade, etc';
-  tableHeadersLocalStorageId = `table_headers_${this.currentView}_${this.authStore.user().id}`;
-  deptName = '' as DEPT_NAMES_ENGLISH;
-  deptNameTranslated = translateDeptNameToLocalLanguage(this.deptName);
-
-  isCopiedData = signal(false);
-  isEditData = signal(false);
   inputSearchValue = signal('');
   isTableHeaderBoxActive = signal(false);
-  tableHeaders = signal<ITableHeader<ITaskHomeData>[]>([
+  tableHeaders = signal<ITableHeader<T>[]>([
     {
       id: 500,
       isHeaderActive: true,
@@ -141,111 +103,16 @@ export class TaskHomeComponent implements OnInit, OnDestroy {
       databaseField: 'status',
     },
   ]);
-  data = signal<ITaskHomeData>({
-    idTask: 0,
-    employee: '',
-    startDate: '',
-    finishDate: '',
-    name: '',
-    status: TASK_NUMBER_STATUS.NOT_STARTED,
-    taskType: '',
-    product: '',
-    productionLine: '',
-  });
-  dataList = signal<ITaskHomeData[]>([]);
-  initialData = signal<ITaskHomeData[]>([]);
+  data = signal<T>();
+  dataList = signal<T[]>([]);
+  initialData = signal<T[]>([]);
   isDelBtnDisabled = signal(true);
   isFilterBoxActive = signal(false);
   isFilterResultZeroRegister = signal(false);
-  filterBox = signal<ITaskHomeData>({
-    idTask: null,
-    employee: '',
-    name: '',
-    startDate: '',
-    finishDate: '',
-    status: null,
-    taskType: '',
-    product: '',
-    productionLine: '',
-  });
-  filterHelp = signal<ITaskFilterHelp>({
-    inputSearch: '',
-    idTask: 0,
-    employee: '',
-    startDate: '',
-    finishDate: '',
-    name: '',
-    status: TASK_NUMBER_STATUS.NOT_STARTED,
-    taskType: '',
-    product: '',
-    productionLine: '',
-  });
+  filterBox = signal<T>();
+  filterHelp = signal<ITaskFilterHelp>();
 
   isComponentSetToDefault = signal<boolean>(false);
-
-  modalInfo = signal<IModalInfo>({
-    isActive: false,
-    title: '',
-    description: '',
-    type: '',
-    onActionOk: null,
-  });
-
-  modalAsk = signal<IModalAsk>({
-    isActive: false,
-    title: '',
-    description: '',
-    onActionOk: null as ActionCallback,
-    onActionNok: null as ActionCallback,
-  });
-
-  filterDateInterval = signal({
-    startDateFrom: '',
-    startDateTo: '',
-    finishDateTo: '',
-    finishDateFrom: '',
-  });
-
-  isLoading = signal(false);
-
-  trackByHeaderId = (_: number, header: any): number => header.id;
-  trackByIndex = (index: number): number => index;
-
-  async ngOnInit() {
-    this.subscription = this.activatedRoute.paramMap.subscribe(params => {
-      this.deptName =
-        (params.get('department') as DEPT_NAMES_ENGLISH) || DEPT_NAMES_ENGLISH.MAINTENANCE;
-    });
-    this.onShowDataList();
-    const selectedTableHeaders = await loadStorage(this.tableHeadersLocalStorageId);
-    const headers = selectedTableHeaders ? selectedTableHeaders : this.tableHeaders();
-    this.tableHeaders.set(headers);
-  }
-
-  ngOnDestroy(): void {
-    if (this.subscription) {
-      this.subscription.unsubscribe();
-    }
-  }
-
-  tableDataFormated = computed(() => {
-    return this.dataList().map(data => {
-      return {
-        ...data,
-        status: onTranslateStatusToString(data.status as number),
-      };
-    });
-  });
-
-  isAtLeastOneFilterBoxNotEmpty = computed(() => {
-    const isfilterBoxOk = Object.values(this.filterBox()).some(v => v != 0 && v != null && v != '');
-    const isDateFilterOk = Object.values(this.filterDateInterval()).some(v => v != null && v != '');
-    return isfilterBoxOk || isDateFilterOk;
-  });
-
-  isAtLeastOneFilterHelpNotEmpty = computed(() => {
-    return Object.values(this.filterHelp()).some(v => v != null && v != '' && v != 0);
-  });
 
   onSetHeaderDisplay = (idx: number): void => {
     console.log('entrando...');
@@ -610,148 +477,15 @@ export class TaskHomeComponent implements OnInit, OnDestroy {
     });
   };
 
-  // onSetModalInfoType = (type: ModalType): void => {
-  //   this.modalInfo.update(current => ({ ...current, type: type }));
-  // };
+  @Output() closeActionNokEmitter = new EventEmitter<boolean>();
 
-  onShowInfoModal = (
-    type: ModalType,
-    title: string,
-    description: string,
-    onActionOk?: ActionCallback
-  ): void => {
-    this.modalInfo.set({
-      ...this.modalInfo,
-      isActive: true,
-      type: type,
-      title: title,
-      description: description,
-      onActionOk: onActionOk,
-    });
-  };
-
-  onCloseInfoModal = async (): Promise<void> => {
-    const callback = this.modalInfo().onActionOk;
-    if (callback) await Promise.resolve(callback());
-    this.modalInfo.set({
-      isActive: false,
-      type: '',
-      title: '',
-      description: '',
-      onActionOk: null,
-    });
-  };
-
-  onShowAskModal = (
-    title: string,
-    description: string,
-    onActionOk?: ActionCallback,
-    onActionNok?: ActionCallback
-  ): void => {
-    this.modalAsk.set({
-      ...this.modalAsk,
-      isActive: true,
-      title: title,
-      description: description,
-      onActionOk: onActionOk,
-      onActionNok: onActionNok,
-    });
-  };
-
-  onCloseAskModalAction = async (isConfirmed: boolean): Promise<void> => {
-    const callback = isConfirmed ? this.modalAsk().onActionOk : this.modalAsk().onActionNok;
-    if (callback) {
-      await Promise.resolve(callback());
-      this.modalInfo.update(current => ({ ...current, type: 'success' }));
-    }
-    this.modalAsk.set({
-      isActive: false,
-      title: '',
-      description: '',
-      onActionOk: null,
-      onActionNok: null,
-    });
-  };
-
-  onRedirectToEditPage = (data: ITaskHomeData): void => {
-    this.data.set(data);
-    this.isEditData.set(true);
-    this.onRedirectPage(
-      `/${this.deptName}/${this.currentView}/edit/${(this.data() as ITaskHomeData).idTask}`
-    );
-  };
-
-  onRedirectPage = (route: string): void => {
-    this.router.navigate([route]);
-  };
-
-  onCloneRegister = async (data: ITaskHomeData): Promise<void> => {
-    this.isCopiedData.set(true);
-    this.data.set(data);
-    this.onRedirectPage(`/${this.deptName}/${this.currentView}/new`);
-  };
-
-  onShowDataList = async (): Promise<void> => {
-    try {
-      this.isLoading.set(true);
-      const response = await this.taskApi.onGetDataList(this.deptName);
-      if (response.data) {
-        const dataList = response.data as ITaskHomeData[];
-        this.initialData.set([...dataList]);
-        this.onClearAllData();
-      } else {
-        return;
-      }
-    } catch (e: unknown) {
-      const error = e as HttpErrorResponse;
-      this.onShowInfoModal('failure', 'Listar registros', error.error?.message);
-    } finally {
-      this.isLoading.set(false);
-    }
-  };
-
-  onDeleteRegister = async (id: number, onActionOk?: ActionCallback): Promise<void> => {
-    try {
-      this.isLoading.set(true);
-      const response = await this.taskApi.onDelete(this.deptName, id);
-      if (response.status) {
-        this.onShowDataList();
-        this.onShowInfoModal('success', 'Excluir registro', response.message, onActionOk);
-      } else {
-        this.onShowInfoModal('failure', 'Excluir registro', response.error?.message || '');
-      }
-      console.log('delete', this.modalInfo());
-    } catch (e: unknown) {
-      const error = e as HttpErrorResponse;
-      this.onShowInfoModal(
-        'failure',
-        'Excluir registro',
-        error.error?.message || 'Erro desconhecido'
-      );
-    } finally {
-      this.isComponentSetToDefault.set(true);
-      this.isLoading.set(false);
-    }
-  };
-
-  async onDelete(selectedData: ITaskHomeData): Promise<void> {
-    await this.onDeleteRegister(selectedData.idTask as number);
+  OnActionNok(): void {
+    this.closeActionNokEmitter.emit();
   }
 
-  onShowModalToDeleteThroughTopBtn(): void {
-    this.onShowAskModal(
-      'Cadastro de atividades',
-      `Deseja excluir o registro <b>${this.data().name}</b>?`,
-      () => this.onDelete(this.data())
-    );
-  }
+  @Output() closeActionOkEmitter = new EventEmitter();
 
-  onShowModalToDeleteThroughTableBtn(data?: ITaskHomeData): void {
-    const selectedData = data ? data : this.data();
-    this.onShowAskModal(
-      'Cadastro de atividades',
-      `Deseja excluir o registro <b>${selectedData.name}</b>?`,
-      () => this.onDelete(selectedData)
-    );
+  OnActionOk(): void {
+    this.closeActionOkEmitter.emit();
   }
 }

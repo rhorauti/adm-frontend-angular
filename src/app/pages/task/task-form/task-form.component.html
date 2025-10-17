@@ -12,21 +12,23 @@
     <h1 class="text-lg font-semibold bg-gray-200 p-1 rounded-md">Dados cadastrais</h1>
     <div class="flex flex-col gap-4">
       <div class="flex flex-col md:flex-row gap-4">
-        @if (taskFormData.idTask != null && taskFormData.idTask > 0) {
-          <div class="flex flex-col gap-1 md:w-24 w-full">
-            <label #labelForm class="font-medium text-sm" for="default">Id</label>
-            <app-input
-              [inputName]="'custom'"
-              [isDisabled]="isDisabled.idTask"
-              [inputValue]="taskFormData.idTask == 0 ? '' : taskFormData.idTask.toString()"
-              [type]="'search'" />
-          </div>
-        }
-        <div class="flex flex-col gap-1 grow">
+        <div
+          class="flex flex-col md:w-24 w-full"
+          [ngClass]="taskFormData.idTask > 0 ? 'block' : 'hidden'">
+          <label #labelForm class="font-medium text-sm" for="default">Id</label>
+          <app-input
+            class="mt-1"
+            [inputName]="'custom'"
+            [isDisabled]="isDisabled.idTask"
+            [inputValue]="taskFormData.idTask == 0 ? '' : taskFormData.idTask.toString()"
+            [type]="'search'" />
+        </div>
+        <div class="flex flex-col grow">
           <label #labelForm class="font-medium text-sm" for="default"
             >Funcionário <span class="font-bold text-red-400">*</span></label
           >
           <app-select
+            class="mt-1"
             [selectType]="'custom'"
             [borderType]="borderType.employee"
             [isDisabled]="isDisabled.employee"
@@ -39,11 +41,12 @@
             [isHelpTextActive]="borderType.employee == 'failure'"></app-help>
         </div>
 
-        <div class="flex flex-col gap-1 grow">
+        <div class="flex flex-col grow">
           <label #labelForm class="font-medium text-sm" for="default"
             >Tipo da Atividade <span class="font-bold text-red-400">*</span></label
           >
           <app-select
+            class="mt-1"
             [selectType]="'custom'"
             [isDisabled]="isDisabled.taskType"
             [borderType]="borderType.taskType"
@@ -57,11 +60,12 @@
         </div>
         @if (eligibleTaskTypeOptionsForTooling.includes(taskFormData.taskType?.name ?? '')) {
           <div class="flex items-end gap-4 grow">
-            <div class="flex flex-col gap-1 grow">
+            <div class="flex flex-col grow">
               <label #labelForm class="font-medium text-sm" for="default"
                 >Ferramenta <span class="font-bold text-red-400">*</span></label
               >
               <app-input
+                class="mt-1"
                 [inputName]="'custom'"
                 [isDisabled]="isDisabled.tooling"
                 [borderType]="borderType.tooling"
@@ -256,85 +260,98 @@
   (clickEmitter)="onCloseInfoModal()" />
 <app-loading [isLoading]="isLoading" />
 
-<app-modal-base [showModal]="modalForm.isActive" [width]="'sm:w-5/6'" [showHeader]="false">
+<!-- <app-modal-base [showModal]="modalForm.isActive" [width]="'sm:w-5/6'" [showHeader]="false">
   <div class="body-block">
-    <div class="flex flex-col gap-5">
-      <app-breadcrumb [items]="modalBreadcrumbList" />
-      @if (baseRegisterStore.dataList().length > 0) {
-        <div class="flex flex-col gap-5">
-          <div class="top-button-layout gap-6 sm:gap-3 overflow-x-auto">
-            <div class="flex gap-3">
-              <app-input
-                [inputValue]="baseRegisterStore.inputSearchValue()"
-                [id]="'input-filter'"
-                [placeholder]="inputSearchPlaceholder"
-                [inputName]="'search'"
-                (clickEmitter)="
-                  baseRegisterStore.onSetInputSearchFilterItemToDefault(inputSearchFilterList)
-                "
-                (keyboardEmitter)="
-                  baseRegisterStore.onKeyPressOnSearchInput($event, inputSearchFilterList)
-                "
-                (inputValueEmitter)="
-                  baseRegisterStore.onSetStateToNewValue('inputSearchValue', $event)
-                " />
-            </div>
+    <div class="flex items-center flex-col gap-2 md:flex-row md:justify-between">
+      <app-breadcrumb [items]="breadcrumbList" />
+    </div>
+    @if (dataList() && dataList().length > 0) {
+      <div class="flex flex-col gap-5">
+        <div class="top-button-layout gap-6 sm:gap-3 overflow-x-auto">
+          <div class="flex gap-3">
+            <app-input
+              [inputValue]="inputSearchValue()"
+              [id]="`input-filter-${currentView}`"
+              [placeholder]="inputSearchPlaceholder"
+              [inputName]="'search'"
+              (iconClickEmitter)="onClickOnFilterBtnThroughSearchInput(inputSearchFilterList)"
+              (keyboardEmitter)="onKeyPressOnSearchInput($event, inputSearchFilterList)"
+              (inputValueEmitter)="inputSearchValue.set($event)" />
+            <app-tooltip [description]="'Filtro'" [position]="'right'">
+              <app-button-icon
+                content
+                (click)="isFilterBoxActive.set(true)"
+                [iconName]="'filter_list'" />
+            </app-tooltip>
           </div>
-          @if (baseRegisterStore.isAtLeastOneFilterHelpNotEmpty()) {
-            <div class="flex flex-wrap items-center gap-3 text-sm">
-              @if (baseRegisterStore.filterHelp().inputSearch.length > 0) {
-                <div class="flex items-center gap-2">
-                  <p>Pesquisa: {{ baseRegisterStore.filterHelp().inputSearch }}</p>
-                  <app-button-close
-                    (click)="
-                      baseRegisterStore.onSetInputSearchFilterItemToDefault()
-                    "></app-button-close>
-                </div>
-              } @else {
-                @for (tableHeader of baseRegisterStore.tableHeaders(); track trackByIndex($index)) {
-                  @if (baseRegisterStore.filterHelp()[tableHeader.databaseField]) {
-                    <div class="flex items-center gap-2">
-                      <p>
-                        {{ tableHeader.headerName }} :
-                        {{ baseRegisterStore.filterHelp()[tableHeader.databaseField] }}
-                      </p>
-                      <app-button-close
-                        (click)="
-                          baseRegisterStore.onSetFilterBoxItemToDefault(tableHeader.databaseField)
-                        "></app-button-close>
-                    </div>
-                  }
+        </div>
+        @if (isAtLeastOneFilterHelpNotEmpty()) {
+          <div class="flex flex-wrap items-center gap-3 text-sm">
+            @if (filterHelp().inputSearch.length > 0) {
+              <div class="flex items-center gap-2">
+                <p>Pesquisa: {{ filterHelp().inputSearch }}</p>
+                <app-button-close (click)="onClearAllData()"></app-button-close>
+              </div>
+            } @else {
+              @for (tableHeader of tableHeaders(); track $index) {
+                @if (filterHelp()[tableHeader.databaseField]) {
+                  <div class="flex items-center gap-2">
+                    <p>
+                      {{ tableHeader.headerName }} :
+                      {{ filterHelp()[tableHeader.databaseField] }}
+                    </p>
+                    <app-button-close
+                      (click)="
+                        onSetFilterBoxItemToDefault(tableHeader.databaseField)
+                      "></app-button-close>
+                  </div>
                 }
               }
-              <button
-                (click)="baseRegisterStore.onClearData()"
-                class="text-logo font-semibold cursor-pointer hover:text-logo-hover hover:underline">
-                Limpar
-              </button>
-            </div>
+            }
+            <button
+              (click)="onClearAllData()"
+              class="text-logo font-semibold cursor-pointer hover:text-logo-hover hover:underline">
+              Limpar
+            </button>
+          </div>
+        }
+        <app-table
+          [initialDataList]="tableDataFormated()"
+          [tableHeaders]="tableHeaders()"
+          [isComponentSetToDefault]="isComponentSetToDefault()"
+          (refreshBtnClickEmitter)="onShowDataList()"
+          (tableDataEmitter)="data.set($event)"
+          (setToDefaultEmitter)="isComponentSetToDefault.set(false)" />
+        <app-pagination [initialDataList]="dataList()" />
+      </div>
+    } @else {
+      <div class="flex flex-col items-center gap-4 w-full mt-10">
+        <mat-icon class="text-logo text-6xl">{{
+          isFilterResultZeroRegister() ? 'search_off' : 'library_add'
+        }}</mat-icon>
+        <p class="font-semibold">Nenhum registro encontrado</p>
+        @if (inputSearchValue().length > 0) {
+          <p>
+            Palavra(s) Pesquisada(s) :
+            <span class="font-semibold">{{ inputSearchValue() }}</span>
+          </p>
+        } @else {
+          <p>Campo(s) pesquisado(s) :</p>
+          @for (tableHeader of tableHeaders(); track $index) {
+            @if (filterBox()[tableHeader.databaseField]) {
+              <p>
+                {{ tableHeader.headerName }} :
+                <span class="font-semibold">{{ filterBox()[tableHeader.databaseField] }}</span>
+              </p>
+            }
           }
-          <app-table
-            [initialDataList]="baseRegisterStore.dataList()"
-            [tableHeaders]="baseRegisterStore.tableHeaders()"
-            (rowClickEmitter)="onSetData($event)" />
-          <!-- <app-pagination [dataList]="baseRegisterStore.dataList()" /> -->
-        </div>
-      } @else {
-        <div class="flex flex-col items-center gap-4 w-full mt-10">
-          <p class="font-semibold">Nenhum registro encontrado</p>
-          @if (baseRegisterStore.inputSearchValue().length > 0) {
-            <p>
-              Palavra(s) Pesquisada(s) :
-              <span class="font-semibold">{{ baseRegisterStore.inputSearchValue() }}</span>
-            </p>
-          }
-          <app-button-label
-            (keyboardEmitter)="baseRegisterStore.onKeyPressOnNotFoundFilterRegister($event)"
-            (click)="baseRegisterStore.onClearData()"
-            [label]="'Voltar'" />
-        </div>
-      }
-    </div>
+        }
+        <app-button-label
+          (keyboardEmitter)="onKeyPressOnNotFoundFilterRegister($event)"
+          (click)="onClearAllData()"
+          [label]="'Voltar'" />
+      </div>
+    }
   </div>
   <div
     class="footer-block flex gap-5 justify-center items-stretch border-t border-gray-400 mt-3 pt-4">
@@ -343,10 +360,5 @@
       [isColorLogo]="false"
       [iconRightName]="'close'"
       (click)="onActionNokModalForm()"></app-button-label>
-    <app-button-label
-      [label]="'Selecionar'"
-      [isDisabled]="modalForm.isBtnDisabled"
-      [iconRightName]="'save'"
-      (click)="onActionOkModalForm()"></app-button-label>
   </div>
-</app-modal-base>
+</app-modal-base> -->

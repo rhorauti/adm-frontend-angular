@@ -117,17 +117,21 @@
                     </mat-icon>
                   }
                   <span>
-                    @switch (header.databaseField) {
+                    {{ formatCell(data, header.databaseField) }}
+                    <!-- @switch (header.databaseField) {
                       @case ('cnpj') {
                         {{ formatCell(data, header.databaseField) }}
                       }
                       @case ('origin') {
                         {{ onSetOrigin(data) }}
                       }
+                      @case (header.databaseField.toString().toLowerCase().includes('date')) {
+                        {{ formatCell(data, header.databaseField) }}
+                      }
                       @default {
                         {{ data[header.databaseField] }}
                       }
-                    }
+                    } -->
                   </span>
                   @if (isModal && tableHeaders.length - 1 == headerIdx) {
                     <mat-icon class="text-green-400">check_circle</mat-icon>

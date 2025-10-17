@@ -21,13 +21,14 @@ import { FormsModule } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
 import { ButtonCloseComponent } from '@components/button/button-close/button-close.component';
 import { RouterModule } from '@angular/router';
-import { BaseType, KeyOfData } from '@core/types/base.type';
+import { BaseType, Page } from '@core/types/base.type';
 import { IProduct } from '@core/interfaces/product.interface';
 import { ITableCheckbox, ITableHeader } from '@core/interfaces/table.interface';
 import { defaultTableHeaderIcon } from '@store/base/base.register.store';
 import { DataService } from '@core/services/data.service';
 import { Subscription } from 'rxjs';
 import { onSetIconStatus, onSetIconStatusBackgroundColor } from 'app/enum/status.enum';
+import { onFormatDateFromUtcToLocal } from '@core/utils/misc';
 
 interface StatusIcon {
   iconName: string;
@@ -54,8 +55,10 @@ export class TableComponent<T = BaseType> implements OnInit, OnDestroy, OnChange
 
   @Input() initialDataList: T[] = [];
   @Input() tableHeaders: ITableHeader<T>[] = [];
+  @Input() pageName: Page = 'tasks';
   @Input() isModal = false;
   @Input() currentPage = signal<number>(1);
+  @Input() isComponentSetToDefault = false;
 
   gridTemplateColumns = '';
 
@@ -74,7 +77,6 @@ export class TableComponent<T = BaseType> implements OnInit, OnDestroy, OnChange
     this.onCreateTableItemsBoxArray();
     this.onGridTemplateColumnsChange();
     this.onCreateTableIconArray();
-    console.log('icons', this.icons);
   }
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -86,13 +88,18 @@ export class TableComponent<T = BaseType> implements OnInit, OnDestroy, OnChange
     if (changes['tableHeaders']) {
       this.onGridTemplateColumnsChange();
     }
+    if (changes['isComponentSetToDefault']) {
+      this.onSetSortFilterToDefault();
+      this.onSetCheckboxArrayToDefault();
+      this.tableCheckBox.header = false;
+      this.onSetToDefault();
+    }
   }
 
   onCreateTableIconArray = (): void => {
     this.icons = Array.from({ length: this.dataList.length }, (_, i) => {
       const row = this.dataList[i] as any;
       const value = row?.status ?? row?.statusId ?? undefined;
-      // console.log('value', value);
       return {
         status: row.status,
         idTask: row.idTask,
@@ -100,6 +107,12 @@ export class TableComponent<T = BaseType> implements OnInit, OnDestroy, OnChange
         backgroundColor: onSetIconStatusBackgroundColor(value),
       };
     });
+  };
+
+  @Output() setToDefaultEmitter = new EventEmitter();
+
+  onSetToDefault = (): void => {
+    this.setToDefaultEmitter.emit(false);
   };
 
   @Output() isDelBtnDisabledEmitter = new EventEmitter();
@@ -177,7 +190,7 @@ export class TableComponent<T = BaseType> implements OnInit, OnDestroy, OnChange
     return (cnpj?.length ?? 0) > 11 ? '00.000.000/0000-00' : '000.000.000-00';
   }
 
-  formatCell(row: T, key: KeyOfData): string {
+  formatCell(row: T, key: any): string {
     const value = (row as any)?.[key];
 
     switch (key) {
@@ -185,6 +198,12 @@ export class TableComponent<T = BaseType> implements OnInit, OnDestroy, OnChange
         const raw = this.getCnpj(row);
         const expr = this.setCnpjMask(raw);
         return this.mask.transform(raw, expr) ?? '';
+      }
+      case 'startDate': {
+        return onFormatDateFromUtcToLocal(value);
+      }
+      case 'finishDate': {
+        return onFormatDateFromUtcToLocal(value);
       }
       default:
         return value ?? '';
@@ -278,16 +297,6 @@ export class TableComponent<T = BaseType> implements OnInit, OnDestroy, OnChange
     });
   };
 
-  onSetTableDataSortDirectionToDefault = <K extends keyof T>(): void => {
-    const keyId = Object.keys(this.dataList)[0] as K;
-    if (!keyId) return;
-    this.dataList.sort((a, b) => {
-      const last = b[keyId] as number;
-      const first = a[keyId] as number;
-      return last - first;
-    });
-  };
-
   onClickOnFilterBtnThroughSort = (idx: number): void => {
     this.onSetTableHeaderSortMethod(idx || 0);
     this.onSetTableHeaderIcon();
@@ -295,13 +304,13 @@ export class TableComponent<T = BaseType> implements OnInit, OnDestroy, OnChange
   };
 
   onSetSortFilterToDefault = (): void => {
-    this.onSetTableDataSortDirectionToDefault();
     this.onSetSortStateToDefault();
+    this.dataList = this.onFilterThroughSort(0);
   };
 
   onSetSortStateToDefault = (): void => {
     this.tableHeaders = this.tableHeaders.map(header => {
-      return { ...header, sort: 0, icon: defaultTableHeaderIcon };
+      return { ...header, sortDirection: 0, icon: defaultTableHeaderIcon };
     });
   };
 
@@ -347,7 +356,6 @@ export class TableComponent<T = BaseType> implements OnInit, OnDestroy, OnChange
   @Output() deleteBtnClickEmitter = new EventEmitter<T>();
 
   onDeleteBtnClick(data: T): void {
-    console.log('table data', data);
     this.deleteBtnClickEmitter.emit(data);
   }
 

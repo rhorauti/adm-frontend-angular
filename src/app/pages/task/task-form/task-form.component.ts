@@ -9,6 +9,7 @@ import {
   OnDestroy,
   OnInit,
   QueryList,
+  signal,
   ViewChildren,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
@@ -24,7 +25,6 @@ import { LoadingComponent } from '@components/loading/loading.component';
 import { ModalAskComponent } from '@components/modal/modal-ask/modal-ask.component';
 import { ModalBaseComponent } from '@components/modal/modal-base/modal-base.component';
 import { ModalInfoComponent } from '@components/modal/modal-info/modal-info.component';
-// import { PaginationComponent } from '@components/pagination/pagination.component';
 import { PhotoBoxListComponent } from '@components/photo-box/photo-box-list/photo-box-list.component';
 import { SelectComponent } from '@components/select/select.component';
 import { TableComponent } from '@components/table/table.component';
@@ -48,6 +48,7 @@ import {
   PartialTaskType,
   IUsedSpareParts,
   ITaskForm,
+  ITaskFilterHelp,
 } from '@core/interfaces/task.interface';
 import { BaseApiName, KeyOfData } from '@core/types/base.type';
 import { ValidationType } from '@core/types/validation.type';
@@ -56,6 +57,7 @@ import { BaseRegisterStore, defaultTableHeaderIcon } from '@store/base/base.regi
 import { ModalType } from '@store/modal/modal.store';
 import { Subscription } from 'rxjs';
 import { onFormatDateFromUtcToLocal } from '@core/utils/misc';
+import { PaginationComponent } from '@components/pagination/pagination.component';
 
 interface IDisabled {
   idTask: boolean;
@@ -101,7 +103,7 @@ type ProductCache = 'toolingCache' | 'sparePartsCache';
     ModalBaseComponent,
     TableComponent,
     ButtonCloseComponent,
-    // PaginationComponent,
+    PaginationComponent,
     HelpComponent,
     ModalInfoComponent,
     ModalAskComponent,
@@ -206,151 +208,6 @@ export class TaskFormComponent implements OnInit, OnDestroy, AfterViewInit {
     productionLine: 'success',
   };
 
-  modalForm = {
-    isActive: false,
-    modalType: '',
-    isBtnDisabled: true,
-    sparePartsIdx: 0,
-    isCopiedData: false,
-    isEditData: false,
-    inputSearchValue: '',
-    isTableHeaderBoxActive: false,
-    tableHeaders: [
-      {
-        id: 0,
-        isHeaderActive: true,
-        sortDirection: 0,
-        icon: defaultTableHeaderIcon,
-        headerName: 'Id',
-        databaseField: 'idTask',
-      },
-      {
-        id: 1,
-        isHeaderActive: true,
-        sortDirection: 0,
-        icon: defaultTableHeaderIcon,
-        headerName: 'Atividade',
-        databaseField: 'name',
-      },
-      {
-        id: 2,
-        isHeaderActive: true,
-        sortDirection: 0,
-        icon: defaultTableHeaderIcon,
-        headerName: 'Funcionário',
-        databaseField: 'employee',
-      },
-      {
-        id: 3,
-        isHeaderActive: true,
-        sortDirection: 0,
-        icon: defaultTableHeaderIcon,
-        headerName: 'Início',
-        databaseField: 'startDate',
-      },
-      {
-        id: 4,
-        isHeaderActive: true,
-        sortDirection: 0,
-        icon: defaultTableHeaderIcon,
-        headerName: 'Fim',
-        databaseField: 'finishDate',
-      },
-      {
-        id: 5,
-        isHeaderActive: true,
-        sortDirection: 0,
-        icon: defaultTableHeaderIcon,
-        headerName: 'Tipo',
-        databaseField: 'taskType',
-      },
-      {
-        id: 6,
-        isHeaderActive: true,
-        sortDirection: 0,
-        icon: defaultTableHeaderIcon,
-        headerName: 'Ferramenta',
-        databaseField: 'product',
-      },
-      {
-        id: 7,
-        isHeaderActive: true,
-        sortDirection: 0,
-        icon: defaultTableHeaderIcon,
-        headerName: 'Linha',
-        databaseField: 'productionLine',
-      },
-      {
-        id: 8,
-        isHeaderActive: true,
-        sortDirection: 0,
-        icon: defaultTableHeaderIcon,
-        headerName: 'Status',
-        databaseField: 'status',
-      },
-    ],
-    tableCheckbox: {
-      header: false,
-      body: [],
-    },
-    tableItemsBox: [],
-    initialData: [],
-    isDelBtnDisabled: false,
-    dataList: [],
-    data: {
-      idTask: 0,
-      employee: '',
-      startDate: '',
-      finishDate: '',
-      name: '',
-      status: TASK_NUMBER_STATUS.NOT_STARTED,
-      taskType: '',
-      product: '',
-      productionLine: '',
-    },
-    isFilterBoxActive: false,
-    isFilterResultZeroRegister: false,
-    filterBox: {
-      idTask: 0,
-      employee: '',
-      startDate: '',
-      finishDate: '',
-      name: '',
-      status: TASK_NUMBER_STATUS.NOT_STARTED,
-      taskType: '',
-      product: '',
-      productionLine: '',
-    },
-    filterHelp: {
-      inputSearch: '',
-      idTask: '',
-      employee: '',
-      startDate: '',
-      finishDate: '',
-      name: '',
-      status: TASK_STRING_STATUS.NOT_STARTED,
-      taskType: '',
-      product: '',
-      productionLine: '',
-    },
-    // pagination: {
-    //   currentPage: 1,
-    //   totalPages: 1,
-    //   qtyPerPage: 10,
-    //   breakpointPage: 7,
-    //   pagesArray: [],
-    // },
-  };
-
-  // modalForm = {
-  //   isActive: false,
-  //   modalType: '',
-  //   isBtnDisabled: true,
-  //   sparePartsIdx: 0,
-  // };
-
-  modalItemList: boolean[] = [];
-
   showSpareParts = false;
   startDate = '';
   finishDate = '';
@@ -370,7 +227,7 @@ export class TaskFormComponent implements OnInit, OnDestroy, AfterViewInit {
     ],
     status: TASK_NUMBER_STATUS.NOT_STARTED,
     comment: '',
-    imgPreviewList: [],
+    imgPreviewList: null,
     productList: [],
     product: {
       idProduct: 0,
@@ -741,90 +598,77 @@ export class TaskFormComponent implements OnInit, OnDestroy, AfterViewInit {
     this.onRedirectPage(`/${this.paramsDeptName}/${this.currentView}`);
   };
 
-  onCreateBooleanListFromDataList = (productCache: ProductCache): void => {
-    const dataListLength = this[productCache].size;
-    if (this.modalItemList.length !== dataListLength) {
-      this.modalItemList = new Array(dataListLength).fill(false);
-    }
-  };
+  // onCreateBooleanListFromDataList = (productCache: ProductCache): void => {
+  //   const dataListLength = this[productCache].size;
+  //   if (this.modalItemList.length !== dataListLength) {
+  //     this.modalItemList = new Array(dataListLength).fill(false);
+  //   }
+  // };
 
-  onActionOkModalForm = (): void => {
-    if (this.modalForm.modalType == this.toolingProductType) {
-      this.onSetProductionLineBasedOnToolingChange(
-        this.taskFormData.product?.internalPartNumber || ''
-      );
-    }
-    this.modalForm.isActive = false;
-  };
+  // onActionOkModalForm = (): void => {
+  //   if (this.modalForm.modalType == this.toolingProductType) {
+  //     this.onSetProductionLineBasedOnToolingChange(
+  //       this.taskFormData.product?.internalPartNumber || ''
+  //     );
+  //   }
+  //   this.modalForm.isActive = false;
+  // };
 
-  onActionNokModalForm = (): void => {
-    if (this.modalForm.modalType == this.toolingProductType) {
-      this.onSetProductionLineBasedOnToolingChange();
-    }
-    this.modalForm.isActive = false;
-  };
+  // onActionNokModalForm = (): void => {
+  //   if (this.modalForm.modalType == this.toolingProductType) {
+  //     this.onSetProductionLineBasedOnToolingChange();
+  //   }
+  //   this.modalForm.isActive = false;
+  // };
 
-  onSetTableItem = (data: PartialProduct): void => {
-    if (this.modalForm.modalType == this.toolingProductType) {
-      if (data) {
-        this.taskFormData.product = { ...data };
-      } else {
-        this.onClearProductData();
-      }
-    } else {
-      if (data && this.taskFormData.usedSpareParts) {
-        // Always assign a new array reference for usedSpareParts
-        const updatedSpareParts = this.taskFormData.usedSpareParts.map((sp, idx) => {
-          if (idx === this.modalForm.sparePartsIdx) {
-            return {
-              ...sp,
-              idProduct: data.idProduct || 0,
-              internalPartNumber: data.internalPartNumber || '',
-              name: data.name || '',
-            };
-          }
-          return sp;
-        });
-        this.taskFormData.usedSpareParts = [...updatedSpareParts];
-      } else {
-        this.taskFormData.usedSpareParts = [];
-      }
-    }
-  };
+  // onSetTableItem = (data: PartialProduct): void => {
+  //   if (this.modalForm.modalType == this.toolingProductType) {
+  //     if (data) {
+  //       this.taskFormData.product = { ...data };
+  //     } else {
+  //       this.onClearProductData();
+  //     }
+  //   } else {
+  //     if (data && this.taskFormData.usedSpareParts) {
+  //       // Always assign a new array reference for usedSpareParts
+  //       const updatedSpareParts = this.taskFormData.usedSpareParts.map((sp, idx) => {
+  //         if (idx === this.modalForm.sparePartsIdx) {
+  //           return {
+  //             ...sp,
+  //             idProduct: data.idProduct || 0,
+  //             internalPartNumber: data.internalPartNumber || '',
+  //             name: data.name || '',
+  //           };
+  //         }
+  //         return sp;
+  //       });
+  //       this.taskFormData.usedSpareParts = [...updatedSpareParts];
+  //     } else {
+  //       this.taskFormData.usedSpareParts = [];
+  //     }
+  //   }
+  // };
 
-  onModalItemChange = (list: boolean[]): void => {
-    if (list.some(item => item == true)) {
-      this.modalForm.isBtnDisabled = false;
-    } else {
-      this.modalForm.isBtnDisabled = true;
-    }
-  };
+  // onModalItemChange = (list: boolean[]): void => {
+  //   if (list.some(item => item == true)) {
+  //     this.modalForm.isBtnDisabled = false;
+  //   } else {
+  //     this.modalForm.isBtnDisabled = true;
+  //   }
+  // };
 
-  onSetData = (data: ITaskForm): void => {
-    this.baseRegisterStore.onSetStateToNewValue('data', data);
-  };
+  // onSetData = (data: ITaskForm): void => {
+  //   this.baseRegisterStore.onSetStateToNewValue('data', data);
+  // };
 
   onShowModalForm = (type: ProductCache, sparePartIdx?: number): void => {
-    this.modalForm.modalType = type;
-    if (this.modalForm.modalType == this.sparePartsProductType) {
-      this.modalForm.sparePartsIdx = sparePartIdx as number;
-    }
-    this.modalBreadcrumbList = ['Produtos', 'Selecione um item'];
-    // const sparePartsList = this.taskFormData.productList
-    //   ? (this.taskFormData.productList?.filter(
-    //       p => p.productType.name == this.modalForm.modalType
-    //     ) as PartialProduct[])
-    //   : [];
-    // this.baseRegisterStore.onSetSlicePropsToNewValue(
-    //   'initialData',
-    //   sparePartsList as PartialProduct[]
-    // );
-    // this.baseRegisterStore.onSetSlicePropsToNewValue(
-    //   'dataList',
-    //   sparePartsList as PartialProduct[]
-    // );
-    this.onCreateBooleanListFromDataList(type);
-    this.modalForm.isActive = true;
+    // this.modalForm.modalType = type;
+    // if (this.modalForm.modalType == this.sparePartsProductType) {
+    //   this.modalForm.sparePartsIdx = sparePartIdx as number;
+    // }
+    // this.modalBreadcrumbList = ['Produtos', 'Selecione um item'];
+    // this.onCreateBooleanListFromDataList(type);
+    // this.modalForm.isActive = true;
   };
 
   onFormFieldsChange = <K extends keyof IBorderType>(property: K, index?: number): void => {

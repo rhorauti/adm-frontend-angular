@@ -51,6 +51,8 @@ export type BaseApiName =
   | 'units'
   | 'task-types';
 
+export type Page = BaseApiName | 'modal';
+
 /**
  * Type to be used in value inside a method patch() provided by NgRx.
  */

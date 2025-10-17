@@ -29,7 +29,7 @@ export interface ITaskForm {
   name?: string;
   status?: number | string;
   comment?: string;
-  imgPreviewList?: IPhoto[];
+  imgPreviewList?: IPhoto[] | null;
   productList?: PartialProduct[];
   product?: PartialProduct | null;
   usedSpareParts?: IUsedSpareParts[];
