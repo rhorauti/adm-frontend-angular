@@ -6,7 +6,7 @@
           type="checkbox"
           name="table-checkbox"
           (change)="onHeaderCheckboxChecked($event)"
-          [(ngModel)]="tableCheckBox.header" />
+          [(ngModel)]="isTableHeaderCheckBoxChecked" />
         <mat-icon
           (click)="onRefreshBtnClick()"
           content
@@ -15,7 +15,7 @@
         >
       </div>
     }
-    @for (header of tableHeaders; track trackByHeaderId($index, header)) {
+    @for (header of tableHeaders; let headerIdx = $index; track headerIdx) {
       @if (header.isHeaderActive) {
         <div
           class="table-td relative flex font-semibold items-center gap-1 overflow-x-auto scrollbar-thin">
@@ -38,14 +38,14 @@
   </div>
   <div class="flex flex-col sm:gap-0">
     @for (
-      data of dataList.slice(computedFirstRegister(), computedLastRegister());
+      body of tableBodyList.slice(computedFirstRegister(), computedLastRegister());
       let dataIdx = $index;
-      track trackByDataId(dataIdx, data)
+      track dataIdx
     ) {
       <div
         tabindex="0"
-        (click)="onRowClick($event, data)"
-        (keydown)="onRowClick($event, data)"
+        (click)="onRowClick($event, body, dataIdx)"
+        (keydown)="onRowClick($event, body, dataIdx)"
         [style.--grid-layout]="gridTemplateColumns"
         class="grid grid-cols-1 sm:gap-2 dynamic-grid mb-2 pb-2 sm:pb-0 sm:mb-0 border-b-[2.5px] border-solid border-gray-200 hover:bg-gray-200 cursor-pointer">
         @if (!isModal) {
@@ -57,33 +57,31 @@
             <input
               type="checkbox"
               name="table-checkbox"
-              (change)="onBodyCheckboxCheckChange(dataIdx, $event, data)"
-              [(ngModel)]="tableCheckBox.body[$index]" />
+              (change)="onBodyCheckboxCheckChange(dataIdx, $event, body.data)"
+              [(ngModel)]="body.isBodyCheckboxChecked" />
             <mat-icon
-              #rowIconOptions
-              (keydown)="onShowTableItemBox($event, dataIdx)"
-              (click)="onShowTableItemBox($event, dataIdx)"
+              (keydown)="onShowRowPopUp($event, dataIdx)"
+              (click)="onShowRowPopUp($event, dataIdx)"
               class="border border-gray-800 rounded-full hover:text-white hover:bg-logo text-center text-sm cursor-pointer p-1 font-semibold"
               >more_horiz</mat-icon
             >
-            @if (rowModalVisibilityControlList[dataIdx]) {
+            @if (body.isRowPopUpActive) {
               <div
-                #divRowModal
                 tabindex="0"
                 [ngClass]="{
-                  'opacity-100': rowModalVisibilityControlList[dataIdx],
-                  'opacity-0': !rowModalVisibilityControlList[dataIdx],
+                  'opacity-100': body.isRowPopUpActive,
+                  'opacity-0': !body.isRowPopUpActive,
                   'sm:-top-6': $last,
                   'top-1': $first,
                 }"
                 class="absolute flex flex-col gap-1 translate-x-[4.7rem] p-2 border border-gray-400 rounded-md bg-gray-100 text-xs">
                 <button
-                  (click)="onCloneBtnClick(data)"
+                  (click)="onCloneBtnClick(body.data)"
                   class="hover:bg-logo hover:text-white hover:rounded-md px-2">
                   Clonar
                 </button>
                 <button
-                  (click)="onDeleteBtnClick(data)"
+                  (click)="onDeleteBtnClick(body.data)"
                   class="hover:bg-logo hover:text-white hover:rounded-md px-2">
                   Excluir
                 </button>
@@ -91,19 +89,15 @@
             }
           </div>
         }
-        @for (
-          header of tableHeaders;
-          let headerIdx = $index;
-          track trackByHeaderId($index, header)
-        ) {
+        @for (header of tableHeaders; let headerIdx = $index; track headerIdx) {
           @if (header.isHeaderActive) {
             <div class="table-td overflow-hidden text-ellipsis">
-              @if (data[header.databaseField]) {
+              @if (body.data[header.databaseField]) {
                 <span class="block sm:hidden font-semibold">{{ header.headerName }}: </span>
               }
               @if (header.databaseField == 'photoUrl') {
                 <img
-                  [src]="formatCell(data, header.databaseField)"
+                  [src]="formatCell(body.data, header.databaseField)"
                   alt="Photo Image"
                   class="w-5 aspect-square" />
               } @else {
@@ -112,28 +106,16 @@
                   [class.justify-between]="isModal && tableHeaders.length - 1 == headerIdx"
                   [class.gap-2]="header.databaseField == 'status'">
                   @if (header.databaseField == 'status') {
-                    <mat-icon [ngClass]="icons[computedFirstRegister() + dataIdx].backgroundColor">
-                      {{ icons[computedFirstRegister() + dataIdx].iconName }}
+                    <mat-icon [ngClass]="body.statusIcon?.backgroundColor">
+                      {{ body.statusIcon?.iconName }}
                     </mat-icon>
                   }
                   <span>
-                    {{ formatCell(data, header.databaseField) }}
-                    <!-- @switch (header.databaseField) {
-                      @case ('cnpj') {
-                        {{ formatCell(data, header.databaseField) }}
-                      }
-                      @case ('origin') {
-                        {{ onSetOrigin(data) }}
-                      }
-                      @case (header.databaseField.toString().toLowerCase().includes('date')) {
-                        {{ formatCell(data, header.databaseField) }}
-                      }
-                      @default {
-                        {{ data[header.databaseField] }}
-                      }
-                    } -->
+                    {{ formatCell(body.data, header.databaseField) }}
                   </span>
-                  @if (isModal && tableHeaders.length - 1 == headerIdx) {
+                  @if (
+                    isModal && tableHeaders.length - 1 == headerIdx && body.isModalCheckIconChecked
+                  ) {
                     <mat-icon class="text-green-400">check_circle</mat-icon>
                   }
                 </p>

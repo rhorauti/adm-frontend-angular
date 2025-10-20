@@ -22,7 +22,7 @@ import { ToogleButtonComponent } from '@components/toogle-button/toogle-button.c
 import { ProductApi } from '@core/http/product/product.api';
 import { ProductionLineApi } from '@core/http/production-line/production-line.api';
 import { ActionCallback } from '@core/interfaces/modal.interface';
-import { IProduct } from '@core/interfaces/product.interface';
+import { IProduct, PartialProduct } from '@core/interfaces/product.interface';
 import { IProductionLine } from '@core/interfaces/production-line.interface';
 import { BaseApiName } from '@core/types/base.type';
 import { BaseRegisterStore } from '@store/base/base.register.store';
@@ -64,7 +64,7 @@ export class ProductionLineFormComponent implements OnInit, OnDestroy, AfterView
   showToolingList = true;
   listBoxStringList: string[] = [];
   selectedListBoxStringList: string[] = [];
-  listBoxDataList: Partial<IProduct>[] = [];
+  listBoxDataList: PartialProduct[] = [];
 
   productionLineData = {
     idProductionLine: 0,
@@ -118,7 +118,7 @@ export class ProductionLineFormComponent implements OnInit, OnDestroy, AfterView
       this.modalStore.onLoading(true);
       const response = await this.productApi.onGetDataListByProductType('name', 'Ativo');
       if (response.data) {
-        this.listBoxDataList = response.data as Partial<IProduct>[];
+        this.listBoxDataList = response.data as PartialProduct[];
       } else {
         return;
       }

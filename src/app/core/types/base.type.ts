@@ -5,7 +5,7 @@ import { IDepartment } from '@core/interfaces/department.interface';
 import { IEmployee, IEmployeePosition } from '@core/interfaces/employee.interface';
 import { IProduct, IProductType, PartialProduct } from '@core/interfaces/product.interface';
 import { IProductionLine } from '@core/interfaces/production-line.interface';
-import { ITaskForm, ITaskHomeData, ITaskType } from '@core/interfaces/task.interface';
+import { ITaskForm, ITaskHomeData as ITaskHome, ITaskType } from '@core/interfaces/task.interface';
 import { IUnit } from '@core/interfaces/unit.interface';
 
 export type StoreType = IBaseRegisterStore<BaseType>;
@@ -26,7 +26,7 @@ export type BaseType =
   | IProductionLine
   | IProductType
   | IDepartment
-  | ITaskHomeData
+  | ITaskHome
   | ITaskForm
   | PartialProduct;
 

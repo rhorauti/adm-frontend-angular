@@ -31,7 +31,7 @@ type InputType = 'search' | 'text' | 'password' | 'number' | 'date' | 'datetime'
 @Component({
   selector: 'app-input',
   imports: [CommonModule, FormsModule, MatIconModule, NgxMaskDirective],
-  providers: [provideNgxMask(), HostListener],
+  providers: [provideNgxMask()],
   templateUrl: './input.component.html',
   styleUrl: './input.component.scss',
 })

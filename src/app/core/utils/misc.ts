@@ -213,3 +213,10 @@ export const onFormatDateFromUtcToLocal = (
     timeStyle: timeFormat,
   }).format(date);
 };
+
+export const isUTCDate = (value: Date | number | string): boolean => {
+  if (value instanceof Date && !isNaN(value.getTime())) return true;
+  if (typeof value === 'string' && /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?Z$/.test(value))
+    return true;
+  return false;
+};

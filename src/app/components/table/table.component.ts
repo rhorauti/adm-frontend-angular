@@ -1,4 +1,4 @@
-import { CommonModule, DOCUMENT } from '@angular/common';
+import { CommonModule } from '@angular/common';
 import {
   Component,
   computed,
@@ -9,8 +9,6 @@ import {
   OnDestroy,
   OnInit,
   Output,
-  QueryList,
-  ViewChildren,
   OnChanges,
   SimpleChanges,
   HostListener,
@@ -23,17 +21,13 @@ import { ButtonCloseComponent } from '@components/button/button-close/button-clo
 import { RouterModule } from '@angular/router';
 import { BaseType, Page } from '@core/types/base.type';
 import { IProduct } from '@core/interfaces/product.interface';
-import { ITableCheckbox, ITableHeader } from '@core/interfaces/table.interface';
+import { ITableBody, ITableHeader } from '@core/interfaces/table.interface';
 import { defaultTableHeaderIcon } from '@store/base/base.register.store';
 import { DataService } from '@core/services/data.service';
 import { Subscription } from 'rxjs';
-import { onSetIconStatus, onSetIconStatusBackgroundColor } from 'app/enum/status.enum';
+import { onSetIconStatus, onSetIconStatusBackgroundColor, Status } from 'app/enum/status.enum';
 import { onFormatDateFromUtcToLocal } from '@core/utils/misc';
-
-interface StatusIcon {
-  iconName: string;
-  backgroundColor: string;
-}
+import { ITaskForm } from '@core/interfaces/task.interface';
 
 @Component({
   selector: 'app-table',
@@ -43,12 +37,7 @@ interface StatusIcon {
   styleUrl: './table.component.scss',
 })
 export class TableComponent<T = BaseType> implements OnInit, OnDestroy, OnChanges {
-  @ViewChildren('divRowModal') private divRowModal!: QueryList<ElementRef>;
-  @ViewChildren('rowIconOptions', { read: ElementRef })
-  private rowIconOptions!: QueryList<ElementRef>;
-
   readonly elRef = inject(ElementRef);
-  readonly document = inject(DOCUMENT);
   readonly mask = inject(NgxMaskPipe);
   readonly dataService = inject(DataService);
   private subscribe!: Subscription;
@@ -60,87 +49,74 @@ export class TableComponent<T = BaseType> implements OnInit, OnDestroy, OnChange
   @Input() currentPage = signal<number>(1);
   @Input() isComponentSetToDefault = false;
 
+  tableBodyList: ITableBody<T>[] = [];
   gridTemplateColumns = '';
-
   qtyPerPage = 10;
-  dataList: T[] = [];
-  rowModalVisibilityControlList: boolean[] = [];
-  tableCheckBox: ITableCheckbox = { header: false, body: [] };
-  icons: StatusIcon[] = [];
+  isTableHeaderCheckBoxChecked = false;
 
   ngOnInit(): void {
-    this.dataList = [...this.initialDataList] as T[];
     this.subscribe = this.dataService.emitEvent.subscribe(currentPage => {
       this.currentPage.set(currentPage);
     });
-    this.onSetCheckboxArrayToDefault();
-    this.onCreateTableItemsBoxArray();
     this.onGridTemplateColumnsChange();
-    this.onCreateTableIconArray();
   }
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['initialDataList']) {
-      this.dataList = [...this.initialDataList] as T[];
+      this.onCreateTableBodyList();
       this.onSetSortFilterToDefault();
-      this.onCreateTableIconArray();
     }
-    if (changes['tableHeaders']) {
+    if (changes['initialTableHeaders']) {
       this.onGridTemplateColumnsChange();
     }
-    if (changes['isComponentSetToDefault']) {
+    if (this.isComponentSetToDefault) {
       this.onSetSortFilterToDefault();
-      this.onSetCheckboxArrayToDefault();
-      this.tableCheckBox.header = false;
-      this.onSetToDefault();
+      this.onSetCheckboxBodyToDefault();
+      this.onComponentSetToDefault();
+      this.onSetModalCheckIconCheckedToDefault();
+      this.isTableHeaderCheckBoxChecked = false;
     }
   }
 
-  onCreateTableIconArray = (): void => {
-    this.icons = Array.from({ length: this.dataList.length }, (_, i) => {
-      const row = this.dataList[i] as any;
-      const value = row?.status ?? row?.statusId ?? undefined;
+  isStatusData = (obj: unknown): obj is ITaskForm => {
+    return typeof obj === 'object' && obj !== null && typeof (obj as ITaskForm).status === 'string';
+  };
+
+  onCreateTableBodyList = (): void => {
+    this.tableBodyList = this.initialDataList.map(data => {
+      const base: ITableBody<T> = {
+        data,
+        isBodyCheckboxChecked: false,
+        isModalCheckIconChecked: false,
+        isRowPopUpActive: false,
+      };
+
+      if (!this.isStatusData(data)) {
+        return base;
+      }
+      const status = data.status as Status;
       return {
-        status: row.status,
-        idTask: row.idTask,
-        iconName: onSetIconStatus(value),
-        backgroundColor: onSetIconStatusBackgroundColor(value),
+        ...base,
+        statusIcon: {
+          backgroundColor: onSetIconStatusBackgroundColor(status),
+          iconName: onSetIconStatus(status),
+          status: status,
+        },
       };
     });
-  };
-
-  @Output() setToDefaultEmitter = new EventEmitter();
-
-  onSetToDefault = (): void => {
-    this.setToDefaultEmitter.emit(false);
-  };
-
-  @Output() isDelBtnDisabledEmitter = new EventEmitter();
-  @Output() tableDataEmitter = new EventEmitter();
-
-  onCheckTableCheckboxBodyStatus = (array: boolean[], data?: T): void => {
-    const bodyCheckboxListUpdated = array.filter(element => element == true);
-    this.tableCheckBox.header = bodyCheckboxListUpdated.length > 0;
-    this.isDelBtnDisabledEmitter.emit(bodyCheckboxListUpdated.length != 1);
-    if (data) this.tableDataEmitter.emit(data);
   };
 
   @HostListener('document:click', ['$event'])
   clickout(event: MouseEvent) {
     if (!this.elRef.nativeElement.contains(event.target)) {
-      this.rowModalVisibilityControlList = this.rowModalVisibilityControlList.map(() => false);
+      this.tableBodyList = this.tableBodyList.map(body => {
+        return {
+          ...body,
+          isRowPopUpActive: false,
+        };
+      });
     }
   }
-
-  onCreateTableItemsBoxArray = (): void => {
-    this.rowModalVisibilityControlList = Array.from({ length: this.dataList.length }, () => false);
-  };
-
-  trackByHeaderId = (_: number, header: any): number => header.id;
-  trackByDataId = (index: number, data: any): string => {
-    const id = data.id || data.idTask || data.idProduct || 'no-id';
-    return `${id}-${index}`;
-  };
 
   onGridTemplateColumnsChange = (): void => {
     this.gridTemplateColumns = '';
@@ -165,13 +141,6 @@ export class TableComponent<T = BaseType> implements OnInit, OnDestroy, OnChange
       }
     });
     this.gridTemplateColumns = columnsWidth.join(' ');
-  };
-
-  @Output() rowClickEmitter = new EventEmitter();
-
-  onRowClick = (event: MouseEvent | KeyboardEvent, data: T): void => {
-    event.stopPropagation();
-    this.rowClickEmitter.emit(data);
   };
 
   computedFirstRegister = computed(() => {
@@ -233,17 +202,18 @@ export class TableComponent<T = BaseType> implements OnInit, OnDestroy, OnChange
    * There are 3 sort states : 0 - Not sorted, 1 - Ascending, 2 - Descending.
    * @param idx The index of the clicked table column.
    */
-  onFilterThroughSort = <K extends keyof T>(idx: number): T[] => {
-    if (!this.dataList || this.dataList.length == 0) return [];
-    const keyId = Object.keys(this.dataList[0] as unknown as object)[0] as K;
+  onFilterThroughSort = <K extends keyof T>(idx: number): ITableBody<T>[] => {
+    if (!this.tableBodyList || this.tableBodyList.length == 0) return [];
+    const firstDataItem = this.tableBodyList[0].data as Record<string, unknown>;
+    const keyId = Object.keys(firstDataItem).find(k => k.toLowerCase().startsWith('id')) as K;
     const header = this.tableHeaders[idx];
     const key = header.databaseField as K;
     const sortDirection = header.sortDirection;
     if (this.tableHeaders[idx].sortDirection == 0) {
       return [
-        ...this.dataList.sort((a, b) => {
-          const valueA = a[keyId];
-          const valueB = b[keyId];
+        ...this.tableBodyList.sort((a, b) => {
+          const valueA = a.data[keyId];
+          const valueB = b.data[keyId];
           if (typeof valueA === 'number' && typeof valueB === 'number') {
             return valueB - valueA;
           }
@@ -252,9 +222,9 @@ export class TableComponent<T = BaseType> implements OnInit, OnDestroy, OnChange
       ];
     } else {
       return [
-        ...this.dataList.sort((a, b) => {
-          const valueA = a[key];
-          const valueB = b[key];
+        ...this.tableBodyList.sort((a, b) => {
+          const valueA = a.data[key];
+          const valueB = b.data[key];
           let comparison = 0;
           if (typeof valueA === 'number' && typeof valueB === 'number') {
             comparison = ((valueA as number) - valueB) as number;
@@ -300,12 +270,12 @@ export class TableComponent<T = BaseType> implements OnInit, OnDestroy, OnChange
   onClickOnFilterBtnThroughSort = (idx: number): void => {
     this.onSetTableHeaderSortMethod(idx || 0);
     this.onSetTableHeaderIcon();
-    this.dataList = this.onFilterThroughSort(idx || 0);
+    this.tableBodyList = this.onFilterThroughSort(idx || 0);
   };
 
   onSetSortFilterToDefault = (): void => {
     this.onSetSortStateToDefault();
-    this.dataList = this.onFilterThroughSort(0);
+    this.tableBodyList = this.onFilterThroughSort(0);
   };
 
   onSetSortStateToDefault = (): void => {
@@ -315,36 +285,113 @@ export class TableComponent<T = BaseType> implements OnInit, OnDestroy, OnChange
   };
 
   onHeaderCheckboxChecked = (event: Event): void => {
-    const newValue = (event.target as HTMLInputElement).checked;
-    this.tableCheckBox.body = this.tableCheckBox.body.map(() => newValue);
-    this.onCheckTableCheckboxBodyStatus(this.tableCheckBox.body);
+    const isChecked = (event.target as HTMLInputElement).checked;
+    this.isTableHeaderCheckBoxChecked = isChecked;
+    this.tableBodyList = this.tableBodyList.map(body => {
+      return {
+        ...body,
+        isBodyCheckboxChecked: isChecked,
+      };
+    });
+    this.onCheckTableCheckboxBodyStatus();
+  };
+
+  @Output() setToDefaultEmitter = new EventEmitter();
+
+  onComponentSetToDefault = (): void => {
+    this.isComponentSetToDefault = false;
+    this.setToDefaultEmitter.emit(false);
+  };
+
+  @Output() isDelBtnDisabledEmitter = new EventEmitter();
+  @Output() tableDataEmitter = new EventEmitter();
+
+  onCheckTableCheckboxBodyStatus = (data?: T): void => {
+    const bodyCheckboxListUpdated = this.tableBodyList.filter(
+      body => body.isBodyCheckboxChecked == true
+    );
+    this.isTableHeaderCheckBoxChecked = bodyCheckboxListUpdated.length > 0;
+    this.isDelBtnDisabledEmitter.emit(bodyCheckboxListUpdated.length != 1);
+    if (data) this.tableDataEmitter.emit(data);
   };
 
   onBodyCheckboxCheckChange = (index: number, event: Event, data?: T) => {
-    const newValue = (event.target as HTMLInputElement).checked;
-    this.tableCheckBox.body = this.tableCheckBox.body.map((element, idx) =>
-      idx == index ? (element = newValue) : element
-    );
-    if (newValue) {
-      this.onCheckTableCheckboxBodyStatus(this.tableCheckBox.body, data);
+    const isChecked = (event.target as HTMLInputElement).checked;
+    this.tableBodyList = this.tableBodyList.map((body, idx) => {
+      if (index == idx) {
+        return {
+          ...body,
+          isBodyCheckboxChecked: isChecked,
+        };
+      }
+      return body;
+    });
+    if (isChecked) {
+      this.onCheckTableCheckboxBodyStatus(data);
     } else {
-      this.onCheckTableCheckboxBodyStatus(this.tableCheckBox.body);
+      this.onCheckTableCheckboxBodyStatus();
     }
   };
 
-  onShowTableItemBox = (event: MouseEvent | KeyboardEvent, idx: number): void => {
+  onShowRowPopUp = (event: MouseEvent | KeyboardEvent, idx: number): void => {
     event.stopPropagation();
-    this.rowModalVisibilityControlList = this.rowModalVisibilityControlList.map((value, index) => {
-      if (!value && index == idx) {
-        return true;
-      } else {
-        return false;
+    this.tableBodyList = this.tableBodyList.map((body, index) => {
+      if (index == idx) {
+        return {
+          ...body,
+          isRowPopUpActive: true,
+        };
       }
+      return body;
     });
   };
 
-  onSetCheckboxArrayToDefault = (): void => {
-    this.tableCheckBox.body = Array.from({ length: this.dataList.length }, () => false);
+  onSetCheckboxBodyToDefault = (): void => {
+    const tableBodyList = this.tableBodyList.map(body => {
+      return {
+        ...body,
+        isBodyCheckboxChecked: false,
+      };
+    });
+    this.tableBodyList = tableBodyList;
+  };
+
+  onSetModalCheckIconCheckedToDefault = (): void => {
+    const tableBodyList = this.tableBodyList.map(body => {
+      return {
+        ...body,
+        isModalCheckIconChecked: false,
+      };
+    });
+    this.tableBodyList = tableBodyList;
+  };
+
+  @Output() rowClickEmitter = new EventEmitter();
+
+  onRowClick = (event: MouseEvent | KeyboardEvent, body: ITableBody<T>, idx: number): void => {
+    event.stopPropagation();
+    if (this.isModal) {
+      this.tableBodyList = this.tableBodyList.map((body, index) => {
+        if (index == idx) {
+          return {
+            ...body,
+            isModalCheckIconChecked: !body.isModalCheckIconChecked,
+          };
+        } else {
+          return {
+            ...body,
+            isModalCheckIconChecked: false,
+          };
+        }
+      });
+      if (this.tableBodyList[idx].isModalCheckIconChecked) {
+        this.rowClickEmitter.emit(body.data);
+      } else {
+        this.rowClickEmitter.emit();
+      }
+    } else {
+      this.rowClickEmitter.emit(body.data);
+    }
   };
 
   @Output() refreshBtnClickEmitter = new EventEmitter();

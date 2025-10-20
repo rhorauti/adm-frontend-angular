@@ -1,94 +1,68 @@
 <app-modal-base [showModal]="isModalActive" [showHeader]="false" [width]="width">
-  <div class="flex items-center flex-col gap-2 md:flex-row md:justify-between">
-    <app-breadcrumb [items]="breadcrumbList" />
-  </div>
-  @if (dataList() && dataList().length > 0) {
-    <div class="flex flex-col gap-5">
-      <div class="top-button-layout gap-6 sm:gap-3 overflow-x-auto">
-        <div class="flex gap-3">
-          <app-input
-            [inputValue]="inputSearchValue()"
-            [id]="`input-filter-${currentView}`"
-            [placeholder]="inputSearchPlaceholder"
-            [inputName]="'search'"
-            (iconClickEmitter)="onClickOnFilterBtnThroughSearchInput(inputSearchFilterList)"
-            (keyboardEmitter)="onKeyPressOnSearchInput($event, inputSearchFilterList)"
-            (inputValueEmitter)="inputSearchValue.set($event)" />
-          <app-tooltip [description]="'Filtro'" [position]="'right'">
-            <app-button-icon
-              content
-              (click)="isFilterBoxActive.set(true)"
-              [iconName]="'filter_list'" />
-          </app-tooltip>
+  <div class="body-block">
+    <div class="flex items-center flex-col gap-2 md:flex-row md:justify-between">
+      <app-breadcrumb [items]="breadcrumbList" />
+    </div>
+    @if (dataList() && dataList().length > 0) {
+      <div class="flex flex-col gap-5">
+        <div class="top-button-layout gap-6 sm:gap-3 overflow-x-auto">
+          <div class="flex gap-3">
+            <app-input
+              [inputValue]="inputSearchValue()"
+              [id]="`input-modal-filter-${currentView}`"
+              [placeholder]="inputSearchPlaceholder"
+              [inputName]="'search'"
+              (iconClickEmitter)="onClickOnFilterBtnThroughSearchInput()"
+              (keyboardEmitter)="onKeyPressOnSearchInput($event)"
+              (inputValueEmitter)="inputSearchValue.set($event)" />
+            <app-tooltip [description]="'Filtro'" [position]="'right'"> </app-tooltip>
+          </div>
         </div>
-      </div>
-      @if (isAtLeastOneFilterHelpNotEmpty()) {
-        <div class="flex flex-wrap items-center gap-3 text-sm">
-          @if (filterHelp().inputSearch.length > 0) {
-            <div class="flex items-center gap-2">
-              <p>Pesquisa: {{ filterHelp().inputSearch }}</p>
-              <app-button-close (click)="onClearAllData()"></app-button-close>
-            </div>
-          } @else {
-            @for (tableHeader of tableHeaders(); track $index) {
-              @if (filterHelp()[tableHeader.databaseField]) {
-                <div class="flex items-center gap-2">
-                  <p>
-                    {{ tableHeader.headerName }} :
-                    {{ filterHelp()[tableHeader.databaseField] }}
-                  </p>
-                  <app-button-close
-                    (click)="
-                      onSetFilterBoxItemToDefault(tableHeader.databaseField)
-                    "></app-button-close>
-                </div>
-              }
+        @if (isAtLeastOneFilterHelpNotEmpty()) {
+          <div class="flex flex-wrap items-center gap-3 text-sm">
+            @if (filterHelp().inputSearch.length > 0) {
+              <div class="flex items-center gap-2">
+                <p>Pesquisa: {{ filterHelp().inputSearch }}</p>
+                <app-button-close (click)="onClearAllData()"></app-button-close>
+              </div>
+              <button
+                (click)="onClearAllData()"
+                class="text-logo font-semibold cursor-pointer hover:text-logo-hover hover:underline">
+                Limpar
+              </button>
             }
-          }
-          <button
-            (click)="onClearAllData()"
-            class="text-logo font-semibold cursor-pointer hover:text-logo-hover hover:underline">
-            Limpar
-          </button>
-        </div>
-      }
-      <app-table
-        [initialDataList]="tableDataFormated()"
-        [tableHeaders]="tableHeaders()"
-        [isComponentSetToDefault]="isComponentSetToDefault()"
-        (refreshBtnClickEmitter)="onShowDataList()"
-        (tableDataEmitter)="data.set($event)"
-        (setToDefaultEmitter)="isComponentSetToDefault.set(false)" />
-      <app-pagination [initialDataList]="dataList()" />
-    </div>
-  } @else {
-    <div class="flex flex-col items-center gap-4 w-full mt-10">
-      <mat-icon class="text-logo text-6xl">{{
-        isFilterResultZeroRegister() ? 'search_off' : 'library_add'
-      }}</mat-icon>
-      <p class="font-semibold">Nenhum registro encontrado</p>
-      @if (inputSearchValue().length > 0) {
-        <p>
-          Palavra(s) Pesquisada(s) :
-          <span class="font-semibold">{{ inputSearchValue() }}</span>
-        </p>
-      } @else {
-        <p>Campo(s) pesquisado(s) :</p>
-        @for (tableHeader of tableHeaders(); track $index) {
-          @if (filterBox()[tableHeader.databaseField]) {
-            <p>
-              {{ tableHeader.headerName }} :
-              <span class="font-semibold">{{ filterBox()[tableHeader.databaseField] }}</span>
-            </p>
-          }
+          </div>
         }
-      }
-      <app-button-label
-        (keyboardEmitter)="onKeyPressOnNotFoundFilterRegister($event)"
-        (click)="onClearAllData()"
-        [label]="'Voltar'" />
-    </div>
-  }
+        <app-table
+          [initialDataList]="dataList()"
+          [isModal]="true"
+          [tableHeaders]="tableHeaders()"
+          [isComponentSetToDefault]="isComponentSetToDefault()"
+          (refreshBtnClickEmitter)="onShowDataList?.()"
+          (rowClickEmitter)="onTableRowClick($event)"
+          (setToDefaultEmitter)="isComponentSetToDefault.set(false)" />
+        <app-pagination [initialDataList]="dataList()" />
+      </div>
+    } @else {
+      <div class="flex flex-col items-center gap-4 w-full mt-10">
+        <mat-icon class="text-logo text-6xl">{{
+          isFilterResultZeroRegister() ? 'search_off' : 'library_add'
+        }}</mat-icon>
+        <p class="font-semibold">Nenhum registro encontrado</p>
+        @if (inputSearchValue().length > 0) {
+          <p>
+            Palavra(s) Pesquisada(s) :
+            <span class="font-semibold">{{ inputSearchValue() }}</span>
+          </p>
+          <app-button-label
+            (keyboardEmitter)="onKeyPressOnNotFoundFilterRegister($event)"
+            (click)="onClearAllData()"
+            [label]="'Voltar'" />
+        }
+      </div>
+    }
+  </div>
+
   <div
     class="footer-block flex gap-5 justify-center items-stretch border-t border-gray-400 mt-3 pt-4">
     <app-button-label
@@ -98,7 +72,7 @@
       (click)="OnActionNok()"></app-button-label>
     <app-button-label
       [label]="'Selecionar'"
-      [isDisabled]="isDisabled"
+      [isDisabled]="isActionOkBtnDisabled"
       [iconRightName]="'save'"
       (click)="OnActionOk()"></app-button-label>
   </div>

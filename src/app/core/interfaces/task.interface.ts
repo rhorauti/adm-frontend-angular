@@ -20,6 +20,7 @@ export interface IUsedSpareParts {
   internalPartNumber: string;
   name: string;
   qty: number;
+  index?: number;
 }
 
 export interface ITaskForm {

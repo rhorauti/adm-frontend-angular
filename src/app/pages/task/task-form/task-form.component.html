@@ -14,13 +14,13 @@
       <div class="flex flex-col md:flex-row gap-4">
         <div
           class="flex flex-col md:w-24 w-full"
-          [ngClass]="taskFormData.idTask > 0 ? 'block' : 'hidden'">
+          [ngClass]="taskForm().idTask > 0 ? 'block' : 'hidden'">
           <label #labelForm class="font-medium text-sm" for="default">Id</label>
           <app-input
             class="mt-1"
             [inputName]="'custom'"
-            [isDisabled]="isDisabled.idTask"
-            [inputValue]="taskFormData.idTask == 0 ? '' : taskFormData.idTask.toString()"
+            [isDisabled]="isDisabled().idTask"
+            [inputValue]="taskForm().idTask == 0 ? '' : taskForm().idTask.toString()"
             [type]="'search'" />
         </div>
         <div class="flex flex-col grow">
@@ -30,15 +30,15 @@
           <app-select
             class="mt-1"
             [selectType]="'custom'"
-            [borderType]="borderType.employee"
-            [isDisabled]="isDisabled.employee"
+            [borderType]="borderType().employee"
+            [isDisabled]="isDisabled().employee"
             [optionList]="employeeOptionList"
-            [selectValue]="taskFormData.employee?.name || 'Selecione um item'"
+            [selectValue]="taskForm().employee?.name || 'Selecione um item'"
             (selectValueEmitter)="setEmployeeValue($event.toString())" />
           <app-help
             [text]="'Este campo não pode estar vazio'"
             [type]="'failure'"
-            [isHelpTextActive]="borderType.employee == 'failure'"></app-help>
+            [isHelpTextActive]="borderType().employee == 'failure'"></app-help>
         </div>
 
         <div class="flex flex-col grow">
@@ -48,17 +48,17 @@
           <app-select
             class="mt-1"
             [selectType]="'custom'"
-            [isDisabled]="isDisabled.taskType"
-            [borderType]="borderType.taskType"
+            [isDisabled]="isDisabled().taskType"
+            [borderType]="borderType().taskType"
             [optionList]="taskTypeOptionList"
-            [selectValue]="taskFormData.taskType?.name || 'Selecione um item'"
+            [selectValue]="taskForm().taskType?.name || 'Selecione um item'"
             (selectValueEmitter)="setTaskTypeValue($event.toString())" />
           <app-help
             [text]="'Este campo não pode estar vazio'"
             [type]="'failure'"
-            [isHelpTextActive]="borderType.taskType == 'failure'"></app-help>
+            [isHelpTextActive]="borderType().taskType == 'failure'"></app-help>
         </div>
-        @if (eligibleTaskTypeOptionsForTooling.includes(taskFormData.taskType?.name ?? '')) {
+        @if (eligibleTaskTypeOptionsForTooling.includes(taskForm().taskType?.name ?? '')) {
           <div class="flex items-end gap-4 grow">
             <div class="flex flex-col grow">
               <label #labelForm class="font-medium text-sm" for="default"
@@ -67,12 +67,12 @@
               <app-input
                 class="mt-1"
                 [inputName]="'custom'"
-                [isDisabled]="isDisabled.tooling"
-                [borderType]="borderType.tooling"
+                [isDisabled]="isDisabled().tooling"
+                [borderType]="borderType().tooling"
                 [initialInputList]="toolingOptionList"
                 [inputValue]="
-                  taskFormData.product?.internalPartNumber && taskFormData.product?.name
-                    ? taskFormData.product?.internalPartNumber + '_' + taskFormData.product?.name
+                  taskForm().product?.internalPartNumber && taskForm().product?.name
+                    ? taskForm().product?.internalPartNumber + '_' + taskForm().product?.name
                     : ''
                 "
                 [type]="'search'"
@@ -80,18 +80,18 @@
               <app-help
                 [text]="'Este campo não pode estar vazio'"
                 [type]="'failure'"
-                [isHelpTextActive]="borderType.tooling == 'failure'"></app-help>
+                [isHelpTextActive]="borderType().tooling == 'failure'"></app-help>
             </div>
             <app-button-icon
-              (click)="onShowModalForm('toolingCache')"
+              (click)="onShowToolingModalTable(true)"
               [iconName]="'search'"
-              [isDisabled]="isDisabled.usedSpareParts"
+              [isDisabled]="isDisabled().usedSpareParts"
               class="grow-0" />
           </div>
         }
       </div>
       <div class="flex flex-col md:flex-row gap-4">
-        @if (eligibleTaskTypeOptionsForProductionLine.includes(taskFormData.taskType?.name || '')) {
+        @if (eligibleTaskTypeOptionsForProductionLine.includes(taskForm().taskType?.name || '')) {
           <div class="flex flex-col gap-1 grow-0">
             <label #labelForm class="font-medium text-sm" for="default"
               >Linha de Produção <span class="font-bold text-red-400">*</span></label
@@ -99,14 +99,14 @@
             <app-select
               [selectType]="'custom'"
               [optionList]="productionLineOptionList"
-              [borderType]="borderType.productionLine"
-              [isDisabled]="isDisabled.productionLine"
-              [selectValue]="taskFormData.productionLine?.lineCode || 'Selecione um item'"
+              [borderType]="borderType().productionLine"
+              [isDisabled]="isDisabled().productionLine"
+              [selectValue]="taskForm().productionLine?.lineCode || 'Selecione um item'"
               (selectValueEmitter)="setProductionLineValue($event.toString())" />
             <app-help
               [text]="'Este campo não pode estar vazio'"
               [type]="'failure'"
-              [isHelpTextActive]="borderType.productionLine == 'failure'"></app-help>
+              [isHelpTextActive]="borderType().productionLine == 'failure'"></app-help>
           </div>
         }
         <div class="flex flex-col gap-1 grow">
@@ -115,16 +115,16 @@
           >
           <app-input
             [inputName]="'custom'"
-            [isDisabled]="isDisabled.name"
-            [borderType]="borderType.name"
-            [inputValue]="taskFormData.name || ''"
+            [isDisabled]="isDisabled().name"
+            [borderType]="borderType().name"
+            [inputValue]="taskForm().name || ''"
             [type]="'search'"
             (changeEmitter)="onFormFieldsChange('name')"
-            (inputValueEmitter)="taskFormData.name = $event" />
+            (inputValueEmitter)="taskForm().name = $event" />
           <app-help
             [text]="'O campo deve ter no mínimo 3 caracteres'"
             [type]="'failure'"
-            [isHelpTextActive]="borderType.name == 'failure'"></app-help>
+            [isHelpTextActive]="borderType().name == 'failure'"></app-help>
         </div>
       </div>
       <h1 class="text-lg font-semibold bg-gray-200 p-1 rounded-md">Resultado</h1>
@@ -133,48 +133,47 @@
           <label #labelForm class="font-medium text-sm" for="default">Inicio</label>
           <app-input
             [inputName]="'custom'"
-            [isDisabled]="isDisabled.startDate"
-            [inputValue]="startDate" />
+            [isDisabled]="isDisabled().startDate"
+            [inputValue]="startDate()" />
         </div>
         <div class="flex flex-col gap-1 grow">
           <label #labelForm class="font-medium text-sm" for="default">Fim</label>
           <app-input
             [inputName]="'custom'"
-            [isDisabled]="isDisabled.finishDate"
-            [inputValue]="finishDate" />
+            [isDisabled]="isDisabled().finishDate"
+            [inputValue]="finishDate()" />
         </div>
         <div class="flex flex-col gap-1 grow">
           <label #labelForm class="font-medium text-sm" for="default">Status</label>
           <app-select
             [selectType]="'status'"
-            [isDisabled]="isDisabled.status"
+            [isDisabled]="isDisabled().status"
             [selectValue]="taskStatus || 'Não iniciado'"
             (selectValueEmitter)="setStatusValue($event.toString())" />
         </div>
       </div>
       <div class="flex gap-4">
         <app-toogle-button
-          [isChecked]="showSpareParts"
-          [isDisabled]="isDisabled.usedSpareParts"
+          [isChecked]="showSpareParts()"
+          [isDisabled]="isDisabled().usedSpareParts"
           [toggleId]="'task-form-tooggle'"
           (isCheckedEmitter)="onToogleButtonChange($event)" />
         <p>Houve troca de peças?</p>
       </div>
       @if (
-        showSpareParts && taskFormData.usedSpareParts && taskFormData.usedSpareParts.length > 0
+        showSpareParts() &&
+        taskForm().usedSpareParts &&
+        (taskForm().usedSpareParts || []).length > 0
       ) {
         <div class="flex flex-col items-end gap-4 w-full">
-          @for (
-            sparePart of taskFormData.usedSpareParts;
-            track trackBySparePartId($index, sparePart)
-          ) {
+          @for (sparePart of taskForm().usedSpareParts; track $index) {
             <div class="flex md:flex-row items-end gap-4 w-full">
               <div class="flex md:flex-row items-end gap-4 w-full">
                 <div class="flex flex-col gap-1 grow">
                   <label #labelForm class="font-medium text-sm" for="default">Peça trocada</label>
                   <app-input
                     [inputName]="'custom'"
-                    [isDisabled]="isDisabled.usedSpareParts"
+                    [isDisabled]="isDisabled().usedSpareParts"
                     [initialInputList]="usedSparePartsOptionList"
                     [inputValue]="
                       sparePart.internalPartNumber && sparePart.name
@@ -187,18 +186,20 @@
                   <app-help
                     [text]="'Este campo está duplicado'"
                     [type]="'failure'"
-                    [isHelpTextActive]="borderType.usedSpareParts[$index] == 'failure'"></app-help>
+                    [isHelpTextActive]="
+                      borderType().usedSpareParts[$index] == 'failure'
+                    "></app-help>
                 </div>
                 <app-button-icon
                   [iconName]="'search'"
-                  (click)="onShowModalForm('sparePartsCache', $index)"
-                  [isDisabled]="isDisabled.usedSpareParts"
+                  (click)="onShowSparePartsModalTable(true, $index)"
+                  [isDisabled]="isDisabled().usedSpareParts"
                   class="grow-0" />
                 <div class="flex flex-col gap-1 grow-0">
                   <label #labelForm class="font-medium text-sm" for="default">Qtd trocada</label>
                   <app-input
                     [inputName]="'custom'"
-                    [isDisabled]="isDisabled.usedSpareParts"
+                    [isDisabled]="isDisabled().usedSpareParts"
                     [type]="'number'"
                     [inputValue]="sparePart.qty.toString()"
                     (inputValueEmitter)="onSparePartQtyChange($event, $index)" />
@@ -207,11 +208,11 @@
               <div class="flex gap-2">
                 <app-button-icon
                   [iconName]="'add'"
-                  [isDisabled]="isDisabled.usedSpareParts"
+                  [isDisabled]="isDisabled().usedSpareParts"
                   class="grow-0"
                   (click)="onAddSparePartsRow()" />
                 <app-button-delete
-                  [isDisabled]="isDisabled.usedSpareParts"
+                  [isDisabled]="isDisabled().usedSpareParts"
                   (click)="onRemoveSparePartsRow(sparePart)" />
               </div>
             </div>
@@ -219,15 +220,15 @@
         </div>
       }
       <app-photo-box-list
-        [imgPreviewList]="taskFormData.imgPreviewList || []"
-        [isDisabled]="isDisabled.photoBoxList"
+        [imgPreviewList]="taskForm().imgPreviewList || []"
+        [isDisabled]="isDisabled().photoBoxList"
         (fileListChangeEmitter)="onFileListChange($event)"></app-photo-box-list>
       <div class="flex flex-col gap-1 grow">
         <label #labelForm class="font-medium text-sm" for="default">Laudo técnico</label>
         <app-text-area
-          [inputValue]="taskFormData.comment ?? ''"
-          [isDisabled]="isDisabled.comment"
-          (inputValueEmitter)="taskFormData.comment = $event" />
+          [inputValue]="taskForm().comment ?? ''"
+          [isDisabled]="isDisabled().comment"
+          (inputValueEmitter)="taskForm().comment = $event" />
       </div>
     </div>
   </div>
@@ -241,124 +242,44 @@
     <app-button-label
       [iconRightName]="'save'"
       [label]="'Salvar'"
-      [isDisabled]="isDisabled.saveButton"
+      [isDisabled]="isDisabled().saveButton"
       (click)="onSaveRegister(onBackToPreviousPage)"></app-button-label>
   </footer>
 </div>
 
 <app-modal-ask
-  [isModalActive]="modalAsk.isActive"
+  [isModalActive]="modalAsk().isActive"
   [type]="'warning'"
-  [title]="modalAsk.title"
-  [description]="modalAsk.description"
+  [title]="modalAsk().title"
+  [description]="modalAsk().description"
   (closeActionNokEmitter)="onCloseAskModalAction(false)"
   (closeActionOkEmitter)="onCloseAskModalAction(true)" />
 <app-modal-info
-  [isModalActive]="modalInfo.isActive"
-  [description]="modalInfo.description"
-  [title]="modalInfo.title"
+  [isModalActive]="modalInfo().isActive"
+  [description]="modalInfo().description"
+  [title]="modalInfo().title"
   (clickEmitter)="onCloseInfoModal()" />
-<app-loading [isLoading]="isLoading" />
+<app-loading [isLoading]="isLoading()" />
 
-<!-- <app-modal-base [showModal]="modalForm.isActive" [width]="'sm:w-5/6'" [showHeader]="false">
-  <div class="body-block">
-    <div class="flex items-center flex-col gap-2 md:flex-row md:justify-between">
-      <app-breadcrumb [items]="breadcrumbList" />
-    </div>
-    @if (dataList() && dataList().length > 0) {
-      <div class="flex flex-col gap-5">
-        <div class="top-button-layout gap-6 sm:gap-3 overflow-x-auto">
-          <div class="flex gap-3">
-            <app-input
-              [inputValue]="inputSearchValue()"
-              [id]="`input-filter-${currentView}`"
-              [placeholder]="inputSearchPlaceholder"
-              [inputName]="'search'"
-              (iconClickEmitter)="onClickOnFilterBtnThroughSearchInput(inputSearchFilterList)"
-              (keyboardEmitter)="onKeyPressOnSearchInput($event, inputSearchFilterList)"
-              (inputValueEmitter)="inputSearchValue.set($event)" />
-            <app-tooltip [description]="'Filtro'" [position]="'right'">
-              <app-button-icon
-                content
-                (click)="isFilterBoxActive.set(true)"
-                [iconName]="'filter_list'" />
-            </app-tooltip>
-          </div>
-        </div>
-        @if (isAtLeastOneFilterHelpNotEmpty()) {
-          <div class="flex flex-wrap items-center gap-3 text-sm">
-            @if (filterHelp().inputSearch.length > 0) {
-              <div class="flex items-center gap-2">
-                <p>Pesquisa: {{ filterHelp().inputSearch }}</p>
-                <app-button-close (click)="onClearAllData()"></app-button-close>
-              </div>
-            } @else {
-              @for (tableHeader of tableHeaders(); track $index) {
-                @if (filterHelp()[tableHeader.databaseField]) {
-                  <div class="flex items-center gap-2">
-                    <p>
-                      {{ tableHeader.headerName }} :
-                      {{ filterHelp()[tableHeader.databaseField] }}
-                    </p>
-                    <app-button-close
-                      (click)="
-                        onSetFilterBoxItemToDefault(tableHeader.databaseField)
-                      "></app-button-close>
-                  </div>
-                }
-              }
-            }
-            <button
-              (click)="onClearAllData()"
-              class="text-logo font-semibold cursor-pointer hover:text-logo-hover hover:underline">
-              Limpar
-            </button>
-          </div>
-        }
-        <app-table
-          [initialDataList]="tableDataFormated()"
-          [tableHeaders]="tableHeaders()"
-          [isComponentSetToDefault]="isComponentSetToDefault()"
-          (refreshBtnClickEmitter)="onShowDataList()"
-          (tableDataEmitter)="data.set($event)"
-          (setToDefaultEmitter)="isComponentSetToDefault.set(false)" />
-        <app-pagination [initialDataList]="dataList()" />
-      </div>
-    } @else {
-      <div class="flex flex-col items-center gap-4 w-full mt-10">
-        <mat-icon class="text-logo text-6xl">{{
-          isFilterResultZeroRegister() ? 'search_off' : 'library_add'
-        }}</mat-icon>
-        <p class="font-semibold">Nenhum registro encontrado</p>
-        @if (inputSearchValue().length > 0) {
-          <p>
-            Palavra(s) Pesquisada(s) :
-            <span class="font-semibold">{{ inputSearchValue() }}</span>
-          </p>
-        } @else {
-          <p>Campo(s) pesquisado(s) :</p>
-          @for (tableHeader of tableHeaders(); track $index) {
-            @if (filterBox()[tableHeader.databaseField]) {
-              <p>
-                {{ tableHeader.headerName }} :
-                <span class="font-semibold">{{ filterBox()[tableHeader.databaseField] }}</span>
-              </p>
-            }
-          }
-        }
-        <app-button-label
-          (keyboardEmitter)="onKeyPressOnNotFoundFilterRegister($event)"
-          (click)="onClearAllData()"
-          [label]="'Voltar'" />
-      </div>
-    }
-  </div>
-  <div
-    class="footer-block flex gap-5 justify-center items-stretch border-t border-gray-400 mt-3 pt-4">
-    <app-button-label
-      [label]="'Cancelar'"
-      [isColorLogo]="false"
-      [iconRightName]="'close'"
-      (click)="onActionNokModalForm()"></app-button-label>
-  </div>
-</app-modal-base> -->
+<app-modal-table
+  [isModalActive]="modalSpareParts().isModalActive"
+  [initialTableHeaders]="modalSpareParts().tableHeaders"
+  [breadcrumbList]="modalSpareParts().breadcrumbList"
+  [currentView]="modalSpareParts().currentView"
+  [onShowDataList]="modalSpareParts().onShowDataList"
+  [inputSearchFilterList]="modalSpareParts().inputSearchFilterList"
+  [inputSearchPlaceholder]="modalSpareParts().inputSearchPlaceholder"
+  [initialDataList]="modalSpareParts().initialDataList"
+  (OnActionNokEmitter)="onShowSparePartsModalTable(false)"
+  (OnActionOkEmitter)="onSetModalTableSparePartsData($event)"></app-modal-table>
+<app-modal-table
+  [isModalActive]="modalTooling().isModalActive"
+  [initialTableHeaders]="modalTooling().tableHeaders"
+  [breadcrumbList]="modalTooling().breadcrumbList"
+  [currentView]="modalTooling().currentView"
+  [onShowDataList]="modalTooling().onShowDataList"
+  [inputSearchFilterList]="modalTooling().inputSearchFilterList"
+  [inputSearchPlaceholder]="modalTooling().inputSearchPlaceholder"
+  [initialDataList]="modalTooling().initialDataList"
+  (OnActionNokEmitter)="onShowToolingModalTable(false)"
+  (OnActionOkEmitter)="onSetModalTableToolingData($event)"></app-modal-table>
