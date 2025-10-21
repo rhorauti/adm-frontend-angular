@@ -4,6 +4,7 @@ import {
   AfterViewInit,
   ChangeDetectorRef,
   Component,
+  computed,
   ElementRef,
   inject,
   OnDestroy,
@@ -33,7 +34,7 @@ import {
   TASK_NUMBER_STATUS,
 } from 'app/enum/status.enum';
 import { TaskApi } from '@core/http/task/task.api';
-import { IEmployee, PartialEmployee } from '@core/interfaces/employee.interface';
+import { IEmployee } from '@core/interfaces/employee.interface';
 import {
   ActionCallback,
   IModalAsk,
@@ -42,11 +43,10 @@ import {
 } from '@core/interfaces/modal.interface';
 import { IPhoto } from '@core/interfaces/photo.interface';
 import { PartialProduct } from '@core/interfaces/product.interface';
-import { IProductionLine, PartialProductionLine } from '@core/interfaces/production-line.interface';
+import { IProductionLine } from '@core/interfaces/production-line.interface';
 import { ITableHeader } from '@core/interfaces/table.interface';
 import {
   ITaskType,
-  PartialTaskType,
   IUsedSpareParts,
   ITaskForm,
   IResponseTaskForm,
@@ -129,7 +129,7 @@ export class TaskFormComponent implements OnInit, OnDestroy, AfterViewInit {
   modalBreadcrumbList: string[] = [];
   paramsDeptName = '';
   paramsIdTask: number | null = null;
-  taskStatus = '';
+  taskStatus = signal('');
   idCompany = 1;
 
   eligibleTaskTypeOptionsForTooling: string[] = ['Ferramenta'];
@@ -268,9 +268,6 @@ export class TaskFormComponent implements OnInit, OnDestroy, AfterViewInit {
     },
   });
 
-  toolingList = signal<PartialProduct[]>([]);
-  sparePartsList = signal<PartialProduct[]>([]);
-
   modalInfo = signal<IModalInfo>({
     isActive: false,
     title: '',
@@ -288,7 +285,6 @@ export class TaskFormComponent implements OnInit, OnDestroy, AfterViewInit {
   });
 
   isLoading = signal(false);
-
   async ngOnInit(): Promise<void> {
     this.subscription = this.activatedRoute.paramMap.subscribe(params => {
       this.paramsIdTask = Number(params.get('idTask')) || 0;
@@ -300,6 +296,13 @@ export class TaskFormComponent implements OnInit, OnDestroy, AfterViewInit {
     );
     const taskData = response.data as ITaskForm;
     this.taskForm.set(taskData);
+    this.borderType.update(form => ({
+      ...form,
+      usedSpareParts: Array.from(
+        { length: (this.taskForm().usedSpareParts || [])?.length },
+        () => 'success'
+      ),
+    }));
     // const modalSparePartsInitialData = this.modalSpareParts().initialDataList || [];
     // if (modalSparePartsInitialData) {
     this.modalSpareParts.update(current => ({
@@ -321,7 +324,10 @@ export class TaskFormComponent implements OnInit, OnDestroy, AfterViewInit {
     }
     this.onSetStartAndFinishDate();
     this.onSetOptionsList();
-    this.taskStatus = onConvertTaskStatusFromNumberToFriendlyName(this.taskForm().status as number);
+    this.taskStatus.set(
+      onConvertTaskStatusFromNumberToFriendlyName(this.taskForm().status as number)
+    );
+
     // this.onDisabledStatusOptions();
     // if (this.taskFormData.status == TASK_NUMBER_STATUS.FINISHED) {
     // this.onDisbledForm();
@@ -373,6 +379,7 @@ export class TaskFormComponent implements OnInit, OnDestroy, AfterViewInit {
     if (data) {
       this.taskForm.update(current => ({ ...current, product: data }));
     }
+    this.onSetProductionLineBasedOnToolingChange(data.internalPartNumber);
     this.onShowToolingModalTable(false);
   };
 
@@ -418,7 +425,9 @@ export class TaskFormComponent implements OnInit, OnDestroy, AfterViewInit {
     ];
 
     if (this.taskForm().taskTypeList?.length) {
-      this.taskTypeOptionList = [...(this.taskForm().taskTypeList || []).map(taskType => taskType.name)];
+      this.taskTypeOptionList = [
+        ...(this.taskForm().taskTypeList || []).map(taskType => taskType.name),
+      ];
     }
 
     if (this.taskForm().productionLineList?.length) {
@@ -428,7 +437,9 @@ export class TaskFormComponent implements OnInit, OnDestroy, AfterViewInit {
     }
 
     if (this.taskForm().employeeList?.length) {
-      this.employeeOptionList = [...(this.taskForm().employeeList || []).map(employee => employee.name)];
+      this.employeeOptionList = [
+        ...(this.taskForm().employeeList || []).map(employee => employee.name),
+      ];
     }
   };
 
@@ -528,7 +539,10 @@ export class TaskFormComponent implements OnInit, OnDestroy, AfterViewInit {
         this.taskForm.update(current => ({ ...current, product: tool }));
       } else {
         if (this.taskForm().product) {
-          const product = { ...this.taskForm().product, internalPartNumber: internalPartNumber } as PartialProduct;
+          const product = {
+            ...this.taskForm().product,
+            internalPartNumber: internalPartNumber,
+          } as PartialProduct;
           this.taskForm.update(current => ({ ...current, product: product }));
         }
       }
@@ -541,7 +555,30 @@ export class TaskFormComponent implements OnInit, OnDestroy, AfterViewInit {
     this.taskForm.update(current => ({ ...current, status: onTranslateStatusToNumber(status) }));
   };
 
-  onSparePartInputChange = (inputValue: string, index: number): void => {
+  onInputSparePartsChange = (inputValue: string, index: number): void => {
+    this.onFormFieldsChange('usedSpareParts');
+    this.onSetSparePartInputValue(inputValue, index);
+  };
+
+  onFormFieldsChange = <K extends keyof IBorderType>(property: K, index?: number): void => {
+    if (Array.isArray(this.borderType()[property])) {
+      const currentArr = [...(this.borderType()[property] as ValidationType[])];
+      const idx = typeof index === 'number' && index >= 0 ? index : 0;
+      if (currentArr[idx] === 'failure') {
+        currentArr[idx] = 'success';
+        this.borderType.update(current => ({ ...current, [property]: currentArr }));
+      }
+    } else {
+      if (this.borderType()[property] === 'failure') {
+        this.borderType.update(current => ({
+          ...current,
+          [property]: 'success' as IBorderType[K],
+        }));
+      }
+    }
+  };
+
+  onSetSparePartInputValue = (inputValue: string, index: number): void => {
     let internalPartNumber = '';
     if (
       JSON.stringify(inputValue && inputValue.split(this.separatorSymbol)) ==
@@ -551,31 +588,32 @@ export class TaskFormComponent implements OnInit, OnDestroy, AfterViewInit {
     } else {
       internalPartNumber = inputValue.split(this.separatorSymbol)[0].trim();
     }
-    if (this.taskForm().usedSpareParts) {
-      const productsFilter = this.taskForm().productList
-        ? (this.taskForm().productList?.filter(
-            p =>
-              p.productType.name.toLocaleLowerCase().trim() ==
-              this.sparePartsProductType.toLowerCase().trim()
-          ) as PartialProduct[])
-        : [];
+    if (this.taskForm().usedSpareParts && this.taskForm().usedSpareParts != null) {
+      const productsFilter = this.taskForm()?.productList || [];
       const selectedItem = productsFilter.find(
         sp => sp.internalPartNumber?.trim() == internalPartNumber.trim()
       ) as PartialProduct;
       if (selectedItem) {
-        const usedSpareParts = {
-          ...(this.taskForm().usedSpareParts || [])[index],
-          idProduct: selectedItem.idProduct,
-          internalPartNumber: selectedItem.internalPartNumber,
-          name: selectedItem.name,
-        };
-        this.taskForm.update(current => ({ ...current[index], usedSpareParts: usedSpareParts }));
+        this.taskForm.update(form => ({
+          ...form,
+          usedSpareParts: form.usedSpareParts?.map((part, idx) =>
+            idx === index
+              ? {
+                  ...part,
+                  idProduct: selectedItem.idProduct ?? 0,
+                  internalPartNumber: selectedItem.internalPartNumber ?? '',
+                  name: selectedItem.name ?? '',
+                }
+              : part
+          ),
+        }));
       } else {
-        const usedSpareParts = {
-          ...(this.taskForm().usedSpareParts || [])[index],
-          internalPartNumber: selectedItem.internalPartNumber,
-        };
-        this.taskForm.update(current => ({ ...current[index], usedSpareParts: usedSpareParts }));
+        this.taskForm.update(form => ({
+          ...form,
+          usedSpareParts: form.usedSpareParts?.map((part, idx) =>
+            idx === index ? { ...part, internalPartNumber: internalPartNumber } : part
+          ),
+        }));
       }
     }
   };
@@ -583,17 +621,19 @@ export class TaskFormComponent implements OnInit, OnDestroy, AfterViewInit {
   onSparePartQtyChange = (value: string, index: number): void => {
     if (this.taskForm().usedSpareParts) {
       if (Number(value) < 1) {
-        const usedSpareParts = {
-          ...(this.taskForm().usedSpareParts || [])[index],
-          qty: 1,
-        };
-        this.taskForm.update(current => ({ ...current[index], usedSpareParts: usedSpareParts }));
+        this.taskForm.update(form => ({
+          ...form,
+          usedSpareParts: form.usedSpareParts?.map((part, idx) =>
+            idx === index ? { ...part, qty: 1 } : part
+          ),
+        }));
       } else {
-        const usedSpareParts = {
-          ...(this.taskForm().usedSpareParts || [])[index],
-          qty: Number(value),
-        };
-        this.taskForm.update(current => ({ ...current[index], usedSpareParts: usedSpareParts }));
+        this.taskForm.update(form => ({
+          ...form,
+          usedSpareParts: form.usedSpareParts?.map((part, idx) =>
+            idx === index ? { ...part, qty: Number(value) } : part
+          ),
+        }));
       }
     }
   };
@@ -622,13 +662,26 @@ export class TaskFormComponent implements OnInit, OnDestroy, AfterViewInit {
   };
 
   onAddSparePartsRow = (): void => {
-    this.taskForm().usedSpareParts?.push({
+    const newRow: IUsedSpareParts = {
       idProduct: 0,
       internalPartNumber: '',
       name: '',
       qty: 1,
-    });
+    };
+    this.taskForm.update(current => ({
+      ...current,
+      usedSpareParts: [...(current.usedSpareParts || []), newRow],
+    }));
   };
+
+  // onAddSparePartsRow = (): void => {
+  //   this.taskForm().usedSpareParts?.push({
+  //     idProduct: 0,
+  //     internalPartNumber: '',
+  //     name: '',
+  //     qty: 1,
+  //   });
+  // };
 
   onRemoveSparePartsRow = (sparePart: IUsedSpareParts): void => {
     const index = this.taskForm().usedSpareParts?.indexOf(sparePart) as number;
@@ -642,7 +695,7 @@ export class TaskFormComponent implements OnInit, OnDestroy, AfterViewInit {
     if (this.paramsIdTask == 0) {
       return 'Novo Registro';
     } else {
-      return this.taskForm.name as string;
+      return this.taskForm().name as string;
     }
   };
 
@@ -666,78 +719,98 @@ export class TaskFormComponent implements OnInit, OnDestroy, AfterViewInit {
     this.onRedirectPage(`/${this.paramsDeptName}/${this.currentView}`);
   };
 
-  onFormFieldsChange = <K extends keyof IBorderType>(property: K, index?: number): void => {
-    if (Array.isArray(this.borderType()[property])) {
-      if (this.borderType()[property][index || 0] == 'failure')
-        this.borderType.update(current => ({ ...current, [property][index || 0]: 'success' }));
-        // this.borderType()[property][index || 0] = 'success';
-    } else {
-      if (this.borderType()[property] == 'failure')
-        this.borderType()[property] = 'success' as IBorderType[K];
-    }
-  };
+  // onFormFieldsChange = <K extends keyof IBorderType>(property: K, index?: number): void => {
+  //   if (Array.isArray(this.borderType()[property])) {
+  //     if (this.borderType()[property][index || 0] == 'failure')
+  //       this.borderType.update(current => ({ ...current, [property][index || 0]: 'success' }));
+  //       // this.borderType()[property][index || 0] = 'success';
+  //   } else {
+  //     if (this.borderType()[property] == 'failure')
+  //       this.borderType()[property] = 'success' as IBorderType[K];
+  //   }
+  // };
 
   onSetBorderTypeToDefault = (): void => {
+    this.borderType.update(form => ({
+      ...form,
+      usedSpareParts: form.usedSpareParts.map(() => 'success'),
+    }));
     this.borderType.update(current => ({
       ...current,
       name: 'success',
-      usedSpareParts: [],
       employee: 'success',
       taskType: 'success',
       tooling: 'success',
-      productionLine: 'success'
-    }))
+      productionLine: 'success',
+    }));
   };
+
+  sparePartsMessage = '';
 
   formValidation = (): void => {
     this.onSetBorderTypeToDefault();
     let message = '';
-    if (
-      this.finalTaskFormData.name == null ||
-      (this.finalTaskFormData.name && this.finalTaskFormData.name?.length < 3)
-    ) {
+    this.sparePartsMessage = '';
+    console.log('name atividae', this.taskForm().name?.length);
+    if (this.finalTaskFormData.name == null || this.finalTaskFormData.name?.length < 3) {
       message = 'O campo Atividade precisa ter pelo menos 3 caracteres';
-      this.borderType.update(current => ({ ...current, name: 'failure' }))
+      this.borderType.update(current => ({ ...current, name: 'failure' }));
+      console.log('entrando atividade', message);
     } else if (
       this.finalTaskFormData.employee == null ||
       (this.finalTaskFormData.employee && this.finalTaskFormData.employee.name?.length < 1)
     ) {
       message = 'O campo Funcionário não pode estar vazio';
-      this.borderType.update(current => ({ ...current, employee: 'failure' }))
+      this.borderType.update(current => ({ ...current, employee: 'failure' }));
     } else if (
       this.finalTaskFormData.taskType == null ||
       (this.finalTaskFormData.taskType && this.finalTaskFormData.taskType.name?.length < 1)
     ) {
       message = 'O campo Tipo de Atividade não pode estar vazio';
-      this.borderType.update(current => ({ ...current, taskType: 'failure' }))
+      this.borderType.update(current => ({ ...current, taskType: 'failure' }));
     } else if (
       this.eligibleTaskTypeOptionsForTooling.includes(this.taskForm().taskType?.name || '') &&
-      this.taskForm().product == null
+      (this.taskForm().product == null || this.taskForm().product?.idProduct == 0)
     ) {
       message = `O campo Ferramenta não pode estar vazio caso o campo Tipo de Atividade seja ${this.taskForm().taskType?.name}`;
       this.borderType().tooling = 'failure';
     } else if (
-      this.eligibleTaskTypeOptionsForProductionLine.includes(this.taskForm().taskType?.name || '') &&
-      this.taskForm().productionLine == null
+      this.eligibleTaskTypeOptionsForProductionLine.includes(
+        this.taskForm().taskType?.name || ''
+      ) &&
+      (this.taskForm().productionLine == null ||
+        this.taskForm().productionLine?.idProductionLine == 0)
     ) {
       message =
         'O campo Linha de Produção não pode estar vazio caso o campo Ferramenta esteja preenchido';
       this.borderType().productionLine = 'failure';
     } else {
-      if (this.taskForm().usedSpareParts) {
-        const uniques: IUsedSpareParts[] = [];
-        const duplicates: IUsedSpareParts[] = [];
-        (this.taskForm().usedSpareParts || []).forEach((sp, idx) => {
-          if (uniques.includes(sp)) {
-            duplicates.push(sp);
-            this.borderType.usedSpareParts[idx] = 'failure';
+      if (this.taskForm().usedSpareParts && (this.taskForm().usedSpareParts || [])?.length > 0) {
+        this.taskForm().usedSpareParts?.forEach((sp, idx) => {
+          if (sp.internalPartNumber.length == 0) {
+            message = 'Existem campos vazios em Peças trocadas';
+            this.sparePartsMessage = 'Este campo não pode estar vazio';
+            this.borderType().usedSpareParts[idx] = 'failure';
           } else {
-            uniques.push(sp);
+            const uniques: IUsedSpareParts[] = [];
+            const duplicates: IUsedSpareParts[] = [];
+            (this.taskForm().usedSpareParts || []).forEach(sp => {
+              if (uniques.includes(sp)) {
+                duplicates.push(sp);
+                this.borderType.update(form => ({
+                  ...form,
+                  usedSpareParts: form.usedSpareParts.map(() => 'failure'),
+                }));
+              } else {
+                uniques.push(sp);
+              }
+              if (duplicates.length > 0) {
+                message = 'Existem campos duplicadas.';
+                this.sparePartsMessage = 'Este campo está duplicado';
+              }
+            });
           }
         });
-        if (duplicates.length > 0) {
-          message = 'Existem peças trocadas duplicadas.';
-        }
       }
     }
     if (message.length > 0) {
@@ -756,18 +829,18 @@ export class TaskFormComponent implements OnInit, OnDestroy, AfterViewInit {
       isActive: true,
       title: title,
       description: description,
-      onActionOk: onActionOk
+      onActionOk: onActionOk,
     }));
   };
 
   onCloseInfoModal = async (): Promise<void> => {
     const callback = this.modalInfo().onActionOk;
     if (callback) await Promise.resolve(callback());
-      this.modalInfo.update(current => ({
+    this.modalInfo.update(current => ({
       ...current,
       isActive: false,
       onActionOk: null,
-      type: 'failure'
+      type: 'failure',
     }));
   };
 
@@ -777,7 +850,7 @@ export class TaskFormComponent implements OnInit, OnDestroy, AfterViewInit {
     onActionOk?: ActionCallback,
     onActionNok?: ActionCallback
   ): void => {
-      this.modalAsk.update(current => ({
+    this.modalAsk.update(current => ({
       ...current,
       isActive: true,
       title: title,
@@ -791,14 +864,14 @@ export class TaskFormComponent implements OnInit, OnDestroy, AfterViewInit {
     const callback = isConfirmed ? this.modalAsk().onActionOk : this.modalAsk().onActionNok;
     if (callback) {
       await Promise.resolve(callback());
-          this.modalInfo.update(current => ({
-      ...current,
-      type: 'success'
-    }));
+      this.modalInfo.update(current => ({
+        ...current,
+        type: 'success',
+      }));
     }
-      this.modalAsk.update(current => ({
+    this.modalAsk.update(current => ({
       ...current,
-    isActive: false,
+      isActive: false,
       onActionOk: null,
       onActionNok: null,
     }));
@@ -833,7 +906,9 @@ export class TaskFormComponent implements OnInit, OnDestroy, AfterViewInit {
       comment: this.taskForm().comment,
       product: this.taskForm().product?.idProduct == 0 ? null : this.taskForm().product,
       productionLine:
-        this.taskForm().productionLine?.idProductionLine == 0 ? null : this.taskForm().productionLine,
+        this.taskForm().productionLine?.idProductionLine == 0
+          ? null
+          : this.taskForm().productionLine,
       taskType: this.taskForm().taskType?.idTaskType == 0 ? null : this.taskForm().taskType,
       employee: this.taskForm().employee?.idEmployee == 0 ? null : this.taskForm().employee,
     };
@@ -881,7 +956,6 @@ export class TaskFormComponent implements OnInit, OnDestroy, AfterViewInit {
       }
       this.cdr.markForCheck();
     } catch (e: unknown) {
-      console.log('error', e);
       if (e instanceof HttpErrorResponse) {
         const error = e as HttpErrorResponse;
         this.onShowInfoModal(

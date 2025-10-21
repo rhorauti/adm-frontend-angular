@@ -8,6 +8,7 @@ import {
   OnChanges,
   OnInit,
   Output,
+  SimpleChanges,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -56,10 +57,25 @@ export class InputComponent implements OnInit, OnChanges {
   showInputBox = false;
   inputListFiltered: string[] = [];
   idx = -1;
+  uniqueId = crypto.randomUUID();
 
   @Output() inputValueEmitter = new EventEmitter<string>();
 
   ngOnInit(): void {
+    this.onBorderTypeChange();
+    this.onSetInputType();
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['borderType']) {
+      this.onBorderTypeChange();
+    }
+    if (changes['initialInputList']) {
+      this.inputListFiltered = [...this.initialInputList];
+    }
+  }
+
+  onSetInputType = (): void => {
     switch (this.inputName) {
       case 'email': {
         this.placeholder = 'Digite o e-mail';
@@ -95,9 +111,9 @@ export class InputComponent implements OnInit, OnChanges {
         break;
       }
     }
-  }
+  };
 
-  ngOnChanges(): void {
+  onBorderTypeChange = (): void => {
     switch (this.borderType) {
       case 'initial': {
         this.borderClass = 'focus-within:border-gray-500 border-gray-500';
@@ -112,8 +128,7 @@ export class InputComponent implements OnInit, OnChanges {
         break;
       }
     }
-    this.inputListFiltered = [...this.initialInputList];
-  }
+  };
 
   onFilterInputList = (): void => {
     if (this.initialInputList.length > 0) {
@@ -124,9 +139,8 @@ export class InputComponent implements OnInit, OnChanges {
     }
   };
 
-  onInputValueChange(event: Event): void {
-    this.inputValue = (event.target as HTMLInputElement).value;
-    // this.onFilterInputList();
+  onInputValueChange(newValue: string): void {
+    this.inputValue = newValue;
     this.inputValueEmitter.emit(this.inputValue.trim());
   }
 
@@ -147,33 +161,29 @@ export class InputComponent implements OnInit, OnChanges {
     this.iconClickEmitter.emit();
   }
 
-  // onMouseOver = (index: number): void => {
-  //   this.idx = index;
-  // };
-
   onSelectOptionThroughKeyboard = (event: KeyboardEvent): void => {
-    if (this.inputListFiltered.length > 0) {
-      this.onFilterInputList();
-      if (event.key == 'ArrowDown') {
-        if (this.idx >= this.inputListFiltered.length - 1) {
-          this.idx = 0;
-        } else {
-          this.idx++;
-        }
-        this.showInputBox = true;
-      } else if (event.key == 'ArrowUp') {
-        if (this.idx <= 0) {
-          this.idx = this.inputListFiltered.length - 1;
-        } else {
-          this.idx--;
-        }
-        this.showInputBox = true;
-      } else if (event.key == 'Enter' && this.idx > -1) {
-        this.inputValue = this.inputListFiltered[this.idx];
-        this.showInputBox = false;
-        this.inputValueEmitter.emit(this.inputValue.trim());
+    // if (this.inputListFiltered.length > 0) {
+    this.onFilterInputList();
+    if (event.key == 'ArrowDown') {
+      if (this.idx >= this.inputListFiltered.length - 1) {
+        this.idx = 0;
+      } else {
+        this.idx++;
       }
+      this.showInputBox = true;
+    } else if (event.key == 'ArrowUp') {
+      if (this.idx <= 0) {
+        this.idx = this.inputListFiltered.length - 1;
+      } else {
+        this.idx--;
+      }
+      this.showInputBox = true;
+    } else if (event.key == 'Enter' && this.idx > -1) {
+      this.inputValue = this.inputListFiltered[this.idx];
+      this.showInputBox = false;
+      this.inputValueEmitter.emit(this.inputValue.trim());
     }
+    // }
   };
 
   @HostListener('document:click', ['$event'])
@@ -211,6 +221,7 @@ export class InputComponent implements OnInit, OnChanges {
   @Output() changeEmitter = new EventEmitter();
 
   onChange(event: Event): void {
-    this.changeEmitter.emit(event);
+    event.stopPropagation();
+    this.changeEmitter.emit(this.inputValue);
   }
 }

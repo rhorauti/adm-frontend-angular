@@ -248,7 +248,6 @@ export class TaskHomeComponent implements OnInit, OnDestroy {
   });
 
   onSetHeaderDisplay = (idx: number): void => {
-    console.log('entrando...');
     const newHeaders = this.tableHeaders().map((header, index) => {
       if (index == idx) {
         return {
@@ -259,7 +258,6 @@ export class TaskHomeComponent implements OnInit, OnDestroy {
         return header;
       }
     });
-    console.log('headers', newHeaders);
     this.tableHeaders.set([...newHeaders]);
     saveStorage(this.tableHeadersLocalStorageId, this.tableHeaders());
   };
@@ -606,7 +604,6 @@ export class TaskHomeComponent implements OnInit, OnDestroy {
           }));
         }
       }
-      console.log('filterBox', this.filterBox());
     });
   };
 
@@ -720,7 +717,6 @@ export class TaskHomeComponent implements OnInit, OnDestroy {
       } else {
         this.onShowInfoModal('failure', 'Excluir registro', response.error?.message || '');
       }
-      console.log('delete', this.modalInfo());
     } catch (e: unknown) {
       const error = e as HttpErrorResponse;
       this.onShowInfoModal(

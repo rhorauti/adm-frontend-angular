@@ -20,7 +20,11 @@
             class="mt-1"
             [inputName]="'custom'"
             [isDisabled]="isDisabled().idTask"
-            [inputValue]="taskForm().idTask == 0 ? '' : taskForm().idTask.toString()"
+            [inputValue]="
+              taskForm().idTask == 0 || taskForm().idTask == null
+                ? ''
+                : taskForm().idTask.toString()
+            "
             [type]="'search'" />
         </div>
         <div class="flex flex-col grow">
@@ -36,6 +40,7 @@
             [selectValue]="taskForm().employee?.name || 'Selecione um item'"
             (selectValueEmitter)="setEmployeeValue($event.toString())" />
           <app-help
+            class="mt-1"
             [text]="'Este campo não pode estar vazio'"
             [type]="'failure'"
             [isHelpTextActive]="borderType().employee == 'failure'"></app-help>
@@ -54,6 +59,7 @@
             [selectValue]="taskForm().taskType?.name || 'Selecione um item'"
             (selectValueEmitter)="setTaskTypeValue($event.toString())" />
           <app-help
+            class="mt-1"
             [text]="'Este campo não pode estar vazio'"
             [type]="'failure'"
             [isHelpTextActive]="borderType().taskType == 'failure'"></app-help>
@@ -72,12 +78,15 @@
                 [initialInputList]="toolingOptionList"
                 [inputValue]="
                   taskForm().product?.internalPartNumber && taskForm().product?.name
-                    ? taskForm().product?.internalPartNumber + '_' + taskForm().product?.name
+                    ? taskForm().product?.internalPartNumber +
+                      separatorSymbol +
+                      taskForm().product?.name
                     : ''
                 "
                 [type]="'search'"
                 (inputValueEmitter)="onSetSelectedTooling($event)" />
               <app-help
+                class="mt-1"
                 [text]="'Este campo não pode estar vazio'"
                 [type]="'failure'"
                 [isHelpTextActive]="borderType().tooling == 'failure'"></app-help>
@@ -104,6 +113,7 @@
               [selectValue]="taskForm().productionLine?.lineCode || 'Selecione um item'"
               (selectValueEmitter)="setProductionLineValue($event.toString())" />
             <app-help
+              class="mt-1"
               [text]="'Este campo não pode estar vazio'"
               [type]="'failure'"
               [isHelpTextActive]="borderType().productionLine == 'failure'"></app-help>
@@ -122,6 +132,7 @@
             (changeEmitter)="onFormFieldsChange('name')"
             (inputValueEmitter)="taskForm().name = $event" />
           <app-help
+            class="mt-1"
             [text]="'O campo deve ter no mínimo 3 caracteres'"
             [type]="'failure'"
             [isHelpTextActive]="borderType().name == 'failure'"></app-help>
@@ -148,7 +159,7 @@
           <app-select
             [selectType]="'status'"
             [isDisabled]="isDisabled().status"
-            [selectValue]="taskStatus || 'Não iniciado'"
+            [selectValue]="taskStatus() || 'Não iniciado'"
             (selectValueEmitter)="setStatusValue($event.toString())" />
         </div>
       </div>
@@ -169,11 +180,14 @@
           @for (sparePart of taskForm().usedSpareParts; track $index) {
             <div class="flex md:flex-row items-end gap-4 w-full">
               <div class="flex md:flex-row items-end gap-4 w-full">
-                <div class="flex flex-col gap-1 grow">
-                  <label #labelForm class="font-medium text-sm" for="default">Peça trocada</label>
+                <div class="flex flex-col grow">
+                  <label #labelForm class="font-medium text-sm mb-1" for="default"
+                    >Peça trocada</label
+                  >
                   <app-input
                     [inputName]="'custom'"
                     [isDisabled]="isDisabled().usedSpareParts"
+                    [borderType]="borderType().usedSpareParts[$index]"
                     [initialInputList]="usedSparePartsOptionList"
                     [inputValue]="
                       sparePart.internalPartNumber && sparePart.name
@@ -181,10 +195,10 @@
                         : ''
                     "
                     [type]="'search'"
-                    (changeEmitter)="onFormFieldsChange('usedSpareParts')"
-                    (inputValueEmitter)="onSparePartInputChange($event, $index)" />
+                    (changeEmitter)="onInputSparePartsChange($event, $index)" />
                   <app-help
-                    [text]="'Este campo está duplicado'"
+                    class="mt-1"
+                    [text]="sparePartsMessage || ''"
                     [type]="'failure'"
                     [isHelpTextActive]="
                       borderType().usedSpareParts[$index] == 'failure'
@@ -256,6 +270,7 @@
   (closeActionOkEmitter)="onCloseAskModalAction(true)" />
 <app-modal-info
   [isModalActive]="modalInfo().isActive"
+  [type]="modalInfo().type"
   [description]="modalInfo().description"
   [title]="modalInfo().title"
   (clickEmitter)="onCloseInfoModal()" />

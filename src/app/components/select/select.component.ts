@@ -38,9 +38,40 @@ export class SelectComponent implements OnInit, OnChanges {
   statusIcon = '';
   iconClass = '';
   borderClass = '';
+  uniqueId = crypto.randomUUID();
 
   ngOnInit(): void {
-    this.changeStatusInfo(this.selectValue as Status);
+    this.onSetSelectType();
+    this.changeStatusInfo();
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['borderType']) {
+      this.onSetBorderType();
+    }
+    if (changes['selectValue'] && this.selectType == 'status') {
+      this.changeStatusInfo();
+    }
+  }
+
+  onSetBorderType = (): void => {
+    switch (this.borderType) {
+      case 'initial': {
+        this.borderClass = 'focus-within:border-gray-500 border-gray-500';
+        break;
+      }
+      case 'success': {
+        this.borderClass = 'focus-within:border-logo border-logo';
+        break;
+      }
+      case 'failure': {
+        this.borderClass = 'focus-within:border-red-400 border-red-400';
+        break;
+      }
+    }
+  };
+
+  onSetSelectType = (): void => {
     switch (this.selectType) {
       case 'state': {
         this.optionList = [
@@ -97,36 +128,17 @@ export class SelectComponent implements OnInit, OnChanges {
         this.optionList = optionTaskStatusList;
       }
     }
-  }
-
-  changeStatusInfo = (value: Status): void => {
-    this.statusIcon = onSetIconStatus(value);
-    this.iconClass = onSetIconStatusBackgroundColor(value);
   };
 
-  ngOnChanges(changes: SimpleChanges): void {
-    if (changes['borderType']) {
-      switch (this.borderType) {
-        case 'initial': {
-          this.borderClass = 'focus-within:border-gray-500 border-gray-500';
-          break;
-        }
-        case 'success': {
-          this.borderClass = 'focus-within:border-logo border-logo';
-          break;
-        }
-        case 'failure': {
-          this.borderClass = 'focus-within:border-red-400 border-red-400';
-          break;
-        }
-      }
-    }
-  }
+  changeStatusInfo = (): void => {
+    this.statusIcon = onSetIconStatus(this.selectValue as Status);
+    this.iconClass = onSetIconStatusBackgroundColor(this.selectValue as Status);
+  };
 
   outputSelectValue(event: Event): void {
     this.selectValue = (event.target as HTMLSelectElement).value;
     if (this.selectType == 'status') {
-      this.changeStatusInfo(this.selectValue as Status);
+      this.changeStatusInfo();
     }
     this.selectValueEmitter.emit(this.selectValue);
   }

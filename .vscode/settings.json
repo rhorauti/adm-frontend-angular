@@ -1,5 +1,19 @@
 {
   "FSharp.suggestGitignore": false,
   "editor.defaultFormatter": "esbenp.prettier-vscode",
-  "editor.formatOnSave": true
+  "editor.formatOnSave": true,
+  "files.watcherExclude": {
+    "**/node_modules/**": true,
+    "**/dist/**": true,
+    "**/.angular/**": true,
+    "**/.git/**": true,
+    // "**/.angular/cache/**": true
+  },
+  "search.exclude": {
+    "**/node_modules": true,
+    "**/dist": true,
+    "**/.angular": true
+  },
+  "typescript.tsserver.maxTsServerMemory": 2048,
+  "editor.formatOnType": false
 }

@@ -145,7 +145,6 @@ export class ModalTableComponent<T, R> implements OnChanges {
     } else {
       this.isActionOkBtnDisabled = true;
     }
-    console.log('onTableRowClick', this.data());
   };
 
   @Output() OnActionNokEmitter = new EventEmitter();

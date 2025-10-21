@@ -17,6 +17,7 @@ export class TextAreaComponent implements OnChanges {
   @Input() isDisabled = false;
   @Input() placeholder = '';
   borderClass = '';
+  uniqueId = crypto.randomUUID();
 
   ngOnChanges(): void {
     switch (this.borderType) {
