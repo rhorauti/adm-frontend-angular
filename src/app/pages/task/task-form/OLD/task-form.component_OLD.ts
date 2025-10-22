@@ -664,7 +664,7 @@
 
 //   formValidation = (): void => {
 //     this.onSetBorderTypeToDefault();
-//     console.log('finalData', this.finalTaskFormData);
+//     ('finalData', this.finalTaskFormData);
 //     let message = '';
 //     if (
 //       this.finalTaskFormData.name == null ||

@@ -66,7 +66,7 @@ export class TableComponent<T = BaseType> implements OnInit, OnDestroy, OnChange
       this.onCreateTableBodyList();
       this.onSetSortFilterToDefault();
     }
-    if (changes['initialTableHeaders']) {
+    if (changes['tableHeaders']) {
       this.onGridTemplateColumnsChange();
     }
     if (this.isComponentSetToDefault) {
@@ -203,39 +203,99 @@ export class TableComponent<T = BaseType> implements OnInit, OnDestroy, OnChange
    * @param idx The index of the clicked table column.
    */
   onFilterThroughSort = <K extends keyof T>(idx: number): ITableBody<T>[] => {
-    if (!this.tableBodyList || this.tableBodyList.length == 0) return [];
-    const firstDataItem = this.tableBodyList[0].data as Record<string, unknown>;
+    if (!this.tableBodyList || this.tableBodyList.length === 0) return [];
+
+    const list = this.tableBodyList.slice(); // NÃO mutamos o original
+    const firstDataItem = list[0].data as Record<string, unknown>;
     const keyId = Object.keys(firstDataItem).find(k => k.toLowerCase().startsWith('id')) as K;
     const header = this.tableHeaders[idx];
     const key = header.databaseField as K;
     const sortDirection = header.sortDirection;
-    if (this.tableHeaders[idx].sortDirection == 0) {
-      return [
-        ...this.tableBodyList.sort((a, b) => {
-          const valueA = a.data[keyId];
-          const valueB = b.data[keyId];
-          if (typeof valueA === 'number' && typeof valueB === 'number') {
-            return valueB - valueA;
-          }
-          return 0;
-        }),
-      ];
+
+    const isEmpty = (v: unknown) =>
+      v === null || v === undefined || (typeof v === 'string' && v.trim().length === 0);
+
+    // comparator que preserva: não vazios primeiro, vazios por último
+    const idComparator = (a: ITableBody<T>, b: ITableBody<T>) => {
+      const valueA = a.data[keyId];
+      const valueB = b.data[keyId];
+
+      const aEmpty = isEmpty(valueA);
+      const bEmpty = isEmpty(valueB);
+
+      if (aEmpty && !bEmpty) return 1;
+      if (!aEmpty && bEmpty) return -1;
+      if (aEmpty && bEmpty) return 0;
+
+      if (typeof valueA === 'number' && typeof valueB === 'number') {
+        return (valueB as number) - (valueA as number);
+      }
+      return 0;
+    };
+
+    const keyComparator = (a: ITableBody<T>, b: ITableBody<T>) => {
+      const valueA = a.data[key];
+      const valueB = b.data[key];
+
+      const aEmpty = isEmpty(valueA);
+      const bEmpty = isEmpty(valueB);
+
+      if (aEmpty && !bEmpty) return 1;
+      if (!aEmpty && bEmpty) return -1;
+      if (aEmpty && bEmpty) return 0;
+
+      let comparison = 0;
+      if (typeof valueA === 'number' && typeof valueB === 'number') {
+        comparison = (valueA as number) - (valueB as number);
+      } else if (typeof valueA === 'string' && typeof valueB === 'string') {
+        comparison = (valueA as string).localeCompare(valueB as string);
+      } else {
+        comparison = String(valueA).localeCompare(String(valueB));
+      }
+
+      return sortDirection === 2 ? -comparison : comparison;
+    };
+
+    if (sortDirection === 0) {
+      return list.sort(idComparator);
     } else {
-      return [
-        ...this.tableBodyList.sort((a, b) => {
-          const valueA = a.data[key];
-          const valueB = b.data[key];
-          let comparison = 0;
-          if (typeof valueA === 'number' && typeof valueB === 'number') {
-            comparison = ((valueA as number) - valueB) as number;
-          } else if (typeof valueA === 'string' && typeof valueB === 'string') {
-            comparison = (valueA as string).localeCompare(valueB as string);
-          }
-          return sortDirection == 2 ? comparison * -1 : comparison;
-        }),
-      ];
+      return list.sort(keyComparator);
     }
   };
+  // onFilterThroughSort = <K extends keyof T>(idx: number): ITableBody<T>[] => {
+  //   if (!this.tableBodyList || this.tableBodyList.length == 0) return [];
+  //   const firstDataItem = this.tableBodyList[0].data as Record<string, unknown>;
+  //   const keyId = Object.keys(firstDataItem).find(k => k.toLowerCase().startsWith('id')) as K;
+  //   const header = this.tableHeaders[idx];
+  //   const key = header.databaseField as K;
+  //   const sortDirection = header.sortDirection;
+  //   if (this.tableHeaders[idx].sortDirection == 0) {
+  //     return [
+  //       ...this.tableBodyList.sort((a, b) => {
+  //         const valueA = a.data[keyId];
+  //         const valueB = b.data[keyId];
+  //         if (typeof valueA === 'number' && typeof valueB === 'number') {
+  //           return valueB - valueA;
+  //         }
+  //         return 0;
+  //       }),
+  //     ];
+  //   } else {
+  //     return [
+  //       ...this.tableBodyList.sort((a, b) => {
+  //         const valueA = a.data[key];
+  //         const valueB = b.data[key];
+  //         let comparison = 0;
+  //         if (typeof valueA === 'number' && typeof valueB === 'number') {
+  //           comparison = ((valueA as number) - valueB) as number;
+  //         } else if (typeof valueA === 'string' && typeof valueB === 'string') {
+  //           comparison = (valueA as string).localeCompare(valueB as string);
+  //         }
+  //         return sortDirection == 2 ? comparison * -1 : comparison;
+  //       }),
+  //     ];
+  //   }
+  // };
 
   /**
    * Change the sort icon according to sort status calculated on onSetTableHeaderSortMethod.
@@ -335,6 +395,12 @@ export class TableComponent<T = BaseType> implements OnInit, OnDestroy, OnChange
 
   onShowRowPopUp = (event: MouseEvent | KeyboardEvent, idx: number): void => {
     event.stopPropagation();
+    this.tableBodyList = this.tableBodyList.map(body => {
+      return {
+        ...body,
+        isRowPopUpActive: false,
+      };
+    });
     this.tableBodyList = this.tableBodyList.map((body, index) => {
       if (index == idx) {
         return {

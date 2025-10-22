@@ -555,10 +555,10 @@ export class TaskFormComponent implements OnInit, OnDestroy, AfterViewInit {
     this.taskForm.update(current => ({ ...current, status: onTranslateStatusToNumber(status) }));
   };
 
-  onInputSparePartsChange = (inputValue: string, index: number): void => {
-    this.onFormFieldsChange('usedSpareParts');
-    this.onSetSparePartInputValue(inputValue, index);
-  };
+  // onInputSparePartsChange = (inputValue: string, index: number): void => {
+  //   this.onFormFieldsChange('usedSpareParts');
+  //   this.onSetSparePartInputValue(inputValue, index);
+  // };
 
   onFormFieldsChange = <K extends keyof IBorderType>(property: K, index?: number): void => {
     if (Array.isArray(this.borderType()[property])) {
@@ -579,43 +579,62 @@ export class TaskFormComponent implements OnInit, OnDestroy, AfterViewInit {
   };
 
   onSetSparePartInputValue = (inputValue: string, index: number): void => {
-    let internalPartNumber = '';
+    console.log('inputValue', inputValue);
     if (
-      JSON.stringify(inputValue && inputValue.split(this.separatorSymbol)) ==
-      JSON.stringify([inputValue])
+      !inputValue.includes(this.separatorSymbol) ||
+      (inputValue.includes(this.separatorSymbol) &&
+        inputValue.split(this.separatorSymbol)[0].trim() == '') ||
+      (inputValue.includes(this.separatorSymbol) &&
+        inputValue.split(this.separatorSymbol)[1].trim() == '')
     ) {
-      internalPartNumber = inputValue;
+      this.taskForm.update(form => ({
+        ...form,
+        usedSpareParts: form.usedSpareParts?.map((part, idx) =>
+          idx === index ? { ...part, idProduct: 0, name: '', internalPartNumber: inputValue } : part
+        ),
+      }));
     } else {
-      internalPartNumber = inputValue.split(this.separatorSymbol)[0].trim();
-    }
-    if (this.taskForm().usedSpareParts && this.taskForm().usedSpareParts != null) {
-      const productsFilter = this.taskForm()?.productList || [];
-      const selectedItem = productsFilter.find(
-        sp => sp.internalPartNumber?.trim() == internalPartNumber.trim()
-      ) as PartialProduct;
-      if (selectedItem) {
-        this.taskForm.update(form => ({
-          ...form,
-          usedSpareParts: form.usedSpareParts?.map((part, idx) =>
-            idx === index
-              ? {
-                  ...part,
-                  idProduct: selectedItem.idProduct ?? 0,
-                  internalPartNumber: selectedItem.internalPartNumber ?? '',
-                  name: selectedItem.name ?? '',
-                }
-              : part
-          ),
-        }));
-      } else {
-        this.taskForm.update(form => ({
-          ...form,
-          usedSpareParts: form.usedSpareParts?.map((part, idx) =>
-            idx === index ? { ...part, internalPartNumber: internalPartNumber } : part
-          ),
-        }));
+      if (this.taskForm().usedSpareParts && this.taskForm().usedSpareParts != null) {
+        let internalPartNumber = '';
+        internalPartNumber = inputValue.split(this.separatorSymbol)[0].trim();
+        const productsFilter = this.taskForm()?.productList || [];
+        const selectedItem = productsFilter.find(
+          sp => sp.internalPartNumber?.trim() == internalPartNumber.trim()
+        ) as PartialProduct;
+        if (selectedItem) {
+          this.taskForm.update(form => ({
+            ...form,
+            usedSpareParts: form.usedSpareParts?.map((part, idx) =>
+              idx === index
+                ? {
+                    ...part,
+                    idProduct: selectedItem.idProduct ?? 0,
+                    internalPartNumber: selectedItem.internalPartNumber ?? '',
+                    name: selectedItem.name ?? '',
+                  }
+                : part
+            ),
+          }));
+        } else {
+          this.taskForm.update(form => ({
+            ...form,
+            usedSpareParts: form.usedSpareParts?.map((part, idx) =>
+              idx === index ? { ...part, internalPartNumber: internalPartNumber } : part
+            ),
+          }));
+        }
       }
     }
+    console.log('onSetSparePartInputValue', this.taskForm().usedSpareParts);
+  };
+
+  onInputValueChange = (inputValue: string, index: number): void => {
+    this.taskForm.update(current => ({
+      ...current,
+      usedSpareParts: (current.usedSpareParts || []).map((part, i) =>
+        i === index ? { ...part, internalPartNumber: inputValue } : part
+      ),
+    }));
   };
 
   onSparePartQtyChange = (value: string, index: number): void => {
@@ -672,6 +691,10 @@ export class TaskFormComponent implements OnInit, OnDestroy, AfterViewInit {
       ...current,
       usedSpareParts: [...(current.usedSpareParts || []), newRow],
     }));
+    this.borderType.update(current => ({
+      ...current,
+      usedSpareParts: [...current.usedSpareParts, 'success'],
+    }));
   };
 
   // onAddSparePartsRow = (): void => {
@@ -687,8 +710,8 @@ export class TaskFormComponent implements OnInit, OnDestroy, AfterViewInit {
     const index = this.taskForm().usedSpareParts?.indexOf(sparePart) as number;
     if (index && index < 0) return;
     const usedSpareParts = this.taskForm().usedSpareParts?.filter((sp, idx) => idx !== index) || [];
-    this.showSpareParts.set((this.taskForm().usedSpareParts as IUsedSpareParts[]).length > 0);
     this.taskForm.update(current => ({ ...current, usedSpareParts: usedSpareParts }));
+    this.showSpareParts.set((this.taskForm().usedSpareParts as IUsedSpareParts[]).length > 0);
   };
 
   defineTitle = (): string => {
@@ -751,11 +774,9 @@ export class TaskFormComponent implements OnInit, OnDestroy, AfterViewInit {
     this.onSetBorderTypeToDefault();
     let message = '';
     this.sparePartsMessage = '';
-    console.log('name atividae', this.taskForm().name?.length);
     if (this.finalTaskFormData.name == null || this.finalTaskFormData.name?.length < 3) {
       message = 'O campo Atividade precisa ter pelo menos 3 caracteres';
       this.borderType.update(current => ({ ...current, name: 'failure' }));
-      console.log('entrando atividade', message);
     } else if (
       this.finalTaskFormData.employee == null ||
       (this.finalTaskFormData.employee && this.finalTaskFormData.employee.name?.length < 1)
@@ -785,33 +806,64 @@ export class TaskFormComponent implements OnInit, OnDestroy, AfterViewInit {
         'O campo Linha de Produção não pode estar vazio caso o campo Ferramenta esteja preenchido';
       this.borderType().productionLine = 'failure';
     } else {
-      if (this.taskForm().usedSpareParts && (this.taskForm().usedSpareParts || [])?.length > 0) {
-        this.taskForm().usedSpareParts?.forEach((sp, idx) => {
-          if (sp.internalPartNumber.length == 0) {
+      if (this.taskForm().usedSpareParts && (this.taskForm().usedSpareParts ?? [])?.length > 0) {
+        (this.taskForm().usedSpareParts ?? []).forEach((sp, idx) => {
+          if ((sp.internalPartNumber || '').length == 0) {
             message = 'Existem campos vazios em Peças trocadas';
             this.sparePartsMessage = 'Este campo não pode estar vazio';
             this.borderType().usedSpareParts[idx] = 'failure';
-          } else {
-            const uniques: IUsedSpareParts[] = [];
-            const duplicates: IUsedSpareParts[] = [];
-            (this.taskForm().usedSpareParts || []).forEach(sp => {
-              if (uniques.includes(sp)) {
-                duplicates.push(sp);
-                this.borderType.update(form => ({
-                  ...form,
-                  usedSpareParts: form.usedSpareParts.map(() => 'failure'),
-                }));
-              } else {
-                uniques.push(sp);
-              }
-              if (duplicates.length > 0) {
-                message = 'Existem campos duplicadas.';
-                this.sparePartsMessage = 'Este campo está duplicado';
-              }
-            });
+            this.onShowInfoModal(`Cadastro de ${this.currentViewTranslatedSingular}`, message);
+            throw Error(message);
           }
         });
       }
+
+      const uniques: string[] = [];
+      const duplicates: string[] = [];
+      (this.taskForm().usedSpareParts || []).forEach((sp, index) => {
+        if (uniques.includes(sp.internalPartNumber)) {
+          duplicates.push(sp.internalPartNumber);
+        } else {
+          uniques.push(sp.internalPartNumber);
+        }
+        if (duplicates.length > 0) {
+          const idxList: number[] = [];
+          duplicates.forEach(d => {
+            this.taskForm().usedSpareParts?.forEach((sp, idx) => {
+              if (d == sp.internalPartNumber) {
+                idxList.push(idx);
+              }
+            });
+          });
+          idxList.forEach(idx => {
+            this.borderType().usedSpareParts[idx] = 'failure';
+          });
+          console.log('borderType', this.borderType().usedSpareParts);
+          message = 'Existem campos duplicadas.';
+          this.sparePartsMessage = 'Este campo está duplicado';
+          this.onShowInfoModal(`Cadastro de ${this.currentViewTranslatedSingular}`, message);
+          throw Error(message);
+        }
+      });
+
+      // let hasInternalPartNumberMatch = true;
+      // let hasNameMatch = true;
+      // this.modalSpareParts().initialDataList.forEach(data => {
+      //   hasInternalPartNumberMatch = (this.taskForm().usedSpareParts ?? [])?.every(sp =>
+      //     (data.internalPartNumber ?? '')?.includes(sp.internalPartNumber)
+      //   );
+      // });
+      // this.modalSpareParts().initialDataList.forEach(data => {
+      //   hasNameMatch = (this.taskForm().usedSpareParts ?? [])?.every(sp =>
+      //     (data.name ?? '')?.includes(sp.name)
+      //   );
+      // });
+      // if (!hasInternalPartNumberMatch || !hasNameMatch) {
+      //   message =
+      //     'O item digitado no campo Troca de peças não bate com nenhum item da lista de opções';
+      //   this.onShowInfoModal(`Cadastro de ${this.currentViewTranslatedSingular}`, message);
+      //   throw Error(message);
+      // }
     }
     if (message.length > 0) {
       this.onShowInfoModal(`Cadastro de ${this.currentViewTranslatedSingular}`, message);

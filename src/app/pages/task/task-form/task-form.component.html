@@ -195,14 +195,16 @@
                         : ''
                     "
                     [type]="'search'"
-                    (changeEmitter)="onInputSparePartsChange($event, $index)" />
-                  <app-help
-                    class="mt-1"
-                    [text]="sparePartsMessage || ''"
-                    [type]="'failure'"
-                    [isHelpTextActive]="
-                      borderType().usedSpareParts[$index] == 'failure'
-                    "></app-help>
+                    (inputValueEmitter)="onSetSparePartInputValue($event, $index)" />
+                  @if (borderType().usedSpareParts[$index] == 'failure') {
+                    <app-help
+                      class="mt-1"
+                      [text]="sparePartsMessage || ''"
+                      [type]="'failure'"
+                      [isHelpTextActive]="
+                        borderType().usedSpareParts[$index] == 'failure'
+                      "></app-help>
+                  }
                 </div>
                 <app-button-icon
                   [iconName]="'search'"
