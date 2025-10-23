@@ -2,7 +2,7 @@ import { IAddress } from '@core/interfaces/address.interface';
 import { IBaseRegisterStore } from '@core/interfaces/base.register.interface';
 import { ICompany, ICompanyDetail } from '@core/interfaces/company.interface';
 import { IDepartment } from '@core/interfaces/department.interface';
-import { IEmployee, IEmployeePosition } from '@core/interfaces/employee.interface';
+import { IEmployeeHome, IEmployeePosition } from '@core/interfaces/employee.interface';
 import { IProduct, IProductType, PartialProduct } from '@core/interfaces/product.interface';
 import { IProductionLine } from '@core/interfaces/production-line.interface';
 import { ITaskForm, ITaskHomeData as ITaskHome, ITaskType } from '@core/interfaces/task.interface';
@@ -17,7 +17,7 @@ export type BaseType =
   | ICompany
   | ICompanyDetail
   | IAddress
-  | IEmployee
+  | IEmployeeHome
   | IEmployeePosition
   | ITaskType
   | IUnit

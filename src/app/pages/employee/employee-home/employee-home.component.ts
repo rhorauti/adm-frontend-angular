@@ -1,70 +1,62 @@
-import { Component, inject, OnDestroy, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { BreadcrumbComponent } from '@components/breadcrumb/breadcrumb.component';
-import { SideBarComponent } from '@components/side-bar/side-bar.component';
-import { MatIconModule } from '@angular/material/icon';
-import { ButtonLabelComponent } from '@components/button/button-label/button-label.component';
-import { ButtonDeleteComponent } from '@components/button/button-delete/button-delete.component';
-import { ButtonIconComponent } from '@components/button/button-icon/button-icon.component';
-import { TooltipComponent } from '@components/tooltip/tooltip.component';
-import { ToogleButtonComponent } from '@components/toogle-button/toogle-button.component';
-import { InputComponent } from '@components/input/input.component';
-import { ButtonCloseComponent } from '@components/button/button-close/button-close.component';
-import { ModalStore } from '@store/modal/modal.store';
-import { AuthStore } from '@store/auth/auth.store';
-import { loadStorage } from '@core/utils/misc';
-import { BaseRegisterStore, defaultTableHeaderIcon } from '@store/base/base.register.store';
-import { ActionCallback } from '@core/interfaces/modal.interface';
 import { HttpErrorResponse } from '@angular/common/http';
-import { KeyOfData } from '@core/types/base.type';
-import { ITableHeader } from '@core/interfaces/table.interface';
+import { Component, inject, OnDestroy, OnInit, signal } from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
+import { HomeComponent } from '@components/home/home.component';
+import { LoadingComponent } from '@components/loading/loading.component';
+import { ModalAskComponent } from '@components/modal/modal-ask/modal-ask.component';
+import { ModalInfoComponent } from '@components/modal/modal-info/modal-info.component';
 import { EmployeeApi } from '@core/http/employee/employee.api';
-import { IEmployee } from '@core/interfaces/employee.interface';
-import { ActivatedRoute } from '@angular/router';
+import { IEmployeeHome } from '@core/interfaces/employee.interface';
+import { ActionCallback, IModalAsk, IModalInfo } from '@core/interfaces/modal.interface';
+import { ITableHeader } from '@core/interfaces/table.interface';
+import { KeyOfData } from '@core/types/base.type';
+import { loadStorage } from '@core/utils/misc';
+import { AuthStore } from '@store/auth/auth.store';
+import { defaultTableHeaderIcon } from '@store/base/base.register.store';
+import { ModalType } from '@store/modal/modal.store';
+import { DEPT_NAMES_ENGLISH } from 'app/enum/department.enum';
 import { Subscription } from 'rxjs';
-import { TableComponent } from '@components/table/table.component';
-// import { PaginationComponent } from '@components/pagination/pagination.component';
 
 @Component({
   selector: 'app-employee-home',
-  imports: [
-    CommonModule,
-    SideBarComponent,
-    InputComponent,
-    TableComponent,
-    // PaginationComponent,
-    BreadcrumbComponent,
-    MatIconModule,
-    ButtonLabelComponent,
-    ButtonDeleteComponent,
-    ButtonIconComponent,
-    TooltipComponent,
-    ToogleButtonComponent,
-    ButtonCloseComponent,
-  ],
+  imports: [HomeComponent, ModalAskComponent, ModalInfoComponent, LoadingComponent],
   templateUrl: './employee-home.component.html',
   styleUrl: './employee-home.component.scss',
 })
 export class EmployeeHomeComponent implements OnInit, OnDestroy {
-  readonly employeeApi = inject(EmployeeApi);
-  readonly baseRegisterStore = inject(BaseRegisterStore);
   private activatedRoute = inject(ActivatedRoute);
-  readonly authStore = inject(AuthStore);
-  readonly modalStore = inject(ModalStore);
-
-  readonly currentView = 'employees';
+  private authStore = inject(AuthStore);
+  readonly router = inject(Router);
   readonly currentViewTranslated = 'Funcionários';
-  readonly keyId = 'idEmployee';
-  readonly breadcrumbList = ['Cadastro', 'Funcionários'];
-  readonly inputSearchFilterList: KeyOfData[] = [
-    'idEmployee',
-    'department',
-    'name',
-    'email',
-    'position',
-  ];
-  readonly inputSearchPlaceholder = 'Id, Nome, Email';
-  readonly initialTableHeaders = [
+  currentView = 'employees';
+  breadcrumbList = ['Cadastro', 'Funcionários'];
+  inputSearchFilterList: KeyOfData[] = ['idEmployee', 'department', 'name', 'email', 'position'];
+  inputSearchPlaceholder = 'Id, Nome, Email';
+  deptName = DEPT_NAMES_ENGLISH.MAINTENANCE as DEPT_NAMES_ENGLISH;
+  subscription: Subscription | undefined = undefined;
+  tableHeadersLocalStorageId = `table_headers_${this.currentView}_${this.authStore.user().id}`;
+  idCompany = 0;
+
+  readonly employeeApi = inject(EmployeeApi);
+  isComponentSetToDefault = signal(false);
+  initialDataList = signal<IEmployeeHome[]>([]);
+  data = signal<IEmployeeHome>({
+    idEmployee: 0,
+    isDefault: false,
+    name: '',
+    cpf: '',
+    email: '',
+    deskphone: '',
+    cellphone: '',
+    photoUrl: '',
+    company: '',
+    department: '',
+    position: '',
+  });
+
+  newRegisterUrl = `/${this.deptName}/${this.currentView}/new`;
+
+  tableHeaders = [
     {
       id: 0,
       isHeaderActive: true,
@@ -121,88 +113,168 @@ export class EmployeeHomeComponent implements OnInit, OnDestroy {
       headerName: 'Celular',
       databaseField: 'cellphone',
     },
-  ] as ITableHeader<IEmployee>[];
-  tableHeadersLocalStorageId = `table_headers_${this.currentView}_${this.authStore.user().id}`;
-  idCompany = 0;
-  subscription: Subscription | undefined = undefined;
+  ] as ITableHeader<IEmployeeHome>[];
 
-  async ngOnInit() {
-    this.activatedRoute.paramMap.subscribe(params => {
-      this.idCompany = Number(params.get('idCompany')) || 0;
+  modalInfo = signal<IModalInfo>({
+    isActive: false,
+    title: '',
+    description: '',
+    type: '',
+    onActionOk: null,
+  });
+
+  modalAsk = signal<IModalAsk>({
+    isActive: false,
+    title: '',
+    description: '',
+    onActionOk: null as ActionCallback,
+    onActionNok: null as ActionCallback,
+  });
+
+  isLoading = signal(false);
+
+  onShowInfoModal = (
+    type: ModalType,
+    title: string,
+    description: string,
+    onActionOk?: ActionCallback
+  ): void => {
+    this.modalInfo.set({
+      ...this.modalInfo,
+      isActive: true,
+      type: type,
+      title: title,
+      description: description,
+      onActionOk: onActionOk,
     });
-    this.onShowDataList();
-    const tableHeaders = await loadStorage(this.tableHeadersLocalStorageId);
-    const headers = tableHeaders ? tableHeaders : this.initialTableHeaders;
-    this.baseRegisterStore.onSetStateToNewValue('tableHeaders', headers);
-  }
-
-  onRedirectToEditPage = (data: IEmployee): void => {
-    this.baseRegisterStore.onSetStateToNewValue('data', data);
-    this.baseRegisterStore.onSetStateToNewValue('isEditData', true);
-    this.modalStore.onRedirectPage(
-      `/${this.idCompany}/${this.currentView}/edit/${(this.baseRegisterStore.data() as IEmployee)[this.keyId]}`
-    );
   };
 
-  onCloneRegister = async (data: IEmployee): Promise<void> => {
-    this.baseRegisterStore.onSetStateToNewValue('isCopiedData', true);
-    this.baseRegisterStore.onSetStateToNewValue('data', data);
-    this.modalStore.onRedirectPage(`/${this.idCompany}/${this.currentView}/new`);
+  async ngOnInit() {
+    this.subscription = this.activatedRoute.paramMap.subscribe(params => {
+      this.idCompany = Number(params.get('idCompany') as DEPT_NAMES_ENGLISH) || -1;
+    });
+    await this.onShowDataList();
+    const selectedTableHeaders = await loadStorage(this.tableHeadersLocalStorageId);
+    const headers = selectedTableHeaders ? selectedTableHeaders : this.tableHeaders;
+    this.tableHeaders = headers;
+  }
+
+  ngOnDestroy(): void {
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
+  }
+
+  onRedirectToEditPage = (data: IEmployeeHome): void => {
+    this.router.navigate([`/${this.deptName}/${this.currentView}/edit/${data.idEmployee}`]);
+  };
+
+  onCloneRegister = (data: IEmployeeHome): void => {
+    this.router.navigate([`/${this.deptName}/${this.currentView}/new/${data.idEmployee}`]);
+  };
+
+  onCloseInfoModal = async (): Promise<void> => {
+    const callback = this.modalInfo().onActionOk;
+    if (callback) await Promise.resolve(callback());
+    this.modalInfo.set({
+      isActive: false,
+      type: '',
+      title: '',
+      description: '',
+      onActionOk: null,
+    });
+  };
+
+  onShowAskModal = (
+    title: string,
+    description: string,
+    onActionOk?: ActionCallback,
+    onActionNok?: ActionCallback
+  ): void => {
+    this.modalAsk.set({
+      ...this.modalAsk,
+      isActive: true,
+      title: title,
+      description: description,
+      onActionOk: onActionOk,
+      onActionNok: onActionNok,
+    });
+  };
+
+  onCloseAskModalAction = async (isConfirmed: boolean): Promise<void> => {
+    const callback = isConfirmed ? this.modalAsk().onActionOk : this.modalAsk().onActionNok;
+    if (callback) {
+      await Promise.resolve(callback());
+      this.modalInfo.update(current => ({ ...current, type: 'success' }));
+    }
+    this.modalAsk.set({
+      isActive: false,
+      title: '',
+      description: '',
+      onActionOk: null,
+      onActionNok: null,
+    });
   };
 
   onShowDataList = async (): Promise<void> => {
     try {
-      this.modalStore.onLoading(true);
+      this.isLoading.set(true);
       const response = await this.employeeApi.onGetDataList(this.idCompany);
       if (response.data) {
-        const data = response.data as IEmployee[];
-        this.baseRegisterStore.onSetStateToNewValue('initialData', data);
-        this.baseRegisterStore.onSetStateToNewValue('dataList', data);
-        this.baseRegisterStore.onClearData(data);
+        const dataList = response.data as IEmployeeHome[];
+        this.initialDataList.set([...dataList]);
       } else {
         return;
       }
     } catch (e: unknown) {
       const error = e as HttpErrorResponse;
-      this.modalStore.onShowInfoModal('Listar registros', error.error?.message);
+      this.onShowInfoModal('failure', 'Listar registros', error.error?.message);
     } finally {
-      this.modalStore.onLoading(false);
+      this.isLoading.set(false);
     }
   };
 
   onDeleteRegister = async (idEmployee: number, onActionOk?: ActionCallback): Promise<void> => {
     try {
-      this.modalStore.onLoading(true);
+      this.isLoading.set(true);
       const response = await this.employeeApi.onDelete(this.idCompany, idEmployee);
       if (response.status) {
         this.onShowDataList();
-        this.modalStore.onSetModalInfoType('success');
-        this.modalStore.onShowInfoModal('Excluir registro', response.message, onActionOk);
+        this.onShowInfoModal('success', 'Excluir registro', response.message, onActionOk);
       } else {
-        this.modalStore.onShowInfoModal('Excluir registro', response.error?.message || '');
+        this.onShowInfoModal('failure', 'Excluir registro', response.error?.message || '');
       }
     } catch (e: unknown) {
       const error = e as HttpErrorResponse;
-      this.modalStore.onShowInfoModal('Excluir registro', error.error.message);
+      this.onShowInfoModal(
+        'failure',
+        'Excluir registro',
+        error.error?.message || 'Erro desconhecido'
+      );
     } finally {
-      this.modalStore.onLoading(false);
+      this.isComponentSetToDefault.set(true);
+      this.isLoading.set(false);
     }
   };
 
-  async onDelete(data: IEmployee): Promise<void> {
-    await this.onDeleteRegister(data[this.keyId] as number);
+  async onDelete(selectedData: IEmployeeHome): Promise<void> {
+    await this.onDeleteRegister(selectedData.idEmployee as number);
   }
 
-  onShowModalToDelete(data?: IEmployee): void {
-    const selectedData = data ? data : (this.baseRegisterStore.itemSelected() as IEmployee) || '';
-    this.modalStore.onShowAskModal(
-      `Cadastro de ${this.currentViewTranslated}`,
-      `Deseja excluir o registro <b>${selectedData.name}</b>?`,
-      () => this.onDelete(selectedData)
+  onShowModalToDeleteThroughTopBtn(): void {
+    this.onShowAskModal(
+      'Cadastro de atividades',
+      `Deseja excluir o registro <b>${this.data().name}</b>?`,
+      () => this.onDelete(this.data())
     );
   }
 
-  ngOnDestroy() {
-    this.subscription?.unsubscribe();
+  onShowModalToDeleteThroughTableBtn(data?: IEmployeeHome): void {
+    const selectedData = data ? data : this.data();
+    this.onShowAskModal(
+      'Cadastro de atividades',
+      `Deseja excluir o registro <b>${selectedData.name}</b>?`,
+      () => this.onDelete(selectedData)
+    );
   }
 }

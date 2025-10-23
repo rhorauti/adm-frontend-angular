@@ -1,6 +1,8 @@
 import { IAddress } from './address.interface';
-import { IEmployee, IEmployeePayload } from './employee.interface';
+import { IEmployeeHome, IEmployeePayload } from './employee.interface';
 import { IBaseResponse } from './response.interface';
+
+export type PartialCompany = Pick<ICompany, 'idCompany' | 'name'>;
 
 export interface ICompany {
   idCompany: number | null;
@@ -14,7 +16,7 @@ export interface ICompany {
 export interface ICompanyDetail {
   company: ICompany;
   address: IAddress;
-  employee: IEmployee | IEmployeePayload;
+  employee: IEmployeeHome | IEmployeePayload;
 }
 
 export interface ICompanyResponse extends IBaseResponse {

@@ -73,11 +73,11 @@
       <app-table
         [initialDataList]="tableDataFormated()"
         [tableHeaders]="tableHeaders()"
-        [isComponentSetToDefault]="isComponentSetToDefault()"
+        [isComponentSetToDefault]="isComponentSetToDefault"
         (refreshBtnClickEmitter)="onShowDataList()"
         (tableDataEmitter)="data.set($event)"
         (setToDefaultEmitter)="isComponentSetToDefault.set(false)"
-        (deleteBtnClickEmitter)="onShowModalToDeleteThroughTableBtn($event)"
+        (tableDeleteBtnClickEmitter)="onShowModalToDeleteThroughTableBtn($event)"
         (isDelBtnDisabledEmitter)="isDelBtnDisabled.set($event)"
         (rowClickEmitter)="onRedirectToEditPage($event)"
         (cloneBtnClickEmitter)="onCloneRegister($event)" />

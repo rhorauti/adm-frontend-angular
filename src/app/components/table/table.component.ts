@@ -47,8 +47,9 @@ export class TableComponent<T = BaseType> implements OnInit, OnDestroy, OnChange
   @Input() pageName: Page = 'tasks';
   @Input() isModal = false;
   @Input() currentPage = signal<number>(1);
-  @Input() isComponentSetToDefault = false;
+  @Input() isComponentSetToDefault = signal(false);
 
+  data = signal<T>({} as T);
   tableBodyList: ITableBody<T>[] = [];
   gridTemplateColumns = '';
   qtyPerPage = 10;
@@ -69,16 +70,16 @@ export class TableComponent<T = BaseType> implements OnInit, OnDestroy, OnChange
     if (changes['tableHeaders']) {
       this.onGridTemplateColumnsChange();
     }
-    if (this.isComponentSetToDefault) {
+    if (changes['isComponentSetToDefault']) {
       this.onSetSortFilterToDefault();
       this.onSetCheckboxBodyToDefault();
-      this.onComponentSetToDefault();
       this.onSetModalCheckIconCheckedToDefault();
       this.isTableHeaderCheckBoxChecked = false;
+      this.onComponentSetToDefault();
     }
   }
 
-  isStatusData = (obj: unknown): obj is ITaskForm => {
+  isTaskData = (obj: unknown): obj is ITaskForm => {
     return typeof obj === 'object' && obj !== null && typeof (obj as ITaskForm).status === 'string';
   };
 
@@ -91,7 +92,7 @@ export class TableComponent<T = BaseType> implements OnInit, OnDestroy, OnChange
         isRowPopUpActive: false,
       };
 
-      if (!this.isStatusData(data)) {
+      if (!this.isTaskData(data)) {
         return base;
       }
       const status = data.status as Status;
@@ -359,7 +360,6 @@ export class TableComponent<T = BaseType> implements OnInit, OnDestroy, OnChange
   @Output() setToDefaultEmitter = new EventEmitter();
 
   onComponentSetToDefault = (): void => {
-    this.isComponentSetToDefault = false;
     this.setToDefaultEmitter.emit(false);
   };
 
@@ -466,16 +466,18 @@ export class TableComponent<T = BaseType> implements OnInit, OnDestroy, OnChange
     this.refreshBtnClickEmitter.emit();
   }
 
-  @Output() deleteBtnClickEmitter = new EventEmitter<T>();
+  @Output() tableDeleteBtnClickEmitter = new EventEmitter<T>();
 
-  onDeleteBtnClick(data: T): void {
-    this.deleteBtnClickEmitter.emit(data);
+  onTableDeleteBtnClick(data: T): void {
+    this.data.set(data);
+    this.tableDeleteBtnClickEmitter.emit(this.data());
   }
 
   @Output() cloneBtnClickEmitter = new EventEmitter<T>();
 
   onCloneBtnClick(data: T): void {
-    this.cloneBtnClickEmitter.emit(data);
+    this.data.set(data);
+    this.cloneBtnClickEmitter.emit(this.data());
   }
 
   ngOnDestroy(): void {

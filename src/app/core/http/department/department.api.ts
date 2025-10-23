@@ -25,7 +25,7 @@ export class DepartmentApi {
     );
   }
 
-  async onGetDataByField<K extends keyof IDepartment>(
+  async onGetDataByQuery<K extends keyof IDepartment>(
     key: K,
     value: IDepartment[K]
   ): Promise<IResponseDepartment> {

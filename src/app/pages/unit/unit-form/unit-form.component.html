@@ -12,6 +12,15 @@
   <div class="flex flex-col gap-4">
     <h1 class="text-lg font-semibold bg-gray-200 p-1 rounded-md">Dados cadastrais</h1>
     <div class="flex flex-col gap-4">
+      <div class="flex flex-col w-full" [ngClass]="(data.idUnit || 0) > 0 ? 'block' : 'hidden'">
+        <label #labelForm class="font-medium text-sm" for="default">Id</label>
+        <app-input
+          class="mt-1"
+          [inputName]="'custom'"
+          [isDisabled]="true"
+          [inputValue]="data.idUnit == 0 || data.idUnit == null ? '' : data.idUnit.toString()"
+          [type]="'search'" />
+      </div>
       <div class="flex flex-col gap-1">
         <label #labelForm class="font-medium text-sm" for="default"
           >Unidade de medida <span class="font-bold text-red-400">*</span></label
@@ -41,3 +50,11 @@
       (click)="onSaveRegister(onBackToPreviousPage)"></app-button-label>
   </footer>
 </div>
+
+<app-modal-info
+  [isModalActive]="modalInfo().isActive"
+  [type]="modalInfo().type"
+  [description]="modalInfo().description"
+  [title]="modalInfo().title"
+  (clickEmitter)="onCloseInfoModal()" />
+<app-loading [isLoading]="isLoading()" />

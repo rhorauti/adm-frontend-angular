@@ -83,6 +83,13 @@ export const routes: Routes = [
       ),
   },
   {
+    path: 'departments/new/:id',
+    loadComponent: () =>
+      import('@pages/department/department-form/department-form.component').then(
+        c => c.DepartmentFormComponent
+      ),
+  },
+  {
     path: 'departments/edit/:id',
     loadComponent: () =>
       import('@pages/department/department-form/department-form.component').then(
@@ -98,6 +105,13 @@ export const routes: Routes = [
   },
   {
     path: ':idCompany/employees/new',
+    loadComponent: () =>
+      import('@pages/employee/employee-form/employee-form.component').then(
+        c => c.EmployeeFormComponent
+      ),
+  },
+  {
+    path: ':idCompany/employees/new/:idEmployee',
     loadComponent: () =>
       import('@pages/employee/employee-form/employee-form.component').then(
         c => c.EmployeeFormComponent
@@ -125,6 +139,13 @@ export const routes: Routes = [
       ),
   },
   {
+    path: 'employee-positions/new/:id',
+    loadComponent: () =>
+      import('@pages/employee/employee-position-form/employee-position-form.component').then(
+        c => c.EmployeePositionFormComponent
+      ),
+  },
+  {
     path: 'employee-positions/edit/:id',
     loadComponent: () =>
       import('@pages/employee/employee-position-form/employee-position-form.component').then(
@@ -140,6 +161,13 @@ export const routes: Routes = [
   },
   {
     path: 'production-lines/new',
+    loadComponent: () =>
+      import('@pages/production/production-line-form/production-line-form.component').then(
+        c => c.ProductionLineFormComponent
+      ),
+  },
+  {
+    path: 'production-lines/new/:id',
     loadComponent: () =>
       import('@pages/production/production-line-form/production-line-form.component').then(
         c => c.ProductionLineFormComponent
@@ -188,6 +216,13 @@ export const routes: Routes = [
       ),
   },
   {
+    path: 'product-types/new/:id',
+    loadComponent: () =>
+      import('@pages/product/product-type-form/product-type-form.component').then(
+        c => c.ProductTypeFormComponent
+      ),
+  },
+  {
     path: 'product-types/edit/:id',
     loadComponent: () =>
       import('@pages/product/product-type-form/product-type-form.component').then(
@@ -201,6 +236,11 @@ export const routes: Routes = [
   },
   {
     path: 'units/new',
+    loadComponent: () =>
+      import('@pages/unit/unit-form/unit-form.component').then(c => c.UnitFormComponent),
+  },
+  {
+    path: 'units/new/:id',
     loadComponent: () =>
       import('@pages/unit/unit-form/unit-form.component').then(c => c.UnitFormComponent),
   },
@@ -224,7 +264,14 @@ export const routes: Routes = [
       ),
   },
   {
-    path: ':department/task-types/edit/:idTask',
+    path: ':department/task-types/new/:idTaskType',
+    loadComponent: () =>
+      import('@pages/task/task-type-form/task-type-form.component').then(
+        c => c.TaskTypeFormComponent
+      ),
+  },
+  {
+    path: ':department/task-types/edit/:idTaskType',
     loadComponent: () =>
       import('@pages/task/task-type-form/task-type-form.component').then(
         c => c.TaskTypeFormComponent

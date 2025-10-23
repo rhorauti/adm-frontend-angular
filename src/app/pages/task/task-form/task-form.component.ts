@@ -4,7 +4,6 @@ import {
   AfterViewInit,
   ChangeDetectorRef,
   Component,
-  computed,
   ElementRef,
   inject,
   OnDestroy,
@@ -34,7 +33,7 @@ import {
   TASK_NUMBER_STATUS,
 } from 'app/enum/status.enum';
 import { TaskApi } from '@core/http/task/task.api';
-import { IEmployee } from '@core/interfaces/employee.interface';
+import { IEmployeeHome } from '@core/interfaces/employee.interface';
 import {
   ActionCallback,
   IModalAsk,
@@ -46,10 +45,10 @@ import { PartialProduct } from '@core/interfaces/product.interface';
 import { IProductionLine } from '@core/interfaces/production-line.interface';
 import { ITableHeader } from '@core/interfaces/table.interface';
 import {
-  ITaskType,
   IUsedSpareParts,
   ITaskForm,
   IResponseTaskForm,
+  ITaskType,
 } from '@core/interfaces/task.interface';
 import { BaseApiName } from '@core/types/base.type';
 import { ValidationType } from '@core/types/validation.type';
@@ -486,7 +485,7 @@ export class TaskFormComponent implements OnInit, OnDestroy, AfterViewInit {
   setEmployeeValue = (employeeName: string): void => {
     const employee = this.taskForm().employeeList?.find(
       employee => employee.name == employeeName
-    ) as IEmployee;
+    ) as IEmployeeHome;
     if (employeeName) {
       this.taskForm.update(current => ({ ...current, employee: employee }));
     } else {
@@ -579,7 +578,6 @@ export class TaskFormComponent implements OnInit, OnDestroy, AfterViewInit {
   };
 
   onSetSparePartInputValue = (inputValue: string, index: number): void => {
-    console.log('inputValue', inputValue);
     if (
       !inputValue.includes(this.separatorSymbol) ||
       (inputValue.includes(this.separatorSymbol) &&
@@ -625,7 +623,6 @@ export class TaskFormComponent implements OnInit, OnDestroy, AfterViewInit {
         }
       }
     }
-    console.log('onSetSparePartInputValue', this.taskForm().usedSpareParts);
   };
 
   onInputValueChange = (inputValue: string, index: number): void => {
@@ -820,7 +817,7 @@ export class TaskFormComponent implements OnInit, OnDestroy, AfterViewInit {
 
       const uniques: string[] = [];
       const duplicates: string[] = [];
-      (this.taskForm().usedSpareParts || []).forEach((sp, index) => {
+      (this.taskForm().usedSpareParts || []).forEach(sp => {
         if (uniques.includes(sp.internalPartNumber)) {
           duplicates.push(sp.internalPartNumber);
         } else {
@@ -838,7 +835,6 @@ export class TaskFormComponent implements OnInit, OnDestroy, AfterViewInit {
           idxList.forEach(idx => {
             this.borderType().usedSpareParts[idx] = 'failure';
           });
-          console.log('borderType', this.borderType().usedSpareParts);
           message = 'Existem campos duplicadas.';
           this.sparePartsMessage = 'Este campo está duplicado';
           this.onShowInfoModal(`Cadastro de ${this.currentViewTranslatedSingular}`, message);

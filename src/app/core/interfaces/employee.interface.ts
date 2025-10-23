@@ -1,7 +1,8 @@
-import { IDepartment } from './department.interface';
+import { PartialCompany } from './company.interface';
+import { IDepartment, PartialDept } from './department.interface';
 import { IBaseResponse } from './response.interface';
 
-export interface IEmployee {
+export interface IEmployeeHome {
   idEmployee: number | null;
   isDefault: boolean;
   name: string;
@@ -13,6 +14,22 @@ export interface IEmployee {
   company?: string;
   department?: string | null;
   position?: string | null;
+}
+
+export interface IEmployeeForm {
+  idEmployee: number | null;
+  isDefault: boolean;
+  name: string;
+  cpf?: string | null;
+  email?: string | null;
+  deskphone?: string | null;
+  cellphone?: string | null;
+  photoUrl?: string | null;
+  company?: PartialCompany | null;
+  departmentList?: PartialDept[];
+  department?: PartialDept | null;
+  employeePositionList?: PartialEmployeePosition[];
+  employeePosition?: PartialEmployeePosition | null;
 }
 
 export interface IEmployeePayload {
@@ -28,16 +45,13 @@ export interface IEmployeePayload {
   employeePosition?: IEmployeePosition | null;
 }
 
-export type PartialEmployee = Pick<IEmployee, 'idEmployee' | 'name'>;
-
-// export type IEmployeePayload = Omit<IEmployee, 'photoUrl' | 'employeePosition'> & {
-//   imgPreview?: FormData | null;
-//   employeePosition?: IEmployeePosition;
-// };
+export type PartialEmployee = Pick<IEmployeeHome, 'idEmployee' | 'name'>;
 
 export interface IResponseEmployee extends IBaseResponse {
-  data?: IEmployee | IEmployee[];
+  data?: IEmployeeHome | IEmployeeHome[];
 }
+
+export type PartialEmployeePosition = Pick<IEmployeePosition, 'idEmployeePosition' | 'name'>;
 
 export interface IEmployeePosition {
   idEmployeePosition: number | null;
@@ -46,5 +60,5 @@ export interface IEmployeePosition {
 }
 
 export interface IEmployeePositionResponse extends IBaseResponse {
-  data?: IEmployeePosition[];
+  data?: IEmployeePosition | IEmployeePosition[];
 }

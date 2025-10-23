@@ -10,7 +10,7 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { AddressState } from '@store/address/address.store';
 import { EmployeeState } from '@store/employee/employee.store';
 import { IAddress } from '@core/interfaces/address.interface';
-import { IEmployee } from '@core/interfaces/employee.interface';
+import { IEmployeeHome } from '@core/interfaces/employee.interface';
 import { saveStorage } from '@core/utils/misc';
 
 type FilterMethod = 'input-search' | 'filter-box' | 'sort';
@@ -770,7 +770,7 @@ export const CompanyStore = signalStore(
         email: '',
         deskphone: '',
         cellphone: '',
-      } as IEmployee,
+      } as IEmployeeHome,
     };
 
     const onMaskNumericalField = (data: string): string => {

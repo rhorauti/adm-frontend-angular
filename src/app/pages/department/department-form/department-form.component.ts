@@ -9,6 +9,7 @@ import {
   OnDestroy,
   OnInit,
   QueryList,
+  signal,
   ViewChildren,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
@@ -16,13 +17,14 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { BreadcrumbComponent } from '@components/breadcrumb/breadcrumb.component';
 import { ButtonLabelComponent } from '@components/button/button-label/button-label.component';
 import { InputComponent } from '@components/input/input.component';
+import { LoadingComponent } from '@components/loading/loading.component';
+import { ModalInfoComponent } from '@components/modal/modal-info/modal-info.component';
 import { TextAreaComponent } from '@components/text-area/text-area.component';
 import { DepartmentApi } from '@core/http/department/department.api';
 import { IDepartment } from '@core/interfaces/department.interface';
-import { ActionCallback } from '@core/interfaces/modal.interface';
+import { ActionCallback, IModalInfo } from '@core/interfaces/modal.interface';
 import { BaseApiName } from '@core/types/base.type';
-import { BaseRegisterStore } from '@store/base/base.register.store';
-import { ModalStore } from '@store/modal/modal.store';
+import { ModalType } from '@store/modal/modal.store';
 import { Subscription } from 'rxjs';
 
 @Component({
@@ -34,6 +36,8 @@ import { Subscription } from 'rxjs';
     FormsModule,
     InputComponent,
     TextAreaComponent,
+    ModalInfoComponent,
+    LoadingComponent,
   ],
   templateUrl: './department-form.component.html',
   styleUrl: './department-form.component.scss',
@@ -42,10 +46,8 @@ export class DepartmentFormComponent implements OnInit, OnDestroy, AfterViewInit
   @ViewChildren(InputComponent) inputs!: QueryList<InputComponent>;
   @ViewChildren('labelForm') private labels!: QueryList<ElementRef>;
   readonly departmentApi = inject(DepartmentApi);
-  readonly baseRegisterStore = inject(BaseRegisterStore);
   private activatedRoute = inject(ActivatedRoute);
   readonly router = inject(Router);
-  readonly modalStore = inject(ModalStore);
 
   private cdr = inject(ChangeDetectorRef);
 
@@ -61,25 +63,34 @@ export class DepartmentFormComponent implements OnInit, OnDestroy, AfterViewInit
     comment: '',
   } as IDepartment;
 
+  modalInfo = signal<IModalInfo>({
+    isActive: false,
+    title: '',
+    description: '',
+    type: '',
+    onActionOk: null,
+  });
+
+  isLoading = signal(false);
+
   async ngOnInit(): Promise<void> {
     this.subscription = this.activatedRoute.paramMap.subscribe(params => {
-      this.id = Number(params.get('id')) || 0;
+      this.id = Number(params.get('id')) || -1;
     });
-    if (this.baseRegisterStore.isEditData()) {
-      this.data = this.baseRegisterStore.data() as IDepartment;
-      this.baseRegisterStore.onSetStateToNewValue('isEditData', false);
-    } else if (this.baseRegisterStore.isCopiedData()) {
-      this.data = this.baseRegisterStore.data() as IDepartment;
-      this.id = 0;
-      this.data.idDepartment = 0;
-      this.baseRegisterStore.onSetStateToNewValue('isCopiedData', false);
+    if (this.router.url.includes('edit') && (this.id || 0) > 0) {
+      const dataList = await this.departmentApi.onGetDataById(this.id || 0);
+      this.data = dataList.data as IDepartment;
+    } else if (this.router.url.includes('new') && (this.id || 0) > 0) {
+      const dataList = await this.departmentApi.onGetDataById(this.id || 0);
+      this.data = dataList.data as IDepartment;
+      this.data.idDepartment = null;
     }
     this.defineTitle();
     this.breadcrumbList = ['Cadastro', this.currentViewTranslated, `${this.defineTitle()}`];
   }
 
   defineTitle = (): string => {
-    if (this.id == 0) {
+    if (this.id == -1) {
       return 'Novo Registro';
     } else {
       return this.data.name;
@@ -99,7 +110,7 @@ export class DepartmentFormComponent implements OnInit, OnDestroy, AfterViewInit
   };
 
   onBackToPreviousPage = (): void => {
-    this.modalStore.onRedirectPage(`/${this.currentView}`);
+    this.router.navigate([`/${this.currentView}`]);
   };
   fieldValidation = (): void => {
     const message = 'O campo Departamento não pode estar vazio.';
@@ -110,18 +121,19 @@ export class DepartmentFormComponent implements OnInit, OnDestroy, AfterViewInit
 
   onSaveRegister = async (onActionOk?: ActionCallback): Promise<void> => {
     try {
-      this.modalStore.onLoading(true);
+      this.isLoading.set(true);
       this.fieldValidation();
       const response = await this.departmentApi.onSave(this.data);
       if (response.status) {
-        this.modalStore.onSetModalInfoType('success');
-        this.modalStore.onShowInfoModal(
+        this.onShowInfoModal(
+          'success',
           `Cadastro de ${this.currentViewTranslated}`,
           response.message,
           onActionOk
         );
       } else {
-        this.modalStore.onShowInfoModal(
+        this.onShowInfoModal(
+          'failure',
           `Cadastro de ${this.currentViewTranslated}`,
           response.error?.message || ''
         );
@@ -129,19 +141,49 @@ export class DepartmentFormComponent implements OnInit, OnDestroy, AfterViewInit
     } catch (e: unknown) {
       if (e instanceof HttpErrorResponse) {
         const error = e as HttpErrorResponse;
-        this.modalStore.onShowInfoModal(
+        this.onShowInfoModal(
+          'failure',
           `Cadastro de ${this.currentViewTranslated}`,
           error.error?.message || 'Erro desconhecido'
         );
       } else {
-        this.modalStore.onShowInfoModal(
+        this.onShowInfoModal(
+          'failure',
           `Cadastro de ${this.currentViewTranslated}`,
           (e as Error).message
         );
       }
     } finally {
-      this.modalStore.onLoading(false);
+      this.isLoading.set(false);
     }
+  };
+
+  onShowInfoModal = (
+    type: ModalType,
+    title: string,
+    description: string,
+    onActionOk?: ActionCallback
+  ): void => {
+    this.modalInfo.set({
+      ...this.modalInfo,
+      isActive: true,
+      type: type,
+      title: title,
+      description: description,
+      onActionOk: onActionOk,
+    });
+  };
+
+  onCloseInfoModal = async (): Promise<void> => {
+    const callback = this.modalInfo().onActionOk;
+    if (callback) await Promise.resolve(callback());
+    this.modalInfo.set({
+      isActive: false,
+      type: '',
+      title: '',
+      description: '',
+      onActionOk: null,
+    });
   };
 
   ngOnDestroy() {

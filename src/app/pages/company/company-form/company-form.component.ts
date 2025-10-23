@@ -25,7 +25,7 @@ import { IAddress } from '@core/interfaces/address.interface';
 import { ICompany, ICompanyDetail as ICompanyDetails } from '@core/interfaces/company.interface';
 import { IDepartment } from '@core/interfaces/department.interface';
 import {
-  IEmployee,
+  IEmployeeHome,
   IEmployeePayload,
   IEmployeePosition,
 } from '@core/interfaces/employee.interface';
@@ -113,7 +113,7 @@ export class CompanyFormComponent implements OnInit, OnDestroy, AfterViewInit {
       cellphone: '',
       position: '',
       department: '',
-    } as IEmployee,
+    } as IEmployeeHome,
   } as ICompanyDetails;
 
   async ngOnInit(): Promise<void> {

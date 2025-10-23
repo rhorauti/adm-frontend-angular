@@ -37,7 +37,7 @@
           [initialDataList]="dataList()"
           [isModal]="true"
           [tableHeaders]="tableHeaders()"
-          [isComponentSetToDefault]="isComponentSetToDefault()"
+          [isComponentSetToDefault]="isComponentSetToDefault"
           (refreshBtnClickEmitter)="onShowDataList?.()"
           (rowClickEmitter)="onTableRowClick($event)"
           (setToDefaultEmitter)="isComponentSetToDefault.set(false)" />

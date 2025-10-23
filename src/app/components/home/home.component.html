@@ -1,0 +1,213 @@
+<div class="flex flex-col gap-4">
+  <div class="flex items-center flex-col gap-2 md:flex-row md:justify-between">
+    <app-breadcrumb [items]="breadcrumbList" />
+    <span class="font-medium">Depto: {{ deptNameTranslated }} </span>
+  </div>
+  @if (dataList() && dataList().length > 0) {
+    <div class="flex flex-col gap-5">
+      <div class="top-button-layout gap-6 sm:gap-3 overflow-x-auto">
+        <div class="flex gap-3">
+          <app-input
+            [inputValue]="inputSearchValue()"
+            [id]="`input-filter-${currentView}`"
+            [placeholder]="inputSearchPlaceholder"
+            [inputName]="'search'"
+            (iconClickEmitter)="onClickOnFilterBtnThroughSearchInput(inputSearchFilterList)"
+            (keyboardEmitter)="onKeyPressOnSearchInput($event, inputSearchFilterList)"
+            (inputValueEmitter)="inputSearchValue.set($event)" />
+          <app-tooltip [description]="'Filtro'" [position]="'right'">
+            <app-button-icon
+              content
+              (click)="isFilterBoxActive.set(true)"
+              [iconName]="'filter_list'" />
+          </app-tooltip>
+        </div>
+        <div class="flex gap-3">
+          <app-button-icon (click)="onRedirectPage(newRegisterUrl)" [iconName]="'add'" />
+          <app-button-delete
+            (click)="onShowModalToDeleteThroughTopBtn()"
+            [isDisabled]="isDelBtnDisabled()" />
+          <app-tooltip [position]="'left'" [description]="'Colunas visíveis'">
+            <app-button-icon
+              content
+              [iconName]="'view_column'"
+              (click)="isTableHeaderBoxActive.set(true)" />
+          </app-tooltip>
+          <div class="is-hidden-from-640px">
+            <app-button-icon [iconName]="'refresh'" (click)="onRefreshBtnClick()" />
+          </div>
+        </div>
+      </div>
+      @if (isAtLeastOneFilterHelpNotEmpty()) {
+        <div class="flex flex-wrap items-center gap-3 text-sm">
+          @if (inputSearchHelp().length > 0) {
+            <div class="flex items-center gap-2">
+              <p>Pesquisa: {{ inputSearchHelp() }}</p>
+              <app-button-close (click)="onClearAllData()"></app-button-close>
+            </div>
+          } @else {
+            @for (tableHeader of tableHeaders; track $index) {
+              @if (filterHelp()[tableHeader.databaseField.toString()]) {
+                <div class="flex items-center gap-2">
+                  <p>
+                    {{ tableHeader.headerName }} :
+                    {{ filterHelp()[tableHeader.databaseField.toString()] }}
+                  </p>
+                  <app-button-close
+                    (click)="
+                      onSetFilterBoxItemToDefault(tableHeader.databaseField.toString())
+                    "></app-button-close>
+                </div>
+              }
+            }
+          }
+          <button
+            (click)="onClearAllData()"
+            class="text-logo font-semibold cursor-pointer hover:text-logo-hover hover:underline">
+            Limpar
+          </button>
+        </div>
+      }
+      <app-table
+        [initialDataList]="dataList()"
+        [tableHeaders]="tableHeaders"
+        [isComponentSetToDefault]="isComponentSetToDefault"
+        (refreshBtnClickEmitter)="onRefreshBtnClick()"
+        (tableDataEmitter)="data.set($event)"
+        (setToDefaultEmitter)="onSetComponentToDefault()"
+        (tableDeleteBtnClickEmitter)="onDeleteThroughTableBtn($event)"
+        (isDelBtnDisabledEmitter)="isDelBtnDisabled.set($event)"
+        (rowClickEmitter)="onRedirectToEditPage($event)"
+        (cloneBtnClickEmitter)="onCloneRegister($event)" />
+      <app-pagination [initialDataList]="dataList()" />
+    </div>
+  } @else {
+    <div class="flex flex-col items-center gap-4 w-full mt-10">
+      <mat-icon class="text-logo text-6xl">{{
+        isFilterResultZeroRegister() ? 'search_off' : 'library_add'
+      }}</mat-icon>
+      <p class="font-semibold">Nenhum registro encontrado</p>
+      @if (!isFilterResultZeroRegister()) {
+        <app-button-label
+          (click)="onRedirectPage(newRegisterUrl)"
+          [showLeftIcon]="true"
+          [iconRightName]="'add'"
+          [label]="'Adicionar um novo registro'" />
+      } @else {
+        @if (inputSearchValue().length > 0) {
+          <p>
+            Palavra(s) Pesquisada(s) :
+            <span class="font-semibold">{{ inputSearchValue() }}</span>
+          </p>
+        } @else {
+          <p>Campo(s) pesquisado(s) :</p>
+          @for (tableHeader of tableHeaders; track $index) {
+            @if (filterBox()[tableHeader.databaseField.toString()]) {
+              <p>
+                {{ tableHeader.headerName }} :
+                <span class="font-semibold">{{
+                  filterBox()[tableHeader.databaseField.toString()]
+                }}</span>
+              </p>
+            }
+          }
+        }
+        <app-button-label
+          (keyboardEmitter)="onKeyPressOnNotFoundFilterRegister($event)"
+          (click)="onClearAllData()"
+          [label]="'Voltar'" />
+      }
+    </div>
+  }
+</div>
+
+<app-side-bar
+  [isSideBarActive]="isFilterBoxActive()"
+  [titleIconName]="'filter_list'"
+  [title]="'Filtro'"
+  [btnLabel]="'Aplicar'"
+  [isPrimaryBtnDisabled]="!isAtLeastOneFilterBoxNotEmpty()"
+  (primaryBtnClickEmitter)="onClickOnFilterBtnThroughFilterBox()"
+  (isCloseBtnClickEmitter)="isFilterBoxActive.set(false)">
+  <div body class="flex flex-col gap-4">
+    @for (tableHeader of tableHeaders; let headerIdx = $index; track headerIdx) {
+      @if (tableHeader.databaseField == 'startDate' || tableHeader.databaseField == 'finishDate') {
+        <div class="flex flex-col md:flex-row md:items-center gap-2">
+          <div class="flex flex-col gap-1 grow">
+            <p class="font-medium">
+              {{ tableHeader.databaseField == 'startDate' ? 'Início' : 'Fim' }}
+            </p>
+            <app-input
+              [id]="`filter-${ currentView }-${ tableHeader.databaseField.toString() }-${tableHeader.databaseField == 'startDate' ? 'start' : 'finish'}`"
+              [inputName]="'custom'"
+              [inputValue]="
+                tableHeader.databaseField == 'startDate'
+                  ? filterDateInterval().startDateFrom
+                  : filterDateInterval().finishDateFrom
+              "
+              [type]="'date'"
+              (inputValueEmitter)="onSetFilterBoxStartDateValue(tableHeader, $event)"
+              (keyboardEmitter)="onKeyPressOnFilterBox($event)" />
+          </div>
+          <mat-icon class="is-hidden-mobile self-end pb-2">keyboard_arrow_right</mat-icon>
+          <mat-icon class="is-hidden-tablet self-center">keyboard_arrow_down</mat-icon>
+          <div class="flex flex-col gap-1 grow">
+            <p class="text-white is-hidden-mobile">Até</p>
+            <app-input
+              [id]="`filter-${ currentView }-${ tableHeader.databaseField.toString() }-${tableHeader.databaseField == 'startDate' ? 'start' : 'finish'}`"
+              [inputName]="'custom'"
+              [inputValue]="
+                tableHeader.databaseField == 'startDate'
+                  ? filterDateInterval().startDateTo
+                  : filterDateInterval().finishDateTo
+              "
+              [type]="'date'"
+              (inputValueEmitter)="onSetFilterBoxFinishDateValue(tableHeader, $event)"
+              (keyboardEmitter)="onKeyPressOnFilterBox($event)" />
+          </div>
+        </div>
+      } @else {
+        <div class="flex flex-col gap-2">
+          <p class="font-medium">{{ tableHeader.headerName }}</p>
+          <app-input
+            [id]="`filter-${ currentView }-${ tableHeader.databaseField.toString() }`"
+            [inputName]="'custom'"
+            [inputValue]="
+              (filterBox()[tableHeader.databaseField.toString()] ?? '').toString() == '0'
+                ? ''
+                : (filterBox()[tableHeader.databaseField.toString()] ?? '').toString()
+            "
+            [type]="'search'"
+            (inputValueEmitter)="onSetFilterBoxValue(tableHeader.databaseField, $event)"
+            (keyboardEmitter)="onKeyPressOnFilterBox($event)" />
+        </div>
+      }
+    }
+  </div>
+</app-side-bar>
+
+<app-side-bar
+  [isSideBarActive]="isTableHeaderBoxActive()"
+  [isTwoThirdWidth]="false"
+  [isFooterActive]="false"
+  [title]="'Colunas Visíveis'"
+  (isCloseBtnClickEmitter)="isTableHeaderBoxActive.set(false)">
+  <div body class="flex flex-col gap-6">
+    @if (isTableHeaderBoxActive()) {
+      <p>Selecione abaixo as colunas que deseja estarem visíveis na tabela</p>
+      <div class="flex flex-col gap-2">
+        @for (header of tableHeaders; track $index) {
+          @if (!$first) {
+            <div class="flex gap-4">
+              <app-toogle-button
+                [isChecked]="header.isHeaderActive"
+                [toggleId]="`task-toggle-${header.id}`"
+                (isCheckedEmitter)="onSetHeaderDisplay($index)" />
+              <p>{{ header.headerName }}</p>
+            </div>
+          }
+        }
+      </div>
+    }
+  </div>
+</app-side-bar>

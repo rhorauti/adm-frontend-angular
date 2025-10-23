@@ -8,16 +8,6 @@
           <input [(ngModel)]="item.isChecked" type="checkbox" [id]="`checkbox-left-${$index}`" />
           <label [for]="`checkbox-left-${$index}`">{{ item.name }}</label>
         </div>
-        <!-- <div
-          tabindex="0"
-          (click)="onActivateRow($index, $event)"
-          (keydown)="onActivateRow($index, $event)"
-          #listItems
-          class="hover-bg-color cursor-pointer">
-          <input type="checkbox" [id]="`checkbox-left-${$index}`" />
-          <label [for]="`checkbox-left-${$index}`">{{ data }}</label>
-          {{ data }}
-        </div> -->
       }
     </div>
   </div>
@@ -34,14 +24,6 @@
           <input [(ngModel)]="item.isChecked" type="checkbox" [id]="`checkbox-right-${$index}`" />
           <label [for]="`checkbox-right-${$index}`" class="ml-2">{{ item.name }}</label>
         </div>
-        <!-- <div
-          tabindex="0"
-          (click)="onActivateRow($index, $event)"
-          (keydown)="onActivateRow($index, $event)"
-          #listItemsSelected
-          class="hover-bg-color cursor-pointer">
-          <label for=""><input type="checkbox" name="" />{{ data }}</label>
-        </div> -->
       }
     </div>
   </div>

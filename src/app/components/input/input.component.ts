@@ -164,14 +164,14 @@ export class InputComponent implements OnInit, OnChanges {
   onSelectOptionThroughKeyboard = (event: KeyboardEvent): void => {
     // if (this.inputListFiltered.length > 0) {
     this.onFilterInputList();
-    if (event.key == 'ArrowDown') {
+    if (event.key == 'ArrowDown' && this.inputListFiltered.length > 0) {
       if (this.idx >= this.inputListFiltered.length - 1) {
         this.idx = 0;
       } else {
         this.idx++;
       }
       this.showInputBox = true;
-    } else if (event.key == 'ArrowUp') {
+    } else if (event.key == 'ArrowUp' && this.inputListFiltered.length > 0) {
       if (this.idx <= 0) {
         this.idx = this.inputListFiltered.length - 1;
       } else {

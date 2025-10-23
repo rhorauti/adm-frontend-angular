@@ -9,6 +9,7 @@ import {
   OnDestroy,
   OnInit,
   QueryList,
+  signal,
   ViewChildren,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
@@ -20,14 +21,15 @@ import { SelectComponent } from '@components/select/select.component';
 import { DepartmentApi } from '@core/http/department/department.api';
 import { EmployeePositionApi } from '@core/http/employee/employee-position.api';
 import { EmployeeApi } from '@core/http/employee/employee.api';
-import { IDepartment } from '@core/interfaces/department.interface';
-import { IEmployee, IEmployeePosition } from '@core/interfaces/employee.interface';
-import { ActionCallback } from '@core/interfaces/modal.interface';
+import { PartialDept } from '@core/interfaces/department.interface';
+import { IEmployeeForm, PartialEmployeePosition } from '@core/interfaces/employee.interface';
+import { ActionCallback, IModalInfo } from '@core/interfaces/modal.interface';
 import { BaseApiName } from '@core/types/base.type';
-import { BaseRegisterStore } from '@store/base/base.register.store';
-import { ModalStore } from '@store/modal/modal.store';
+import { ModalType } from '@store/modal/modal.store';
 import { Subscription } from 'rxjs';
 import { PhotoBoxSingleComponent } from '@components/photo-box/photo-box-single/photo-box-single.component';
+import { ModalInfoComponent } from '@components/modal/modal-info/modal-info.component';
+import { LoadingComponent } from '@components/loading/loading.component';
 
 @Component({
   selector: 'app-employee-form',
@@ -39,6 +41,8 @@ import { PhotoBoxSingleComponent } from '@components/photo-box/photo-box-single/
     InputComponent,
     SelectComponent,
     PhotoBoxSingleComponent,
+    ModalInfoComponent,
+    LoadingComponent,
   ],
   templateUrl: './employee-form.component.html',
   styleUrl: './employee-form.component.scss',
@@ -50,10 +54,8 @@ export class EmployeeFormComponent implements OnInit, OnDestroy, AfterViewInit {
   readonly employeeApi = inject(EmployeeApi);
   readonly departmentApi = inject(DepartmentApi);
   readonly employeePositionApi = inject(EmployeePositionApi);
-  readonly baseRegisterStore = inject(BaseRegisterStore);
   private activatedRoute = inject(ActivatedRoute);
   readonly router = inject(Router);
-  readonly modalStore = inject(ModalStore);
 
   private cdr = inject(ChangeDetectorRef);
 
@@ -63,109 +65,74 @@ export class EmployeeFormComponent implements OnInit, OnDestroy, AfterViewInit {
   breadcrumbList: string[] = [];
   idEmployee = 0;
   idCompany = 0;
-  departmentList: IDepartment[] = [];
   departmentOptionList: string[] = [];
-  employeePositionList: IEmployeePosition[] = [];
   employeePositionOptionList: string[] = [];
-
-  departmentData = {
-    idDepartment: null,
-    name: '',
-    comment: '',
-  } as IDepartment;
-
-  employeePositionData = {
-    idEmployeePosition: null,
-    name: '',
-    comment: '',
-  } as IEmployeePosition;
 
   imgPreview: File | null = null;
   isRemovedPhoto = false;
 
-  employeeData = {
-    idEmployee: null,
+  employeeFormData: IEmployeeForm = {
+    idEmployee: 0,
     isDefault: false,
     name: '',
-    email: '',
-    photoUrl: '',
-    cellphone: '',
-    deskphone: '',
     cpf: '',
-  } as IEmployee;
+    email: '',
+    deskphone: '',
+    cellphone: '',
+    photoUrl: '',
+    company: {
+      idCompany: 0,
+      name: '',
+    },
+    departmentList: [],
+    department: {
+      idDepartment: 0,
+      name: '',
+    },
+    employeePositionList: [],
+    employeePosition: {
+      idEmployeePosition: 0,
+      name: '',
+    },
+  };
+
+  modalInfo = signal<IModalInfo>({
+    isActive: false,
+    title: '',
+    description: '',
+    type: '',
+    onActionOk: null,
+  });
+
+  isLoading = signal(false);
 
   async ngOnInit(): Promise<void> {
     this.subscription = this.activatedRoute.paramMap.subscribe(params => {
       this.idEmployee = Number(params.get('idEmployee')) || 0;
-      this.idCompany = Number(params.get('idCompany')) || 0;
+      this.idCompany = Number(params.get('idCompany')) || 1;
     });
-    await this.onGetDepartmentList();
-    await this.onGetEmployeePositionList();
-    if (this.baseRegisterStore.isEditData()) {
-      this.employeeData = this.baseRegisterStore.data() as IEmployee;
-      this.baseRegisterStore.onSetStateToNewValue('isEditData', false);
-    } else if (this.baseRegisterStore.isCopiedData()) {
-      this.employeeData = this.baseRegisterStore.data() as IEmployee;
-      this.idEmployee = 0;
-      this.employeeData.idEmployee = 0;
-      this.employeeData.photoUrl = '';
-      this.baseRegisterStore.onSetStateToNewValue('isCopiedData', false);
+    if (this.router.url.includes('edit') && (this.idEmployee || 0) > 0) {
+      const employee = await this.employeeApi.onGetData(this.idCompany || 0, this.idEmployee || 0);
+      this.employeeFormData = employee.data as IEmployeeForm;
+    } else if (this.router.url.includes('new') && (this.idEmployee || 0) > 0) {
+      const employee = await this.employeeApi.onGetData(this.idCompany || 0, this.idEmployee || 0);
+      this.employeeFormData = employee.data as IEmployeeForm;
+      this.employeeFormData.idEmployee = null;
+      this.employeeFormData.photoUrl = '';
     }
-    const dept = this.departmentList.find(
-      d => d.name === (this.employeeData as IEmployee).department
-    );
-    this.departmentData = dept ?? { idDepartment: null, name: '', comment: '' };
-    const posName = (this.employeeData as IEmployee).position;
-    const pos = this.employeePositionList.find(p => p.name === posName);
-    this.employeePositionData = pos ?? { idEmployeePosition: null, name: '', comment: '' };
+    this.departmentOptionList = this.employeeFormData.departmentList?.map(dept => dept.name) || [];
+    this.employeePositionOptionList =
+      this.employeeFormData.employeePositionList?.map(pos => pos.name) || [];
+    this.employeePositionOptionList.unshift('Sem registro');
     this.defineTitle();
     this.breadcrumbList = ['Cadastro', this.currentViewTranslated, `${this.defineTitle()}`];
   }
-
-  onGetDepartmentList = async (): Promise<void> => {
-    try {
-      this.modalStore.onLoading(true);
-      const response = await this.departmentApi.onGetDataList();
-      if (response.data) {
-        const data = response.data as IDepartment[];
-        this.departmentList = data;
-        this.departmentOptionList = data.map(dept => dept.name);
-      } else {
-        return;
-      }
-    } catch (e: unknown) {
-      const error = e as HttpErrorResponse;
-      this.modalStore.onShowInfoModal('Listar departamentos: ', error.error?.message);
-    } finally {
-      this.modalStore.onLoading(false);
-    }
-  };
-
-  onGetEmployeePositionList = async (): Promise<void> => {
-    try {
-      this.modalStore.onLoading(true);
-      const response = await this.employeePositionApi.onGetDataList();
-      if (response.data) {
-        const data = response.data as IEmployeePosition[];
-        this.employeePositionList = data;
-        this.employeePositionOptionList = data.map(position => position.name);
-        this.employeePositionOptionList.unshift('Sem registro');
-      } else {
-        return;
-      }
-    } catch (e: unknown) {
-      const error = e as HttpErrorResponse;
-      this.modalStore.onShowInfoModal('Listar cargos: ', error.error?.message);
-    } finally {
-      this.modalStore.onLoading(false);
-    }
-  };
 
   defineTitle = (): string => {
     if (this.idEmployee == 0) {
       return 'Novo Registro';
     } else {
-      return this.employeeData.name;
+      return this.employeeFormData.name;
     }
   };
 
@@ -189,29 +156,29 @@ export class EmployeeFormComponent implements OnInit, OnDestroy, AfterViewInit {
   };
 
   setDepartmentValue = (deptName: string): void => {
-    const dept = this.departmentList.find(dept => dept.name == deptName) as IDepartment;
+    const dept = (this.employeeFormData.departmentList || []).find(
+      dept => dept.name == deptName
+    ) as PartialDept;
     if (dept) {
-      this.departmentData = dept;
+      this.employeeFormData.department = dept;
     } else {
-      this.departmentData = {
+      this.employeeFormData.department = {
         idDepartment: 0,
         name: '',
-        comment: '',
       };
     }
   };
 
   setEmployeePositionValue = (positionName: string): void => {
-    const position = this.employeePositionList.find(
+    const position = (this.employeeFormData.employeePositionList || []).find(
       position => position.name == positionName
-    ) as IEmployeePosition;
+    ) as PartialEmployeePosition;
     if (position) {
-      this.employeePositionData = position;
+      this.employeeFormData.employeePosition = position;
     } else {
-      this.employeePositionData = {
+      this.employeeFormData.employeePosition = {
         idEmployeePosition: 0,
         name: '',
-        comment: '',
       };
     }
   };
@@ -227,16 +194,25 @@ export class EmployeeFormComponent implements OnInit, OnDestroy, AfterViewInit {
   };
 
   onBackToPreviousPage = (): void => {
-    this.modalStore.onRedirectPage(`/${this.idCompany}/${this.currentView}`);
+    this.router.navigate([`/${this.idCompany}/${this.currentView}`]);
   };
 
   fieldValidation = (): void => {
     let message = '';
-    if (this.employeeData && this.employeeData.name.length == 0) {
+    if (this.employeeFormData && this.employeeFormData.name.length == 0) {
       message = 'O campo Nome não pode estar vazio.';
     }
-    if (this.employeeData && this.departmentData.name?.length == 0) {
+    if (
+      this.employeeFormData.department != null &&
+      (this.employeeFormData.department.name || '')?.length == 0
+    ) {
       message = 'O campo Departamento não pode estar vazio.';
+    }
+    if (
+      this.employeeFormData.employeePosition != null &&
+      (this.employeeFormData.employeePosition.name || '')?.length == 0
+    ) {
+      message = 'O campo Cargo não pode estar vazio.';
     }
     if (message.length > 0) {
       throw Error(message);
@@ -251,19 +227,18 @@ export class EmployeeFormComponent implements OnInit, OnDestroy, AfterViewInit {
     formData.append(
       'data',
       JSON.stringify({
-        idEmployee: this.employeeData.idEmployee,
-        isDefault: this.employeeData.isDefault,
-        name: this.employeeData.name,
-        email: this.employeeData.email ?? '',
-        cellphone: this.employeeData.cellphone ?? '',
-        deskphone: this.employeeData.deskphone ?? '',
-        cpf: this.employeeData.cpf ?? '',
+        idEmployee: this.employeeFormData.idEmployee,
+        isDefault: this.employeeFormData.isDefault,
+        name: this.employeeFormData.name,
+        email: this.employeeFormData.email ?? '',
+        cellphone: this.employeeFormData.cellphone ?? '',
+        deskphone: this.employeeFormData.deskphone ?? '',
+        cpf: this.employeeFormData.cpf ?? '',
         isRemovedPhoto: this.isRemovedPhoto,
-        department: this.departmentData ?? { idDepartment: null, name: '', comment: '' },
-        employeePosition: this.employeePositionData ?? {
+        department: this.employeeFormData.department ?? { idDepartment: null, name: '' },
+        employeePosition: this.employeeFormData.employeePosition ?? {
           idEmployeePosition: null,
           name: '',
-          comment: '',
         },
       })
     );
@@ -274,17 +249,18 @@ export class EmployeeFormComponent implements OnInit, OnDestroy, AfterViewInit {
     try {
       const finalData = this.setFinalData();
       this.fieldValidation();
-      this.modalStore.onLoading(true);
+      this.isLoading.set(true);
       const response = await this.employeeApi.onSave(this.idCompany, finalData);
       if (response.status) {
-        this.modalStore.onSetModalInfoType('success');
-        this.modalStore.onShowInfoModal(
+        this.onShowInfoModal(
+          'success',
           `Cadastro de ${this.currentViewTranslated}`,
           response.message,
           onActionOk
         );
       } else {
-        this.modalStore.onShowInfoModal(
+        this.onShowInfoModal(
+          'failure',
           `Cadastro de ${this.currentViewTranslated}`,
           response.error?.message || ''
         );
@@ -292,19 +268,49 @@ export class EmployeeFormComponent implements OnInit, OnDestroy, AfterViewInit {
     } catch (e: unknown) {
       if (e instanceof HttpErrorResponse) {
         const error = e as HttpErrorResponse;
-        this.modalStore.onShowInfoModal(
+        this.onShowInfoModal(
+          'failure',
           `Cadastro de ${this.currentViewTranslated}`,
           error.error?.message || 'Erro desconhecido'
         );
       } else {
-        this.modalStore.onShowInfoModal(
+        this.onShowInfoModal(
+          'failure',
           `Cadastro de ${this.currentViewTranslated}`,
           (e as Error).message
         );
       }
     } finally {
-      this.modalStore.onLoading(false);
+      this.isLoading.set(false);
     }
+  };
+
+  onShowInfoModal = (
+    type: ModalType,
+    title: string,
+    description: string,
+    onActionOk?: ActionCallback
+  ): void => {
+    this.modalInfo.set({
+      ...this.modalInfo,
+      isActive: true,
+      type: type,
+      title: title,
+      description: description,
+      onActionOk: onActionOk,
+    });
+  };
+
+  onCloseInfoModal = async (): Promise<void> => {
+    const callback = this.modalInfo().onActionOk;
+    if (callback) await Promise.resolve(callback());
+    this.modalInfo.set({
+      isActive: false,
+      type: '',
+      title: '',
+      description: '',
+      onActionOk: null,
+    });
   };
 
   ngOnDestroy() {

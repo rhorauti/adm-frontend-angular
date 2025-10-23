@@ -12,23 +12,41 @@
   <div class="flex flex-col gap-4">
     <h1 class="text-lg font-semibold bg-gray-200 p-1 rounded-md">Dados cadastrais</h1>
     <div class="flex flex-col gap-4">
-      <div class="flex flex-col gap-1">
-        <label #labelForm class="font-medium text-sm" for="default"
-          >Código da Linha <span class="font-bold text-red-400">*</span></label
-        >
-        <app-input
-          [inputName]="'custom'"
-          [inputValue]="productionLineData.lineCode"
-          [type]="'search'"
-          (inputValueEmitter)="productionLineData.lineCode = $event" />
-      </div>
-      <div class="flex flex-col gap-1">
-        <label #labelForm class="font-medium text-sm" for="default">Nome do Linha</label>
-        <app-input
-          [inputName]="'custom'"
-          [inputValue]="productionLineData.lineName ?? ''"
-          [type]="'search'"
-          (inputValueEmitter)="productionLineData.lineName = $event" />
+      <div class="flex flex-col md:flex-row gap-4">
+        <div
+          class="flex flex-col md:w-24 w-full"
+          [ngClass]="(productionLineData.idProductionLine || 0) > 0 ? 'block' : 'hidden'">
+          <label #labelForm class="font-medium text-sm" for="default">Id</label>
+          <app-input
+            class="mt-1"
+            [inputName]="'custom'"
+            [isDisabled]="true"
+            [inputValue]="
+              productionLineData.idProductionLine == 0 ||
+              productionLineData.idProductionLine == null
+                ? ''
+                : productionLineData.idProductionLine.toString()
+            "
+            [type]="'search'" />
+        </div>
+        <div class="flex flex-col gap-1 grow">
+          <label #labelForm class="font-medium text-sm" for="default"
+            >Código da Linha <span class="font-bold text-red-400">*</span></label
+          >
+          <app-input
+            [inputName]="'custom'"
+            [inputValue]="productionLineData.lineCode"
+            [type]="'search'"
+            (inputValueEmitter)="productionLineData.lineCode = $event" />
+        </div>
+        <div class="flex flex-col gap-1 grow">
+          <label #labelForm class="font-medium text-sm" for="default">Nome do Linha</label>
+          <app-input
+            [inputName]="'custom'"
+            [inputValue]="productionLineData.lineName ?? ''"
+            [type]="'search'"
+            (inputValueEmitter)="productionLineData.lineName = $event" />
+        </div>
       </div>
       <div class="flex flex-col gap-2">
         <div class="flex gap-4">
@@ -66,3 +84,11 @@
       (click)="onSaveRegister(onBackToPreviousPage)"></app-button-label>
   </footer>
 </div>
+
+<app-modal-info
+  [isModalActive]="modalInfo().isActive"
+  [type]="modalInfo().type"
+  [description]="modalInfo().description"
+  [title]="modalInfo().title"
+  (clickEmitter)="onCloseInfoModal()" />
+<app-loading [isLoading]="isLoading()" />

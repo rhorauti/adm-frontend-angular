@@ -6,6 +6,8 @@ export interface IDepartment {
   comment: string;
 }
 
+export type PartialDept = Pick<IDepartment, 'idDepartment' | 'name'>;
+
 export interface IResponseDepartment extends IBaseResponse {
   data?: IDepartment | IDepartment[];
 }
