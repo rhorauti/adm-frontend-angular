@@ -41,6 +41,13 @@ export const routes: Routes = [
       ),
   },
   {
+    path: 'companies/new/:id',
+    loadComponent: () =>
+      import('@pages/company/company-form/company-form.component').then(
+        c => c.CompanyFormComponent
+      ),
+  },
+  {
     path: 'companies/edit/:id',
     loadComponent: () =>
       import('@pages/company/company-form/company-form.component').then(
@@ -189,6 +196,13 @@ export const routes: Routes = [
   },
   {
     path: 'products/new',
+    loadComponent: () =>
+      import('@pages/product/product-form/product-form.component').then(
+        c => c.ProductFormComponent
+      ),
+  },
+  {
+    path: 'products/new/:id',
     loadComponent: () =>
       import('@pages/product/product-form/product-form.component').then(
         c => c.ProductFormComponent

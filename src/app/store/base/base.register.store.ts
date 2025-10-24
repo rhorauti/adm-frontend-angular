@@ -55,9 +55,9 @@ export const BaseRegisterStore = signalStore(
       }
     }),
 
-    isAtLeastOneFilterBoxNotEmpty: computed(() => {
-      return Object.values(store.filterBox()).some(v => v?.trim().length > 0);
-    }),
+    // isAtLeastOneFilterBoxNotEmpty: computed(() => {
+    //   return Object.values(store.filterBox()).some(v => v?.trim().length > 0);
+    // }),
 
     isAtLeastOneFilterHelpNotEmpty: computed(() => {
       return Object.values(store.filterHelp()).some(v => v.trim().length > 0);

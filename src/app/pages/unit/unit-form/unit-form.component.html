@@ -27,13 +27,15 @@
         >
         <app-input
           [inputName]="'custom'"
-          [inputValue]="data.name"
+          [inputValue]="data.name || ''"
           [type]="'search'"
           (inputValueEmitter)="data.name = $event" />
       </div>
       <div class="flex flex-col gap-1">
         <label #labelForm class="font-medium text-sm" for="default">Comentários</label>
-        <app-text-area [inputValue]="data.comment" (inputValueEmitter)="data.comment = $event" />
+        <app-text-area
+          [inputValue]="data.comment || ''"
+          (inputValueEmitter)="data.comment = $event" />
       </div>
     </div>
   </div>

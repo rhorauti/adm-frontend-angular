@@ -94,7 +94,7 @@ export class ProductTypeFormComponent implements OnInit, OnDestroy, AfterViewIni
     if (this.id == 0) {
       return 'Novo Registro';
     } else {
-      return this.data.name;
+      return this.data.name || '';
     }
   };
 
@@ -116,7 +116,7 @@ export class ProductTypeFormComponent implements OnInit, OnDestroy, AfterViewIni
 
   fieldValidation = (): void => {
     const message = 'O campo tipo de produto não pode estar vazio.';
-    if (this.data && this.data.name.length == 0) {
+    if (this.data && (this.data.name || '').length == 0) {
       throw Error(message);
     }
   };

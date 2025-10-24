@@ -2,8 +2,8 @@ import { inject, Injectable } from '@angular/core';
 import { HttpRequestService } from '../http-request.service';
 import { environment } from '@environments/environment';
 import {
-  ICompanyDetailedDataResponse,
-  ICompanyDetail,
+  IResponseCompanyForm,
+  ICompanyForm,
   ICompanyResponse,
 } from '@core/interfaces/company.interface';
 import { IBaseResponse } from '@core/interfaces/response.interface';
@@ -22,7 +22,7 @@ export class CompanyApi {
     );
   }
 
-  async onGetDataDetailedInfo(id: number): Promise<ICompanyDetailedDataResponse> {
+  async onGetDataDetailedInfo(id: number): Promise<IResponseCompanyForm> {
     return await this.httpRequestService.sendHttpRequest(
       `${environment.apiUrl}/${this.baseApiName}/detail/${id}`,
       'GET'
@@ -36,7 +36,7 @@ export class CompanyApi {
     );
   }
 
-  async onSave(data: ICompanyDetail): Promise<ICompanyResponse> {
+  async onSave(data: ICompanyForm): Promise<ICompanyResponse> {
     return await this.httpRequestService.sendHttpRequest(
       `${environment.apiUrl}/${this.baseApiName}`,
       'POST',

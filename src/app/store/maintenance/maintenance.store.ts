@@ -1,5 +1,5 @@
 import { signalStore, withState, withMethods, patchState, withComputed } from '@ngrx/signals';
-import { ICompany, ICompanyStore } from '@core/interfaces/company.interface';
+import { ICompanyHome, ICompanyStore } from '@core/interfaces/company.interface';
 import { computed, inject } from '@angular/core';
 import { ITableCheckbox, ITableHeader } from '@core/interfaces/table.interface';
 import { IPagination } from '@core/interfaces/pagination.interface';
@@ -74,14 +74,14 @@ export const CompanyStore = signalStore(
             headerName: 'Inscr. Municipal',
             databaseField: 'im',
           },
-        ] as ITableHeader<ICompany>[],
+        ] as ITableHeader<ICompanyHome>[],
         tableCheckbox: {
           header: false,
           body: [],
         } as ITableCheckbox,
         tableItemsBox: [] as boolean[],
-        initialTableData: [] as ICompany[],
-        companiesData: [] as ICompany[],
+        initialTableData: [] as ICompanyHome[],
+        companiesData: [] as ICompanyHome[],
         isDelBtnDisabled: false,
         companyData: {
           idCompany: 0,
@@ -90,7 +90,7 @@ export const CompanyStore = signalStore(
           cnpj: '',
           ie: '',
           im: '',
-        } as ICompany,
+        } as ICompanyHome,
         isFilterBoxActive: false,
         isFilterResultZeroRegister: false,
         filterBox: {
@@ -277,7 +277,7 @@ export const CompanyStore = signalStore(
       onSetPaginationToDefault();
     };
 
-    const onSetCompaniesData = (companiesData: ICompany[]): void => {
+    const onSetCompaniesData = (companiesData: ICompanyHome[]): void => {
       patchState(store, {
         companiesData: companiesData,
       });
@@ -298,7 +298,7 @@ export const CompanyStore = signalStore(
       });
     };
 
-    const onSetCompanyData = (companyData: ICompany): void => {
+    const onSetCompanyData = (companyData: ICompanyHome): void => {
       patchState(store, {
         companyData: companyData,
       });
@@ -325,7 +325,7 @@ export const CompanyStore = signalStore(
       });
     };
 
-    const onSetTableHeaders = (tableHeaders: ITableHeader<ICompany>[]): void => {
+    const onSetTableHeaders = (tableHeaders: ITableHeader<ICompanyHome>[]): void => {
       patchState(store, {
         tableHeaders: tableHeaders,
       });
@@ -392,7 +392,7 @@ export const CompanyStore = signalStore(
      * There are 3 sort states : 0 - Not sorted, 1 - Ascending, 2 - Descending.
      * @param idx The index of the clicked table column.
      */
-    const onFilterThroughSort = (idx: number): ICompany[] => {
+    const onFilterThroughSort = (idx: number): ICompanyHome[] => {
       if (store.tableHeaders()[idx].sort == 0) {
         return [
           ...store.companiesData().sort((a, b) => {
@@ -401,7 +401,7 @@ export const CompanyStore = signalStore(
         ];
       } else {
         const header = store.tableHeaders()[idx];
-        const key = header.databaseField as keyof ICompany;
+        const key = header.databaseField as keyof ICompanyHome;
         const sortDirection = header.sort;
         return [
           ...store.companiesData().sort((a, b) => {
@@ -456,7 +456,7 @@ export const CompanyStore = signalStore(
       }
     };
 
-    const onClearData = (companiesData: ICompany[] = store.initialTableData()): void => {
+    const onClearData = (companiesData: ICompanyHome[] = store.initialTableData()): void => {
       onSetCompaniesData(companiesData);
       onSetIsFilterResultZeroRegister(false);
       onSetisDelBtnDisabled(true);
@@ -480,7 +480,7 @@ export const CompanyStore = signalStore(
     };
 
     const onFilter = (filterType: FilterMethod, idx?: number): void => {
-      let filterData: ICompany[] = [];
+      let filterData: ICompanyHome[] = [];
       if (filterType == 'input-search') {
         filterData = onFilterThroughSearchInput();
         onSetCompaniesData(filterData);
@@ -516,10 +516,10 @@ export const CompanyStore = signalStore(
       onSetPaginationToDefault();
     };
 
-    const onFilterThroughSearchInput = (): ICompany[] => {
+    const onFilterThroughSearchInput = (): ICompanyHome[] => {
       return store.initialTableData().filter(company => {
         return ['idCompany', 'nickname', 'name'].some(key => {
-          const propertyValue = company[key as keyof ICompany];
+          const propertyValue = company[key as keyof ICompanyHome];
           return String(propertyValue)
             .toLowerCase()
             .trim()
@@ -528,7 +528,7 @@ export const CompanyStore = signalStore(
       });
     };
 
-    const onFilterThroughFilterBox = (): ICompany[] => {
+    const onFilterThroughFilterBox = (): ICompanyHome[] => {
       return store.initialTableData().filter(company => {
         return (
           String(company.idCompany)
@@ -591,7 +591,7 @@ export const CompanyStore = signalStore(
       });
     };
 
-    const onRedirectToEditPage = (companyData: ICompany): void => {
+    const onRedirectToEditPage = (companyData: ICompanyHome): void => {
       onSetCompanyData(companyData);
       modalStore.onRedirectPage(`/companies/edit/${store.companyData().idCompany}`);
     };
@@ -709,7 +709,7 @@ export const CompanyStore = signalStore(
       });
     };
 
-    const onCloneRegister = async (companyData: ICompany): Promise<void> => {
+    const onCloneRegister = async (companyData: ICompanyHome): Promise<void> => {
       patchState(store, {
         companyData: companyData,
       });
@@ -750,7 +750,7 @@ export const CompanyStore = signalStore(
         cnpj: '',
         ie: '',
         im: '',
-      } as ICompany,
+      } as ICompanyHome,
       address: {
         idAddress: 0,
         postalCode: '',

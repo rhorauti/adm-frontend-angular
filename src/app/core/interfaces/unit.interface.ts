@@ -2,10 +2,12 @@ import { IBaseResponse } from './response.interface';
 
 export interface IUnit {
   idUnit: number | null;
-  name: string;
-  comment: string;
+  name?: string;
+  comment?: string;
 }
 
 export interface IResponseUnit extends IBaseResponse {
   data?: IUnit | IUnit[];
 }
+
+export type PartialUnit = Pick<IUnit, 'idUnit' | 'name'>;

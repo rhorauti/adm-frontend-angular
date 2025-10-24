@@ -24,7 +24,7 @@ type InputName =
   | 'email'
   | 'password'
   | 'date'
-  | 'qty'
+  | 'only-numbers'
   | 'search'
   | 'custom';
 type InputType = 'search' | 'text' | 'password' | 'number' | 'date' | 'datetime' | 'datetime-local';
@@ -32,7 +32,12 @@ type InputType = 'search' | 'text' | 'password' | 'number' | 'date' | 'datetime'
 @Component({
   selector: 'app-input',
   imports: [CommonModule, FormsModule, MatIconModule, NgxMaskDirective],
-  providers: [provideNgxMask()],
+  providers: [
+    provideNgxMask({
+      thousandSeparator: '.',
+      decimalMarker: ',',
+    }),
+  ],
   templateUrl: './input.component.html',
   styleUrl: './input.component.scss',
 })
@@ -110,6 +115,11 @@ export class InputComponent implements OnInit, OnChanges {
         this.type = 'search';
         break;
       }
+      case 'only-numbers': {
+        this.type = 'search';
+        this.maskValue = 'separator.2';
+        break;
+      }
     }
   };
 
@@ -141,7 +151,7 @@ export class InputComponent implements OnInit, OnChanges {
 
   onInputValueChange(newValue: string): void {
     this.inputValue = newValue;
-    this.inputValueEmitter.emit(this.inputValue.trim());
+    this.inputValueEmitter.emit(this.inputValue);
   }
 
   @Output() iconClickEmitter = new EventEmitter();
@@ -162,28 +172,28 @@ export class InputComponent implements OnInit, OnChanges {
   }
 
   onSelectOptionThroughKeyboard = (event: KeyboardEvent): void => {
-    // if (this.inputListFiltered.length > 0) {
-    this.onFilterInputList();
-    if (event.key == 'ArrowDown' && this.inputListFiltered.length > 0) {
-      if (this.idx >= this.inputListFiltered.length - 1) {
-        this.idx = 0;
-      } else {
-        this.idx++;
+    if (this.inputListFiltered.length > 0) {
+      this.onFilterInputList();
+      if (event.key == 'ArrowDown') {
+        if (this.idx >= this.inputListFiltered.length - 1) {
+          this.idx = 0;
+        } else {
+          this.idx++;
+        }
+        this.showInputBox = true;
+      } else if (event.key == 'ArrowUp') {
+        if (this.idx <= 0) {
+          this.idx = this.inputListFiltered.length - 1;
+        } else {
+          this.idx--;
+        }
+        this.showInputBox = true;
+      } else if (event.key == 'Enter' && this.idx > -1) {
+        this.inputValue = this.inputListFiltered[this.idx];
+        this.showInputBox = false;
+        this.inputValueEmitter.emit(this.inputValue.trim());
       }
-      this.showInputBox = true;
-    } else if (event.key == 'ArrowUp' && this.inputListFiltered.length > 0) {
-      if (this.idx <= 0) {
-        this.idx = this.inputListFiltered.length - 1;
-      } else {
-        this.idx--;
-      }
-      this.showInputBox = true;
-    } else if (event.key == 'Enter' && this.idx > -1) {
-      this.inputValue = this.inputListFiltered[this.idx];
-      this.showInputBox = false;
-      this.inputValueEmitter.emit(this.inputValue.trim());
     }
-    // }
   };
 
   @HostListener('document:click', ['$event'])

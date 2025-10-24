@@ -1,9 +1,14 @@
 import { IAddress } from '@core/interfaces/address.interface';
 import { IBaseRegisterStore } from '@core/interfaces/base.register.interface';
-import { ICompany, ICompanyDetail } from '@core/interfaces/company.interface';
+import { ICompanyHome, ICompanyForm } from '@core/interfaces/company.interface';
 import { IDepartment } from '@core/interfaces/department.interface';
 import { IEmployeeHome, IEmployeePosition } from '@core/interfaces/employee.interface';
-import { IProduct, IProductType, PartialProduct } from '@core/interfaces/product.interface';
+import {
+  IProductForm,
+  IProductHome,
+  IProductType,
+  PartialProduct,
+} from '@core/interfaces/product.interface';
 import { IProductionLine } from '@core/interfaces/production-line.interface';
 import { ITaskForm, ITaskHomeData as ITaskHome, ITaskType } from '@core/interfaces/task.interface';
 import { IUnit } from '@core/interfaces/unit.interface';
@@ -14,14 +19,15 @@ export type StoreType = IBaseRegisterStore<BaseType>;
  * Types of data used in register pages.
  */
 export type BaseType =
-  | ICompany
-  | ICompanyDetail
+  | ICompanyHome
+  | ICompanyForm
   | IAddress
   | IEmployeeHome
   | IEmployeePosition
   | ITaskType
   | IUnit
-  | IProduct
+  | IProductHome
+  | IProductForm
   | IUnit
   | IProductionLine
   | IProductType

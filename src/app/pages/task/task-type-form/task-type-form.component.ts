@@ -26,8 +26,12 @@ import { IDepartment } from '@core/interfaces/department.interface';
 import { ActionCallback, IModalInfo } from '@core/interfaces/modal.interface';
 import { ITaskType } from '@core/interfaces/task.interface';
 import { BaseApiName } from '@core/types/base.type';
-import { translateDeptName } from '@core/utils/misc';
 import { ModalType } from '@store/modal/modal.store';
+import {
+  DEPT_NAMES_ENGLISH,
+  DEPT_NAMES_LOCAL_LANGUAGE,
+  translateDeptNameToLocalLanguage,
+} from 'app/enum/department.enum';
 import { Subscription } from 'rxjs';
 
 @Component({
@@ -86,7 +90,7 @@ export class TaskTypeFormComponent implements OnInit, OnDestroy, AfterViewInit {
   async ngOnInit(): Promise<void> {
     this.subscription = this.activatedRoute.paramMap.subscribe(params => {
       this.id = Number(params.get('idTaskType')) || -1;
-      this.deptName = params.get('department') || '';
+      this.deptName = params.get('department') || DEPT_NAMES_ENGLISH.MAINTENANCE;
     });
     if (this.router.url.includes('edit') && (this.id || 0) > 0) {
       const taskType = await this.taskTypeApi.onGetDataById(this.deptName, this.id || 0);
@@ -164,7 +168,9 @@ export class TaskTypeFormComponent implements OnInit, OnDestroy, AfterViewInit {
     try {
       this.isLoading.set(true);
       this.fieldValidation();
-      const deptNameTranslated = translateDeptName(this.deptName);
+      const deptNameTranslated = translateDeptNameToLocalLanguage(
+        this.deptName as DEPT_NAMES_ENGLISH
+      );
       const dept = await this.departmentApi.onGetDataByQuery('name', deptNameTranslated);
       const deptData = dept.data as IDepartment;
       this.data.department = deptData;

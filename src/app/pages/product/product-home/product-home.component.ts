@@ -1,56 +1,30 @@
-import { Component, inject, OnDestroy, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { BreadcrumbComponent } from '@components/breadcrumb/breadcrumb.component';
-import { SideBarComponent } from '@components/side-bar/side-bar.component';
-import { MatIconModule } from '@angular/material/icon';
-import { ButtonLabelComponent } from '@components/button/button-label/button-label.component';
-import { ButtonDeleteComponent } from '@components/button/button-delete/button-delete.component';
-import { ButtonIconComponent } from '@components/button/button-icon/button-icon.component';
-import { TooltipComponent } from '@components/tooltip/tooltip.component';
-import { ToogleButtonComponent } from '@components/toogle-button/toogle-button.component';
-import { InputComponent } from '@components/input/input.component';
-import { ButtonCloseComponent } from '@components/button/button-close/button-close.component';
-import { ModalStore } from '@store/modal/modal.store';
-import { AuthStore } from '@store/auth/auth.store';
-import { loadStorage } from '@core/utils/misc';
-import { BaseRegisterStore, defaultTableHeaderIcon } from '@store/base/base.register.store';
-import { ActionCallback } from '@core/interfaces/modal.interface';
 import { HttpErrorResponse } from '@angular/common/http';
-import { KeyOfData } from '@core/types/base.type';
-import { ITableHeader } from '@core/interfaces/table.interface';
-import { ActivatedRoute } from '@angular/router';
-import { Subscription } from 'rxjs';
+import { Component, inject, OnInit, signal } from '@angular/core';
+import { Router } from '@angular/router';
+import { HomeComponent } from '@components/home/home.component';
+import { LoadingComponent } from '@components/loading/loading.component';
+import { ModalAskComponent } from '@components/modal/modal-ask/modal-ask.component';
+import { ModalInfoComponent } from '@components/modal/modal-info/modal-info.component';
 import { ProductApi } from '@core/http/product/product.api';
-import { IProduct } from '@core/interfaces/product.interface';
-import { TableComponent } from '@components/table/table.component';
-// import { PaginationComponent } from '@components/pagination/pagination.component';
+import { ActionCallback, IModalAsk, IModalInfo } from '@core/interfaces/modal.interface';
+import { IProductHome } from '@core/interfaces/product.interface';
+import { ITableHeader } from '@core/interfaces/table.interface';
+import { KeyOfData } from '@core/types/base.type';
+import { loadStorage } from '@core/utils/misc';
+import { AuthStore } from '@store/auth/auth.store';
+import { defaultTableHeaderIcon } from '@store/base/base.register.store';
+import { ModalType } from '@store/modal/modal.store';
 
 @Component({
   selector: 'app-product-home',
-  imports: [
-    CommonModule,
-    SideBarComponent,
-    InputComponent,
-    TableComponent,
-    // PaginationComponent,
-    BreadcrumbComponent,
-    MatIconModule,
-    ButtonLabelComponent,
-    ButtonDeleteComponent,
-    ButtonIconComponent,
-    TooltipComponent,
-    ToogleButtonComponent,
-    ButtonCloseComponent,
-  ],
+  imports: [HomeComponent, ModalAskComponent, ModalInfoComponent, LoadingComponent],
   templateUrl: './product-home.component.html',
   styleUrl: './product-home.component.scss',
 })
-export class ProductHomeComponent implements OnInit, OnDestroy {
-  readonly productApi = inject(ProductApi);
-  readonly baseRegisterStore = inject(BaseRegisterStore);
-  private activatedRoute = inject(ActivatedRoute);
+export class ProductHomeComponent implements OnInit {
   readonly authStore = inject(AuthStore);
-  readonly modalStore = inject(ModalStore);
+  readonly productApi = inject(ProductApi);
+  readonly router = inject(Router);
 
   readonly currentView = 'products';
   readonly currentViewTranslated = 'Produtos';
@@ -63,7 +37,24 @@ export class ProductHomeComponent implements OnInit, OnDestroy {
     'name',
   ];
   readonly inputSearchPlaceholder = 'Id, Part Number, Nome';
-  readonly initialTableHeaders = [
+
+  tableHeadersLocalStorageId = `table_headers_${this.currentView}_${this.authStore.user().id}`;
+  isComponentSetToDefault = signal(false);
+  initialDataList = signal<IProductHome[]>([]);
+  data = signal<IProductHome>({
+    idProduct: 0,
+    internalPartNumber: '',
+    customerPartNumber: '',
+    name: '',
+    nameTranslated: '',
+    origin: '',
+    unit: '',
+    stock: 0,
+  });
+
+  newRegisterUrl = `/${this.currentView}/new`;
+
+  tableHeaders = [
     {
       id: 0,
       isHeaderActive: true,
@@ -101,119 +92,186 @@ export class ProductHomeComponent implements OnInit, OnDestroy {
       isHeaderActive: true,
       sortDirection: 0,
       icon: defaultTableHeaderIcon,
+      headerName: 'Nome traduzido',
+      databaseField: 'nameTranslated',
+    },
+    {
+      id: 5,
+      isHeaderActive: true,
+      sortDirection: 0,
+      icon: defaultTableHeaderIcon,
       headerName: 'Origem',
       databaseField: 'origin',
     },
     {
-      id: 5,
-      isHeaderActive: false,
-      sortDirection: 0,
-      icon: defaultTableHeaderIcon,
-      headerName: 'Ncm',
-      databaseField: 'ncm',
-    },
-    {
       id: 6,
-      isHeaderActive: false,
+      isHeaderActive: true,
       sortDirection: 0,
       icon: defaultTableHeaderIcon,
-      headerName: 'Preço unitário',
-      databaseField: 'purchasingUnitPrice',
+      headerName: 'Unidade',
+      databaseField: 'unit',
     },
     {
       id: 7,
       isHeaderActive: false,
       sortDirection: 0,
       icon: defaultTableHeaderIcon,
-      headerName: 'Peso',
-      databaseField: 'weight',
-    },
-    {
-      id: 8,
-      isHeaderActive: false,
-      sortDirection: 0,
-      icon: defaultTableHeaderIcon,
       headerName: 'Estoque',
       databaseField: 'stock',
     },
-  ] as ITableHeader<IProduct>[];
-  tableHeadersLocalStorageId = `table_headers_${this.currentView}_${this.authStore.user().id}`;
-  subscription: Subscription | undefined = undefined;
+  ] as ITableHeader<IProductHome>[];
 
-  async ngOnInit() {
-    this.onShowDataList();
-    const tableHeaders = await loadStorage(this.tableHeadersLocalStorageId);
-    const headers = tableHeaders ? tableHeaders : this.initialTableHeaders;
-    this.baseRegisterStore.onSetStateToNewValue('tableHeaders', headers);
-  }
+  modalInfo = signal<IModalInfo>({
+    isActive: false,
+    title: '',
+    description: '',
+    type: '',
+    onActionOk: null,
+  });
 
-  onRedirectToEditPage = (data: IProduct): void => {
-    this.baseRegisterStore.onSetStateToNewValue('data', data);
-    this.baseRegisterStore.onSetStateToNewValue('isEditData', true);
-    this.modalStore.onRedirectPage(
-      `/${this.currentView}/edit/${(this.baseRegisterStore.data() as IProduct)[this.keyId]}`
-    );
+  modalAsk = signal<IModalAsk>({
+    isActive: false,
+    title: '',
+    description: '',
+    onActionOk: null as ActionCallback,
+    onActionNok: null as ActionCallback,
+  });
+
+  isLoading = signal(false);
+
+  onShowInfoModal = (
+    type: ModalType,
+    title: string,
+    description: string,
+    onActionOk?: ActionCallback
+  ): void => {
+    this.modalInfo.set({
+      ...this.modalInfo,
+      isActive: true,
+      type: type,
+      title: title,
+      description: description,
+      onActionOk: onActionOk,
+    });
   };
 
-  onCloneRegister = async (data: IProduct): Promise<void> => {
-    this.baseRegisterStore.onSetStateToNewValue('isCopiedData', true);
-    this.baseRegisterStore.onSetStateToNewValue('data', data);
-    this.modalStore.onRedirectPage(`/${this.currentView}/new`);
+  async ngOnInit() {
+    await this.onShowDataList();
+    const selectedTableHeaders = await loadStorage(this.tableHeadersLocalStorageId);
+    const headers = selectedTableHeaders ? selectedTableHeaders : this.tableHeaders;
+    this.tableHeaders = headers;
+  }
+
+  onRedirectToEditPage = (data: IProductHome): void => {
+    this.router.navigate([`/${this.currentView}/edit/${data.idProduct}`]);
+  };
+
+  onCloneRegister = (data: IProductHome): void => {
+    this.router.navigate([`/${this.currentView}/new/${data.idProduct}`]);
+  };
+
+  onCloseInfoModal = async (): Promise<void> => {
+    const callback = this.modalInfo().onActionOk;
+    if (callback) await Promise.resolve(callback());
+    this.modalInfo.set({
+      isActive: false,
+      type: '',
+      title: '',
+      description: '',
+      onActionOk: null,
+    });
+  };
+
+  onShowAskModal = (
+    title: string,
+    description: string,
+    onActionOk?: ActionCallback,
+    onActionNok?: ActionCallback
+  ): void => {
+    this.modalAsk.set({
+      ...this.modalAsk,
+      isActive: true,
+      title: title,
+      description: description,
+      onActionOk: onActionOk,
+      onActionNok: onActionNok,
+    });
+  };
+
+  onCloseAskModalAction = async (isConfirmed: boolean): Promise<void> => {
+    const callback = isConfirmed ? this.modalAsk().onActionOk : this.modalAsk().onActionNok;
+    if (callback) {
+      await Promise.resolve(callback());
+      this.modalInfo.update(current => ({ ...current, type: 'success' }));
+    }
+    this.modalAsk.set({
+      isActive: false,
+      title: '',
+      description: '',
+      onActionOk: null,
+      onActionNok: null,
+    });
   };
 
   onShowDataList = async (): Promise<void> => {
     try {
-      this.modalStore.onLoading(true);
+      this.isLoading.set(true);
       const response = await this.productApi.onGetDataList();
       if (response.data) {
-        const data = response.data as IProduct[];
-        this.baseRegisterStore.onSetStateToNewValue('initialData', data);
-        this.baseRegisterStore.onSetStateToNewValue('dataList', data);
-        this.baseRegisterStore.onClearData(data);
+        const dataList = response.data as IProductHome[];
+        this.initialDataList.set([...dataList]);
       } else {
         return;
       }
     } catch (e: unknown) {
       const error = e as HttpErrorResponse;
-      this.modalStore.onShowInfoModal('Listar registros', error.error?.message);
+      this.onShowInfoModal('failure', 'Listar registros', error.error?.message);
     } finally {
-      this.modalStore.onLoading(false);
+      this.isLoading.set(false);
     }
   };
 
   onDeleteRegister = async (id: number, onActionOk?: ActionCallback): Promise<void> => {
     try {
-      this.modalStore.onLoading(true);
+      this.isLoading.set(true);
       const response = await this.productApi.onDelete(id);
       if (response.status) {
         this.onShowDataList();
-        this.modalStore.onSetModalInfoType('success');
-        this.modalStore.onShowInfoModal('Excluir registro', response.message, onActionOk);
+        this.onShowInfoModal('success', 'Excluir registro', response.message, onActionOk);
       } else {
-        this.modalStore.onShowInfoModal('Excluir registro', response.error?.message || '');
+        this.onShowInfoModal('failure', 'Excluir registro', response.error?.message || '');
       }
     } catch (e: unknown) {
       const error = e as HttpErrorResponse;
-      this.modalStore.onShowInfoModal('Excluir registro', error.error.message);
+      this.onShowInfoModal(
+        'failure',
+        'Excluir registro',
+        error.error?.message || 'Erro desconhecido'
+      );
     } finally {
-      this.modalStore.onLoading(false);
+      this.isComponentSetToDefault.set(true);
+      this.isLoading.set(false);
     }
   };
 
-  async onDelete(data: IProduct): Promise<void> {
-    await this.onDeleteRegister(data[this.keyId] as number);
+  async onDelete(selectedData: IProductHome): Promise<void> {
+    await this.onDeleteRegister(selectedData.idProduct as number);
   }
 
-  onShowModalToDelete(data?: IProduct): void {
-    const selectedData = data ? data : (this.baseRegisterStore.itemSelected() as IProduct) || '';
-    this.modalStore.onShowAskModal(
-      `Cadastro de ${this.currentViewTranslated}`,
-      `Deseja excluir o registro <b>${selectedData.name}</b>?`,
-      () => this.onDelete(selectedData)
+  onShowModalToDeleteThroughTopBtn(): void {
+    this.onShowAskModal(
+      'Cadastro de atividades',
+      `Deseja excluir o registro <b>${this.data().name}</b>?`,
+      () => this.onDelete(this.data())
     );
   }
 
-  ngOnDestroy() {
-    this.subscription?.unsubscribe();
+  onShowModalToDeleteThroughTableBtn(data?: IProductHome): void {
+    const selectedData = data ? data : this.data();
+    this.onShowAskModal(
+      'Cadastro de atividades',
+      `Deseja excluir o registro <b>${selectedData.name}</b>?`,
+      () => this.onDelete(selectedData)
+    );
   }
 }

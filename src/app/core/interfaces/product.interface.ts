@@ -1,13 +1,24 @@
 import { IBaseResponse } from './response.interface';
-import { IUnit } from './unit.interface';
+import { PartialUnit } from './unit.interface';
 
 export interface IProductType {
   idProductType: number | null;
-  name: string;
+  name?: string;
   comment?: string;
 }
 
-export interface IProduct {
+export interface IProductHome {
+  idProduct: number | null;
+  internalPartNumber?: string;
+  customerPartNumber?: string;
+  name?: string;
+  nameTranslated?: string;
+  origin?: string;
+  unit?: string;
+  stock?: number;
+}
+
+export interface IProductForm {
   idProduct: number | null;
   internalPartNumber?: string;
   customerPartNumber?: string;
@@ -31,19 +42,27 @@ export interface IProduct {
   qrcode?: string;
   photoUrl?: string;
   comment?: string;
-  unit: IUnit;
-  productType: IProductType;
+  unitList?: PartialUnit[];
+  unit: PartialUnit;
+  productTypeList?: PartialProductType[];
+  productType: PartialProductType;
 }
 
 export interface IResponseProductType extends IBaseResponse {
   data?: IProductType | IProductType[];
 }
 
-export interface IResponseProduct extends IBaseResponse {
-  data?: IProduct | IProduct[];
+export interface IResponseProductHome extends IBaseResponse {
+  data?: IProductHome | IProductHome[];
+}
+
+export interface IResponseProductForm extends IBaseResponse {
+  data?: IProductForm | IProductForm[];
 }
 
 export type PartialProduct = Pick<
-  IProduct,
+  IProductForm,
   'idProduct' | 'internalPartNumber' | 'name' | 'productType'
 >;
+
+export type PartialProductType = Pick<IProductType, 'idProductType' | 'name'>;

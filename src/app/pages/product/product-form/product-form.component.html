@@ -51,7 +51,9 @@
                 [selectType]="'custom'"
                 [optionList]="originList"
                 [selectValue]="selectedOrigin || 'Selecione um item'"
-                (selectValueEmitter)="onSetOriginToNumber($event.toString())" />
+                (selectValueEmitter)="
+                  productData.origin = onSetOriginToNumber($event.toString())
+                " />
             </div>
           </div>
           <div class="flex md:flex-row flex-col gap-3 w-full">
@@ -88,7 +90,7 @@
         <div class="flex flex-col gap-1 grow">
           <label #labelForm class="font-medium text-sm" for="default">Preço de compra</label>
           <app-input
-            [inputName]="'custom'"
+            [inputName]="'only-numbers'"
             [inputValue]="
               (productData.purchasingUnitPrice ?? '').toString() == '0'
                 ? ''
@@ -110,7 +112,7 @@
         <div class="flex flex-col gap-1 grow">
           <label #labelForm class="font-medium text-sm" for="default">Preço de venda</label>
           <app-input
-            [inputName]="'custom'"
+            [inputName]="'only-numbers'"
             [inputValue]="
               (productData.salesUnitPrice ?? '').toString() == '0'
                 ? ''
@@ -155,7 +157,7 @@
         <div class="flex flex-col gap-1 grow">
           <label #labelForm class="font-medium text-sm" for="default">ICMS</label>
           <app-input
-            [inputName]="'custom'"
+            [inputName]="'only-numbers'"
             [inputValue]="
               (productData.icms ?? '').toString() == '0' ? '' : (productData.icms ?? '').toString()
             "
@@ -165,7 +167,7 @@
         <div class="flex flex-col gap-1 grow">
           <label #labelForm class="font-medium text-sm" for="default">PIS</label>
           <app-input
-            [inputName]="'custom'"
+            [inputName]="'only-numbers'"
             [inputValue]="
               (productData.pis ?? '').toString() == '0' ? '' : (productData.pis ?? '').toString()
             "
@@ -175,7 +177,7 @@
         <div class="flex flex-col gap-1 grow">
           <label #labelForm class="font-medium text-sm" for="default">COFINS</label>
           <app-input
-            [inputName]="'custom'"
+            [inputName]="'only-numbers'"
             [inputValue]="
               (productData.cofins ?? '').toString() == '0'
                 ? ''
@@ -187,7 +189,7 @@
         <div class="flex flex-col gap-1 grow">
           <label #labelForm class="font-medium text-sm" for="default">IPI</label>
           <app-input
-            [inputName]="'custom'"
+            [inputName]="'only-numbers'"
             [inputValue]="
               (productData.ipi ?? '').toString() == '0' ? '' : (productData.ipi ?? '').toString()
             "
@@ -210,7 +212,7 @@
         <div class="flex flex-col gap-1 grow">
           <label #labelForm class="font-medium text-sm" for="default">Largura (mm)</label>
           <app-input
-            [inputName]="'custom'"
+            [inputName]="'only-numbers'"
             [inputValue]="
               (productData.width ?? '').toString() == '0'
                 ? ''
@@ -222,7 +224,7 @@
         <div class="flex flex-col gap-1 grow">
           <label #labelForm class="font-medium text-sm" for="default">Atura (mm)</label>
           <app-input
-            [inputName]="'custom'"
+            [inputName]="'only-numbers'"
             [inputValue]="
               (productData.height ?? '').toString() == '0'
                 ? ''
@@ -234,7 +236,7 @@
         <div class="flex flex-col gap-1 grow">
           <label #labelForm class="font-medium text-sm" for="default">Profundidade (mm)</label>
           <app-input
-            [inputName]="'custom'"
+            [inputName]="'only-numbers'"
             [inputValue]="
               (productData.depth ?? '').toString() == '0'
                 ? ''
@@ -246,7 +248,7 @@
         <div class="flex flex-col gap-1 grow">
           <label #labelForm class="font-medium text-sm" for="default">Peso</label>
           <app-input
-            [inputName]="'custom'"
+            [inputName]="'only-numbers'"
             [inputValue]="
               (productData.weight ?? '').toString() == '0'
                 ? ''
@@ -277,3 +279,11 @@
     </footer>
   </div>
 </div>
+
+<app-modal-info
+  [isModalActive]="modalInfo().isActive"
+  [type]="modalInfo().type"
+  [description]="modalInfo().description"
+  [title]="modalInfo().title"
+  (clickEmitter)="onCloseInfoModal()" />
+<app-loading [isLoading]="isLoading()" />

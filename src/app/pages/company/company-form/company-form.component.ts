@@ -9,6 +9,7 @@ import {
   OnDestroy,
   OnInit,
   QueryList,
+  signal,
   ViewChildren,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
@@ -16,22 +17,19 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { BreadcrumbComponent } from '@components/breadcrumb/breadcrumb.component';
 import { ButtonLabelComponent } from '@components/button/button-label/button-label.component';
 import { InputComponent } from '@components/input/input.component';
+import { LoadingComponent } from '@components/loading/loading.component';
+import { ModalInfoComponent } from '@components/modal/modal-info/modal-info.component';
 import { SelectComponent } from '@components/select/select.component';
 import { CompanyApi } from '@core/http/company/company.api';
 import { DepartmentApi } from '@core/http/department/department.api';
 import { EmployeePositionApi } from '@core/http/employee/employee-position.api';
 import { ThirdPartApi } from '@core/http/third-part/third-part.api';
-import { IAddress } from '@core/interfaces/address.interface';
-import { ICompany, ICompanyDetail as ICompanyDetails } from '@core/interfaces/company.interface';
+import { ICompanyForm } from '@core/interfaces/company.interface';
 import { IDepartment } from '@core/interfaces/department.interface';
-import {
-  IEmployeeHome,
-  IEmployeePayload,
-  IEmployeePosition,
-} from '@core/interfaces/employee.interface';
-import { ActionCallback } from '@core/interfaces/modal.interface';
-import { BaseRegisterStore } from '@store/base/base.register.store';
-import { ModalStore } from '@store/modal/modal.store';
+import { IEmployeePosition } from '@core/interfaces/employee.interface';
+import { ActionCallback, IModalInfo } from '@core/interfaces/modal.interface';
+import { onRemoveMask } from '@core/utils/misc';
+import { ModalType } from '@store/modal/modal.store';
 import { Subscription } from 'rxjs';
 
 @Component({
@@ -43,6 +41,8 @@ import { Subscription } from 'rxjs';
     FormsModule,
     InputComponent,
     SelectComponent,
+    ModalInfoComponent,
+    LoadingComponent,
   ],
   templateUrl: './company-form.component.html',
   styleUrl: './company-form.component.scss',
@@ -53,10 +53,8 @@ export class CompanyFormComponent implements OnInit, OnDestroy, AfterViewInit {
   readonly companyApi = inject(CompanyApi);
   readonly departmentApi = inject(DepartmentApi);
   readonly employeePositionApi = inject(EmployeePositionApi);
-  readonly baseRegisterStore = inject(BaseRegisterStore);
   private activatedRoute = inject(ActivatedRoute);
   readonly router = inject(Router);
-  readonly modalStore = inject(ModalStore);
   readonly thirdPartApi = inject(ThirdPartApi);
 
   private cdr = inject(ChangeDetectorRef);
@@ -65,26 +63,12 @@ export class CompanyFormComponent implements OnInit, OnDestroy, AfterViewInit {
   currentViewTranslated = 'Empresas'.slice(0, -1);
   subscription: Subscription | undefined = undefined;
   breadcrumbList: string[] = [];
-  id: number | null = null;
+  idCompany: number | null = null;
 
-  departmentList: IDepartment[] = [];
   departmentOptionList: string[] = [];
-  employeePositionList: IEmployeePosition[] = [];
   employeePositionOptionList: string[] = [];
 
-  departmentData = {
-    idDepartment: null,
-    name: '',
-    comment: '',
-  } as IDepartment;
-
-  employeePositionData = {
-    idEmployeePosition: null,
-    name: '',
-    comment: '',
-  } as IEmployeePosition;
-
-  detailedData = {
+  companyForm = {
     company: {
       idCompany: null,
       nickname: '',
@@ -92,7 +76,7 @@ export class CompanyFormComponent implements OnInit, OnDestroy, AfterViewInit {
       cnpj: '',
       ie: '',
       im: '',
-    } as ICompany,
+    },
     address: {
       idAddress: null,
       postalCode: '',
@@ -102,48 +86,60 @@ export class CompanyFormComponent implements OnInit, OnDestroy, AfterViewInit {
       district: '',
       city: '',
       state: '',
-    } as IAddress,
+    },
     employee: {
-      idEmployee: null,
+      idEmployee: 0,
       isDefault: false,
       name: '',
-      cpf: '',
       email: '',
       deskphone: '',
       cellphone: '',
-      position: '',
-      department: '',
-    } as IEmployeeHome,
-  } as ICompanyDetails;
+      departmentList: [],
+      department: {
+        idDepartment: 0,
+        name: '',
+      },
+      employeePositionList: [],
+      employeePosition: {
+        idEmployeePosition: 0,
+        name: '',
+      },
+    },
+  } as ICompanyForm;
+
+  modalInfo = signal<IModalInfo>({
+    isActive: false,
+    title: '',
+    description: '',
+    type: '',
+    onActionOk: null,
+  });
+
+  isLoading = signal(false);
 
   async ngOnInit(): Promise<void> {
     this.subscription = this.activatedRoute.paramMap.subscribe(params => {
-      this.id = Number(params.get('id')) || 0;
+      this.idCompany = Number(params.get('id')) || 0;
     });
-    await this.onGetDepartmentList();
-    await this.onGetEmployeePositionList();
-    if (this.id != 0) {
-      await this.onGetDataDetails();
-    } else {
-      if (this.baseRegisterStore.isCopiedData()) {
-        this.id = (this.baseRegisterStore.data() as ICompany).idCompany;
-        await this.onGetDataDetails();
-        this.id = 0;
-        this.detailedData.company.idCompany = null;
-        this.detailedData.address.idAddress = null;
-        this.detailedData.employee.idEmployee = null;
-        this.baseRegisterStore.onSetStateToNewValue('isCopiedData', false);
-      }
+    if (this.router.url.includes('edit') && (this.idCompany || 0) > 0) {
+      const company = await this.companyApi.onGetDataDetailedInfo(this.idCompany || 0);
+      this.companyForm = company.data as ICompanyForm;
+    } else if (this.router.url.includes('new') && (this.idCompany || 0) > 0) {
+      const company = await this.companyApi.onGetDataDetailedInfo(this.idCompany || 0);
+      this.companyForm = company.data as ICompanyForm;
+      this.companyForm.company.idCompany = null;
+      this.companyForm.address.idAddress = null;
+      this.companyForm.employee.idEmployee = null;
     }
     this.defineTitle();
     this.breadcrumbList = ['Cadastro', this.currentViewTranslated, `${this.defineTitle()}`];
   }
 
   defineTitle = (): string => {
-    if (this.id == 0) {
+    if (this.idCompany == 0) {
       return 'Novo Registro';
     } else {
-      return this.detailedData.company.name;
+      return this.companyForm.company.name;
     }
   };
 
@@ -159,123 +155,52 @@ export class CompanyFormComponent implements OnInit, OnDestroy, AfterViewInit {
     });
   };
 
-  onGetDataDetails = async (): Promise<void> => {
-    try {
-      let detaildDataResponse = null;
-      this.modalStore.onLoading(true);
-      if (this.id) {
-        detaildDataResponse = await this.companyApi.onGetDataDetailedInfo(this.id);
-        if (detaildDataResponse.data) {
-          this.detailedData = detaildDataResponse.data;
-          const dept = this.departmentList.find(
-            d => d.name === (this.detailedData.employee as IEmployeePayload).department?.name
-          );
-          this.departmentData = dept ?? { idDepartment: null, name: '', comment: '' };
-          const posName = (this.detailedData.employee as IEmployeePayload).employeePosition?.name;
-          const pos = this.employeePositionList.find(p => p.name === posName);
-          this.employeePositionData = pos ?? { idEmployeePosition: null, name: '', comment: '' };
-        } else {
-          return;
-        }
-      }
-    } catch (e: unknown) {
-      const error = e as HttpErrorResponse;
-      this.modalStore.onShowInfoModal(
-        `Cadastro de ${this.currentViewTranslated}`,
-        error.error.message
-      );
-    } finally {
-      this.modalStore.onLoading(false);
-    }
-  };
-
-  onGetDepartmentList = async (): Promise<void> => {
-    try {
-      this.modalStore.onLoading(true);
-      const response = await this.departmentApi.onGetDataList();
-      if (response.data) {
-        const data = response.data as IDepartment[];
-        this.departmentList = data;
-        this.departmentOptionList = data.map(dept => dept.name);
-      } else {
-        return;
-      }
-    } catch (e: unknown) {
-      const error = e as HttpErrorResponse;
-      this.modalStore.onShowInfoModal('Listar departamentos: ', error.error?.message);
-    } finally {
-      this.modalStore.onLoading(false);
-    }
-  };
-
-  onGetEmployeePositionList = async (): Promise<void> => {
-    try {
-      this.modalStore.onLoading(true);
-      const response = await this.employeePositionApi.onGetDataList();
-      if (response.data) {
-        const data = response.data as IEmployeePosition[];
-        this.employeePositionList = data;
-        this.employeePositionOptionList = data.map(position => position.name);
-        this.employeePositionOptionList.unshift('Sem registro');
-      } else {
-        return;
-      }
-    } catch (e: unknown) {
-      const error = e as HttpErrorResponse;
-      this.modalStore.onShowInfoModal('Listar cargos: ', error.error?.message);
-    } finally {
-      this.modalStore.onLoading(false);
-    }
-  };
-
   setDepartmentValue = (deptName: string): void => {
-    const dept = this.departmentList.find(dept => dept.name == deptName) as IDepartment;
+    const dept = (this.companyForm.employee.departmentList || []).find(
+      dept => dept.name == deptName
+    ) as IDepartment;
     if (dept) {
-      this.departmentData = dept;
+      this.companyForm.employee.department = dept;
     } else {
-      this.departmentData = {
+      this.companyForm.employee.department = {
         idDepartment: null,
         name: '',
-        comment: '',
       };
     }
   };
 
   setEmployeePositionValue = (positionName: string): void => {
-    const position = this.employeePositionList.find(
+    const position = (this.companyForm.employee.employeePositionList || []).find(
       position => position.name == positionName
     ) as IEmployeePosition;
     if (position) {
-      this.employeePositionData = position;
+      this.companyForm.employee.employeePosition = position;
     } else {
-      this.employeePositionData = {
+      this.companyForm.employee.employeePosition = {
         idEmployeePosition: null,
         name: '',
-        comment: '',
       };
     }
   };
 
   onBackToPreviousPage = (): void => {
-    this.modalStore.onRedirectPage(`/${this.currentView}`);
+    this.router.navigate([`/${this.currentView}`]);
   };
 
   onSetAddressViaCEPValues = async (): Promise<void> => {
-    const response = await this.thirdPartApi.getAddressFromCep(
-      this.detailedData.address.postalCode
-    );
+    const response = await this.thirdPartApi.getAddressFromCep(this.companyForm.address.postalCode);
     if (response) {
-      this.detailedData.address.address = response.logradouro;
-      this.detailedData.address.complement = response.complemento;
-      this.detailedData.address.district = response.bairro;
-      this.detailedData.address.city = response.localidade;
-      this.detailedData.address.state = response.uf;
+      this.companyForm.address.address = response.logradouro;
+      this.companyForm.address.complement = response.complemento;
+      this.companyForm.address.district = response.bairro;
+      this.companyForm.address.city = response.localidade;
+      this.companyForm.address.state = response.uf;
     } else {
       return;
     }
   };
 
-  finalData = {
+  finalData: ICompanyForm = {
     company: {
       idCompany: null,
       nickname: '',
@@ -283,7 +208,7 @@ export class CompanyFormComponent implements OnInit, OnDestroy, AfterViewInit {
       cnpj: '',
       ie: '',
       im: '',
-    } as ICompany,
+    },
     address: {
       idAddress: null,
       postalCode: '',
@@ -293,84 +218,115 @@ export class CompanyFormComponent implements OnInit, OnDestroy, AfterViewInit {
       district: '',
       city: '',
       state: '',
-    } as IAddress,
+    },
     employee: {
-      idEmployee: null,
+      idEmployee: 0,
       isDefault: false,
       name: '',
-      cpf: '',
       email: '',
       deskphone: '',
       cellphone: '',
-      department: null,
-      employeePosition: null,
-    } as IEmployeePayload,
-  } as ICompanyDetails;
+      departmentList: [],
+      department: {
+        idDepartment: 0,
+        name: '',
+      },
+      employeePositionList: [],
+      employeePosition: {
+        idEmployeePosition: 0,
+        name: '',
+      },
+    },
+  };
 
   onSetFinalData = (): void => {
-    this.finalData.company.idCompany = this.detailedData.company.idCompany;
-    this.finalData.company.nickname = (this.detailedData.company.nickname ?? '').trim();
-    this.finalData.company.name = (this.detailedData.company.name ?? '').trim();
-    this.finalData.company.cnpj = this.baseRegisterStore.onMaskNumericalField(
-      (this.detailedData.company?.cnpj ?? '').trim()
+    this.finalData.company.idCompany = this.companyForm.company.idCompany;
+    this.finalData.company.nickname = (this.companyForm.company.nickname ?? '').trim();
+    this.finalData.company.name = (this.companyForm.company.name ?? '').trim();
+    this.finalData.company.cnpj = onRemoveMask((this.companyForm.company?.cnpj ?? '').trim());
+    this.finalData.company.ie = onRemoveMask((this.companyForm.company.ie ?? '').trim());
+    this.finalData.company.im = onRemoveMask((this.companyForm.company.im ?? '').trim());
+    this.finalData.address.idAddress = this.companyForm.address.idAddress;
+    this.finalData.address.postalCode = onRemoveMask(
+      (this.companyForm.address.postalCode ?? '').trim()
     );
-    this.finalData.company.ie = this.baseRegisterStore.onMaskNumericalField(
-      (this.detailedData.company.ie ?? '').trim()
+    this.finalData.address.address = (this.companyForm.address.address ?? '').trim();
+    this.finalData.address.number = (this.companyForm.address.number ?? '').trim();
+    this.finalData.address.complement = (this.companyForm.address.complement ?? '').trim();
+    this.finalData.address.district = (this.companyForm.address.district ?? '').trim();
+    this.finalData.address.city = (this.companyForm.address.city ?? '').trim();
+    this.finalData.address.state = (this.companyForm.address.state ?? '').trim();
+    this.finalData.employee.idEmployee = this.companyForm.employee.idEmployee;
+    this.finalData.employee.isDefault = this.companyForm.employee.isDefault;
+    this.finalData.employee.name = (this.companyForm.employee.name ?? '').trim();
+    this.finalData.employee.department = this.companyForm.employee.department;
+    this.finalData.employee.employeePosition = this.companyForm.employee.employeePosition;
+    this.finalData.employee.email = (this.companyForm.employee.email ?? '').trim();
+    this.finalData.employee.deskphone = onRemoveMask(
+      (this.companyForm.employee.deskphone ?? '')?.trim()
     );
-    this.finalData.company.im = this.baseRegisterStore.onMaskNumericalField(
-      (this.detailedData.company.im ?? '').trim()
-    );
-    this.finalData.address.idAddress = this.detailedData.address.idAddress;
-    this.finalData.address.postalCode = this.baseRegisterStore.onMaskNumericalField(
-      (this.detailedData.address.postalCode ?? '').trim()
-    );
-    this.finalData.address.address = (this.detailedData.address.address ?? '').trim();
-    this.finalData.address.number = (this.detailedData.address.number ?? '').trim();
-    this.finalData.address.complement = (this.detailedData.address.complement ?? '').trim();
-    this.finalData.address.district = (this.detailedData.address.district ?? '').trim();
-    this.finalData.address.city = (this.detailedData.address.city ?? '').trim();
-    this.finalData.address.state = (this.detailedData.address.state ?? '').trim();
-    this.finalData.employee.idEmployee = this.detailedData.employee.idEmployee;
-    this.finalData.employee.isDefault = this.detailedData.employee.isDefault;
-    this.finalData.employee.name = (this.detailedData.employee.name ?? '').trim();
-    this.finalData.employee.department = this.departmentData ?? 0;
-    (this.finalData.employee as IEmployeePayload).employeePosition = this.employeePositionData;
-    this.finalData.employee.email = (this.detailedData.employee.email ?? '').trim();
-    this.finalData.employee.deskphone = this.baseRegisterStore.onMaskNumericalField(
-      (this.detailedData.employee.deskphone ?? '')?.trim()
-    );
-    this.finalData.employee.cellphone = this.baseRegisterStore.onMaskNumericalField(
-      (this.detailedData.employee.cellphone ?? '')?.trim()
+    this.finalData.employee.cellphone = onRemoveMask(
+      (this.companyForm.employee.cellphone ?? '')?.trim()
     );
   };
 
   onSaveRegister = async (onActionOk?: ActionCallback): Promise<void> => {
     try {
-      this.modalStore.onLoading(true);
+      this.isLoading.set(true);
       this.onSetFinalData();
       const response = await this.companyApi.onSave(this.finalData);
       if (response.status) {
-        this.modalStore.onSetModalInfoType('success');
-        this.modalStore.onShowInfoModal(
+        this.onShowInfoModal(
+          'success',
           `Cadastro de ${this.currentViewTranslated}`,
           response.message,
           onActionOk
         );
       } else {
-        this.modalStore.onShowInfoModal(
+        this.onShowInfoModal(
+          'failure',
           `Cadastro de ${this.currentViewTranslated}`,
           response.error?.message || ''
         );
       }
     } catch (e: unknown) {
       const error = e as HttpErrorResponse;
-      this.modalStore.onShowInfoModal(
+      this.onShowInfoModal(
+        'failure',
         `Cadastro de ${this.currentViewTranslated}`,
         error.error?.message || 'Erro desconhecido'
       );
     } finally {
-      this.modalStore.onLoading(false);
+      this.isLoading.set(false);
     }
+  };
+
+  onShowInfoModal = (
+    type: ModalType,
+    title: string,
+    description: string,
+    onActionOk?: ActionCallback
+  ): void => {
+    this.modalInfo.set({
+      ...this.modalInfo,
+      isActive: true,
+      type: type,
+      title: title,
+      description: description,
+      onActionOk: onActionOk,
+    });
+  };
+
+  onCloseInfoModal = async (): Promise<void> => {
+    const callback = this.modalInfo().onActionOk;
+    if (callback) await Promise.resolve(callback());
+    this.modalInfo.set({
+      isActive: false,
+      type: '',
+      title: '',
+      description: '',
+      onActionOk: null,
+    });
   };
 
   ngOnDestroy() {

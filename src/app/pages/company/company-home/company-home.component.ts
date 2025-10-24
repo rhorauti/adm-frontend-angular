@@ -1,53 +1,33 @@
-import { Component, inject, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { BreadcrumbComponent } from '@components/breadcrumb/breadcrumb.component';
-import { SideBarComponent } from '@components/side-bar/side-bar.component';
-import { MatIconModule } from '@angular/material/icon';
-import { ButtonLabelComponent } from '@components/button/button-label/button-label.component';
-import { ButtonDeleteComponent } from '@components/button/button-delete/button-delete.component';
-import { ButtonIconComponent } from '@components/button/button-icon/button-icon.component';
-import { TooltipComponent } from '@components/tooltip/tooltip.component';
-import { ToogleButtonComponent } from '@components/toogle-button/toogle-button.component';
-import { InputComponent } from '@components/input/input.component';
-import { ButtonCloseComponent } from '@components/button/button-close/button-close.component';
-import { ModalStore } from '@store/modal/modal.store';
-import { ICompany } from '@core/interfaces/company.interface';
-import { AuthStore } from '@store/auth/auth.store';
-import { loadStorage } from '@core/utils/misc';
-import { BaseRegisterStore, defaultTableHeaderIcon } from '@store/base/base.register.store';
-import { ActionCallback } from '@core/interfaces/modal.interface';
 import { HttpErrorResponse } from '@angular/common/http';
+import { Component, inject, OnDestroy, OnInit, signal } from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
+import { HomeComponent } from '@components/home/home.component';
+import { LoadingComponent } from '@components/loading/loading.component';
+import { ModalAskComponent } from '@components/modal/modal-ask/modal-ask.component';
+import { ModalInfoComponent } from '@components/modal/modal-info/modal-info.component';
 import { CompanyApi } from '@core/http/company/company.api';
-import { KeyOfData } from '@core/types/base.type';
+import { ICompanyHome } from '@core/interfaces/company.interface';
+import { ActionCallback, IModalAsk, IModalInfo } from '@core/interfaces/modal.interface';
 import { ITableHeader } from '@core/interfaces/table.interface';
-import { TableComponent } from '@components/table/table.component';
-// import { PaginationComponent } from '@components/pagination/pagination.component';
+import { KeyOfData } from '@core/types/base.type';
+import { loadStorage } from '@core/utils/misc';
+import { AuthStore } from '@store/auth/auth.store';
+import { defaultTableHeaderIcon } from '@store/base/base.register.store';
+import { ModalType } from '@store/modal/modal.store';
+import { DEPT_NAMES_ENGLISH } from 'app/enum/department.enum';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-company-home',
-  imports: [
-    CommonModule,
-    SideBarComponent,
-    InputComponent,
-    TableComponent,
-    // PaginationComponent,
-    BreadcrumbComponent,
-    MatIconModule,
-    ButtonLabelComponent,
-    ButtonDeleteComponent,
-    ButtonIconComponent,
-    TooltipComponent,
-    ToogleButtonComponent,
-    ButtonCloseComponent,
-  ],
+  imports: [HomeComponent, ModalAskComponent, ModalInfoComponent, LoadingComponent],
   templateUrl: './company-home.component.html',
   styleUrl: './company-home.component.scss',
 })
-export class CompanyHomeComponent implements OnInit {
+export class CompanyHomeComponent implements OnInit, OnDestroy {
+  private activatedRoute = inject(ActivatedRoute);
+  private authStore = inject(AuthStore);
+  readonly router = inject(Router);
   readonly companyApi = inject(CompanyApi);
-  readonly baseRegisterStore = inject(BaseRegisterStore);
-  readonly authStore = inject(AuthStore);
-  readonly modalStore = inject(ModalStore);
 
   readonly currentView = 'companies';
   readonly currentViewTranslated = 'empresas';
@@ -55,7 +35,24 @@ export class CompanyHomeComponent implements OnInit {
   readonly breadcrumbList = ['Cadastro', 'Empresas'];
   readonly inputSearchFilterList: KeyOfData[] = ['idCompany', 'nickname', 'name'];
   readonly inputSearchPlaceholder = 'Id, Nome Fantasia, Razão Social';
-  readonly initialTableHeaders = [
+  subscription: Subscription | undefined = undefined;
+  tableHeadersLocalStorageId = `table_headers_${this.currentView}_${this.authStore.user().id}`;
+  idCompany = 0;
+
+  isComponentSetToDefault = signal(false);
+  initialDataList = signal<ICompanyHome[]>([]);
+  data = signal<ICompanyHome>({
+    idCompany: 0,
+    nickname: '',
+    name: '',
+    cnpj: '',
+    ie: '',
+    im: '',
+  });
+
+  newRegisterUrl = `/${this.currentView}/new`;
+
+  tableHeaders = [
     {
       id: 0,
       isHeaderActive: true,
@@ -104,75 +101,166 @@ export class CompanyHomeComponent implements OnInit {
       headerName: 'Inscr.Municipal',
       databaseField: 'im',
     },
-  ] as ITableHeader<ICompany>[];
-  tableHeadersLocalStorageId = `table_headers_${this.currentView}_${this.authStore.user().id}`;
+  ] as ITableHeader<ICompanyHome>[];
 
-  async ngOnInit() {
-    this.onShowDataList();
-    const tableHeaders = await loadStorage(this.tableHeadersLocalStorageId);
-    const headers = tableHeaders ? tableHeaders : this.initialTableHeaders;
-    this.baseRegisterStore.onSetStateToNewValue('tableHeaders', headers);
-  }
+  modalInfo = signal<IModalInfo>({
+    isActive: false,
+    title: '',
+    description: '',
+    type: '',
+    onActionOk: null,
+  });
 
-  onRedirectToEditPage = (data: ICompany): void => {
-    this.baseRegisterStore.onSetStateToNewValue('data', data);
-    this.modalStore.onRedirectPage(
-      `/${this.currentView}/edit/${(this.baseRegisterStore.data() as ICompany)[this.keyId]}`
-    );
+  modalAsk = signal<IModalAsk>({
+    isActive: false,
+    title: '',
+    description: '',
+    onActionOk: null as ActionCallback,
+    onActionNok: null as ActionCallback,
+  });
+
+  isLoading = signal(false);
+
+  onShowInfoModal = (
+    type: ModalType,
+    title: string,
+    description: string,
+    onActionOk?: ActionCallback
+  ): void => {
+    this.modalInfo.set({
+      ...this.modalInfo,
+      isActive: true,
+      type: type,
+      title: title,
+      description: description,
+      onActionOk: onActionOk,
+    });
   };
 
-  onCloneRegister = async (data: ICompany): Promise<void> => {
-    this.baseRegisterStore.onSetStateToNewValue('isCopiedData', true);
-    this.baseRegisterStore.onSetStateToNewValue('data', data);
-    this.modalStore.onRedirectPage(`/${this.currentView}/new`);
+  async ngOnInit() {
+    this.subscription = this.activatedRoute.paramMap.subscribe(params => {
+      this.idCompany = Number(params.get('idCompany') as DEPT_NAMES_ENGLISH) || -1;
+    });
+    await this.onShowDataList();
+    const selectedTableHeaders = await loadStorage(this.tableHeadersLocalStorageId);
+    const headers = selectedTableHeaders ? selectedTableHeaders : this.tableHeaders;
+    this.tableHeaders = headers;
+  }
+
+  ngOnDestroy(): void {
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
+  }
+
+  onRedirectToEditPage = (data: ICompanyHome): void => {
+    this.router.navigate([`/${this.currentView}/edit/${data.idCompany}`]);
+  };
+
+  onCloneRegister = (data: ICompanyHome): void => {
+    this.router.navigate([`/${this.currentView}/new/${data.idCompany}`]);
+  };
+
+  onCloseInfoModal = async (): Promise<void> => {
+    const callback = this.modalInfo().onActionOk;
+    if (callback) await Promise.resolve(callback());
+    this.modalInfo.set({
+      isActive: false,
+      type: '',
+      title: '',
+      description: '',
+      onActionOk: null,
+    });
+  };
+
+  onShowAskModal = (
+    title: string,
+    description: string,
+    onActionOk?: ActionCallback,
+    onActionNok?: ActionCallback
+  ): void => {
+    this.modalAsk.set({
+      ...this.modalAsk,
+      isActive: true,
+      title: title,
+      description: description,
+      onActionOk: onActionOk,
+      onActionNok: onActionNok,
+    });
+  };
+
+  onCloseAskModalAction = async (isConfirmed: boolean): Promise<void> => {
+    const callback = isConfirmed ? this.modalAsk().onActionOk : this.modalAsk().onActionNok;
+    if (callback) {
+      await Promise.resolve(callback());
+      this.modalInfo.update(current => ({ ...current, type: 'success' }));
+    }
+    this.modalAsk.set({
+      isActive: false,
+      title: '',
+      description: '',
+      onActionOk: null,
+      onActionNok: null,
+    });
   };
 
   onShowDataList = async (): Promise<void> => {
     try {
-      this.modalStore.onLoading(true);
+      this.isLoading.set(true);
       const response = await this.companyApi.onGetDataList();
       if (response.data) {
-        this.baseRegisterStore.onSetStateToNewValue('initialData', response.data);
-        this.baseRegisterStore.onSetStateToNewValue('dataList', response.data);
-        this.baseRegisterStore.onClearData(response.data);
+        const dataList = response.data as ICompanyHome[];
+        this.initialDataList.set([...dataList]);
       } else {
         return;
       }
     } catch (e: unknown) {
       const error = e as HttpErrorResponse;
-      this.modalStore.onShowInfoModal('Listar registros', error.error?.message);
+      this.onShowInfoModal('failure', 'Listar registros', error.error?.message);
     } finally {
-      this.modalStore.onLoading(false);
+      this.isLoading.set(false);
     }
   };
 
-  onDeleteRegister = async (id: number, onActionOk?: ActionCallback): Promise<void> => {
+  onDeleteRegister = async (idEmployee: number, onActionOk?: ActionCallback): Promise<void> => {
     try {
-      this.modalStore.onLoading(true);
-      const response = await this.companyApi.onDelete(id);
+      this.isLoading.set(true);
+      const response = await this.companyApi.onDelete(this.idCompany);
       if (response.status) {
         this.onShowDataList();
-        this.modalStore.onSetModalInfoType('success');
-        this.modalStore.onShowInfoModal('Excluir registro', response.message, onActionOk);
+        this.onShowInfoModal('success', 'Excluir registro', response.message, onActionOk);
       } else {
-        this.modalStore.onShowInfoModal('Excluir registro', response.error?.message || '');
+        this.onShowInfoModal('failure', 'Excluir registro', response.error?.message || '');
       }
     } catch (e: unknown) {
       const error = e as HttpErrorResponse;
-      this.modalStore.onShowInfoModal('Excluir registro', error.error.message);
+      this.onShowInfoModal(
+        'failure',
+        'Excluir registro',
+        error.error?.message || 'Erro desconhecido'
+      );
     } finally {
-      this.modalStore.onLoading(false);
+      this.isComponentSetToDefault.set(true);
+      this.isLoading.set(false);
     }
   };
 
-  async onDelete(data: ICompany): Promise<void> {
-    await this.onDeleteRegister(data[this.keyId] as number);
+  async onDelete(selectedData: ICompanyHome): Promise<void> {
+    await this.onDeleteRegister(selectedData.idCompany as number);
   }
 
-  onShowModalToDelete(data?: ICompany): void {
-    const selectedData = data ? data : (this.baseRegisterStore.itemSelected() as ICompany) || '';
-    this.modalStore.onShowAskModal(
-      `Cadastro de ${this.currentViewTranslated}`,
+  onShowModalToDeleteThroughTopBtn(): void {
+    this.onShowAskModal(
+      'Cadastro de atividades',
+      `Deseja excluir o registro <b>${this.data().name}</b>?`,
+      () => this.onDelete(this.data())
+    );
+  }
+
+  onShowModalToDeleteThroughTableBtn(data?: ICompanyHome): void {
+    const selectedData = data ? data : this.data();
+    this.onShowAskModal(
+      'Cadastro de atividades',
       `Deseja excluir o registro <b>${selectedData.name}</b>?`,
       () => this.onDelete(selectedData)
     );

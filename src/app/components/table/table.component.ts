@@ -20,14 +20,14 @@ import { MatIconModule } from '@angular/material/icon';
 import { ButtonCloseComponent } from '@components/button/button-close/button-close.component';
 import { RouterModule } from '@angular/router';
 import { BaseType, Page } from '@core/types/base.type';
-import { IProduct } from '@core/interfaces/product.interface';
 import { ITableBody, ITableHeader } from '@core/interfaces/table.interface';
 import { defaultTableHeaderIcon } from '@store/base/base.register.store';
 import { DataService } from '@core/services/data.service';
 import { Subscription } from 'rxjs';
 import { onSetIconStatus, onSetIconStatusBackgroundColor, Status } from 'app/enum/status.enum';
-import { onFormatDateFromUtcToLocal } from '@core/utils/misc';
+import { onFormatDateFromUtcToLocal, setCnpjMask } from '@core/utils/misc';
 import { ITaskForm } from '@core/interfaces/task.interface';
+import { onSetOriginToString } from 'app/enum/origin.enum';
 
 @Component({
   selector: 'app-table',
@@ -152,22 +152,13 @@ export class TableComponent<T = BaseType> implements OnInit, OnDestroy, OnChange
     return this.currentPage() * this.qtyPerPage;
   });
 
-  getCnpj(row: T): string {
-    return (row as any)?.cnpj ?? (row as any)?.company?.cnpj ?? '';
-  }
-
-  setCnpjMask(cnpj: string): string {
-    return (cnpj?.length ?? 0) > 11 ? '00.000.000/0000-00' : '000.000.000-00';
-  }
-
   formatCell(row: T, key: any): string {
     const value = (row as any)?.[key];
 
     switch (key) {
       case 'cnpj': {
-        const raw = this.getCnpj(row);
-        const expr = this.setCnpjMask(raw);
-        return this.mask.transform(raw, expr) ?? '';
+        const expr = setCnpjMask(value);
+        return this.mask.transform(value, expr) ?? '';
       }
       case 'startDate': {
         return onFormatDateFromUtcToLocal(value);
@@ -175,27 +166,12 @@ export class TableComponent<T = BaseType> implements OnInit, OnDestroy, OnChange
       case 'finishDate': {
         return onFormatDateFromUtcToLocal(value);
       }
+      case 'ogigin': {
+        return onSetOriginToString(value);
+      }
       default:
         return value ?? '';
     }
-  }
-
-  originList = ['Produto nacional', 'Fabricado interno', 'Produto importado'];
-
-  onSetOrigin(data: T): string {
-    const productData = data as IProduct;
-    switch (productData.origin) {
-      case 1: {
-        return this.originList[0];
-      }
-      case 2: {
-        return this.originList[1];
-      }
-      case 3: {
-        return this.originList[2];
-      }
-    }
-    return '';
   }
 
   /**

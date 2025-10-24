@@ -9,6 +9,7 @@ import {
   OnDestroy,
   OnInit,
   QueryList,
+  signal,
   ViewChildren,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
@@ -17,18 +18,19 @@ import { BreadcrumbComponent } from '@components/breadcrumb/breadcrumb.component
 import { ButtonLabelComponent } from '@components/button/button-label/button-label.component';
 import { InputComponent } from '@components/input/input.component';
 import { SelectComponent } from '@components/select/select.component';
-import { ActionCallback } from '@core/interfaces/modal.interface';
+import { ActionCallback, IModalInfo } from '@core/interfaces/modal.interface';
 import { BaseApiName } from '@core/types/base.type';
-import { BaseRegisterStore } from '@store/base/base.register.store';
-import { ModalStore } from '@store/modal/modal.store';
+import { ModalType } from '@store/modal/modal.store';
 import { Subscription } from 'rxjs';
 import { PhotoBoxSingleComponent } from '@components/photo-box/photo-box-single/photo-box-single.component';
 import { ProductApi } from '@core/http/product/product.api';
-import { IProduct, IProductType } from '@core/interfaces/product.interface';
-import { IUnit } from '@core/interfaces/unit.interface';
-import { UnitApi } from '@core/http/unit/unit.api';
-import { ProductTypeApi } from '@core/http/product/product-type.api';
+import { IProductForm, IProductType, PartialProductType } from '@core/interfaces/product.interface';
+import { IUnit, PartialUnit } from '@core/interfaces/unit.interface';
 import { TextAreaComponent } from '@components/text-area/text-area.component';
+import { ModalInfoComponent } from '@components/modal/modal-info/modal-info.component';
+import { LoadingComponent } from '@components/loading/loading.component';
+import { onSetOriginToNumber, onSetOriginToString, originList } from 'app/enum/origin.enum';
+import { currencyList } from '@core/utils/misc';
 
 @Component({
   selector: 'app-product-form',
@@ -41,6 +43,8 @@ import { TextAreaComponent } from '@components/text-area/text-area.component';
     SelectComponent,
     PhotoBoxSingleComponent,
     TextAreaComponent,
+    ModalInfoComponent,
+    LoadingComponent,
   ],
   templateUrl: './product-form.component.html',
   styleUrl: './product-form.component.scss',
@@ -50,13 +54,8 @@ export class ProductFormComponent implements OnInit, OnDestroy, AfterViewInit {
   @ViewChildren(SelectComponent) select!: QueryList<SelectComponent>;
   @ViewChildren('labelForm') private labels!: QueryList<ElementRef>;
   readonly productApi = inject(ProductApi);
-  readonly unitApi = inject(UnitApi);
-  readonly productTypeApi = inject(ProductTypeApi);
-  readonly baseRegisterStore = inject(BaseRegisterStore);
   private activatedRoute = inject(ActivatedRoute);
   readonly router = inject(Router);
-  readonly modalStore = inject(ModalStore);
-
   private cdr = inject(ChangeDetectorRef);
 
   currentView: BaseApiName = 'products';
@@ -65,33 +64,19 @@ export class ProductFormComponent implements OnInit, OnDestroy, AfterViewInit {
   breadcrumbList: string[] = [];
   idProduct = 0;
   idCompany = 0;
-  unitList: IUnit[] = [];
+  // unitList: PartialUnit[] = [];
   unitOptionList: string[] = [];
-  productTypeList: IProductType[] = [];
+  // productTypeList: PartialProductType[] = [];
   productTypeOptionList: string[] = [];
-  currencyList = ['R$', 'USD'];
-
-  // unitData = {
-  //   idUnit: null,
-  //   name: '',
-  //   comment: '',
-  // } as IUnit;
-
-  // productTypeData = {
-  //   idProductType: null,
-  //   name: '',
-  //   comment: '',
-  // } as IProductType;
 
   imgPreview: File | null = null;
   isRemovedPhoto = false;
 
   selectedOrigin = '';
-  originList = ['Produto nacional', 'Fabricado interno', 'Produto importado'];
   ncmList = ['000000', '1111111'];
 
-  productData = {
-    idProduct: null,
+  productData: IProductForm = {
+    idProduct: 0,
     internalPartNumber: '',
     customerPartNumber: '',
     name: '',
@@ -102,9 +87,9 @@ export class ProductFormComponent implements OnInit, OnDestroy, AfterViewInit {
     pis: 0,
     cofins: 0,
     ipi: 0,
-    purchasingCurrency: this.currencyList[0],
+    purchasingCurrency: '',
     purchasingUnitPrice: 0,
-    salesCurrency: this.currencyList[0],
+    salesCurrency: '',
     salesUnitPrice: 0,
     materialSpec: '',
     width: 0,
@@ -114,124 +99,61 @@ export class ProductFormComponent implements OnInit, OnDestroy, AfterViewInit {
     qrcode: '',
     photoUrl: '',
     comment: '',
+    unitList: [],
     unit: {
-      idUnit: null,
+      idUnit: 0,
       name: '',
-      comment: '',
     },
+    productTypeList: [],
     productType: {
-      idProductType: null,
+      idProductType: 0,
       name: '',
-      comment: '',
     },
-  } as IProduct;
+  };
+  originList = originList;
+  currencyList = currencyList;
+  onSetOriginToNumber = onSetOriginToNumber;
+
+  modalInfo = signal<IModalInfo>({
+    isActive: false,
+    title: '',
+    description: '',
+    type: '',
+    onActionOk: null,
+  });
+
+  isLoading = signal(false);
 
   async ngOnInit(): Promise<void> {
     this.subscription = this.activatedRoute.paramMap.subscribe(params => {
-      this.idProduct = Number(params.get('idProduct')) || 0;
+      this.idProduct = Number(params.get('id')) || 0;
     });
-    await this.onGetUnitList();
-    await this.onGetProductTypeList();
-    if (this.baseRegisterStore.isEditData()) {
-      this.productData = this.baseRegisterStore.data() as IProduct;
-      this.baseRegisterStore.onSetStateToNewValue('isEditData', false);
-    } else if (this.baseRegisterStore.isCopiedData()) {
-      this.productData = this.baseRegisterStore.data() as IProduct;
-      this.productData.idProduct = 0;
-      this.idProduct = 0;
-      this.productData.photoUrl = '';
-      this.baseRegisterStore.onSetStateToNewValue('isCopiedData', false);
+    if (this.router.url.includes('edit') && (this.idProduct || 0) > 0) {
+      const dataList = await this.productApi.onGetData(this.idProduct || 0);
+      this.productData = dataList.data as IProductForm;
+    } else if (this.router.url.includes('new') && (this.idProduct || 0) > 0) {
+      const dataList = await this.productApi.onGetData(this.idProduct || 0);
+      this.productData = dataList.data as IProductForm;
+      this.productData.idProduct = null;
     }
-    this.productData.unit = this.unitList.find(d => d.idUnit == this.productData.unit.idUnit) ?? {
-      idUnit: null,
-      name: '',
-      comment: '',
-    };
-    this.productData.productType = this.productTypeList.find(
-      p => p.idProductType == this.productData.productType.idProductType
-    ) ?? { idProductType: null, name: '', comment: '' };
-    this.onSetOriginToString(this.productData.origin);
+    this.selectedOrigin = onSetOriginToString(this.productData.origin ?? 0);
+    this.onSetSelectOptionList();
     this.defineTitle();
     this.breadcrumbList = ['Cadastro', this.currentViewTranslated, `${this.defineTitle()}`];
   }
 
-  onSetOriginToString = (origin: number): void => {
-    switch (origin) {
-      case 1: {
-        this.selectedOrigin = this.originList[0];
-        break;
-      }
-      case 2: {
-        this.selectedOrigin = this.originList[1];
-        break;
-      }
-      case 3: {
-        this.selectedOrigin = this.originList[2];
-        break;
-      }
-    }
-  };
-
-  onSetOriginToNumber = (originTranslated: string): void => {
-    switch (originTranslated) {
-      case this.originList[0]: {
-        this.productData.origin = 1;
-        break;
-      }
-      case this.originList[1]: {
-        this.productData.origin = 2;
-        break;
-      }
-      case this.originList[2]: {
-        this.productData.origin = 3;
-        break;
-      }
-    }
-  };
-
-  onGetUnitList = async (): Promise<void> => {
-    try {
-      this.modalStore.onLoading(true);
-      const response = await this.unitApi.onGetDataList();
-      if (response.data) {
-        const data = response.data as IUnit[];
-        this.unitList = data;
-        this.unitOptionList = data.map(unit => unit.name);
-      } else {
-        return;
-      }
-    } catch (e: unknown) {
-      const error = e as HttpErrorResponse;
-      this.modalStore.onShowInfoModal('Listar departamentos: ', error.error?.message);
-    } finally {
-      this.modalStore.onLoading(false);
-    }
-  };
-
-  onGetProductTypeList = async (): Promise<void> => {
-    try {
-      this.modalStore.onLoading(true);
-      const response = await this.productTypeApi.onGetDataList();
-      if (response.data) {
-        const data = response.data as IProductType[];
-        this.productTypeList = data;
-        this.productTypeOptionList = data.map(position => position.name);
-      } else {
-        return;
-      }
-    } catch (e: unknown) {
-      const error = e as HttpErrorResponse;
-      this.modalStore.onShowInfoModal('Listar cargos: ', error.error?.message);
-    } finally {
-      this.modalStore.onLoading(false);
-    }
+  onSetSelectOptionList = (): void => {
+    this.unitOptionList = (this.productData.unitList || []).map(unit => unit.name) as string[];
+    this.productTypeOptionList = (this.productData.productTypeList || []).map(
+      pt => pt.name
+    ) as string[];
   };
 
   defineTitle = (): string => {
     if (this.idProduct == 0) {
       return 'Novo Registro';
     } else {
-      return this.productData.name;
+      return this.productData ? this.productData.name : '';
     }
   };
 
@@ -255,25 +177,28 @@ export class ProductFormComponent implements OnInit, OnDestroy, AfterViewInit {
   };
 
   setUnitValue = (unitName: string): void => {
-    this.productData.unit = this.unitList.find(unit => unit.name == unitName.trim()) as IUnit;
+    this.productData.unit = this.productData.unitList?.find(
+      unit => unit.name?.trim() == unitName.trim()
+    ) as IUnit;
     if (!this.productData.unit) {
       this.productData.unit = {
         idUnit: null,
         name: '',
-        comment: '',
       };
     }
+    console.log('unit', this.productData.unit);
   };
 
   setProductTypeValue = (productTypeName: string): void => {
-    this.productData.productType = this.productTypeList.find(
-      type => type.name == productTypeName.trim()
+    console.log('name', productTypeName);
+    this.productData.productType = this.productData.productTypeList?.find(
+      type => type.name?.trim() == productTypeName.trim()
     ) as IProductType;
+    console.log('productTypé', this.productData.productType);
     if (!this.productData.productType) {
       this.productData.productType = {
         idProductType: null,
         name: '',
-        comment: '',
       };
     }
   };
@@ -289,7 +214,7 @@ export class ProductFormComponent implements OnInit, OnDestroy, AfterViewInit {
   };
 
   onBackToPreviousPage = (): void => {
-    this.modalStore.onRedirectPage(`/${this.currentView}`);
+    this.router.navigate([`/${this.currentView}`]);
   };
 
   fieldValidation = (): void => {
@@ -302,40 +227,42 @@ export class ProductFormComponent implements OnInit, OnDestroy, AfterViewInit {
     }
   };
 
+  onSetJsonData = (): IProductForm => {
+    return {
+      idProduct: this.productData.idProduct,
+      internalPartNumber: this.productData.internalPartNumber ?? '',
+      customerPartNumber: this.productData.customerPartNumber ?? '',
+      name: this.productData.name ?? '',
+      nameTranslated: this.productData.nameTranslated ?? '',
+      ncm: this.productData.ncm ?? '',
+      icms: this.productData.icms ?? 0,
+      pis: this.productData.pis ?? 0,
+      cofins: this.productData.cofins ?? 0,
+      ipi: this.productData.ipi ?? 0,
+      origin: this.productData.origin ?? 0,
+      purchasingCurrency: this.productData.purchasingCurrency ?? '',
+      purchasingUnitPrice: this.productData.purchasingUnitPrice ?? 0,
+      salesCurrency: this.productData.salesCurrency ?? '',
+      salesUnitPrice: this.productData.salesUnitPrice ?? 0,
+      materialSpec: this.productData.materialSpec ?? '',
+      width: this.productData.width ?? 0,
+      height: this.productData.height ?? 0,
+      depth: this.productData.depth ?? 0,
+      weight: this.productData.weight ?? 0,
+      unit: this.productData.unit ?? null,
+      productType: this.productData.productType ?? null,
+      comment: this.productData.comment ?? '',
+      isRemovedPhoto: this.isRemovedPhoto,
+    } as IProductForm;
+  };
+
   setFinalData = (): FormData => {
     const formData = new FormData();
     if (this.imgPreview) {
       formData.append('file', this.imgPreview, this.imgPreview.name);
     }
-    formData.append(
-      'data',
-      JSON.stringify({
-        idProduct: this.productData.idProduct,
-        internalPartNumber: this.productData.internalPartNumber ?? '',
-        customerPartNumber: this.productData.customerPartNumber ?? '',
-        name: this.productData.name ?? '',
-        nameTranslated: this.productData.nameTranslated ?? '',
-        ncm: this.productData.ncm ?? '',
-        icms: this.productData.icms ?? 0,
-        pis: this.productData.pis ?? 0,
-        cofins: this.productData.cofins ?? 0,
-        ipi: this.productData.ipi ?? 0,
-        origin: this.productData.origin ?? 0,
-        purchasingCurrency: this.productData.purchasingCurrency ?? '',
-        purchasingUnitPrice: this.productData.purchasingUnitPrice ?? 0,
-        salesCurrency: this.productData.salesCurrency ?? '',
-        salesUnitPrice: this.productData.salesUnitPrice ?? 0,
-        materialSpec: this.productData.materialSpec ?? '',
-        width: this.productData.width ?? 0,
-        height: this.productData.height ?? 0,
-        depth: this.productData.depth ?? 0,
-        weight: this.productData.weight ?? 0,
-        unit: this.productData.unit ?? null,
-        productType: this.productData.productType ?? null,
-        comment: this.productData.comment ?? '',
-        isRemovedPhoto: this.isRemovedPhoto,
-      } as IProduct)
-    );
+    const jsonData = this.onSetJsonData();
+    formData.append('data', JSON.stringify(jsonData));
     return formData;
   };
 
@@ -343,17 +270,18 @@ export class ProductFormComponent implements OnInit, OnDestroy, AfterViewInit {
     try {
       const finalData = this.setFinalData();
       this.fieldValidation();
-      this.modalStore.onLoading(true);
+      this.isLoading.set(true);
       const response = await this.productApi.onSave(finalData);
       if (response.status) {
-        this.modalStore.onSetModalInfoType('success');
-        this.modalStore.onShowInfoModal(
+        this.onShowInfoModal(
+          'success',
           `Cadastro de ${this.currentViewTranslated}`,
           response.message,
           onActionOk
         );
       } else {
-        this.modalStore.onShowInfoModal(
+        this.onShowInfoModal(
+          'failure',
           `Cadastro de ${this.currentViewTranslated}`,
           response.error?.message || ''
         );
@@ -361,19 +289,49 @@ export class ProductFormComponent implements OnInit, OnDestroy, AfterViewInit {
     } catch (e: unknown) {
       if (e instanceof HttpErrorResponse) {
         const error = e as HttpErrorResponse;
-        this.modalStore.onShowInfoModal(
+        this.onShowInfoModal(
+          'failure',
           `Cadastro de ${this.currentViewTranslated}`,
           error.error?.message || 'Erro desconhecido'
         );
       } else {
-        this.modalStore.onShowInfoModal(
+        this.onShowInfoModal(
+          'failure',
           `Cadastro de ${this.currentViewTranslated}`,
           (e as Error).message
         );
       }
     } finally {
-      this.modalStore.onLoading(false);
+      this.isLoading.set(false);
     }
+  };
+
+  onShowInfoModal = (
+    type: ModalType,
+    title: string,
+    description: string,
+    onActionOk?: ActionCallback
+  ): void => {
+    this.modalInfo.set({
+      ...this.modalInfo,
+      isActive: true,
+      type: type,
+      title: title,
+      description: description,
+      onActionOk: onActionOk,
+    });
+  };
+
+  onCloseInfoModal = async (): Promise<void> => {
+    const callback = this.modalInfo().onActionOk;
+    if (callback) await Promise.resolve(callback());
+    this.modalInfo.set({
+      isActive: false,
+      type: '',
+      title: '',
+      description: '',
+      onActionOk: null,
+    });
   };
 
   ngOnDestroy() {

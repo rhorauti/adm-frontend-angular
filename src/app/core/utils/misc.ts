@@ -138,66 +138,6 @@ export function formatTelephoneNumber(number: string): string {
   }
 }
 
-export const translateDeptName = (deptName: string): string => {
-  switch (deptName.toLowerCase().trim()) {
-    case 'maintenance': {
-      return 'Manutenção';
-    }
-    case 'purchasing': {
-      return 'Compras';
-    }
-    case 'pc': {
-      return 'PCP';
-    }
-    case 'sales': {
-      return 'Vendas';
-    }
-    case 'project': {
-      return 'Projetos';
-    }
-    case 'finance': {
-      return 'Financeiro';
-    }
-    case 'quality': {
-      return 'Qualidade';
-    }
-    case 'hr': {
-      return 'RH';
-    }
-  }
-  return '';
-};
-
-export const setDeptNameTranslationToDefaultName = (deptName: string): string => {
-  switch (deptName.toLowerCase().trim()) {
-    case 'manutenção': {
-      return 'maintenance';
-    }
-    case 'compras': {
-      return 'purchasing';
-    }
-    case 'pcp': {
-      return 'pc';
-    }
-    case 'vendas': {
-      return 'sales';
-    }
-    case 'projetos': {
-      return 'project';
-    }
-    case 'financeiro': {
-      return 'finance';
-    }
-    case 'qualidade': {
-      return 'quality';
-    }
-    case 'rh': {
-      return 'hr';
-    }
-  }
-  return '';
-};
-
 const countrySetup = 'pt-BR';
 type DateFormat = 'short' | 'long' | 'medium' | 'full';
 
@@ -219,4 +159,25 @@ export const isUTCDate = (value: Date | number | string): boolean => {
   if (typeof value === 'string' && /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?Z$/.test(value))
     return true;
   return false;
+};
+
+export const setCnpjMask = (cnpj: string): string => {
+  return (cnpj?.length ?? 0) > 11 ? '00.000.000/0000-00' : '000.000.000-00';
+};
+
+export const currencyList = ['R$', 'USD'];
+
+export const onSetPriceToDatabaseFormat = (price: string): number => {
+  return parseFloat(price.replace(/\./g, '').replace(',', '.'));
+};
+
+export const onSetPriceToBrFormat = (price: number): string => {
+  return price.toLocaleString('pt-BR', {
+    style: 'currency',
+    currency: 'BRL',
+  });
+};
+
+export const onRemoveMask = (data: string): string => {
+  return (data ?? '').replace(/[\D]/g, '');
 };
