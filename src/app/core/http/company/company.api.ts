@@ -22,14 +22,7 @@ export class CompanyApi {
     );
   }
 
-  async onGetDataDetailedInfo(id: number): Promise<IResponseCompanyForm> {
-    return await this.httpRequestService.sendHttpRequest(
-      `${environment.apiUrl}/${this.baseApiName}/detail/${id}`,
-      'GET'
-    );
-  }
-
-  async onGetDataInfo(id: number): Promise<ICompanyResponse> {
+  async onGetData(id: number): Promise<IResponseCompanyForm> {
     return await this.httpRequestService.sendHttpRequest(
       `${environment.apiUrl}/${this.baseApiName}/${id}`,
       'GET'

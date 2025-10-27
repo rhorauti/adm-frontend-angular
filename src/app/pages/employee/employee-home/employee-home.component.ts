@@ -30,9 +30,15 @@ export class EmployeeHomeComponent implements OnInit, OnDestroy {
   readonly currentViewTranslated = 'Funcionários';
   currentView = 'employees';
   breadcrumbList = ['Cadastro', 'Funcionários'];
-  inputSearchFilterList: KeyOfData[] = ['idEmployee', 'department', 'name', 'email', 'position'];
+  inputSearchFilterList: KeyOfData[] = [
+    'idEmployee',
+    'department',
+    'name',
+    'email',
+    'employeePosition',
+  ];
   inputSearchPlaceholder = 'Id, Nome, Email';
-  deptName = DEPT_NAMES_ENGLISH.MAINTENANCE as DEPT_NAMES_ENGLISH;
+  // deptName = DEPT_NAMES_ENGLISH.MAINTENANCE as DEPT_NAMES_ENGLISH;
   subscription: Subscription | undefined = undefined;
   tableHeadersLocalStorageId = `table_headers_${this.currentView}_${this.authStore.user().id}`;
   idCompany = 0;
@@ -51,10 +57,10 @@ export class EmployeeHomeComponent implements OnInit, OnDestroy {
     photoUrl: '',
     company: '',
     department: '',
-    position: '',
+    employeePosition: '',
   });
 
-  newRegisterUrl = `/${this.deptName}/${this.currentView}/new`;
+  newRegisterUrl = `/${this.idCompany}/${this.currentView}/new`;
 
   tableHeaders = [
     {
@@ -87,7 +93,7 @@ export class EmployeeHomeComponent implements OnInit, OnDestroy {
       sortDirection: 0,
       icon: defaultTableHeaderIcon,
       headerName: 'Cargo',
-      databaseField: 'position',
+      databaseField: 'employeePosition',
     },
     {
       id: 4,
@@ -166,11 +172,11 @@ export class EmployeeHomeComponent implements OnInit, OnDestroy {
   }
 
   onRedirectToEditPage = (data: IEmployeeHome): void => {
-    this.router.navigate([`/${this.deptName}/${this.currentView}/edit/${data.idEmployee}`]);
+    this.router.navigate([`/${this.idCompany}/${this.currentView}/edit/${data.idEmployee}`]);
   };
 
   onCloneRegister = (data: IEmployeeHome): void => {
-    this.router.navigate([`/${this.deptName}/${this.currentView}/new/${data.idEmployee}`]);
+    this.router.navigate([`/${this.idCompany}/${this.currentView}/new/${data.idEmployee}`]);
   };
 
   onCloseInfoModal = async (): Promise<void> => {

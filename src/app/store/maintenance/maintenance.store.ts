@@ -766,7 +766,7 @@ export const CompanyStore = signalStore(
         name: '',
         cpf: '',
         department: '',
-        position: '',
+        employeePosition: '',
         email: '',
         deskphone: '',
         cellphone: '',
@@ -796,7 +796,7 @@ export const CompanyStore = signalStore(
       finalData.employee.idEmployee = employeeStore.employeeData().idEmployee;
       finalData.employee.name = employeeStore.employeeData().name;
       finalData.employee.department = employeeStore.employeeData().department;
-      finalData.employee.position = employeeStore.employeeData().position;
+      finalData.employee.employeePosition = employeeStore.employeeData().position;
       finalData.employee.email = employeeStore.employeeData().email;
       finalData.employee.deskphone = onMaskNumericalField(
         employeeStore.employeeData().deskphone || ''

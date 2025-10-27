@@ -13,7 +13,7 @@ export interface IEmployeeHome {
   photoUrl?: string;
   company?: string;
   department?: string | null;
-  position?: string | null;
+  employeePosition?: string | null;
 }
 
 export interface IEmployeeForm {

@@ -21,16 +21,21 @@ export interface IEmployeeCompany {
   email?: string;
   deskphone?: string;
   cellphone?: string;
-  departmentList?: PartialDept[];
   department?: PartialDept;
-  employeePositionList?: PartialEmployeePosition[];
   employeePosition?: PartialEmployeePosition;
 }
 
 export interface ICompanyForm {
-  company: ICompanyHome;
+  idCompany: number | null;
+  nickname: string;
+  name: string;
+  cnpj?: string;
+  ie?: string;
+  im?: string;
   address: IAddress;
-  employee: IEmployeeCompany;
+  employee: IEmployeeCompany[];
+  employeePositionList?: PartialEmployeePosition[];
+  departmentList?: PartialDept[];
 }
 
 export interface ICompanyResponse extends IBaseResponse {

@@ -24,7 +24,7 @@ import { CompanyApi } from '@core/http/company/company.api';
 import { DepartmentApi } from '@core/http/department/department.api';
 import { EmployeePositionApi } from '@core/http/employee/employee-position.api';
 import { ThirdPartApi } from '@core/http/third-part/third-part.api';
-import { ICompanyForm } from '@core/interfaces/company.interface';
+import { ICompanyForm, IResponseCompanyForm } from '@core/interfaces/company.interface';
 import { IDepartment } from '@core/interfaces/department.interface';
 import { IEmployeePosition } from '@core/interfaces/employee.interface';
 import { ActionCallback, IModalInfo } from '@core/interfaces/modal.interface';
@@ -68,15 +68,13 @@ export class CompanyFormComponent implements OnInit, OnDestroy, AfterViewInit {
   departmentOptionList: string[] = [];
   employeePositionOptionList: string[] = [];
 
-  companyForm = {
-    company: {
-      idCompany: null,
-      nickname: '',
-      name: '',
-      cnpj: '',
-      ie: '',
-      im: '',
-    },
+  companyForm: ICompanyForm = {
+    idCompany: null,
+    nickname: '',
+    name: '',
+    cnpj: '',
+    ie: '',
+    im: '',
     address: {
       idAddress: null,
       postalCode: '',
@@ -87,25 +85,27 @@ export class CompanyFormComponent implements OnInit, OnDestroy, AfterViewInit {
       city: '',
       state: '',
     },
-    employee: {
-      idEmployee: 0,
-      isDefault: false,
-      name: '',
-      email: '',
-      deskphone: '',
-      cellphone: '',
-      departmentList: [],
-      department: {
-        idDepartment: 0,
+    employee: [
+      {
+        idEmployee: 0,
+        isDefault: false,
         name: '',
+        email: '',
+        deskphone: '',
+        cellphone: '',
+        department: {
+          idDepartment: 0,
+          name: '',
+        },
+        employeePosition: {
+          idEmployeePosition: 0,
+          name: '',
+        },
       },
-      employeePositionList: [],
-      employeePosition: {
-        idEmployeePosition: 0,
-        name: '',
-      },
-    },
-  } as ICompanyForm;
+    ],
+    departmentList: [],
+    employeePositionList: [],
+  };
 
   modalInfo = signal<IModalInfo>({
     isActive: false,
@@ -121,16 +121,23 @@ export class CompanyFormComponent implements OnInit, OnDestroy, AfterViewInit {
     this.subscription = this.activatedRoute.paramMap.subscribe(params => {
       this.idCompany = Number(params.get('id')) || 0;
     });
+    let company: IResponseCompanyForm;
     if (this.router.url.includes('edit') && (this.idCompany || 0) > 0) {
-      const company = await this.companyApi.onGetDataDetailedInfo(this.idCompany || 0);
+      company = await this.companyApi.onGetData(this.idCompany || 0);
       this.companyForm = company.data as ICompanyForm;
     } else if (this.router.url.includes('new') && (this.idCompany || 0) > 0) {
-      const company = await this.companyApi.onGetDataDetailedInfo(this.idCompany || 0);
+      company = await this.companyApi.onGetData(this.idCompany || 0);
       this.companyForm = company.data as ICompanyForm;
-      this.companyForm.company.idCompany = null;
+      this.companyForm.idCompany = null;
       this.companyForm.address.idAddress = null;
-      this.companyForm.employee.idEmployee = null;
+      this.companyForm.employee[0].idEmployee = null;
+      console.log('companyData', this.companyForm);
+    } else {
+      company = await this.companyApi.onGetData(0);
+      this.companyForm = company.data as ICompanyForm;
     }
+    console.log('companyForm', this.companyForm);
+    this.onSetSelectionOptionList();
     this.defineTitle();
     this.breadcrumbList = ['Cadastro', this.currentViewTranslated, `${this.defineTitle()}`];
   }
@@ -139,7 +146,7 @@ export class CompanyFormComponent implements OnInit, OnDestroy, AfterViewInit {
     if (this.idCompany == 0) {
       return 'Novo Registro';
     } else {
-      return this.companyForm.company.name;
+      return this.companyForm.name;
     }
   };
 
@@ -147,6 +154,15 @@ export class CompanyFormComponent implements OnInit, OnDestroy, AfterViewInit {
     this.onDefineInputId();
     this.cdr.detectChanges();
   }
+
+  onSetSelectionOptionList = (): void => {
+    if (this.companyForm.departmentList) {
+      this.departmentOptionList = this.companyForm.departmentList?.map(dept => dept.name);
+    }
+    if (this.companyForm.employeePositionList) {
+      this.employeePositionOptionList = this.companyForm.employeePositionList.map(ep => ep.name);
+    }
+  };
 
   onDefineInputId = () => {
     this.inputs.forEach((input, index) => {
@@ -156,13 +172,13 @@ export class CompanyFormComponent implements OnInit, OnDestroy, AfterViewInit {
   };
 
   setDepartmentValue = (deptName: string): void => {
-    const dept = (this.companyForm.employee.departmentList || []).find(
+    const dept = (this.companyForm.departmentList || []).find(
       dept => dept.name == deptName
     ) as IDepartment;
     if (dept) {
-      this.companyForm.employee.department = dept;
+      this.companyForm.employee[0].department = dept;
     } else {
-      this.companyForm.employee.department = {
+      this.companyForm.employee[0].department = {
         idDepartment: null,
         name: '',
       };
@@ -170,13 +186,13 @@ export class CompanyFormComponent implements OnInit, OnDestroy, AfterViewInit {
   };
 
   setEmployeePositionValue = (positionName: string): void => {
-    const position = (this.companyForm.employee.employeePositionList || []).find(
+    const position = (this.companyForm.employeePositionList || []).find(
       position => position.name == positionName
     ) as IEmployeePosition;
     if (position) {
-      this.companyForm.employee.employeePosition = position;
+      this.companyForm.employee[0].employeePosition = position;
     } else {
-      this.companyForm.employee.employeePosition = {
+      this.companyForm.employee[0].employeePosition = {
         idEmployeePosition: null,
         name: '',
       };
@@ -201,14 +217,12 @@ export class CompanyFormComponent implements OnInit, OnDestroy, AfterViewInit {
   };
 
   finalData: ICompanyForm = {
-    company: {
-      idCompany: null,
-      nickname: '',
-      name: '',
-      cnpj: '',
-      ie: '',
-      im: '',
-    },
+    idCompany: null,
+    nickname: '',
+    name: '',
+    cnpj: '',
+    ie: '',
+    im: '',
     address: {
       idAddress: null,
       postalCode: '',
@@ -219,33 +233,33 @@ export class CompanyFormComponent implements OnInit, OnDestroy, AfterViewInit {
       city: '',
       state: '',
     },
-    employee: {
-      idEmployee: 0,
-      isDefault: false,
-      name: '',
-      email: '',
-      deskphone: '',
-      cellphone: '',
-      departmentList: [],
-      department: {
-        idDepartment: 0,
+    employee: [
+      {
+        idEmployee: 0,
+        isDefault: false,
         name: '',
+        email: '',
+        deskphone: '',
+        cellphone: '',
+        department: {
+          idDepartment: 0,
+          name: '',
+        },
+        employeePosition: {
+          idEmployeePosition: 0,
+          name: '',
+        },
       },
-      employeePositionList: [],
-      employeePosition: {
-        idEmployeePosition: 0,
-        name: '',
-      },
-    },
+    ],
   };
 
   onSetFinalData = (): void => {
-    this.finalData.company.idCompany = this.companyForm.company.idCompany;
-    this.finalData.company.nickname = (this.companyForm.company.nickname ?? '').trim();
-    this.finalData.company.name = (this.companyForm.company.name ?? '').trim();
-    this.finalData.company.cnpj = onRemoveMask((this.companyForm.company?.cnpj ?? '').trim());
-    this.finalData.company.ie = onRemoveMask((this.companyForm.company.ie ?? '').trim());
-    this.finalData.company.im = onRemoveMask((this.companyForm.company.im ?? '').trim());
+    this.finalData.idCompany = this.companyForm.idCompany;
+    this.finalData.nickname = (this.companyForm.nickname ?? '').trim();
+    this.finalData.name = (this.companyForm.name ?? '').trim();
+    this.finalData.cnpj = onRemoveMask((this.companyForm.cnpj ?? '').trim());
+    this.finalData.ie = onRemoveMask((this.companyForm.ie ?? '').trim());
+    this.finalData.im = onRemoveMask((this.companyForm.im ?? '').trim());
     this.finalData.address.idAddress = this.companyForm.address.idAddress;
     this.finalData.address.postalCode = onRemoveMask(
       (this.companyForm.address.postalCode ?? '').trim()
@@ -256,17 +270,17 @@ export class CompanyFormComponent implements OnInit, OnDestroy, AfterViewInit {
     this.finalData.address.district = (this.companyForm.address.district ?? '').trim();
     this.finalData.address.city = (this.companyForm.address.city ?? '').trim();
     this.finalData.address.state = (this.companyForm.address.state ?? '').trim();
-    this.finalData.employee.idEmployee = this.companyForm.employee.idEmployee;
-    this.finalData.employee.isDefault = this.companyForm.employee.isDefault;
-    this.finalData.employee.name = (this.companyForm.employee.name ?? '').trim();
-    this.finalData.employee.department = this.companyForm.employee.department;
-    this.finalData.employee.employeePosition = this.companyForm.employee.employeePosition;
-    this.finalData.employee.email = (this.companyForm.employee.email ?? '').trim();
-    this.finalData.employee.deskphone = onRemoveMask(
-      (this.companyForm.employee.deskphone ?? '')?.trim()
+    this.finalData.employee[0].idEmployee = this.companyForm.employee[0].idEmployee;
+    this.finalData.employee[0].isDefault = this.companyForm.employee[0].isDefault;
+    this.finalData.employee[0].name = (this.companyForm.employee[0].name ?? '').trim();
+    this.finalData.employee[0].department = this.companyForm.employee[0].department;
+    this.finalData.employee[0].employeePosition = this.companyForm.employee[0].employeePosition;
+    this.finalData.employee[0].email = (this.companyForm.employee[0].email ?? '').trim();
+    this.finalData.employee[0].deskphone = onRemoveMask(
+      (this.companyForm.employee[0].deskphone ?? '')?.trim()
     );
-    this.finalData.employee.cellphone = onRemoveMask(
-      (this.companyForm.employee.cellphone ?? '')?.trim()
+    this.finalData.employee[0].cellphone = onRemoveMask(
+      (this.companyForm.employee[0].cellphone ?? '')?.trim()
     );
   };
 
