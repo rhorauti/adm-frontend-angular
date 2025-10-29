@@ -131,12 +131,10 @@ export class CompanyFormComponent implements OnInit, OnDestroy, AfterViewInit {
       this.companyForm.idCompany = null;
       this.companyForm.address.idAddress = null;
       this.companyForm.employee[0].idEmployee = null;
-      console.log('companyData', this.companyForm);
     } else {
       company = await this.companyApi.onGetData(0);
       this.companyForm = company.data as ICompanyForm;
     }
-    console.log('companyForm', this.companyForm);
     this.onSetSelectionOptionList();
     this.defineTitle();
     this.breadcrumbList = ['Cadastro', this.currentViewTranslated, `${this.defineTitle()}`];

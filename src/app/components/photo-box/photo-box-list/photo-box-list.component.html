@@ -9,6 +9,7 @@
           [ngClass]="[divClass, isDisabled ? 'grayscale-[75%]' : '']"
           [src]="img.previewUrl"
           alt="Profile Image"
+          (error)="handleImageError($event)"
           class="border border-logo rounded-md aspect-square object-cover cursor-pointer" />
         @if (!isDisabled) {
           <app-button-close

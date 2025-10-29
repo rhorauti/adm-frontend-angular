@@ -40,7 +40,11 @@
               <app-select
                 [selectType]="'custom'"
                 [optionList]="unitOptionList"
-                [selectValue]="productData.unit.name || 'Selecione um item'"
+                [selectValue]="
+                  productData.unit != null
+                    ? productData.unit.name || 'Selecione um item'
+                    : 'Selecione um item'
+                "
                 (selectValueEmitter)="setUnitValue($event.toString())" />
             </div>
             <div class="flex flex-col gap-1 grow">
@@ -141,7 +145,11 @@
           <app-select
             [selectType]="'custom'"
             [optionList]="productTypeOptionList"
-            [selectValue]="productData.productType.name || 'Selecione um item'"
+            [selectValue]="
+              productData.productType != null
+                ? productData.productType.name || 'Selecione um item'
+                : 'Selecione um item'
+            "
             (selectValueEmitter)="setProductTypeValue($event.toString())" />
         </div>
         <div class="flex flex-col gap-1 grow">

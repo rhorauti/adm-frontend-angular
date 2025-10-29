@@ -42,6 +42,11 @@ export class PhotoBoxListComponent implements OnDestroy {
     });
   };
 
+  handleImageError(event: Event) {
+    const element = event.target as HTMLImageElement;
+    element.src = '../../../../assets/images/sem-imagem.jpg';
+  }
+
   onShowModal(img: IPhoto): void {
     this.modalImgSrc = img.previewUrl as string;
     this.isModalActive = true;

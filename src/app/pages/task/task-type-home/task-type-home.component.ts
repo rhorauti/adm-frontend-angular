@@ -14,7 +14,6 @@ import { loadStorage } from '@core/utils/misc';
 import { AuthStore } from '@store/auth/auth.store';
 import { defaultTableHeaderIcon } from '@store/base/base.register.store';
 import { ModalType } from '@store/modal/modal.store';
-import { DEPT_NAMES_ENGLISH } from 'app/enum/department.enum';
 import { Subscription } from 'rxjs';
 
 @Component({
@@ -31,7 +30,7 @@ export class TaskTypeHomeComponent implements OnInit, OnDestroy {
   breadcrumbList = ['Cadastro', 'Tipos de Atividades'];
   inputSearchFilterList: KeyOfData[] = ['idTaskType', 'name', 'comment'];
   inputSearchPlaceholder = 'Id ou Nome, Comentários';
-  deptName = DEPT_NAMES_ENGLISH.MAINTENANCE as DEPT_NAMES_ENGLISH;
+  paramsIdDepartment = 0;
   subscription: Subscription | undefined = undefined;
   tableHeadersLocalStorageId = `table_headers_${this.currentView}_${this.authStore.user().id}`;
 
@@ -49,7 +48,7 @@ export class TaskTypeHomeComponent implements OnInit, OnDestroy {
     },
   });
 
-  newRegisterUrl = `/${this.deptName}/${this.currentView}/new`;
+  newRegisterUrl = '';
 
   tableHeaders = [
     {
@@ -114,9 +113,9 @@ export class TaskTypeHomeComponent implements OnInit, OnDestroy {
 
   async ngOnInit() {
     this.subscription = this.activatedRoute.paramMap.subscribe(params => {
-      this.deptName =
-        (params.get('department') as DEPT_NAMES_ENGLISH) || DEPT_NAMES_ENGLISH.MAINTENANCE;
+      this.paramsIdDepartment = Number(params.get('idDepartment') || 0);
     });
+    this.newRegisterUrl = `/${this.paramsIdDepartment}/${this.currentView}/new`;
     await this.onShowDataList();
     const selectedTableHeaders = await loadStorage(this.tableHeadersLocalStorageId);
     const headers = selectedTableHeaders ? selectedTableHeaders : this.tableHeaders;
@@ -130,11 +129,15 @@ export class TaskTypeHomeComponent implements OnInit, OnDestroy {
   }
 
   onRedirectToEditPage = (data: ITaskType): void => {
-    this.router.navigate([`/${this.deptName}/${this.currentView}/edit/${data.idTaskType}`]);
+    this.router.navigate([
+      `/${this.paramsIdDepartment}/${this.currentView}/edit/${data.idTaskType}`,
+    ]);
   };
 
   onCloneRegister = (data: ITaskType): void => {
-    this.router.navigate([`/${this.deptName}/${this.currentView}/new/${data.idTaskType}`]);
+    this.router.navigate([
+      `/${this.paramsIdDepartment}/${this.currentView}/new/${data.idTaskType}`,
+    ]);
   };
 
   onCloseInfoModal = async (): Promise<void> => {
@@ -183,7 +186,7 @@ export class TaskTypeHomeComponent implements OnInit, OnDestroy {
   onShowDataList = async (): Promise<void> => {
     try {
       this.isLoading.set(true);
-      const response = await this.taskTypeApi.onGetDataList(this.deptName);
+      const response = await this.taskTypeApi.onGetDataList(this.paramsIdDepartment);
       if (response.data) {
         const dataList = response.data as ITaskType[];
         this.initialDataList.set([...dataList]);
@@ -201,7 +204,7 @@ export class TaskTypeHomeComponent implements OnInit, OnDestroy {
   onDeleteRegister = async (id: number, onActionOk?: ActionCallback): Promise<void> => {
     try {
       this.isLoading.set(true);
-      const response = await this.taskTypeApi.onDelete(this.deptName, id);
+      const response = await this.taskTypeApi.onDelete(this.paramsIdDepartment, id);
       if (response.status) {
         this.onShowDataList();
         this.onShowInfoModal('success', 'Excluir registro', response.message, onActionOk);

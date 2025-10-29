@@ -227,7 +227,6 @@ export class DepartmentHomeComponent implements OnInit {
     } finally {
       this.isComponentSetToDefault.set(true);
       this.isLoading.set(false);
-      console.log('taskTypePage 2', this.isComponentSetToDefault());
     }
   };
 

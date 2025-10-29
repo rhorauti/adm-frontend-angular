@@ -24,8 +24,8 @@ import { ModalType } from '@store/modal/modal.store';
 import { Subscription } from 'rxjs';
 import { PhotoBoxSingleComponent } from '@components/photo-box/photo-box-single/photo-box-single.component';
 import { ProductApi } from '@core/http/product/product.api';
-import { IProductForm, IProductType, PartialProductType } from '@core/interfaces/product.interface';
-import { IUnit, PartialUnit } from '@core/interfaces/unit.interface';
+import { IProductForm, IProductType } from '@core/interfaces/product.interface';
+import { IUnit } from '@core/interfaces/unit.interface';
 import { TextAreaComponent } from '@components/text-area/text-area.component';
 import { ModalInfoComponent } from '@components/modal/modal-info/modal-info.component';
 import { LoadingComponent } from '@components/loading/loading.component';
@@ -135,6 +135,10 @@ export class ProductFormComponent implements OnInit, OnDestroy, AfterViewInit {
       const dataList = await this.productApi.onGetData(this.idProduct || 0);
       this.productData = dataList.data as IProductForm;
       this.productData.idProduct = null;
+      this.productData.photoUrl = '';
+    } else {
+      const dataList = await this.productApi.onGetData(0);
+      this.productData = dataList.data as IProductForm;
     }
     this.selectedOrigin = onSetOriginToString(this.productData.origin ?? 0);
     this.onSetSelectOptionList();
@@ -186,15 +190,12 @@ export class ProductFormComponent implements OnInit, OnDestroy, AfterViewInit {
         name: '',
       };
     }
-    console.log('unit', this.productData.unit);
   };
 
   setProductTypeValue = (productTypeName: string): void => {
-    console.log('name', productTypeName);
     this.productData.productType = this.productData.productTypeList?.find(
       type => type.name?.trim() == productTypeName.trim()
     ) as IProductType;
-    console.log('productTypé', this.productData.productType);
     if (!this.productData.productType) {
       this.productData.productType = {
         idProductType: null,

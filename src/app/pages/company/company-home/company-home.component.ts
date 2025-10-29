@@ -1,5 +1,5 @@
 import { HttpErrorResponse } from '@angular/common/http';
-import { Component, inject, OnDestroy, OnInit, signal } from '@angular/core';
+import { Component, inject, OnInit, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { HomeComponent } from '@components/home/home.component';
 import { LoadingComponent } from '@components/loading/loading.component';
@@ -14,7 +14,6 @@ import { loadStorage } from '@core/utils/misc';
 import { AuthStore } from '@store/auth/auth.store';
 import { defaultTableHeaderIcon } from '@store/base/base.register.store';
 import { ModalType } from '@store/modal/modal.store';
-import { DEPT_NAMES_ENGLISH } from 'app/enum/department.enum';
 import { Subscription } from 'rxjs';
 
 @Component({
@@ -23,7 +22,7 @@ import { Subscription } from 'rxjs';
   templateUrl: './company-home.component.html',
   styleUrl: './company-home.component.scss',
 })
-export class CompanyHomeComponent implements OnInit, OnDestroy {
+export class CompanyHomeComponent implements OnInit {
   private activatedRoute = inject(ActivatedRoute);
   private authStore = inject(AuthStore);
   readonly router = inject(Router);
@@ -37,7 +36,7 @@ export class CompanyHomeComponent implements OnInit, OnDestroy {
   readonly inputSearchPlaceholder = 'Id, Nome Fantasia, Razão Social';
   subscription: Subscription | undefined = undefined;
   tableHeadersLocalStorageId = `table_headers_${this.currentView}_${this.authStore.user().id}`;
-  idCompany = 0;
+  // idCompany = 0;
 
   isComponentSetToDefault = signal(false);
   initialDataList = signal<ICompanyHome[]>([]);
@@ -138,20 +137,20 @@ export class CompanyHomeComponent implements OnInit, OnDestroy {
   };
 
   async ngOnInit() {
-    this.subscription = this.activatedRoute.paramMap.subscribe(params => {
-      this.idCompany = Number(params.get('idCompany') as DEPT_NAMES_ENGLISH) || -1;
-    });
+    // this.subscription = this.activatedRoute.paramMap.subscribe(params => {
+    //   this.idCompany = Number(params.get('idCompany') as DEPT_NAMES_ENGLISH) || -1;
+    // });
     await this.onShowDataList();
     const selectedTableHeaders = await loadStorage(this.tableHeadersLocalStorageId);
     const headers = selectedTableHeaders ? selectedTableHeaders : this.tableHeaders;
     this.tableHeaders = headers;
   }
 
-  ngOnDestroy(): void {
-    if (this.subscription) {
-      this.subscription.unsubscribe();
-    }
-  }
+  // ngOnDestroy(): void {
+  //   if (this.subscription) {
+  //     this.subscription.unsubscribe();
+  //   }
+  // }
 
   onRedirectToEditPage = (data: ICompanyHome): void => {
     this.router.navigate([`/${this.currentView}/edit/${data.idCompany}`]);
@@ -222,10 +221,10 @@ export class CompanyHomeComponent implements OnInit, OnDestroy {
     }
   };
 
-  onDeleteRegister = async (idEmployee: number, onActionOk?: ActionCallback): Promise<void> => {
+  onDeleteRegister = async (idCompany: number, onActionOk?: ActionCallback): Promise<void> => {
     try {
       this.isLoading.set(true);
-      const response = await this.companyApi.onDelete(this.idCompany);
+      const response = await this.companyApi.onDelete(idCompany);
       if (response.status) {
         this.onShowDataList();
         this.onShowInfoModal('success', 'Excluir registro', response.message, onActionOk);

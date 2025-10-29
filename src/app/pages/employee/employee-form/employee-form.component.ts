@@ -119,6 +119,9 @@ export class EmployeeFormComponent implements OnInit, OnDestroy, AfterViewInit {
       this.employeeFormData = employee.data as IEmployeeForm;
       this.employeeFormData.idEmployee = null;
       this.employeeFormData.photoUrl = '';
+    } else {
+      const employee = await this.employeeApi.onGetData(this.idCompany || 0, 0);
+      this.employeeFormData = employee.data as IEmployeeForm;
     }
     this.departmentOptionList = this.employeeFormData.departmentList?.map(dept => dept.name) || [];
     this.employeePositionOptionList =

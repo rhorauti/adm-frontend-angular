@@ -28,7 +28,6 @@ import { LoadingComponent } from '@components/loading/loading.component';
 import { TableComponent } from '@components/table/table.component';
 import { PaginationComponent } from '@components/pagination/pagination.component';
 import { ITableHeader } from '@core/interfaces/table.interface';
-import { DEPT_NAMES_ENGLISH, translateDeptNameToLocalLanguage } from 'app/enum/department.enum';
 
 @Component({
   selector: 'app-task-home',
@@ -76,8 +75,7 @@ export class TaskHomeComponent implements OnInit, OnDestroy {
   ];
   readonly inputSearchPlaceholder = 'Id, Atividade, etc';
   tableHeadersLocalStorageId = `table_headers_${this.currentView}_${this.authStore.user().id}`;
-  deptName = '' as DEPT_NAMES_ENGLISH;
-  deptNameTranslated = translateDeptNameToLocalLanguage(this.deptName);
+  idDepartment = 0;
 
   isCopiedData = signal(false);
   isEditData = signal(false);
@@ -146,6 +144,7 @@ export class TaskHomeComponent implements OnInit, OnDestroy {
     employee: '',
     startDate: '',
     finishDate: '',
+    deptName: '',
     name: '',
     status: TASK_NUMBER_STATUS.NOT_STARTED,
     taskType: '',
@@ -163,6 +162,7 @@ export class TaskHomeComponent implements OnInit, OnDestroy {
     name: '',
     startDate: '',
     finishDate: '',
+    deptName: '',
     status: null,
     taskType: '',
     product: '',
@@ -174,6 +174,7 @@ export class TaskHomeComponent implements OnInit, OnDestroy {
     employee: '',
     startDate: '',
     finishDate: '',
+    deptName: '',
     name: '',
     status: TASK_NUMBER_STATUS.NOT_STARTED,
     taskType: '',
@@ -207,14 +208,11 @@ export class TaskHomeComponent implements OnInit, OnDestroy {
   });
 
   isLoading = signal(false);
-
-  trackByHeaderId = (_: number, header: any): number => header.id;
-  trackByIndex = (index: number): number => index;
+  deptName = '';
 
   async ngOnInit() {
     this.subscription = this.activatedRoute.paramMap.subscribe(params => {
-      this.deptName =
-        (params.get('department') as DEPT_NAMES_ENGLISH) || DEPT_NAMES_ENGLISH.MAINTENANCE;
+      this.idDepartment = Number(params.get('idDepartment')) || 0;
     });
     this.onShowDataList();
     const selectedTableHeaders = await loadStorage(this.tableHeadersLocalStorageId);
@@ -244,7 +242,7 @@ export class TaskHomeComponent implements OnInit, OnDestroy {
   });
 
   isAtLeastOneFilterHelpNotEmpty = computed(() => {
-    return Object.values(this.filterHelp()).some(v => v != null && v != '' && v != 0);
+    return Object.values(this.filterHelp()).some(v => v != null && v != '' && v > 1);
   });
 
   onSetHeaderDisplay = (idx: number): void => {
@@ -274,6 +272,7 @@ export class TaskHomeComponent implements OnInit, OnDestroy {
       employee: '',
       startDate: '',
       finishDate: '',
+      deptName: '',
       name: '',
       status: TASK_NUMBER_STATUS.NOT_STARTED,
       taskType: '',
@@ -288,6 +287,7 @@ export class TaskHomeComponent implements OnInit, OnDestroy {
       employee: '',
       startDate: '',
       finishDate: '',
+      deptName: '',
       name: '',
       status: TASK_NUMBER_STATUS.NOT_STARTED,
       taskType: '',
@@ -308,6 +308,7 @@ export class TaskHomeComponent implements OnInit, OnDestroy {
       idTask: 0,
       employee: '',
       startDate: '',
+      deptName: '',
       finishDate: '',
       name: '',
       status: TASK_NUMBER_STATUS.NOT_STARTED,
@@ -326,17 +327,6 @@ export class TaskHomeComponent implements OnInit, OnDestroy {
     this.isDelBtnDisabled.set(true);
     this.inputSearchValue.set('');
   };
-
-  // onSetInputSearchFilterItemToDefault = (fieldList?: KeyOfData[]): void => {
-  //   this.onClearFilterBox();
-  //   this.onClearFilterHelp();
-  //   this.inputSearchValue.set('');
-  //   const fields = fieldList ?? this.tableHeaders().map(h => h.databaseField as KeyOfData);
-  //   this.dataList.set(this.onFilterThroughSearchInput(fields));
-  //   if (this.dataList().length == 0) {
-  //     this.isFilterResultZeroRegister.set(true);
-  //   }
-  // };
 
   onSetFilterBoxValue = <K extends keyof ITaskHomeData>(key: K, value: ITaskHomeData[K]): void => {
     this.filterBox.update(current => ({ ...current, [key]: value }));
@@ -674,7 +664,7 @@ export class TaskHomeComponent implements OnInit, OnDestroy {
     this.data.set(data);
     this.isEditData.set(true);
     this.onRedirectPage(
-      `/${this.deptName}/${this.currentView}/edit/${(this.data() as ITaskHomeData).idTask}`
+      `/${this.idDepartment}/${this.currentView}/edit/${(this.data() as ITaskHomeData).idTask}`
     );
   };
 
@@ -685,16 +675,19 @@ export class TaskHomeComponent implements OnInit, OnDestroy {
   onCloneRegister = async (data: ITaskHomeData): Promise<void> => {
     this.isCopiedData.set(true);
     this.data.set(data);
-    this.onRedirectPage(`/${this.deptName}/${this.currentView}/new`);
+    this.onRedirectPage(
+      `/${this.idDepartment}/${this.currentView}/new/${(this.data() as ITaskHomeData).idTask}`
+    );
   };
 
   onShowDataList = async (): Promise<void> => {
     try {
       this.isLoading.set(true);
-      const response = await this.taskApi.onGetDataList(this.deptName);
+      const response = await this.taskApi.onGetDataList(this.idDepartment);
       if (response.data) {
         const dataList = response.data as ITaskHomeData[];
         this.initialData.set([...dataList]);
+        this.deptName = this.initialData() ? this.initialData()[0].deptName : '';
         this.onClearAllData();
       } else {
         return;
@@ -710,7 +703,7 @@ export class TaskHomeComponent implements OnInit, OnDestroy {
   onDeleteRegister = async (id: number, onActionOk?: ActionCallback): Promise<void> => {
     try {
       this.isLoading.set(true);
-      const response = await this.taskApi.onDelete(this.deptName, id);
+      const response = await this.taskApi.onDelete(this.idDepartment, id);
       if (response.status) {
         this.onShowDataList();
         this.onShowInfoModal('success', 'Excluir registro', response.message, onActionOk);

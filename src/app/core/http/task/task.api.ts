@@ -11,31 +11,31 @@ export class TaskApi {
   private httpRequestService = inject(HttpRequestService);
   private baseApiName = 'tasks';
 
-  async onGetDataList(department: string): Promise<IResponseTaskHome> {
+  async onGetDataList(idDepartment: number): Promise<IResponseTaskHome> {
     return await this.httpRequestService.sendHttpRequest(
-      `${environment.apiUrl}/${department}/${this.baseApiName}`,
+      `${environment.apiUrl}/${idDepartment}/${this.baseApiName}`,
       'GET'
     );
   }
 
-  async onGetDataById(department: string, idTask: number): Promise<IResponseTaskForm> {
+  async onGetDataById(idDepartment: number, idTask: number): Promise<IResponseTaskForm> {
     return await this.httpRequestService.sendHttpRequest(
-      `${environment.apiUrl}/${department}/${this.baseApiName}/${idTask}`,
+      `${environment.apiUrl}/${idDepartment}/${this.baseApiName}/${idTask}`,
       'GET'
     );
   }
 
-  async onSave(department: string, data: FormData): Promise<IResponseTaskForm> {
+  async onSave(idDepartment: number, data: FormData): Promise<IResponseTaskForm> {
     return await this.httpRequestService.sendHttpRequest(
-      `${environment.apiUrl}/${department}/${this.baseApiName}`,
+      `${environment.apiUrl}/${idDepartment}/${this.baseApiName}`,
       'POST',
       data
     );
   }
 
-  async onDelete(department: string, idTask: number): Promise<IBaseResponse> {
+  async onDelete(idDepartment: number, idTask: number): Promise<IBaseResponse> {
     return await this.httpRequestService.sendHttpRequest(
-      `${environment.apiUrl}/${department}/${this.baseApiName}/${idTask}`,
+      `${environment.apiUrl}/${idDepartment}/${this.baseApiName}/${idTask}`,
       'DELETE'
     );
   }

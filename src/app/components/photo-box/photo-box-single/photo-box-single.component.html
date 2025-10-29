@@ -10,7 +10,11 @@
       class="hidden overflow-hidden"
       (change)="uploadFile($event)" />
     @if (imgPreviewUrl) {
-      <img [src]="imgPreviewUrl" alt="Profile Image" class="w-full h-full object-cover" />
+      <img
+        [src]="imgPreviewUrl"
+        alt="Profile Image"
+        (error)="handleImageError($event)"
+        class="w-full h-full object-cover" />
     }
     @if (!imgPreviewUrl) {
       <label

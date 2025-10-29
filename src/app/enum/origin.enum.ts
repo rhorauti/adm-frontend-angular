@@ -1,7 +1,7 @@
 export enum PRODUCT_NUMBER_ORIGIN {
-  LOCAL = 0,
-  IMPORTED = 1,
-  IN_HOUSE = 2,
+  LOCAL = 1,
+  IMPORTED = 2,
+  IN_HOUSE = 3,
 }
 
 export enum PRODUCT_STRING_ORIGIN {

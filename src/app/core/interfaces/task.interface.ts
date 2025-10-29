@@ -40,6 +40,7 @@ export interface ITaskForm {
   taskType?: PartialTaskType | null;
   employeeList?: PartialEmployee[];
   employee?: PartialEmployee | null;
+  deptName?: string;
 }
 
 export interface ITaskFilterHelp extends ITaskHomeData {
@@ -52,6 +53,7 @@ export interface ITaskHomeData {
   startDate: string;
   finishDate: string;
   name: string;
+  deptName: string;
   status: number | string | null;
   taskType: string;
   product: string;

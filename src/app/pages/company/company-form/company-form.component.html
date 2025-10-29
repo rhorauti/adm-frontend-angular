@@ -151,7 +151,9 @@
             [selectType]="'custom'"
             [optionList]="departmentOptionList"
             [selectValue]="
-              companyForm.employee[0].department ? companyForm.employee[0].department.name : ''
+              companyForm.employee[0].department != null
+                ? companyForm.employee[0].department.name
+                : ''
             "
             (selectValueEmitter)="setDepartmentValue($event.toString())" />
         </div>
@@ -161,7 +163,7 @@
             [selectType]="'custom'"
             [optionList]="employeePositionOptionList"
             [selectValue]="
-              companyForm.employee[0].employeePosition
+              companyForm.employee[0].employeePosition != null
                 ? companyForm.employee[0].employeePosition.name
                 : ''
             "

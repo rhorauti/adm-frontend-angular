@@ -1,7 +1,7 @@
 <div class="flex flex-col gap-4">
   <div class="flex items-center flex-col gap-2 md:flex-row md:justify-between">
     <app-breadcrumb [items]="breadcrumbList" />
-    <span class="font-medium">Depto: {{ deptNameTranslated }} </span>
+    <span class="font-medium">Depto: {{ deptName }} </span>
   </div>
   @if (dataList() && dataList().length > 0) {
     <div class="flex flex-col gap-5">
@@ -24,7 +24,7 @@
         </div>
         <div class="flex gap-3">
           <app-button-icon
-            (click)="onRedirectPage(`/${deptName}/${currentView}/new`)"
+            (click)="onRedirectPage(`/${idDepartment}/${currentView}/new`)"
             [iconName]="'add'" />
           <app-button-delete
             (click)="onShowModalToDeleteThroughTopBtn()"
@@ -91,7 +91,7 @@
       <p class="font-semibold">Nenhum registro encontrado</p>
       @if (!isFilterResultZeroRegister()) {
         <app-button-label
-          (click)="onRedirectPage(`/${deptName}/${currentView}/new`)"
+          (click)="onRedirectPage(`/${idDepartment}/${currentView}/new`)"
           [showLeftIcon]="true"
           [iconRightName]="'add'"
           [label]="'Adicionar um novo registro'" />
@@ -130,7 +130,7 @@
   (primaryBtnClickEmitter)="onClickOnFilterBtnThroughFilterBox()"
   (isCloseBtnClickEmitter)="isFilterBoxActive.set(false)">
   <div body class="flex flex-col gap-4">
-    @for (tableHeader of tableHeaders(); track trackByHeaderId($index, tableHeader)) {
+    @for (tableHeader of tableHeaders(); track $index) {
       @if (tableHeader.databaseField == 'startDate' || tableHeader.databaseField == 'finishDate') {
         <div class="flex flex-col md:flex-row md:items-center gap-2">
           <div class="flex flex-col gap-1 grow">
@@ -196,7 +196,7 @@
     @if (isTableHeaderBoxActive()) {
       <p>Selecione abaixo as colunas que deseja estarem visíveis na tabela</p>
       <div class="flex flex-col gap-2">
-        @for (header of tableHeaders(); track trackByHeaderId($index, header)) {
+        @for (header of tableHeaders(); track $index) {
           @if (!$first) {
             <div class="flex gap-4">
               <app-toogle-button

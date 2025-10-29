@@ -264,45 +264,50 @@ export const routes: Routes = [
       import('@pages/unit/unit-form/unit-form.component').then(c => c.UnitFormComponent),
   },
   {
-    path: ':department/task-types',
+    path: ':idDepartment/task-types',
     loadComponent: () =>
       import('@pages/task/task-type-home/task-type-home.component').then(
         c => c.TaskTypeHomeComponent
       ),
   },
   {
-    path: ':department/task-types/new',
+    path: ':idDepartment/task-types/new',
     loadComponent: () =>
       import('@pages/task/task-type-form/task-type-form.component').then(
         c => c.TaskTypeFormComponent
       ),
   },
   {
-    path: ':department/task-types/new/:idTaskType',
+    path: ':idDepartment/task-types/new/:idTaskType',
     loadComponent: () =>
       import('@pages/task/task-type-form/task-type-form.component').then(
         c => c.TaskTypeFormComponent
       ),
   },
   {
-    path: ':department/task-types/edit/:idTaskType',
+    path: ':idDepartment/task-types/edit/:idTaskType',
     loadComponent: () =>
       import('@pages/task/task-type-form/task-type-form.component').then(
         c => c.TaskTypeFormComponent
       ),
   },
   {
-    path: ':department/tasks',
+    path: ':idDepartment/tasks',
     loadComponent: () =>
       import('@pages/task/task-home/task-home.component').then(c => c.TaskHomeComponent),
   },
   {
-    path: ':department/tasks/new',
+    path: ':idDepartment/tasks/new',
     loadComponent: () =>
       import('@pages/task/task-form/task-form.component').then(c => c.TaskFormComponent),
   },
   {
-    path: ':department/tasks/edit/:idTask',
+    path: ':idDepartment/tasks/new/:idTask',
+    loadComponent: () =>
+      import('@pages/task/task-form/task-form.component').then(c => c.TaskFormComponent),
+  },
+  {
+    path: ':idDepartment/tasks/edit/:idTask',
     loadComponent: () =>
       import('@pages/task/task-form/task-form.component').then(c => c.TaskFormComponent),
   },

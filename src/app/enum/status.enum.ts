@@ -6,10 +6,10 @@ export enum TASK_STRING_STATUS {
 }
 
 export enum TASK_NUMBER_STATUS {
-  NOT_STARTED = 0,
-  UNDER_PROGRESS = 1,
-  PAUSED = 2,
-  FINISHED = 3,
+  NOT_STARTED = 1,
+  UNDER_PROGRESS = 2,
+  PAUSED = 3,
+  FINISHED = 4,
 }
 
 export const optionTaskStatusList = [

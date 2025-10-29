@@ -106,12 +106,12 @@ export class MenuComponent {
         {
           idSublink: 0,
           name: 'Tipo de atividade',
-          routerLink: '/maintenance/task-types',
+          routerLink: '/1/task-types',
         },
         {
           idSublink: 1,
           name: 'Atividades',
-          routerLink: '/maintenance/tasks',
+          routerLink: '/1/tasks',
         },
       ],
     },

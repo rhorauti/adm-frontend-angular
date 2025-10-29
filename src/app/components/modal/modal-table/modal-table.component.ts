@@ -52,8 +52,8 @@ export class ModalTableComponent<T, R> implements OnChanges {
   @Input() currentView = '';
   @Input() inputSearchPlaceholder = '';
   @Input() width = 'sm:w-5/6';
+  @Input() inputSearchValue = signal('');
 
-  inputSearchValue = signal('');
   data = signal({} as T);
   dataList = signal<T[]>([]);
   tableHeaders = signal<ITableHeader<T>[]>([]);

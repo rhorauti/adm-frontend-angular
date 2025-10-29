@@ -27,11 +27,6 @@ import { ActionCallback, IModalInfo } from '@core/interfaces/modal.interface';
 import { ITaskType } from '@core/interfaces/task.interface';
 import { BaseApiName } from '@core/types/base.type';
 import { ModalType } from '@store/modal/modal.store';
-import {
-  DEPT_NAMES_ENGLISH,
-  DEPT_NAMES_LOCAL_LANGUAGE,
-  translateDeptNameToLocalLanguage,
-} from 'app/enum/department.enum';
 import { Subscription } from 'rxjs';
 
 @Component({
@@ -64,8 +59,8 @@ export class TaskTypeFormComponent implements OnInit, OnDestroy, AfterViewInit {
   currentViewTranslatedSingular = this.currentViewTranslated.slice(0, -1);
   subscription: Subscription | undefined = undefined;
   breadcrumbList: string[] = [];
-  deptName = '';
-  id: number | null = null;
+  paramsIdDepartment = 0;
+  paramsIdTaskType: number | null = null;
   data = {
     idTaskType: null,
     name: '',
@@ -89,14 +84,20 @@ export class TaskTypeFormComponent implements OnInit, OnDestroy, AfterViewInit {
 
   async ngOnInit(): Promise<void> {
     this.subscription = this.activatedRoute.paramMap.subscribe(params => {
-      this.id = Number(params.get('idTaskType')) || -1;
-      this.deptName = params.get('department') || DEPT_NAMES_ENGLISH.MAINTENANCE;
+      this.paramsIdTaskType = Number(params.get('idTaskType')) || -1;
+      this.paramsIdDepartment = Number(params.get('idDepartment')) || 0;
     });
-    if (this.router.url.includes('edit') && (this.id || 0) > 0) {
-      const taskType = await this.taskTypeApi.onGetDataById(this.deptName, this.id || 0);
+    if (this.router.url.includes('edit') && (this.paramsIdTaskType || 0) > 0) {
+      const taskType = await this.taskTypeApi.onGetDataById(
+        this.paramsIdDepartment,
+        this.paramsIdTaskType || 0
+      );
       this.data = taskType.data as ITaskType;
-    } else if (this.router.url.includes('new') && (this.id || 0) > 0) {
-      const taskType = await this.taskTypeApi.onGetDataById(this.deptName, this.id || 0);
+    } else if (this.router.url.includes('new') && (this.paramsIdTaskType || 0) > 0) {
+      const taskType = await this.taskTypeApi.onGetDataById(
+        this.paramsIdDepartment,
+        this.paramsIdTaskType || 0
+      );
       this.data = taskType.data as ITaskType;
       this.data.idTaskType = null;
     }
@@ -105,7 +106,7 @@ export class TaskTypeFormComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   defineTitle = (): string => {
-    if (!this.id || this.id == -1) {
+    if (!this.paramsIdTaskType || this.paramsIdTaskType == -1) {
       return 'Novo Registro';
     } else {
       return this.data.name;
@@ -125,7 +126,7 @@ export class TaskTypeFormComponent implements OnInit, OnDestroy, AfterViewInit {
   };
 
   onBackToPreviousPage = (): void => {
-    this.router.navigate([`/${this.deptName}/${this.currentView}`]);
+    this.router.navigate([`/${this.paramsIdDepartment}/${this.currentView}`]);
   };
 
   fieldValidation = (): void => {
@@ -168,13 +169,13 @@ export class TaskTypeFormComponent implements OnInit, OnDestroy, AfterViewInit {
     try {
       this.isLoading.set(true);
       this.fieldValidation();
-      const deptNameTranslated = translateDeptNameToLocalLanguage(
-        this.deptName as DEPT_NAMES_ENGLISH
+      const dept = await this.departmentApi.onGetDataByQuery(
+        'idDepartment',
+        this.paramsIdDepartment
       );
-      const dept = await this.departmentApi.onGetDataByQuery('name', deptNameTranslated);
       const deptData = dept.data as IDepartment;
       this.data.department = deptData;
-      const response = await this.taskTypeApi.onSave(this.deptName, this.data);
+      const response = await this.taskTypeApi.onSave(this.paramsIdDepartment, this.data);
       if (response.status) {
         this.onShowInfoModal(
           'success',

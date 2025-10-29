@@ -37,6 +37,11 @@ export class PhotoBoxSingleComponent implements OnDestroy {
     }
   };
 
+  handleImageError(event: Event) {
+    const element = event.target as HTMLImageElement;
+    element.src = '../../../../assets/images/sem-imagem.jpg';
+  }
+
   clearPhoto = (): void => {
     this.fileUrl = null;
     this.imgPreviewUrl = null;

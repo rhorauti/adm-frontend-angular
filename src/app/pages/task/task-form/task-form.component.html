@@ -40,7 +40,7 @@
             [selectValue]="taskForm().employee?.name || 'Selecione um item'"
             (selectValueEmitter)="setEmployeeValue($event.toString())" />
           <app-help
-            class="mt-1"
+            [class.mt-1]="borderType().employee == 'failure'"
             [text]="'Este campo não pode estar vazio'"
             [type]="'failure'"
             [isHelpTextActive]="borderType().employee == 'failure'"></app-help>
@@ -59,7 +59,7 @@
             [selectValue]="taskForm().taskType?.name || 'Selecione um item'"
             (selectValueEmitter)="setTaskTypeValue($event.toString())" />
           <app-help
-            class="mt-1"
+            [class.mt-1]="borderType().taskType == 'failure'"
             [text]="'Este campo não pode estar vazio'"
             [type]="'failure'"
             [isHelpTextActive]="borderType().taskType == 'failure'"></app-help>
@@ -84,9 +84,9 @@
                     : ''
                 "
                 [type]="'search'"
-                (inputValueEmitter)="onSetSelectedTooling($event)" />
+                (inputValueEmitter)="toolingInputValue = $event" />
               <app-help
-                class="mt-1"
+                [class.mt-1]="borderType().tooling == 'failure'"
                 [text]="'Este campo não pode estar vazio'"
                 [type]="'failure'"
                 [isHelpTextActive]="borderType().tooling == 'failure'"></app-help>
@@ -113,7 +113,7 @@
               [selectValue]="taskForm().productionLine?.lineCode || 'Selecione um item'"
               (selectValueEmitter)="setProductionLineValue($event.toString())" />
             <app-help
-              class="mt-1"
+              [class.mt-1]="borderType().productionLine == 'failure'"
               [text]="'Este campo não pode estar vazio'"
               [type]="'failure'"
               [isHelpTextActive]="borderType().productionLine == 'failure'"></app-help>
@@ -132,7 +132,7 @@
             (changeEmitter)="onFormFieldsChange('name')"
             (inputValueEmitter)="taskForm().name = $event" />
           <app-help
-            class="mt-1"
+            [class.mt-1]="borderType().name == 'failure'"
             [text]="'O campo deve ter no mínimo 3 caracteres'"
             [type]="'failure'"
             [isHelpTextActive]="borderType().name == 'failure'"></app-help>
@@ -195,10 +195,10 @@
                         : ''
                     "
                     [type]="'search'"
-                    (inputValueEmitter)="onSetSparePartInputValue($event, $index)" />
+                    (inputValueEmitter)="sparePartsInputValueList[$index] = $event" />
                   @if (borderType().usedSpareParts[$index] == 'failure') {
                     <app-help
-                      class="mt-1"
+                      [class.mt-1]="borderType().usedSpareParts[$index] == 'failure'"
                       [text]="sparePartsMessage || ''"
                       [type]="'failure'"
                       [isHelpTextActive]="
@@ -217,7 +217,7 @@
                     [inputName]="'custom'"
                     [isDisabled]="isDisabled().usedSpareParts"
                     [type]="'number'"
-                    [inputValue]="sparePart.qty.toString()"
+                    [inputValue]="(sparePart.qty || 0).toString()"
                     (inputValueEmitter)="onSparePartQtyChange($event, $index)" />
                 </div>
               </div>
